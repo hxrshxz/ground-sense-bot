@@ -7,8 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
     Search, Camera, Bot, User, X, Mic, Languages, Bell,
-    Lightbulb, ShieldCheck, CheckCircle, AlertTriangle, Database, TrendingUp, BarChartHorizontal, ArrowDown, ArrowUp, CloudRain, Satellite, Info
+    Lightbulb, ShieldCheck, CheckCircle, AlertTriangle, Database, TrendingUp, BarChartHorizontal, ArrowDown, ArrowUp, CloudRain, Satellite, Info, MapPin, FileText, BarChart3, Activity, Droplets, Zap
 } from "lucide-react";
+import { GeminiApiService } from "@/services/geminiApi";
+import { ShimmerEffect } from "@/components/ShimmerEffect";
+import { ApiKeyInput } from "@/components/ApiKeyInput";
 
 // --- Mock Database for INGRES Demonstration ---
 const MOCK_DB = {
@@ -381,6 +384,9 @@ export const INGRESAssistant = () => {
   const [language, setLanguage] = useState('en-US');
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [toast, setToast] = useState({ message: '', type: 'info', visible: false });
+  const [geminiApi, setGeminiApi] = useState<GeminiApiService | null>(null);
+  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
+  const [isDemo, setIsDemo] = useState(false);
 
   const { text: voiceText, startListening, stopListening, isListening, hasRecognitionSupport } = useSpeechRecognition({ lang: language });
   
@@ -401,30 +407,90 @@ export const INGRESAssistant = () => {
   const handleChatSubmit = async (text: string) => {
     if (!text.trim()) return;
     
+    // Check if we need API key
+    if (!geminiApi && !isDemo) {
+      setShowApiKeyInput(true);
+      return;
+    }
+    
     setView('chat');
     setChatHistory(prev => [...prev, { id: Date.now(), type: 'user', text }]);
     setInputValue('');
     setIsThinking(true);
     
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
     let aiResponse: ChatMessage = { id: Date.now() + 1, type: 'ai' };
     const query = text.toLowerCase();
     const blockKeyword = Object.keys(MOCK_DB).find(key => query.includes(key));
 
-    if (blockKeyword) {
-      aiResponse.component = <BlockAssessmentCard data={MOCK_DB[blockKeyword as keyof typeof MOCK_DB]} />;
-    } else if (query.includes('critical') && query.includes('block')) {
-      aiResponse.text = "Here are the critical blocks: Chaksu (Jaipur), Bassi (Jaipur), Dausa (Dausa). Would you like detailed information about any specific block?";
-    } else if (query.includes('report') || query.includes('generate')) {
-      aiResponse.text = "I can generate comprehensive reports for any state or district. Which specific region would you like me to analyze?";
-    } else {
-      aiResponse.text = "I can provide detailed groundwater data for specific blocks like 'Sanganer' or 'Chaksu', generate reports, or list critical areas. What would you like to explore?";
+    try {
+      if (geminiApi && !isDemo) {
+        // Use real Gemini API
+        const response = await geminiApi.generateResponse(text);
+        
+        // Check if the response warrants a visual card
+        if (blockKeyword) {
+          aiResponse.component = <BlockAssessmentCard data={MOCK_DB[blockKeyword as keyof typeof MOCK_DB]} />;
+        } else {
+          aiResponse.text = response.text;
+        }
+      } else {
+        // Demo mode - use mock responses
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        if (blockKeyword) {
+          aiResponse.component = <BlockAssessmentCard data={MOCK_DB[blockKeyword as keyof typeof MOCK_DB]} />;
+        } else if (query.includes('critical') && query.includes('block')) {
+          aiResponse.text = "Here are the critical blocks: Chaksu (Jaipur), Bassi (Jaipur), Dausa (Dausa). Would you like detailed information about any specific block?";
+        } else if (query.includes('report') || query.includes('generate')) {
+          aiResponse.text = "I can generate comprehensive reports for any state or district. Which specific region would you like me to analyze?";
+        } else {
+          aiResponse.text = "I can provide detailed groundwater data for specific blocks like 'Sanganer' or 'Chaksu', generate reports, or list critical areas. What would you like to explore?";
+        }
+      }
+    } catch (error) {
+      console.error('Error generating response:', error);
+      aiResponse.text = "I apologize, but I'm having trouble connecting to the AI service. Please check your API key or try again later.";
+      showToast('Error connecting to Gemini API', 'error');
     }
     
     setChatHistory(prev => [...prev, aiResponse]);
     setIsThinking(false);
   };
+
+  const handleApiKeySubmit = (apiKey: string) => {
+    try {
+      const api = new GeminiApiService(apiKey);
+      setGeminiApi(api);
+      setIsDemo(false);
+      setShowApiKeyInput(false);
+      showToast('Connected to Gemini AI successfully!', 'success');
+      
+      // Store in localStorage for session persistence
+      localStorage.setItem('gemini_api_key', apiKey);
+    } catch (error) {
+      showToast('Invalid API key format', 'error');
+    }
+  };
+
+  const handleSkipApiKey = () => {
+    setIsDemo(true);
+    setShowApiKeyInput(false);
+    showToast('Running in demo mode', 'info');
+  };
+
+  // Load API key from localStorage on component mount
+  useEffect(() => {
+    const savedApiKey = localStorage.getItem('gemini_api_key');
+    if (savedApiKey) {
+      try {
+        const api = new GeminiApiService(savedApiKey);
+        setGeminiApi(api);
+        setIsDemo(false);
+      } catch (error) {
+        localStorage.removeItem('gemini_api_key');
+      }
+    }
+  }, []);
   
   const stats = useMemo(() => [
     { title: "Over-Exploited Units", value: 660, icon: AlertTriangle, iconColor: "text-red-600", iconBg: "from-red-50 to-red-100", change: "+5.2%" },
@@ -449,7 +515,13 @@ export const INGRESAssistant = () => {
   const suggestedPrompts = [
     { title: "Block Analysis", text: "Show the status of Sanganer block", icon: Database },
     { title: "Critical Areas", text: "List all critical blocks in Rajasthan", icon: AlertTriangle },
-    { title: "Annual Report", text: "Generate the annual report for Punjab", icon: BarChartHorizontal },
+    { title: "Annual Report", text: "Generate the annual report for Punjab", icon: BarChart3 },
+    { title: "Water Quality", text: "Analyze water quality trends in Maharashtra", icon: Droplets },
+    { title: "Recharge Analysis", text: "Compare recharge rates across northern states", icon: Activity },
+    { title: "Extraction Hotspots", text: "Identify over-extraction hotspots in Gujarat", icon: Zap },
+    { title: "District Summary", text: "Provide a summary for Jaipur district", icon: MapPin },
+    { title: "Seasonal Trends", text: "Show seasonal groundwater variations", icon: TrendingUp },
+    { title: "Policy Impact", text: "Analyze impact of water conservation policies", icon: FileText },
   ];
 
   const renderDashboard = () => (
@@ -539,8 +611,8 @@ export const INGRESAssistant = () => {
                     >
                       How can I help you analyze groundwater data?
                     </motion.h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
-                      {suggestedPrompts.map((prompt, i) => (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-6xl mx-auto">
+                      {suggestedPrompts.slice(0, 6).map((prompt, i) => (
                         <motion.button 
                           key={i}
                           variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} 
@@ -596,27 +668,7 @@ export const INGRESAssistant = () => {
                     </motion.div>
                   ))}
                   
-                  {isThinking && (
-                    <motion.div 
-                      initial={{ opacity: 0 }} 
-                      animate={{ opacity: 1 }}
-                      className="flex items-start gap-4"
-                    >
-                        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center shadow-soft">
-                          <Bot className="w-5 h-5 text-white"/>
-                        </div>
-                        <div className="p-4 rounded-3xl bg-white/90 backdrop-blur-sm border border-white/60 shadow-soft">
-                          <div className="flex items-center gap-2">
-                            <div className="flex space-x-1">
-                              <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
-                              <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                              <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                            </div>
-                            <span className="text-sm text-slate-600">Analyzing...</span>
-                          </div>
-                        </div>
-                    </motion.div>
-                  )}
+                  {isThinking && <ShimmerEffect />}
                 </AnimatePresence>
             </CardContent>
             
@@ -646,6 +698,14 @@ export const INGRESAssistant = () => {
           />
         )}
       </AnimatePresence>
+      
+      {/* API Key Input Modal */}
+      {showApiKeyInput && (
+        <ApiKeyInput 
+          onApiKeySubmit={handleApiKeySubmit}
+          onSkip={handleSkipApiKey}
+        />
+      )}
       
       {/* Main Content */}
       <AnimatePresence mode="wait">

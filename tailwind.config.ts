@@ -92,6 +92,10 @@ export default {
           "0%, 100%": { opacity: "0.7", transform: "scale(1)" },
           "50%": { opacity: "1", transform: "scale(1.05)" },
         },
+        shimmer: {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -100,6 +104,7 @@ export default {
         "animation-delay-2000": "blob 7s infinite 2s",
         "fade-in": "fade-in 0.5s ease-out",
         glow: "glow 2s ease-in-out infinite",
+        shimmer: "shimmer 2s infinite",
       },
       backgroundImage: {
         "gradient-primary": "var(--gradient-primary)",

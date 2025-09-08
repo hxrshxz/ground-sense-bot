@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
-    Search, Camera, Bot, User, X, Mic, Languages, Bell,
+    Search, Camera, Sparkles, User, X, Mic, Languages, Bell,
     Lightbulb, ShieldCheck, CheckCircle, AlertTriangle, Database, TrendingUp, BarChartHorizontal, ArrowDown, ArrowUp, CloudRain, Satellite, Info, MapPin, FileText, BarChart3, Activity, Droplets, Zap
 } from "lucide-react";
 import { GeminiApiService } from "@/services/geminiApi";
@@ -276,7 +276,7 @@ const INGRESCommandBar = ({
             </div>
             <Button 
               onClick={onSubmit}
-              className="rounded-2xl h-16 px-8 bg-gradient-primary text-white font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+              className="rounded-2xl h-16 px-8 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
             >
               Submit
             </Button>
@@ -580,8 +580,8 @@ export const INGRESAssistant = () => {
         <Card className="w-full max-w-5xl h-[calc(100vh-2rem)] flex flex-col bg-white/80 backdrop-blur-xl border-white/50 shadow-elevated rounded-3xl overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between border-b border-slate-200/50 bg-white/50 backdrop-blur-sm">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gradient-primary rounded-xl">
-                    <Bot className="h-6 w-6 text-white"/>
+                  <div className="p-2 bg-emerald-500 rounded-xl">
+                    <Sparkles className="h-6 w-6 text-white"/>
                   </div>
                   <CardTitle className="text-xl text-slate-800">INGRES AI Assistant</CardTitle>
                 </div>
@@ -643,8 +643,8 @@ export const INGRESAssistant = () => {
                       className={`flex items-start gap-4 max-w-4xl ${msg.type === 'user' ? 'ml-auto justify-end' : 'mr-auto'}`}
                     >
                         {msg.type === 'ai' && (
-                          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center shadow-soft">
-                            <Bot className="w-5 h-5 text-white"/>
+                          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center shadow-soft">
+                            <Sparkles className="w-5 h-5 text-white"/>
                           </div>
                         )}
                         <div className="max-w-xl">

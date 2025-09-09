@@ -6,8 +6,8 @@
 
   // Configuration
   const CONFIG = {
-    scriptUrl: 'https://ground-sense-bot.vercel.app/embed.js',
-    widgetUrl: 'https://ground-sense-bot.vercel.app/embed.html',
+    scriptUrl: window.location.origin + '/embed.js',
+    widgetUrl: window.location.origin + '/embed.html',
     apiKey: null,
     position: 'bottom-right',
     theme: 'dark',
@@ -77,6 +77,19 @@
         transition: all 0.3s ease;
         box-shadow: 0 4px 20px rgba(0, 212, 255, 0.4);
       }
+      
+      /* Toggle button sizes */
+      .ground-sense-bot-widget.small .ground-sense-bot-toggle {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+      }
+      
+      .ground-sense-bot-widget.large .ground-sense-bot-toggle {
+        width: 70px;
+        height: 70px;
+        font-size: 28px;
+      }
 
       .ground-sense-bot-toggle:hover {
         transform: scale(1.05);
@@ -89,6 +102,22 @@
         background: #0f172a;
         border: 1px solid #1e293b;
         display: none;
+      }
+      
+      /* Size variations */
+      .ground-sense-bot-widget.small .ground-sense-bot-chat {
+        width: 320px;
+        height: 500px;
+      }
+      
+      .ground-sense-bot-widget.medium .ground-sense-bot-chat {
+        width: 980px;
+        height: 700px;
+      }
+      
+      .ground-sense-bot-widget.large .ground-sense-bot-chat {
+        width: 450px;
+        height: 700px;
       }
 
       .ground-sense-bot-chat.open {
@@ -147,7 +176,7 @@
   function createWidget() {
     // Create main widget container
     const widget = createElement('div', {
-      class: `ground-sense-bot-widget ${CONFIG.position}`,
+      class: `ground-sense-bot-widget ${CONFIG.position} ${CONFIG.size}`,
       id: 'ground-sense-bot-widget'
     });
 
@@ -207,7 +236,18 @@
   // Initialize the widget
   function init() {
     // Load configuration from script attributes
-    const script = document.currentScript;
+    let script;
+    
+    // Look for our script in the document
+    const scripts = document.getElementsByTagName('script');
+    for (let i = 0; i < scripts.length; i++) {
+      const s = scripts[i];
+      if (s.src && s.src.includes('embed.js')) {
+        script = s;
+        break;
+      }
+    }
+    
     if (script) {
       CONFIG.apiKey = script.getAttribute('data-api-key');
       CONFIG.position = script.getAttribute('data-position') || CONFIG.position;

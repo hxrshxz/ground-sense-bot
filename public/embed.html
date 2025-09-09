@@ -133,24 +133,30 @@
         // Build the chat URL
         const chatUrl = `${window.location.origin}?embedded=true&apiKey=${encodeURIComponent(config.apiKey || '')}`;
 
-        // Load the chat
-        const iframe = document.getElementById('chat-iframe');
-        const loading = document.getElementById('loading');
-        const error = document.getElementById('error');
+  // Load the chat
+  const iframe = document.getElementById('chat-iframe');
+  const loading = document.getElementById('loading');
+  const error = document.getElementById('error');
 
-        iframe.src = chatUrl;
+  // Use the current origin instead of hardcoded URL
+  const currentUrl = window.location.origin + "/?embedded=true&apiKey=" + encodeURIComponent(config.apiKey || '');
+  iframe.src = currentUrl;
 
-        iframe.onload = function() {
-            loading.style.display = 'none';
-            iframe.style.display = 'block';
-        };
+  iframe.onload = function() {
+    loading.style.display = 'none';
+    iframe.style.display = 'block';
+    
+    // Send API key to iframe
+    iframe.contentWindow.postMessage({
+      type: 'set-api-key',
+      apiKey: config.apiKey
+    }, '*');
+  };
 
-        iframe.onerror = function() {
-            loading.style.display = 'none';
-            error.style.display = 'flex';
-        };
-
-        // Handle messages from parent window
+  iframe.onerror = function() {
+    loading.style.display = 'none';
+    error.style.display = 'flex';
+  };        // Handle messages from parent window
         window.addEventListener('message', function(event) {
             // Handle cross-origin messages if needed
             if (event.data.type === 'close-chat') {

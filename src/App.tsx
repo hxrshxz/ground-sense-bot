@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -16,23 +16,31 @@ const EmbeddedChat = () => {
   const [isEmbedded, setIsEmbedded] = useState(false);
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const embedded = urlParams.get('embedded') === 'true';
-    setIsEmbedded(embedded);
+    setIsEmbedded(true);
 
     // If embedded, hide scrollbars and adjust body
-    if (embedded) {
-      document.body.style.overflow = 'hidden';
-      document.body.style.margin = '0';
-      document.body.style.padding = '0';
-      document.documentElement.style.height = '100%';
-      document.body.style.height = '100%';
+    document.body.style.overflow = 'hidden';
+    document.body.style.margin = '0';
+    document.body.style.padding = '0';
+    document.documentElement.style.height = '100%';
+    document.body.style.height = '100%';
+    
+    // Handle messages from parent window
+    window.addEventListener('message', (event) => {
+      console.log('Message received:', event.data);
+      
+      // You can handle specific messages here
+      if (event.data.type === 'set-api-key') {
+        // Handle API key setting
+        console.log('Setting API key:', event.data.apiKey);
+      }
+    });
+
+    // Notify parent that we're ready
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: 'embed-ready' }, '*');
     }
   }, []);
-
-  if (!isEmbedded) {
-    return null;
-  }
 
   return (
     <div style={{
@@ -53,7 +61,13 @@ const App = () => {
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    setIsEmbedded(urlParams.get('embedded') === 'true');
+    const embedded = urlParams.get('embedded') === 'true';
+    setIsEmbedded(embedded);
+    
+    // Special handling for /embed.html path - always treat as embedded
+    if (window.location.pathname === '/embed.html') {
+      setIsEmbedded(true);
+    }
   }, []);
 
   // If embedded, show only the chat component

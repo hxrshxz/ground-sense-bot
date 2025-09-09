@@ -1,8 +1,11 @@
 "use client";
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { motion, AnimatePresence, useInView, useSpring } from "framer-motion";
-import { GoogleGenerativeAI } from "@google/generative-ai"; // --- GEMINI API IMPORT ---
-import { cn } from "@/lib/utils"; // Assuming you have this utility function
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import ReactMarkdown from "react-markdown"; 
+import remarkGfm from "remark-gfm"; 
+import { TextGenerateEffect } from "@/components/ui/text-generate-effect";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -349,7 +352,7 @@ export const INGRESAssistant = () => {
 
     // --- 2. Call Gemini API for general queries ---
     // IMPORTANT: Replace with your actual Google AI Studio API key
-    const API_KEY = "AIzaSyDNHmmsmvod1_WQfIAjh5Tq7lu4NyLfo7Q";
+    const API_KEY = "YOUR_API_KEY_HERE";
 
     if (API_KEY) {
         try {
@@ -357,7 +360,7 @@ export const INGRESAssistant = () => {
             const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
             const dataContext = JSON.stringify(MOCK_DB, null, 2);
-            const prompt = `You are an AI assistant for INGRES, India's National Groundwater Resource Estimation System. Your knowledge base is the following JSON data about a few groundwater blocks in Rajasthan:\n---\n${dataContext}\n---\nBased ONLY on this data, answer the user's question. If the question is about data you don't have (e.g., Punjab), state that you only have data for the provided blocks in Rajasthan. Be concise and helpful. User's question: "${text}"`;
+            const prompt = `You are an AI assistant for INGRES, India's National Groundwater Resource Estimation System. Your knowledge base is the following JSON data about a few groundwater blocks in Rajasthan:\n---\n${dataContext}\n---\nBased ONLY on this data, answer the user's question. If the question is about data you don't have (e.g., Punjab), state that you only have data for the provided blocks in Rajasthan. Be concise and helpful. Use Markdown for formatting (e.g., **bold** for emphasis, lists). User's question: "${text}"`;
 
             const result = await model.generateContent(prompt);
             const response = await result.response;
@@ -445,16 +448,30 @@ export const INGRESAssistant = () => {
                   </motion.div>
                 )}
                 <AnimatePresence>
-                  {chatHistory.map((msg) => (
-                    <motion.div key={msg.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`flex items-start gap-3 max-w-2xl ${msg.type === 'user' ? 'ml-auto justify-end' : 'mr-auto'}`}>
-                        {msg.type === 'ai' && <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-sky-100 to-purple-100 flex items-center justify-center"><Bot className="w-5 h-5 text-sky-600"/></div>}
-                        <div className="max-w-xl">
-                          {msg.type === 'user' ? (<div className="bg-purple-500 text-white p-3 rounded-2xl rounded-br-lg shadow-sm"><p className="text-sm">{msg.text}</p></div>)
-                           : (msg.text ? <div className="bg-white p-3 rounded-2xl rounded-bl-lg border shadow-sm text-slate-800"><p className="text-sm">{msg.text}</p></div> : msg.component)}
-                        </div>
-                        {msg.type === 'user' && <div className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center"><User className="w-5 h-5 text-slate-600"/></div>}
-                    </motion.div>
-                  ))}
+                  {chatHistory.map((msg, index) => {
+                    const isLastMessage = index === chatHistory.length - 1;
+                    return (
+                        <motion.div key={msg.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`flex items-start gap-3 max-w-2xl ${msg.type === 'user' ? 'ml-auto justify-end' : 'mr-auto'}`}>
+                            {msg.type === 'ai' && <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-sky-100 to-purple-100 flex items-center justify-center"><Bot className="w-5 h-5 text-sky-600"/></div>}
+                            <div className="max-w-xl">
+                              {msg.type === 'user' ? (<div className="bg-purple-500 text-white p-3 rounded-2xl rounded-br-lg shadow-sm"><p className="text-sm">{msg.text}</p></div>)
+                               : (msg.text ? 
+                                    // CORRECTED CODE BLOCK
+                                    <div className="bg-white p-3 rounded-2xl rounded-bl-lg border shadow-sm text-slate-800 prose prose-sm max-w-none">
+                                      {msg.type === 'ai' && isLastMessage && !isThinking ? (
+                                        <TextGenerateEffect words={msg.text} />
+                                      ) : (
+                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                          {msg.text}
+                                        </ReactMarkdown>
+                                      )}
+                                    </div> 
+                                  : msg.component)}
+                            </div>
+                            {msg.type === 'user' && <div className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center"><User className="w-5 h-5 text-slate-600"/></div>}
+                        </motion.div>
+                    )
+                  })}
                   {isThinking && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-start gap-3">
                         <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-sky-100 to-purple-100 flex items-center justify-center"><Bot className="w-5 h-5 text-sky-600"/></div>

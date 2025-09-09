@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { motion, AnimatePresence, useInView, useSpring } from "framer-motion";
+import { GoogleGenerativeAI } from "@google/generative-ai"; // --- GEMINI API IMPORT ---
 import { cn } from "@/lib/utils"; // Assuming you have this utility function
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +14,7 @@ import {
 
 
 //================================================================================
-// --- INGRES ASSISTANT COMPONENT AND ITS HELPERS (FROM SECOND SNIPPET) ---
+// --- INGRES ASSISTANT COMPONENT AND ITS HELPERS ---
 //================================================================================
 
 // --- Mock Database for INGRES Demonstration ---
@@ -110,7 +111,7 @@ const BlockAssessmentCard = ({ data }: { data: any }) => {
     "Over-Exploited": { badge: "bg-red-100 text-red-800", text: "text-red-600" },
     "Critical": { badge: "bg-orange-100 text-orange-800", text: "text-orange-600" },
   };
-  const styles = categoryStyles[data.category] || {};
+  const styles = categoryStyles[data.category] || { badge: "bg-slate-100 text-slate-800", text: "text-slate-600" };
 
   return (
     <Card className="w-full max-w-lg bg-white/80 backdrop-blur-sm border-slate-200/80 shadow-lg text-slate-900">
@@ -159,6 +160,52 @@ const BlockAssessmentCard = ({ data }: { data: any }) => {
   );
 };
 
+// --- NEW COMPONENT: Proactive Insight Card ---
+const ProactiveInsightCard = () => {
+  const criticalShifts = 1;
+  const regionsMonitored = Object.keys(MOCK_DB).length;
+  const highestExtractionStage = MOCK_DB.sanganer.stage;
+
+  return (
+    <Card className="w-full max-w-lg bg-white/80 backdrop-blur-sm border-slate-200/80 shadow-lg text-slate-900">
+      <CardHeader>
+        <div className="flex justify-between items-start">
+            <div>
+                <h3 className="font-bold text-xl text-slate-900">Proactive Groundwater Insights</h3>
+                <p className="text-sm text-slate-500">Summary for Q3 2025</p>
+            </div>
+            <Badge className="bg-sky-100 text-sky-800">AI Generated</Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="p-3 bg-red-50 rounded-lg border border-red-100">
+                <p className="text-xs font-semibold text-slate-500">Critical Shifts</p>
+                <p className="text-lg font-bold text-red-800 flex items-center justify-center gap-1"><AlertTriangle className="h-4 w-4"/> {criticalShifts}</p>
+            </div>
+            <div className="p-3 bg-purple-50 rounded-lg border border-purple-100">
+                <p className="text-xs font-semibold text-slate-500">Highest Stage</p>
+                <p className="text-lg font-bold text-purple-800">{highestExtractionStage}</p>
+            </div>
+             <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                <p className="text-xs font-semibold text-slate-500">Blocks Analyzed</p>
+                <p className="text-lg font-bold text-slate-800">{regionsMonitored}</p>
+            </div>
+        </div>
+        <div>
+            <h4 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4"/> Key Observation</h4>
+            <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                <p className="text-xs text-slate-700">
+                    The <strong>Sanganer</strong> block has shown a consistent upward trend in extraction, moving it into the 'Over-Exploited' category. This is correlated with an increase in water-intensive crops identified via satellite data and below-average rainfall.
+                </p>
+            </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+
 // --- Command Bar Component ---
 const INGRESCommandBar = ({ inputValue, onInputChange, onSubmit, isListening, onMicClick, hasSpeechSupport, language, onLanguageChange, activeYear, onYearChange }: any) => {
   const placeholders = useMemo(() => language === 'en-US' ? ["Show data for Sanganer block...", "List all critical blocks..."] : ["संगनेर ब्लॉक का डेटा दिखाएं...", "सभी क्रिटिकल ब्लॉकों की सूची बनाएं..."], [language]);
@@ -175,7 +222,7 @@ const INGRESCommandBar = ({ inputValue, onInputChange, onSubmit, isListening, on
     <motion.div className="w-full max-w-3xl mx-auto">
         <div className="relative">
         <div className="absolute -inset-1 bg-gradient-to-r from-purple-400 to-sky-400 rounded-3xl blur-lg opacity-30"></div>
-        <div className="relative bg-white/70 backdrop-blur-xl border border-white/40 rounded-2xl shadow-lg p-4 space-y-4">
+        <div className="relative bg-white/70 backdrop-blur-xl  border border-white/40 rounded-2xl shadow-lg p-4 space-y-4">
             <div className="flex items-center space-x-4">
                 <div className="relative w-full flex items-center">
                     <Search className="h-6 w-6 text-slate-500 absolute left-3" />
@@ -266,23 +313,77 @@ export const INGRESAssistant = () => {
   
   const showToast = (message: string, type = 'info') => { setToast({ message, type, visible: true }); };
 
+  // --- MODIFIED: handleChatSubmit with Gemini API Integration ---
   const handleChatSubmit = async (text: string) => {
+    const query = text.toLowerCase();
     setView('chat');
     setChatHistory(prev => [...prev, { id: Date.now(), type: 'user', text }]);
     setInputValue('');
     setIsThinking(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    let aiResponse: ChatMessage = { id: Date.now() + 1, type: 'ai' };
-    const query = text.toLowerCase();
+    
+    // --- 1. Check for local commands to show rich components ---
     const blockKeyword = Object.keys(MOCK_DB).find(key => query.includes(key));
-
     if (blockKeyword) {
-      aiResponse.component = <BlockAssessmentCard data={MOCK_DB[blockKeyword as keyof typeof MOCK_DB]} />;
-    } else {
-      aiResponse.text = "I can provide detailed data for blocks like 'Sanganer' or 'Chaksu'. Try asking about one to see a full report card.";
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        const aiResponse = { 
+            id: Date.now() + 1, 
+            type: 'ai', 
+            component: <BlockAssessmentCard data={MOCK_DB[blockKeyword as keyof typeof MOCK_DB]} /> 
+        };
+        setChatHistory(prev => [...prev, aiResponse]);
+        setIsThinking(false);
+        return; // Exit after handling
     }
-    setChatHistory(prev => [...prev, aiResponse]);
-    setIsThinking(false);
+
+    if (query.includes("proactive insight") || query.includes("generate a summary") || query.includes("generate a report")) {
+         await new Promise(resolve => setTimeout(resolve, 1500));
+         const aiResponse = { 
+            id: Date.now() + 1, 
+            type: 'ai', 
+            component: <ProactiveInsightCard />
+        };
+        setChatHistory(prev => [...prev, aiResponse]);
+        setIsThinking(false);
+        return; // Exit after handling
+    }
+
+    // --- 2. Call Gemini API for general queries ---
+    // IMPORTANT: Replace with your actual Google AI Studio API key
+    const API_KEY = "AIzaSyDNHmmsmvod1_WQfIAjh5Tq7lu4NyLfo7Q";
+
+    if (API_KEY) {
+        try {
+            const genAI = new GoogleGenerativeAI(API_KEY);
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+            const dataContext = JSON.stringify(MOCK_DB, null, 2);
+            const prompt = `You are an AI assistant for INGRES, India's National Groundwater Resource Estimation System. Your knowledge base is the following JSON data about a few groundwater blocks in Rajasthan:\n---\n${dataContext}\n---\nBased ONLY on this data, answer the user's question. If the question is about data you don't have (e.g., Punjab), state that you only have data for the provided blocks in Rajasthan. Be concise and helpful. User's question: "${text}"`;
+
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            const aiResponseText = response.text();
+            
+            const aiResponse = { id: Date.now() + 1, type: 'ai', text: aiResponseText };
+            setChatHistory(prev => [...prev, aiResponse]);
+
+        } catch (error) {
+            console.error("Error calling Gemini API:", error);
+            const aiResponse = { id: Date.now() + 1, type: 'ai', text: "Sorry, I encountered an error while connecting to the AI service. Please try again later." };
+            setChatHistory(prev => [...prev, aiResponse]);
+        } finally {
+            setIsThinking(false);
+        }
+    } else {
+        // --- 3. Fallback logic if API key is not provided ---
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        const aiResponse = { 
+            id: Date.now() + 1, 
+            type: 'ai', 
+            text: "I can provide detailed data for blocks like 'Sanganer' or 'Chaksu', or generate a proactive insight summary. Try one of those to see a full report. (Note: Gemini API key not configured)."
+        };
+        setChatHistory(prev => [...prev, aiResponse]);
+        setIsThinking(false);
+    }
   };
   
   const stats = useMemo(() => [
@@ -300,12 +401,13 @@ export const INGRESAssistant = () => {
 
   const suggestedPrompts = [
     { title: "Get Block Details", text: "Show the status of Sanganer block" },
-    { title: "List Critical Areas", text: "List all critical blocks in Punjab" },
-    { title: "Generate a Report", text: "Generate the annual report for Rajasthan" },
+    { title: "Generate an Insight", text: "Generate a proactive insight summary" },
+    { title: "Compare Blocks", text: "Compare the extraction stages of Chaksu and Sanganer" },
+    { title: "Ask About Data", text: "List all critical blocks in Punjab" },
   ];
 
   const renderDashboard = () => (
-    <div className="container mx-auto px-4 pt-8 pb-24">
+    <div className="container mx-auto mt-[-80px] px-4 pt-8 pb-24 mt-10">
         <div className="absolute top-8 right-8"><NotificationBell /></div>
         <div className="relative text-center max-w-4xl mx-auto">
              <div className="absolute top-0 right-0 -mr-8 mt-4 w-32 h-32 bg-sky-400/30 rounded-full blur-3xl animate-pulse"></div>

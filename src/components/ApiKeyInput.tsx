@@ -81,12 +81,6 @@ export const ApiKeyInput: React.FC<ApiKeyInputProps> = ({ onApiKeySubmit, onSkip
               Get one from Google AI Studio
             </Button>
           </div>
-          
-          <div className="bg-sky-50 border border-sky-200 rounded-lg p-3">
-            <p className="text-xs text-sky-800">
-              <strong>Recommended:</strong> For production use, connect to Supabase to securely store your API keys.
-            </p>
-          </div>
         </CardContent>
       </Card>
     </motion.div>

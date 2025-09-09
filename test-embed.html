@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ground Sense Bot - Local Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #00d4ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .test-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin: 10px 0;
+            overflow-x: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #22c55e;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #3b82f6;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Ground Sense Bot - Embedding Test</h1>
+
+        <div class="test-section">
+            <h2>✅ Test Results</h2>
+            <div class="success">
+                <strong>✓ Build Status:</strong> Project compiled successfully!
+            </div>
+            <div class="info">
+                <strong>ℹ️ Local URLs:</strong><br>
+                • Main App: http://localhost:5173<br>
+                • Embed Script: http://localhost:5173/embed.js<br>
+                • Embed Page: http://localhost:5173/embed.html
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔧 Test the Embed Script</h2>
+            <p>To test the embedding locally:</p>
+            <ol>
+                <li>Start the dev server: <code>npm run dev</code></li>
+                <li>Open this HTML file in your browser</li>
+                <li>The chatbot widget should appear in the bottom-right corner</li>
+            </ol>
+
+            <div class="code-block">
+// Test script - replace with your actual API key
+&lt;script
+  src="http://localhost:5173/embed.js"
+  data-api-key="your-test-api-key"
+  data-position="bottom-right"
+  data-theme="dark"&gt;
+&lt;/script&gt;
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📋 What to Test</h2>
+            <ul>
+                <li>✅ Widget appears on page load</li>
+                <li>✅ Toggle button works (show/hide chat)</li>
+                <li>✅ Chat window opens correctly</li>
+                <li>✅ Embedded mode styling is applied</li>
+                <li>✅ API key is passed correctly</li>
+                <li>✅ Responsive design on mobile</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>🌐 Production Deployment</h2>
+            <p>Once deployed to Vercel/Netlify:</p>
+            <div class="code-block">
+&lt;script
+  src="https://your-domain.vercel.app/embed.js"
+  data-api-key="your-production-api-key"
+  data-position="bottom-right"
+  data-theme="dark"
+  data-color="#00d4ff"&gt;
+&lt;/script&gt;
+            </div>
+        </div>
+    </div>
+
+    <!-- Test the embed script locally -->
+    <script
+        src="http://localhost:5173/embed.js"
+        data-api-key="test-key"
+        data-position="bottom-right"
+        data-theme="dark">
+    </script>
+
+    <script>
+        // Test programmatic control
+        document.addEventListener('groundSenseBotReady', function(event) {
+            console.log('🎉 Ground Sense Bot is ready for testing!', event.detail);
+
+            // Auto-show after 2 seconds for testing
+            setTimeout(() => {
+                if (window.GroundSenseBot) {
+                    window.GroundSenseBot.show();
+                }
+            }, 2000);
+        });
+
+        // Log any errors
+        window.addEventListener('error', function(e) {
+            console.error('❌ Embedding error:', e.error);
+        });
+    </script>
+</body>
+</html>

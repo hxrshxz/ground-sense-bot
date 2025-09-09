@@ -370,7 +370,7 @@ type ChatMessage = {
 };
 
 // --- Main INGRES Assistant Component ---
-export const INGRESAssistant = () => {
+export const INGRESAssistant = ({ embedded = false }: { embedded?: boolean }) => {
   const [view, setView] = useState('dashboard');
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [isThinking, setIsThinking] = useState(false);
@@ -483,11 +483,11 @@ export const INGRESAssistant = () => {
   ];
 
   const renderDashboard = () => (
-    <div className="container mx-auto mt-[-80px] px-4 pt-8 pb-24 mt-10">
-        <div className="absolute top-8 right-8"><NotificationBell /></div>
+    <div className={`container mx-auto px-4 pt-8 pb-24 ${embedded ? 'mt-0' : 'mt-10'}`}>
+        {!embedded && <div className="absolute top-8 right-8"><NotificationBell /></div>}
         <div className="relative text-center max-w-4xl mx-auto">
-             <div className="absolute top-0 right-0 -mr-8 mt-4 w-32 h-32 bg-sky-400/30 rounded-full blur-3xl animate-pulse"></div>
-            <h1 className="text-5xl md:text-7xl font-bold text-slate-800">INGRES AI Assistant</h1>
+             {!embedded && <div className="absolute top-0 right-0 -mr-8 mt-4 w-32 h-32 bg-sky-400/30 rounded-full blur-3xl animate-pulse"></div>}
+            <h1 className={`font-bold text-slate-800 ${embedded ? 'text-3xl' : 'text-5xl md:text-7xl'}`}>INGRES AI Assistant</h1>
             <p className="text-xl text-slate-600 max-w-2xl mt-4 mx-auto">Your intelligent command center for India's groundwater data.</p>
         </div>
         <div className="mt-12"><INGRESCommandBar {...commonCommandBarProps} /></div>
@@ -498,22 +498,22 @@ export const INGRESAssistant = () => {
   );
 
   const renderChatView = () => (
-     <div className="flex items-center justify-center min-h-screen p-4">
-        <Card className="w-full max-w-4xl h-[calc(100vh-4rem)] flex flex-col bg-white/60 backdrop-blur-xl border-white/30 shadow-2xl rounded-2xl">
-            <CardHeader className="flex flex-row items-center justify-between border-b border-slate-200/80">
+     <div className={`flex items-center justify-center min-h-screen p-4 ${embedded ? 'p-2' : ''}`}>
+        <Card className={`w-full flex flex-col shadow-2xl rounded-2xl ${embedded ? 'h-full max-w-none bg-slate-800/90 border-slate-700' : 'max-w-4xl h-[calc(100vh-4rem)] bg-white/60 backdrop-blur-xl border-white/30'}`}>
+            <CardHeader className={`flex flex-row items-center justify-between ${embedded ? 'border-slate-700 bg-slate-800/50' : 'border-slate-200/80'}`}>
                 <div className="flex items-center gap-3"><Bot className="h-6 w-6 text-purple-600"/><CardTitle className="text-xl">AI Data Analyst</CardTitle></div>
                 <div className="flex items-center gap-2">
-                    <NotificationBell />
+                    {!embedded && <NotificationBell />}
                     <Button variant="ghost" onClick={() => { setView('dashboard'); setChatHistory([]); }}><X className="h-4 w-4 mr-2"/> End Chat</Button>
                 </div>
             </CardHeader>
-            <CardContent ref={chatContainerRef} className="flex-grow p-4 overflow-y-auto space-y-4">
+            <CardContent ref={chatContainerRef} className={`flex-grow overflow-y-auto space-y-4 ${embedded ? 'p-3' : 'p-4'}`}>
                 {chatHistory.length === 0 && (
                   <motion.div variants={{ visible: { transition: { staggerChildren: 0.1 } } }} initial="hidden" animate="visible" className="pt-4 pb-8 text-center">
                     <motion.h3 variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} className="text-lg font-semibold text-slate-700 mb-4">Try one of these sample queries...</motion.h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {suggestedPrompts.map((prompt, i) => (
-                        <motion.button key={i} variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} onClick={() => handleChatSubmit(prompt.text)} className="p-4 bg-white/60 rounded-lg text-left text-sm font-medium text-slate-800 border shadow-sm hover:bg-slate-100/80 hover:shadow-md">
+                        <motion.button key={i} variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} onClick={() => handleChatSubmit(prompt.text)} className={`p-4 rounded-lg text-left text-sm font-medium border shadow-sm hover:shadow-md ${embedded ? 'bg-slate-700/50 text-slate-200 border-slate-600 hover:bg-slate-600/50' : 'bg-white/60 text-slate-800 hover:bg-slate-100/80'}`}>
                           <p className="font-semibold">{prompt.title}</p>
                         </motion.button>
                       ))}
@@ -529,7 +529,7 @@ export const INGRESAssistant = () => {
                             <div className="max-w-xl">
                               {msg.type === 'user' ? (<div className="bg-purple-500 text-white p-3 rounded-2xl rounded-br-lg shadow-sm"><p className="text-sm">{msg.text}</p></div>)
                                : (msg.text ? 
-                                    <div className="bg-white p-3 rounded-2xl rounded-bl-lg border shadow-sm text-slate-800 prose prose-sm max-w-none">
+                                    <div className={`p-3 rounded-2xl rounded-bl-lg border shadow-sm prose prose-sm max-w-none ${embedded ? 'bg-slate-700/50 text-slate-200 border-slate-600' : 'bg-white text-slate-800'}`}>
                                       {/* --- CORRECTED LOGIC --- */}
                                       {msg.type === 'ai' && isLastMessage && !isThinking ? (
                                         <TextGenerateEffect>
@@ -552,7 +552,7 @@ export const INGRESAssistant = () => {
                   {isThinking && <GeminiShimmerEffect />}
                 </AnimatePresence>
             </CardContent>
-            <CardContent className="border-t border-slate-200/80 pt-4">
+            <CardContent className={`${embedded ? 'border-slate-700 bg-slate-800/50' : 'border-slate-200/80'} pt-4`}>
                 <INGRESCommandBar {...commonCommandBarProps} />
             </CardContent>
         </Card>
@@ -560,11 +560,13 @@ export const INGRESAssistant = () => {
   );
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 font-sans isolate">
-      <div className="absolute inset-0 -z-10 h-full w-full overflow-hidden">
-        <div className="absolute -top-1/4 left-0 h-[800px] w-[800px] bg-purple-200/30 rounded-full blur-3xl filter animate-blob"></div>
-        <div className="absolute -top-1/3 right-0 h-[800px] w-[800px] bg-sky-200/30 rounded-full filter animate-blob animation-delay-2000"></div>
-      </div>
+    <div className={`min-h-screen text-slate-900 font-sans isolate ${embedded ? 'bg-slate-900' : 'bg-slate-100'}`}>
+      {!embedded && (
+        <div className="absolute inset-0 -z-10 h-full w-full overflow-hidden">
+          <div className="absolute -top-1/4 left-0 h-[800px] w-[800px] bg-purple-200/30 rounded-full blur-3xl filter animate-blob"></div>
+          <div className="absolute -top-1/3 right-0 h-[800px] w-[800px] bg-sky-200/30 rounded-full filter animate-blob animation-delay-2000"></div>
+        </div>
+      )}
       <AnimatePresence>
         {toast.visible && <Toast message={toast.message} type={toast.type} onDismiss={() => setToast({ ...toast, visible: false })} />}
       </AnimatePresence>

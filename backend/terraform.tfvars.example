@@ -1,0 +1,16 @@
+# AWS Configuration
+aws_region = "us-east-1"
+environment = "dev"
+
+# Database Configuration
+db_username = "ground_sense_user"
+db_password = "your_secure_password_here"
+db_instance_class = "db.t3.micro"
+
+# Application Configuration
+app_cpu = "256"
+app_memory = "512"
+app_desired_count = 1
+
+# Security
+jwt_secret = "your_jwt_secret_key_here"

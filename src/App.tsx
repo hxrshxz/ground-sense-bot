@@ -3,25 +3,86 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useEffect, useState } from "react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import { INGRESAssistant } from "./components/INGRESAssistant";
+import { ApiKeyProvider } from "./components/ApiKeyContext";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+// Embedded Chat Component
+const EmbeddedChat = () => {
+  const [isEmbedded, setIsEmbedded] = useState(false);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const embedded = urlParams.get('embedded') === 'true';
+    setIsEmbedded(embedded);
+
+    // If embedded, hide scrollbars and adjust body
+    if (embedded) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.margin = '0';
+      document.body.style.padding = '0';
+      document.documentElement.style.height = '100%';
+      document.body.style.height = '100%';
+    }
+  }, []);
+
+  if (!isEmbedded) {
+    return null;
+  }
+
+  return (
+    <div style={{
+      height: '100vh',
+      width: '100vw',
+      overflow: 'hidden',
+      background: '#0f172a'
+    }}>
+      <ApiKeyProvider>
+        <INGRESAssistant embedded={true} />
+      </ApiKeyProvider>
+    </div>
+  );
+};
+
+const App = () => {
+  const [isEmbedded, setIsEmbedded] = useState(false);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    setIsEmbedded(urlParams.get('embedded') === 'true');
+  }, []);
+
+  // If embedded, show only the chat component
+  if (isEmbedded) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <EmbeddedChat />
+        </TooltipProvider>
+      </QueryClientProvider>
+    );
+  }
+
+  // Normal app routing
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

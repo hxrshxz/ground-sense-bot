@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ground Sense Bot - Embedded Chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .embed-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .embed-header {
+            background: linear-gradient(135deg, #00d4ff, #00ff88);
+            padding: 16px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .embed-content {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .embed-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #1e293b;
+            border-top: 3px solid #00d4ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            flex-direction: column;
+            gap: 16px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .error-icon {
+            font-size: 48px;
+            color: #ef4444;
+        }
+
+        .error-message {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="embed-container">
+        <div class="embed-header">
+            🤖 Ground Sense Bot
+        </div>
+        <div class="embed-content">
+            <div id="loading" class="loading">
+                <div class="loading-spinner"></div>
+                <div>Loading chatbot...</div>
+            </div>
+            <div id="error" class="error" style="display: none;">
+                <div class="error-icon">⚠️</div>
+                <div class="error-message">Failed to load chatbot. Please check your API key configuration.</div>
+            </div>
+            <iframe
+                id="chat-iframe"
+                class="embed-iframe"
+                style="display: none;"
+                src=""
+                title="Ground Sense Bot Chat">
+            </iframe>
+        </div>
+    </div>
+
+    <script>
+        // Get URL parameters
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            const results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        // Configuration
+        const config = {
+            apiKey: getUrlParameter('apiKey'),
+            theme: getUrlParameter('theme') || 'dark',
+            color: getUrlParameter('color') || '#00d4ff'
+        };
+
+        // Build the chat URL
+        const chatUrl = `${window.location.origin}?embedded=true&apiKey=${encodeURIComponent(config.apiKey || '')}`;
+
+        // Load the chat
+        const iframe = document.getElementById('chat-iframe');
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+
+        iframe.src = chatUrl;
+
+        iframe.onload = function() {
+            loading.style.display = 'none';
+            iframe.style.display = 'block';
+        };
+
+        iframe.onerror = function() {
+            loading.style.display = 'none';
+            error.style.display = 'flex';
+        };
+
+        // Handle messages from parent window
+        window.addEventListener('message', function(event) {
+            // Handle cross-origin messages if needed
+            if (event.data.type === 'close-chat') {
+                // Handle close request from parent
+            }
+        });
+
+        // Notify parent that embed is ready
+        if (window.parent !== window) {
+            window.parent.postMessage({
+                type: 'embed-ready',
+                config: config
+            }, '*');
+        }
+    </script>
+</body>
+</html>

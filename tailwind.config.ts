@@ -27,7 +27,7 @@ export default {
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
-        },
+      },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
@@ -104,7 +104,7 @@ export default {
         "animation-delay-2000": "blob 7s infinite 2s",
         "fade-in": "fade-in 0.5s ease-out",
         glow: "glow 2s ease-in-out infinite",
-        shimmer: "shimmer 2s infinite",
+        shimmer: "shimmer 2s linear infinite",
       },
       backgroundImage: {
         "gradient-primary": "var(--gradient-primary)",

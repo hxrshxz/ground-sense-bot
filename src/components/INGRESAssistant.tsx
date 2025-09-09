@@ -12,15 +12,90 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
     Search, Camera, Bot, User, X, Mic, Languages, Bell, Server, Info,
-    Lightbulb, ShieldCheck, CheckCircle, AlertTriangle, Database,  TrendingUp,  BarChartHorizontal, ArrowDown, ArrowUp, CloudRain, Satellite
+    Lightbulb, ShieldCheck, CheckCircle, AlertTriangle, Database,  TrendingUp,  BarChartHorizontal, ArrowDown, ArrowUp, CloudRain, Satellite, BrainCircuit
 } from "lucide-react";
+
+
+//================================================================================
+// --- SHIMMER EFFECT COMPONENT ---
+//================================================================================
+const GeminiShimmerEffect = () => {
+  const thinkingPhrases = [
+    "Connecting to data source...", "Analyzing groundwater levels...", "Processing sensor data...", "Identifying patterns...", "Generating insights...",
+  ];
+  const shimmerLines = [
+    { width: "95%", delay: 0 }, { width: "100%", delay: 0.1 }, { width: "90%", delay: 0.2 }, { width: "75%", delay: 0.3 },
+  ];
+  const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentPhraseIndex((prevIndex) => (prevIndex + 1) % thinkingPhrases.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.15 } },
+  };
+  const lineVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0 },
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="flex items-start gap-3 max-w-2xl mr-auto">
+      <motion.div
+        animate={{ scale: [1, 1.05, 1], opacity: [0.8, 1, 0.8] }}
+        transition={{ duration: 2, repeat: Infinity, repeatType: "mirror" }}
+        className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center shadow-soft"
+      >
+        <BrainCircuit className="w-5 h-5 text-white" />
+      </motion.div>
+      <div className="p-3 rounded-2xl bg-white/90 backdrop-blur-sm border border-white/60 shadow-soft space-y-3 w-full max-w-md">
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-2">
+          {shimmerLines.map((line, index) => (
+            <motion.div
+              key={index}
+              variants={lineVariants}
+              className="h-3 bg-gradient-to-r from-slate-200 via-slate-300 to-slate-200 rounded animate-shimmer bg-[length:200%_100%]"
+              style={{ width: line.width, animationDelay: `${line.delay}s` }}
+            />
+          ))}
+        </motion.div>
+        <div className="flex items-center gap-2 pt-1">
+          <div className="flex space-x-1">
+            <motion.div className="w-1.5 h-1.5 bg-purple-400/60 rounded-full" animate={{ y: [0, -2, 0] }} transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }} />
+            <motion.div className="w-1.5 h-1.5 bg-purple-400/60 rounded-full" animate={{ y: [0, -2, 0] }} transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut", delay: 0.1 }} />
+            <motion.div className="w-1.5 h-1.5 bg-purple-400/60 rounded-full" animate={{ y: [0, -2, 0] }} transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut", delay: 0.2 }} />
+          </div>
+          <div className="text-xs text-slate-600 w-full overflow-hidden">
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={currentPhraseIndex}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ duration: 0.3 }}
+                className="block"
+              >
+                {thinkingPhrases[currentPhraseIndex]}
+              </motion.span>
+            </AnimatePresence>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
 
 
 //================================================================================
 // --- INGRES ASSISTANT COMPONENT AND ITS HELPERS ---
 //================================================================================
 
-// --- Mock Database for INGRES Demonstration ---
+// --- Mock Database ---
 const MOCK_DB = {
   sanganer: {
     block: "Sanganer", district: "Jaipur", state: "Rajasthan", category: "Over-Exploited",
@@ -163,7 +238,7 @@ const BlockAssessmentCard = ({ data }: { data: any }) => {
   );
 };
 
-// --- NEW COMPONENT: Proactive Insight Card ---
+// --- Proactive Insight Card Component ---
 const ProactiveInsightCard = () => {
   const criticalShifts = 1;
   const regionsMonitored = Object.keys(MOCK_DB).length;
@@ -324,7 +399,7 @@ export const INGRESAssistant = () => {
     setInputValue('');
     setIsThinking(true);
     
-    // --- 1. Check for local commands to show rich components ---
+    // --- 1. Check for local commands ---
     const blockKeyword = Object.keys(MOCK_DB).find(key => query.includes(key));
     if (blockKeyword) {
         await new Promise(resolve => setTimeout(resolve, 1500));
@@ -335,7 +410,7 @@ export const INGRESAssistant = () => {
         };
         setChatHistory(prev => [...prev, aiResponse]);
         setIsThinking(false);
-        return; // Exit after handling
+        return;
     }
 
     if (query.includes("proactive insight") || query.includes("generate a summary") || query.includes("generate a report")) {
@@ -347,13 +422,11 @@ export const INGRESAssistant = () => {
         };
         setChatHistory(prev => [...prev, aiResponse]);
         setIsThinking(false);
-        return; // Exit after handling
+        return;
     }
 
-    // --- 2. Call Gemini API for general queries ---
-    // IMPORTANT: Replace with your actual Google AI Studio API key
-    const API_KEY = "YOUR_API_KEY_HERE";
-
+    // --- 2. Call Gemini API ---
+ const API_KEY = "AIzaSyAOwDOc9YeueDaj8sxQsgDjOpKo_FV1pMc";
     if (API_KEY) {
         try {
             const genAI = new GoogleGenerativeAI(API_KEY);
@@ -377,12 +450,12 @@ export const INGRESAssistant = () => {
             setIsThinking(false);
         }
     } else {
-        // --- 3. Fallback logic if API key is not provided ---
+        // --- 3. Fallback logic ---
         await new Promise(resolve => setTimeout(resolve, 1500));
         const aiResponse = { 
             id: Date.now() + 1, 
             type: 'ai', 
-            text: "I can provide detailed data for blocks like 'Sanganer' or 'Chaksu', or generate a proactive insight summary. Try one of those to see a full report. (Note: Gemini API key not configured)."
+            text: "I can provide detailed data for blocks like 'Sanganer' or 'Chaksu'. (Note: Gemini API key not configured)."
         };
         setChatHistory(prev => [...prev, aiResponse]);
         setIsThinking(false);
@@ -456,10 +529,14 @@ export const INGRESAssistant = () => {
                             <div className="max-w-xl">
                               {msg.type === 'user' ? (<div className="bg-purple-500 text-white p-3 rounded-2xl rounded-br-lg shadow-sm"><p className="text-sm">{msg.text}</p></div>)
                                : (msg.text ? 
-                                    // CORRECTED CODE BLOCK
                                     <div className="bg-white p-3 rounded-2xl rounded-bl-lg border shadow-sm text-slate-800 prose prose-sm max-w-none">
+                                      {/* --- CORRECTED LOGIC --- */}
                                       {msg.type === 'ai' && isLastMessage && !isThinking ? (
-                                        <TextGenerateEffect words={msg.text} />
+                                        <TextGenerateEffect>
+                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                              {msg.text}
+                                            </ReactMarkdown>
+                                        </TextGenerateEffect>
                                       ) : (
                                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                           {msg.text}
@@ -472,15 +549,7 @@ export const INGRESAssistant = () => {
                         </motion.div>
                     )
                   })}
-                  {isThinking && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-start gap-3">
-                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-sky-100 to-purple-100 flex items-center justify-center"><Bot className="w-5 h-5 text-sky-600"/></div>
-                        <div className="p-3 rounded-2xl bg-white border border-slate-200 space-y-2 w-48 animate-pulse">
-                            <div className="bg-slate-200 h-4 rounded"></div>
-                            <div className="bg-slate-200 h-4 w-3/4 rounded"></div>
-                        </div>
-                    </motion.div>
-                  )}
+                  {isThinking && <GeminiShimmerEffect />}
                 </AnimatePresence>
             </CardContent>
             <CardContent className="border-t border-slate-200/80 pt-4">

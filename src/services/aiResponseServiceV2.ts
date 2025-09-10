@@ -1149,6 +1149,202 @@ The following alerts are based on current groundwater monitoring data and trend 
     aiSummary:
       "Rajasthan currently has 85 blocks classified as 'Over-Exploited' with extraction rates exceeding 150% of recharge. Jaipur district has the highest concentration of critical blocks (18), with Sanganer being the most severely affected (192% extraction rate). Immediate action is required in these areas to prevent irreversible damage to aquifers and ensure water security for local communities.",
   },
+
+  rainfallImpactGroundwater: {
+    displayType: DisplayType.TABS,
+    title: "Rainfall's Impact on Groundwater Recharge",
+    components: [
+      {
+        id: "1",
+        type: ComponentType.MARKDOWN,
+        title: "Regional Rainfall Contribution",
+        content: `
+## Key Findings:
+
+- In the **Chaksu** block, rainfall provides **75.2 units** of the total **95.2 units** of groundwater recharge (79% of total recharge)
+- In the **Delhi** block, rainfall contributes **90.5 units** of the total **120.5 units** of recharge (75% of total recharge)
+- Other natural sources (river seepage, canal leakage) contribute the remaining recharge
+- Artificial recharge initiatives currently contribute <5% to total recharge in most blocks
+        `,
+      },
+      {
+        id: "2",
+        type: ComponentType.PIE_CHART,
+        title: "Chaksu Block: Recharge Sources",
+        labels: ["Rainfall", "Other Natural Sources", "Artificial Recharge"],
+        datasets: [
+          {
+            label: "Recharge Sources",
+            data: [75.2, 16.5, 3.5],
+            backgroundColor: ["#3182CE", "#38A169", "#DD6B20"],
+            borderWidth: 1,
+          },
+        ],
+        options: {
+          plugins: {
+            legend: {
+              position: "right",
+              labels: {
+                font: {
+                  size: 14,
+                },
+              },
+            },
+            title: {
+              display: true,
+              text: "Chaksu Block: Groundwater Recharge Sources (units)",
+              font: {
+                size: 16,
+                weight: "bold",
+              },
+            },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  let label = context.label || "";
+                  let value = context.raw || 0;
+                  let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  let percentage = Math.round((value / total) * 100);
+                  return `${label}: ${value} units (${percentage}%)`;
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        id: "3",
+        type: ComponentType.PIE_CHART,
+        title: "Delhi Block: Recharge Sources",
+        labels: ["Rainfall", "Other Natural Sources", "Artificial Recharge"],
+        datasets: [
+          {
+            label: "Recharge Sources",
+            data: [90.5, 24.8, 5.2],
+            backgroundColor: ["#3182CE", "#38A169", "#DD6B20"],
+            borderWidth: 1,
+          },
+        ],
+        options: {
+          plugins: {
+            legend: {
+              position: "right",
+              labels: {
+                font: {
+                  size: 14,
+                },
+              },
+            },
+            title: {
+              display: true,
+              text: "Delhi Block: Groundwater Recharge Sources (units)",
+              font: {
+                size: 16,
+                weight: "bold",
+              },
+            },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  let label = context.label || "";
+                  let value = context.raw || 0;
+                  let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  let percentage = Math.round((value / total) * 100);
+                  return `${label}: ${value} units (${percentage}%)`;
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        id: "4",
+        type: ComponentType.BAR_CHART,
+        title: "Rainfall vs. Total Recharge Comparison",
+        labels: ["Chaksu Block", "Delhi Block"],
+        datasets: [
+          {
+            label: "Rainfall Contribution",
+            data: [75.2, 90.5],
+            backgroundColor: "rgba(49, 130, 206, 0.7)",
+            borderColor: "rgba(44, 82, 130, 1)",
+            borderWidth: 1,
+          },
+          {
+            label: "Total Recharge",
+            data: [95.2, 120.5],
+            backgroundColor: "rgba(56, 161, 105, 0.7)",
+            borderColor: "rgba(39, 103, 73, 1)",
+            borderWidth: 1,
+          },
+        ],
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: "top",
+            },
+            title: {
+              display: true,
+              text: "Rainfall Contribution to Groundwater Recharge (units)",
+              font: {
+                size: 16,
+                weight: "bold",
+              },
+            },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  let label = context.dataset.label || "";
+                  let value = context.raw || 0;
+                  return `${label}: ${value} units`;
+                },
+              },
+            },
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: "Location",
+              },
+            },
+            y: {
+              title: {
+                display: true,
+                text: "Recharge Units",
+              },
+              beginAtZero: true,
+            },
+          },
+        },
+      },
+      {
+        id: "5",
+        type: ComponentType.MARKDOWN,
+        title: "Analysis & Implications",
+        content: `
+## Analysis:
+
+- Rainfall is the **dominant source of groundwater recharge** in both Chaksu and Delhi blocks
+- The Delhi block benefits from higher absolute rainfall contribution (90.5 units vs 75.2 units)
+- Chaksu has a slightly higher dependency on rainfall as a percentage of total recharge (79% vs 75%)
+- Both regions would face severe groundwater stress during drought years or periods of below-average rainfall
+- The relatively small contribution from artificial recharge methods (3.5-5.2 units) indicates significant potential for improvement
+
+## Implications:
+
+- Rainfall patterns directly impact annual groundwater availability
+- Climate change-induced rainfall variability poses a serious threat to groundwater sustainability
+- Increasing artificial recharge infrastructure could help buffer against rainfall fluctuations
+- Developing rainwater harvesting structures should be prioritized in regional water management plans
+- Sustainable extraction limits should account for annual rainfall variations
+        `,
+      },
+    ],
+    aiSummary:
+      "Rainfall is the primary contributor to groundwater recharge in both Chaksu and Delhi blocks in Rajasthan, accounting for 75-79% of total recharge. Chaksu receives 75.2 units from rainfall out of 95.2 total recharge units, while Delhi receives 90.5 units from rainfall out of 120.5 total recharge units. The high dependence on rainfall makes these regions vulnerable to climate variability, while the relatively small contribution from artificial recharge methods (3.5-5.2 units) indicates significant opportunity for enhancement of managed aquifer recharge infrastructure.",
+  },
 };
 
 // Function to get a response based on query
@@ -1295,6 +1491,15 @@ export function getAIResponse(query: string): AIResponse | null {
     (queryLower.includes("ludhiana") || queryLower.includes("amritsar"))
   ) {
     return sampleResponses.punjabExtractionIncrease;
+  }
+
+  // Rainfall Impact on Groundwater (General)
+  if (
+    queryLower.includes("rainfall") &&
+    queryLower.includes("impact") &&
+    queryLower.includes("groundwater")
+  ) {
+    return sampleResponses.rainfallImpactGroundwater;
   }
 
   // 12. Punjab Rainfall Impact

@@ -259,60 +259,60 @@ const Toast = ({
 };
 
 // --- HELPER UI COMPONENTS ---
-const NotificationBell = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      )
-        setIsOpen(false);
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+// const NotificationBell = () => {
+//   const [isOpen, setIsOpen] = useState(false);
+//   const dropdownRef = useRef<HTMLDivElement>(null);
+//   useEffect(() => {
+//     const handleClickOutside = (event: MouseEvent) => {
+//       if (
+//         dropdownRef.current &&
+//         !dropdownRef.current.contains(event.target as Node)
+//       )
+//         setIsOpen(false);
+//     };
+//     document.addEventListener("mousedown", handleClickOutside);
+//     return () => document.removeEventListener("mousedown", handleClickOutside);
+//   }, []);
 
-  return (
-    <div ref={dropdownRef} className="relative">
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => setIsOpen((prev) => !prev)}
-        className="rounded-full hover:bg-slate-200/70 relative"
-      >
-        <Bell className="h-5 w-5 text-slate-600" />
-        <span className="absolute top-1 right-1.5 flex h-2 w-2">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-        </span>
-      </Button>
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="absolute top-full z-20 mt-2 w-80 right-0 origin-top-right rounded-xl border border-slate-200 bg-white/90 p-2 shadow-xl backdrop-blur-sm"
-          >
-            <div className="font-semibold text-sm text-slate-800 p-2">
-              Proactive Alerts
-            </div>
-            <div className="w-full text-left p-3 rounded-lg hover:bg-slate-100">
-              <p className="font-medium text-sm text-slate-700">
-                Status Change: Delhi Block
-              </p>
-              <p className="text-xs text-slate-500">
-                This block has shifted from 'Critical' to 'Over-Exploited'.
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
+//   return (
+//     <div ref={dropdownRef} className="relative">
+//       <Button
+//         variant="ghost"
+//         size="icon"
+//         onClick={() => setIsOpen((prev) => !prev)}
+//         className="rounded-full hover:bg-slate-200/70 relative"
+//       >
+//         <Bell className="h-5 w-5 text-slate-600" />
+//         <span className="absolute top-1 right-1.5 flex h-2 w-2">
+//           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+//           <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+//         </span>
+//       </Button>
+//       <AnimatePresence>
+//         {isOpen && (
+//           <motion.div
+//             initial={{ opacity: 0, y: -10 }}
+//             animate={{ opacity: 1, y: 0 }}
+//             exit={{ opacity: 0, y: -10 }}
+//             className="absolute top-full z-20 mt-2 w-80 right-0 origin-top-right rounded-xl border border-slate-200 bg-white/90 p-2 shadow-xl backdrop-blur-sm"
+//           >
+//             <div className="font-semibold text-sm text-slate-800 p-2">
+//               Proactive Alerts
+//             </div>
+//             <div className="w-full text-left p-3 rounded-lg hover:bg-slate-100">
+//               <p className="font-medium text-sm text-slate-700">
+//                 Status Change: Delhi Block
+//               </p>
+//               <p className="text-xs text-slate-500">
+//                 This block has shifted from 'Critical' to 'Over-Exploited'.
+//               </p>
+//             </div>
+//           </motion.div>
+//         )}
+//       </AnimatePresence>
+//     </div>
+//   );
+// };
 
 // --- Proactive Insight Card Component ---
 const ProactiveInsightCard = () => {
@@ -1099,7 +1099,7 @@ export const INGRESAssistant = ({
     >
       {!embedded && (
         <div className="absolute top-8 right-8">
-          <NotificationBell />
+          {/* <NotificationBell /> */}
         </div>
       )}
       <div className="relative text-center max-w-4xl mx-auto">
@@ -1169,17 +1169,9 @@ export const INGRESAssistant = ({
             <Bot className="h-6 w-6 text-purple-600" />
             <CardTitle className="text-xl">AI Data Analyst</CardTitle>
             {/* Development button - only show in development mode */}
-            {process.env.NODE_ENV !== "production" && (
-              <button
-                onClick={showPunjabRajasthanComparison}
-                className="ml-4 px-2 py-1 text-xs bg-red-100 text-red-800 rounded border border-red-200"
-              >
-                Test Punjab vs Rajasthan
-              </button>
-            )}
           </div>
           <div className="flex items-center gap-2">
-            {!embedded && <NotificationBell />}
+            {/* {!embedded && <NotificationBell />} */}
             <Button
               variant="ghost"
               onClick={() => {

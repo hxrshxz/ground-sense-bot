@@ -13,6 +13,7 @@ An intelligent AI-powered chatbot for India's groundwater data analytics, featur
 - 🌍 **Multi-language Support** - English and Hindi language options
 - 📁 **File Upload Support** - Analyze custom datasets
 - 🔒 **Secure Authentication** - API key management system
+- 📥 **Report Download** - Save and share reports as PDF or images
 
 ## 🚀 Quick Start
 
@@ -190,7 +191,24 @@ For support and questions:
 - 🐛 Issues: GitHub Issues
 - 📖 Docs: [Embedding Guide](./EMBEDDING_GUIDE.md)
 
-## 🙏 Acknowledgments
+## � Downloading Reports
+
+GroundSense Bot provides the ability to download any generated report in multiple formats:
+
+1. **PDF Download**: Perfect for sharing in formal contexts or archiving data.
+2. **Image Download**: Quick visual capture of any report for easy sharing.
+3. **Share Feature**: On compatible devices, directly share reports through messaging apps, email, etc.
+
+To download a report:
+
+1. Generate any report by asking a question to the AI assistant
+2. Once the report is displayed, look for the "Download" button at the bottom
+3. Choose your preferred format (PDF or Image) or use the Share option
+4. Save the file to your device or share it directly
+
+This feature works with all report types including block assessments, comparison charts, trend analyses, and policy recommendations.
+
+## �🙏 Acknowledgments
 
 - Google Gemini AI for powering the conversational interface
 - India's Central Ground Water Board for data insights

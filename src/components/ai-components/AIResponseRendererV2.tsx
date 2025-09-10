@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,6 +22,9 @@ import { AnimatedAIText } from "./AnimatedAIContent";
 
 // Import simple component renderer
 import { SimpleComponentRenderer } from "./SimpleComponentRenderers";
+
+// Import download component
+import { DownloadReport } from "../DownloadReport";
 
 // Component to render individual AI components based on their type
 const ComponentRenderer = ({ component }: { component: AIComponent }) => {
@@ -162,9 +165,11 @@ const AccordionLayout: React.FC<{ response: AIResponse }> = ({ response }) => {
 const AIResponseRenderer: React.FC<{ response: AIResponse }> = ({
   response,
 }) => {
+  const reportRef = useRef<HTMLDivElement>(null);
+
   return (
     <Card className="w-full overflow-hidden bg-white shadow-lg">
-      <CardContent className="p-6">
+      <CardContent className="p-6" ref={reportRef}>
         {(() => {
           switch (response.displayType) {
             case DisplayType.GRID:
@@ -180,6 +185,14 @@ const AIResponseRenderer: React.FC<{ response: AIResponse }> = ({
           }
         })()}
       </CardContent>
+      <div className="flex justify-end p-4 border-t border-gray-100">
+        <DownloadReport
+          targetRef={reportRef}
+          fileName={`groundsense-${
+            response.title?.toLowerCase().replace(/\s+/g, "-") || "report"
+          }`}
+        />
+      </div>
     </Card>
   );
 };

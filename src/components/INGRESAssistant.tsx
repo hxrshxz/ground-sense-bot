@@ -532,7 +532,7 @@ const INGRESCommandBar = ({
 
           <div className="flex items-center justify-between pl-2 pr-1">
             <div className="flex items-center gap-2">
-              <select
+              {/* <select
                 value={activeYear}
                 onChange={(e) => onYearChange(e.target.value)}
                 className="rounded-full bg-slate-200/70 px-4 py-1.5 text-sm font-medium text-slate-700 border-none focus:ring-0"
@@ -540,7 +540,7 @@ const INGRESCommandBar = ({
                 <option>Latest (2025)</option>
                 <option>2024</option>
                 <option>2023</option>
-              </select>
+              </select> */}
               {hasSpeechSupport && (
                 <Button
                   variant="ghost"

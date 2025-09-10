@@ -36,6 +36,10 @@ export const BlockAssessmentCard = (
         badge: "bg-orange-100 text-orange-800",
         text: "text-orange-600",
       },
+      Saline: {
+        badge: "bg-blue-100 text-blue-800",
+        text: "text-blue-600",
+      },
       "Semi-Critical": {
         badge: "bg-yellow-100 text-yellow-800",
         text: "text-yellow-600",

@@ -153,7 +153,7 @@ export const BusinessTools = () => {
           transition={{ delay: 0.3, duration: 0.8, ease: "easeInOut" }}
           className="mt-8 bg-gradient-to-br from-slate-300 to-slate-500 py-4 bg-clip-text text-center text-5xl font-medium tracking-tight text-transparent md:text-7xl"
         >
-          Ingress AI Advisor for Govt Portal
+          AI-Driver chatbot for INGRESS Portal
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, y: 40 }}
@@ -161,8 +161,7 @@ export const BusinessTools = () => {
           transition={{ delay: 0.5, duration: 0.8, ease: "easeInOut" }}
           className="mt-4 font-normal text-base text-slate-400 max-w-lg text-center mx-auto"
         >
-          An AI-powered chatbot assistant designed to help monitor, analyze, and
-          provide insights on groundwater levels for better decision-making.
+An AI-powered chatbot assistant for monitoring and analyzing groundwater levels, seamlessly integrated with Ingress Database for real-time data insights.
         </motion.p>
       </LampContainer>
 

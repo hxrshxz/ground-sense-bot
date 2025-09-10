@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { BlockAssessmentCard } from "./BlockAssessmentCard";
 import {
     Search, Camera, Bot, User, X, Mic, Languages, Bell, Server, Info,
     Lightbulb, ShieldCheck, CheckCircle, AlertTriangle, Database,  TrendingUp,  BarChartHorizontal, ArrowDown, ArrowUp, CloudRain, Satellite, BrainCircuit
@@ -183,61 +184,6 @@ const NotificationBell = () => {
   );
 };
 
-// --- Block Assessment Card Component ---
-const BlockAssessmentCard = ({ data }: { data: any }) => {
-  const categoryStyles: Record<string, { badge: string; text: string }> = {
-    "Over-Exploited": { badge: "bg-red-100 text-red-800", text: "text-red-600" },
-    "Critical": { badge: "bg-orange-100 text-orange-800", text: "text-orange-600" },
-  };
-  const styles = categoryStyles[data.category] || { badge: "bg-slate-100 text-slate-800", text: "text-slate-600" };
-
-  return (
-    <Card className="w-full max-w-lg bg-white/80 backdrop-blur-sm border-slate-200/80 shadow-lg text-slate-900">
-      <CardHeader>
-        <div className="flex justify-between items-start">
-          <div>
-            <p className="text-2xl font-bold">{data.block} Block</p>
-            <p className="text-sm text-slate-500">{data.district}, {data.state}</p>
-          </div>
-          <Badge className={styles.badge}>{data.category}</Badge>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-3 gap-3 text-center">
-          <div className="p-3 bg-sky-50 rounded-lg border border-sky-100">
-            <p className="text-xs font-semibold text-slate-500">Recharge (MCM)</p>
-            <p className="text-lg font-bold text-sky-800 flex items-center justify-center gap-1"><ArrowDown className="h-4 w-4 text-green-500"/> {data.recharge}</p>
-          </div>
-          <div className="p-3 bg-red-50 rounded-lg border border-red-100">
-            <p className="text-xs font-semibold text-slate-500">Extraction (MCM)</p>
-            <p className="text-lg font-bold text-red-800 flex items-center justify-center gap-1"><ArrowUp className="h-4 w-4 text-red-500"/> {data.extraction}</p>
-          </div>
-          <div className="p-3 bg-purple-50 rounded-lg border border-purple-100">
-            <p className="text-xs font-semibold text-slate-500">Extraction Stage</p>
-            <p className={`text-lg font-bold ${styles.text}`}>{data.stage}</p>
-          </div>
-        </div>
-        <div>
-          <h4 className="text-sm font-semibold text-slate-700 mb-1 flex items-center gap-2"><TrendingUp className="h-4 w-4"/> 5-Year Trend</h4>
-          <div className="p-2 bg-slate-50 rounded-lg border border-slate-200"><p className="text-center text-xs text-slate-500 py-4">[Chart placeholder: {data.trend.join("% → ")}%]</p></div>
-        </div>
-        <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
-           <h4 className="text-sm font-semibold text-slate-700">Enriched Data</h4>
-           <p className="text-xs text-slate-600 flex items-center gap-2"><CloudRain className="h-4 w-4 text-sky-500"/>IMD Data: Below-average rainfall recorded.</p>
-           <p className="text-xs text-slate-600 flex items-center gap-2"><Satellite className="h-4 w-4 text-green-500"/>ISRO Data: Increase in water-intensive crops.</p>
-        </div>
-        {data.category === "Over-Exploited" && (
-            <div className="p-3 bg-red-50 rounded-lg border border-red-200 space-y-2">
-                <h4 className="text-sm font-semibold text-red-800 flex items-center gap-2"><Lightbulb className="h-4 w-4"/> AI Advisor</h4>
-                <p className="text-xs text-slate-700"><b>Forecast:</b> Groundwater level likely to decline.</p>
-                <p className="text-xs text-slate-700"><b>Recommendation:</b> Promote micro-irrigation schemes.</p>
-            </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-};
-
 // --- Proactive Insight Card Component ---
 const ProactiveInsightCard = () => {
   const criticalShifts = 1;
@@ -286,7 +232,7 @@ const ProactiveInsightCard = () => {
 
 // --- Command Bar Component ---
 const INGRESCommandBar = ({ inputValue, onInputChange, onSubmit, isListening, onMicClick, hasSpeechSupport, language, onLanguageChange, activeYear, onYearChange }: any) => {
-  const placeholders = useMemo(() => language === 'en-US' ? ["Show data for Sanganer block...", "List all critical blocks..."] : ["संगनेर ब्लॉक का डेटा दिखाएं...", "सभी क्रिटिकल ब्लॉकों की सूची बनाएं..."], [language]);
+  const placeholders = useMemo(() => language === 'en-US' ? ["Show data for Sanganer block...", "List all critical blocks..."] : ["संगनेर ब्लॉक का डेटा दिखाएं...", "جميع ब्लॉकों की सूची बनाएं..."], [language]);
   const [currentPlaceholder, setCurrentPlaceholder] = useState(placeholders[0]);
   
   useEffect(() => {
@@ -369,6 +315,45 @@ type ChatMessage = {
   component?: React.ReactNode;
 };
 
+// --- FIX: Updated component to manage animation and markdown rendering ---
+const AnimatedMarkdownMessage = ({ text }: { text: string }) => {
+  const [animationComplete, setAnimationComplete] = useState(false);
+
+  // --- 1. Create a clean, plain-text version of the message for animation ---
+  const plainText = useMemo(() => {
+    // This regex removes common markdown characters like *, _, #, `, [, ], (, )
+    // to prevent them from showing during the animation.
+    return text.replace(/[*_#`[\]()]/g, "");
+  }, [text]);
+
+  // When the text content changes, reset the animation state
+  useEffect(() => {
+    setAnimationComplete(false);
+  }, [text]);
+
+  return (
+    <AnimatePresence mode="wait">
+      {!animationComplete ? (
+        <motion.div key="animating" exit={{ opacity: 0, transition: { duration: 0.2 } }}>
+          <TextGenerateEffect
+            // --- 2. Animate the CLEAN text ---
+            words={plainText}
+            onAnimationComplete={() => setAnimationComplete(true)}
+          />
+        </motion.div>
+      ) : (
+        <motion.div key="formatted" initial={{ opacity: 0 }} animate={{ opacity: 1, transition: { duration: 0.2 } }}>
+          {/* --- 3. Display the ORIGINAL text with formatting --- */}
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {text}
+          </ReactMarkdown>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+
 // --- Main INGRES Assistant Component ---
 export const INGRESAssistant = ({ embedded = false }: { embedded?: boolean }) => {
   const [view, setView] = useState('dashboard');
@@ -391,15 +376,14 @@ export const INGRESAssistant = ({ embedded = false }: { embedded?: boolean }) =>
   
   const showToast = (message: string, type = 'info') => { setToast({ message, type, visible: true }); };
 
-  // --- MODIFIED: handleChatSubmit with Gemini API Integration ---
   const handleChatSubmit = async (text: string) => {
+    if (!text.trim()) return;
     const query = text.toLowerCase();
     setView('chat');
     setChatHistory(prev => [...prev, { id: Date.now(), type: 'user', text }]);
     setInputValue('');
     setIsThinking(true);
     
-    // --- 1. Check for local commands ---
     const blockKeyword = Object.keys(MOCK_DB).find(key => query.includes(key));
     if (blockKeyword) {
         await new Promise(resolve => setTimeout(resolve, 1500));
@@ -425,8 +409,7 @@ export const INGRESAssistant = ({ embedded = false }: { embedded?: boolean }) =>
         return;
     }
 
-    // --- 2. Call Gemini API ---
- const API_KEY = "AIzaSyAOwDOc9YeueDaj8sxQsgDjOpKo_FV1pMc";
+    const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
     if (API_KEY) {
         try {
             const genAI = new GoogleGenerativeAI(API_KEY);
@@ -444,18 +427,17 @@ export const INGRESAssistant = ({ embedded = false }: { embedded?: boolean }) =>
 
         } catch (error) {
             console.error("Error calling Gemini API:", error);
-            const aiResponse = { id: Date.now() + 1, type: 'ai', text: "Sorry, I encountered an error while connecting to the AI service. Please try again later." };
+            const aiResponse = { id: Date.now() + 1, type: 'ai', text: "Sorry, I encountered an error while connecting to the AI service. The model may be overloaded. Please try again later." };
             setChatHistory(prev => [...prev, aiResponse]);
         } finally {
             setIsThinking(false);
         }
     } else {
-        // --- 3. Fallback logic ---
         await new Promise(resolve => setTimeout(resolve, 1500));
         const aiResponse = { 
             id: Date.now() + 1, 
             type: 'ai', 
-            text: "I can provide detailed data for blocks like 'Sanganer' or 'Chaksu'. (Note: Gemini API key not configured)."
+            text: "I can provide detailed data for blocks like 'Sanganer' or 'Chaksu'. (Note: Gemini API key not configured. Please set up your VITE_GEMINI_API_KEY in the .env.local file)."
         };
         setChatHistory(prev => [...prev, aiResponse]);
         setIsThinking(false);
@@ -475,11 +457,27 @@ export const INGRESAssistant = ({ embedded = false }: { embedded?: boolean }) =>
     activeYear: activeYear, onYearChange: setActiveYear,
   };
 
-  const suggestedPrompts = [
-    { title: "Get Block Details", text: "Show the status of Sanganer block" },
-    { title: "Generate an Insight", text: "Generate a proactive insight summary" },
-    { title: "Compare Blocks", text: "Compare the extraction stages of Chaksu and Sanganer" },
-    { title: "Ask About Data", text: "List all critical blocks in Punjab" },
+const suggestedPrompts = [
+    { 
+      title: "Get Block Details", 
+      text: "Show the status of Sanganer block",
+      description: "Fetch a detailed visual report for a specific block." 
+    },
+    { 
+      title: "List Critical Areas", 
+      text: "List all 'Over-Exploited' blocks in Punjab",
+      description: "Filter and view blocks by category and state."
+    },
+    { 
+      title: "Predict Future Trends", 
+      text: "Forecast the groundwater level for my block for the next 6 months",
+      description: "Use predictive analytics to see future possibilities." 
+    },
+    { 
+      title: "Get AI Recommendations", 
+      text: "What crops should I plant in a 'Critical' zone in Haryana?",
+      description: "Receive actionable advice based on current data."
+    },
   ];
 
   const renderDashboard = () => (
@@ -497,9 +495,11 @@ export const INGRESAssistant = ({ embedded = false }: { embedded?: boolean }) =>
     </div>
   );
 
+// --- Located inside the INGRESAssistant component ---
   const renderChatView = () => (
-     <div className={`flex items-center justify-center min-h-screen p-4 ${embedded ? 'p-2' : ''}`}>
-        <Card className={`w-full flex flex-col shadow-2xl rounded-2xl ${embedded ? 'h-full max-w-none bg-slate-800/90 border-slate-700' : 'max-w-4xl h-[calc(100vh-4rem)] bg-white/60 backdrop-blur-xl border-white/30'}`}>
+     <div className={`flex items-center justify-center min-h-screen p-4 ${embedded ? 'p-2' : 'md:p-6'}`}> {/* CHANGED: Added more padding on larger screens */}
+        {/* CHANGED: Increased max-width and adjusted height for a bigger chat window */}
+        <Card className={`w-full flex flex-col shadow-2xl rounded-2xl ${embedded ? 'h-full max-w-none bg-slate-800/90 border-slate-700' : 'max-w-5xl h-[calc(100vh-1rem)] bg-white/60 backdrop-blur-xl border-white/30'}`}>
             <CardHeader className={`flex flex-row items-center justify-between ${embedded ? 'border-slate-700 bg-slate-800/50' : 'border-slate-200/80'}`}>
                 <div className="flex items-center gap-3"><Bot className="h-6 w-6 text-purple-600"/><CardTitle className="text-xl">AI Data Analyst</CardTitle></div>
                 <div className="flex items-center gap-2">
@@ -507,7 +507,7 @@ export const INGRESAssistant = ({ embedded = false }: { embedded?: boolean }) =>
                     <Button variant="ghost" onClick={() => { setView('dashboard'); setChatHistory([]); }}><X className="h-4 w-4 mr-2"/> End Chat</Button>
                 </div>
             </CardHeader>
-            <CardContent ref={chatContainerRef} className={`flex-grow overflow-y-auto space-y-4 ${embedded ? 'p-3' : 'p-4'}`}>
+            <CardContent ref={chatContainerRef} className={`flex-grow overflow-y-auto space-y-6 ${embedded ? 'p-3' : 'p-6'}`}> {/* CHANGED: Increased padding and spacing */}
                 {chatHistory.length === 0 && (
                   <motion.div variants={{ visible: { transition: { staggerChildren: 0.1 } } }} initial="hidden" animate="visible" className="pt-4 pb-8 text-center">
                     <motion.h3 variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} className="text-lg font-semibold text-slate-700 mb-4">Try one of these sample queries...</motion.h3>
@@ -524,19 +524,14 @@ export const INGRESAssistant = ({ embedded = false }: { embedded?: boolean }) =>
                   {chatHistory.map((msg, index) => {
                     const isLastMessage = index === chatHistory.length - 1;
                     return (
-                        <motion.div key={msg.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`flex items-start gap-3 max-w-2xl ${msg.type === 'user' ? 'ml-auto justify-end' : 'mr-auto'}`}>
+                        <motion.div key={msg.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`flex items-start gap-4 max-w-4xl ${msg.type === 'user' ? 'ml-auto justify-end' : 'mr-auto'}`}> {/* CHANGED: Increased gap and max-width of messages */}
                             {msg.type === 'ai' && <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-sky-100 to-purple-100 flex items-center justify-center"><Bot className="w-5 h-5 text-sky-600"/></div>}
-                            <div className="max-w-xl">
-                              {msg.type === 'user' ? (<div className="bg-purple-500 text-white p-3 rounded-2xl rounded-br-lg shadow-sm"><p className="text-sm">{msg.text}</p></div>)
+                            <div className="max-w-2xl"> {/* CHANGED: Increased max-width of message bubble */}
+                              {msg.type === 'user' ? (<div className="bg-purple-500 text-white p-3 rounded-2xl rounded-br-lg shadow-sm"><p className="text-base">{msg.text}</p></div>) /* CHANGED: Larger text */
                                : (msg.text ? 
-                                    <div className={`p-3 rounded-2xl rounded-bl-lg border shadow-sm prose prose-sm max-w-none ${embedded ? 'bg-slate-700/50 text-slate-200 border-slate-600' : 'bg-white text-slate-800'}`}>
-                                      {/* --- CORRECTED LOGIC --- */}
-                                      {msg.type === 'ai' && isLastMessage && !isThinking ? (
-                                        <TextGenerateEffect>
-                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                              {msg.text}
-                                            </ReactMarkdown>
-                                        </TextGenerateEffect>
+                                    <div className={`p-4 rounded-2xl rounded-bl-lg border shadow-sm prose prose-base max-w-none ${embedded ? 'bg-slate-700/50 text-slate-200 border-slate-600' : 'bg-white text-slate-800'}`}> {/* CHANGED: Increased padding and text size */}
+                                      {isLastMessage ? (
+                                        <AnimatedMarkdownMessage text={msg.text || ""} />
                                       ) : (
                                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                           {msg.text}

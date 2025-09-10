@@ -5,10 +5,11 @@ import { cn } from "../lib/utils";
 
 import { Server } from "lucide-react";
 import { INGRESAssistant } from "./INGRESAssistant";
+import { ApiKeyProvider } from "./ApiKeyContext";
 
 // Import your main tool component
 // --- Lamp Effect Component ---
-const LampContainer = ({    
+const LampContainer = ({
   children,
   className,
 }: {
@@ -152,7 +153,7 @@ export const BusinessTools = () => {
           transition={{ delay: 0.3, duration: 0.8, ease: "easeInOut" }}
           className="mt-8 bg-gradient-to-br from-slate-300 to-slate-500 py-4 bg-clip-text text-center text-5xl font-medium tracking-tight text-transparent md:text-7xl"
         >
-  Ingress AI Advisor for Govt Portal
+          Ingress AI Advisor for Govt Portal
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, y: 40 }}
@@ -160,8 +161,8 @@ export const BusinessTools = () => {
           transition={{ delay: 0.5, duration: 0.8, ease: "easeInOut" }}
           className="mt-4 font-normal text-base text-slate-400 max-w-lg text-center mx-auto"
         >
-  An AI-powered chatbot assistant designed to help monitor, analyze, and provide insights on groundwater levels for better decision-making.
-
+          An AI-powered chatbot assistant designed to help monitor, analyze, and
+          provide insights on groundwater levels for better decision-making.
         </motion.p>
       </LampContainer>
 
@@ -179,15 +180,11 @@ export const BusinessTools = () => {
               <motion.h2
                 variants={fadeIn}
                 className="text-3xl md:text-4xl font-bold"
-              >
-
-              </motion.h2>
+              ></motion.h2>
               <motion.p
                 variants={fadeIn}
                 className="text-lg text-slate-600 mt-2"
-              >
-
-              </motion.p>
+              ></motion.p>
             </motion.div>
 
             {/* --- The Toggle UI --- */}
@@ -242,7 +239,11 @@ export const BusinessTools = () => {
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  {activeTool === "dba" && <INGRESAssistant/>}
+                  {activeTool === "dba" && (
+                    <ApiKeyProvider>
+                      <INGRESAssistant />
+                    </ApiKeyProvider>
+                  )}
                 </motion.div>
               </AnimatePresence>
             </div>

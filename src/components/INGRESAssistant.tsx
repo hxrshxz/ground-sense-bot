@@ -36,11 +36,34 @@ import {
   CloudRain,
   Satellite,
   BrainCircuit,
+  VolumeX,
+  Volume2,
 } from "lucide-react";
 import { GroundwaterComparisonChart } from "./GroundWaterComponent";
 import AIResponseRenderer from "./ai-components/AIResponseRenderer";
 import AIResponseRendererV2 from "./ai-components/AIResponseRendererV2";
 import { getAIResponse } from "../services/aiResponseServiceV2";
+import { GeminiApiService } from "../services/geminiApi";
+import { useApiKey } from "./ApiKeyContext";
+
+//================================================================================
+// --- LISTENING INDICATOR COMPONENT ---
+//================================================================================
+const ListeningIndicator = () => {
+  return (
+    <div className="fixed bottom-24 right-24 z-50 flex items-center justify-center">
+      <div className="relative">
+        <div className="absolute inset-0 rounded-full bg-green-500 opacity-20 animate-ping"></div>
+        <div className="relative rounded-full bg-green-600 p-4 flex items-center justify-center shadow-lg">
+          <Mic className="h-6 w-6 text-white" />
+        </div>
+      </div>
+      <span className="ml-3 font-medium text-green-600 bg-white/80 px-3 py-1 rounded-full shadow-sm">
+        Listening...
+      </span>
+    </div>
+  );
+};
 
 //================================================================================
 // --- SHIMMER EFFECT COMPONENT ---
@@ -392,6 +415,8 @@ const INGRESCommandBar = ({
   onLanguageChange,
   activeYear,
   onYearChange,
+  isCoPilotMode,
+  onCoPilotModeChange,
 }: any) => {
   const placeholders = useMemo(
     () =>
@@ -457,12 +482,16 @@ const INGRESCommandBar = ({
               {hasSpeechSupport && (
                 <button
                   onClick={onMicClick}
-                  className="absolute right-3 p-2 rounded-full hover:bg-slate-200/60"
+                  className={`absolute right-3 p-2 rounded-full transition-all duration-200 ${
+                    isListening
+                      ? "bg-green-100 shadow-md"
+                      : "hover:bg-slate-200/60"
+                  }`}
                 >
                   <Mic
                     className={`h-6 w-6 ${
                       isListening
-                        ? "text-red-500 animate-pulse"
+                        ? "text-green-600 animate-pulse"
                         : "text-slate-500"
                     }`}
                   />
@@ -569,6 +598,26 @@ const INGRESCommandBar = ({
                   </div>
                 </Button>
               )}
+
+              {/* Co-Pilot Mode toggle */}
+              <Button
+                variant={isCoPilotMode ? "default" : "ghost"}
+                className={`h-auto px-3 py-1.5 rounded-lg ${
+                  isCoPilotMode
+                    ? "bg-green-600 hover:bg-green-700 text-white"
+                    : "text-slate-700 hover:bg-slate-200/70"
+                }`}
+                onClick={() => onCoPilotModeChange(!isCoPilotMode)}
+              >
+                <div className="flex items-center gap-2">
+                  {isCoPilotMode ? (
+                    <Volume2 className="h-4 w-4" />
+                  ) : (
+                    <VolumeX className="h-4 w-4" />
+                  )}
+                  <span>Co-Pilot {isCoPilotMode ? "On" : "Off"}</span>
+                </div>
+              </Button>
             </div>
             <input
               type="file"
@@ -716,6 +765,15 @@ export const INGRESAssistant = ({
     visible: false,
   });
 
+  // Co-Pilot Mode state variables
+  const [isCoPilotMode, setIsCoPilotMode] = useState(false);
+  const [currentDataContext, setCurrentDataContext] = useState<any | null>(
+    null
+  );
+  const [isListeningForFollowUp, setIsListeningForFollowUp] = useState(false);
+  const [showListeningIndicator, setShowListeningIndicator] = useState(false);
+
+  const { apiKey } = useApiKey();
   const {
     text: voiceText,
     startListening,
@@ -724,12 +782,98 @@ export const INGRESAssistant = ({
     hasRecognitionSupport,
   } = useSpeechRecognition({ lang: language });
 
+  // Text-to-speech function for Co-Pilot Mode
+  const speakText = (text: string, onEnd?: () => void) => {
+    if (!isCoPilotMode) return;
+
+    // Stop any ongoing speech
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+    }
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = language;
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+
+    if (onEnd) {
+      utterance.onend = onEnd;
+    }
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  // Function to call Gemini API with context awareness for Co-Pilot Mode
+  const callGeminiAPI = async (query: string) => {
+    if (!apiKey) {
+      setToast({
+        message: "API key is required to use Co-Pilot Mode",
+        type: "error",
+        visible: true,
+      });
+      return null;
+    }
+
+    try {
+      setIsThinking(true);
+
+      // Prepare context-aware prompt
+      let contextualPrompt = query;
+      if (currentDataContext) {
+        contextualPrompt += `\n\nCurrent context: ${JSON.stringify(
+          currentDataContext
+        )}`;
+      }
+
+      // Call Gemini API
+      const geminiService = new GeminiApiService(apiKey);
+      const response = await geminiService.generateResponse(contextualPrompt);
+
+      return response.text;
+    } catch (error) {
+      console.error("Error calling Gemini API:", error);
+      setToast({
+        message: "Error getting response from Co-Pilot",
+        type: "error",
+        visible: true,
+      });
+      return null;
+    } finally {
+      setIsThinking(false);
+    }
+  };
+
   useEffect(() => {
     if (voiceText) setInputValue(voiceText);
   }, [voiceText]);
 
-  const handleMicClick = () =>
-    isListening ? stopListening() : startListening();
+  const handleMicClick = () => {
+    if (isListening) {
+      stopListening();
+      setShowListeningIndicator(false);
+      setIsListeningForFollowUp(false);
+
+      // In Co-Pilot Mode, submit the voice text immediately after stopping
+      if (isCoPilotMode && voiceText) {
+        setInputValue(voiceText);
+        // Use a slight delay to allow the UI to update
+        setTimeout(() => {
+          handleChatSubmit(voiceText);
+        }, 300);
+      }
+    } else {
+      // If starting listening and we're in Co-Pilot Mode, provide a voice prompt
+      if (isCoPilotMode) {
+        speakText("I'm listening. How can I help you?", () => {
+          startListening();
+          setShowListeningIndicator(true);
+        });
+      } else {
+        startListening();
+        setShowListeningIndicator(true);
+      }
+    }
+  };
   const handleLanguageChange = () =>
     setLanguage((prev) => (prev === "en-US" ? "hi-IN" : "en-US"));
 
@@ -738,6 +882,37 @@ export const INGRESAssistant = ({
       chatContainerRef.current.scrollTop =
         chatContainerRef.current.scrollHeight;
   }, [chatHistory, isThinking]);
+
+  // Update input value with voice text when using speech recognition
+  useEffect(() => {
+    if (voiceText) {
+      setInputValue(voiceText);
+
+      // In Co-Pilot Mode, if listening for follow-up, auto-submit the question
+      if (
+        isCoPilotMode &&
+        isListeningForFollowUp &&
+        voiceText.trim().length > 5
+      ) {
+        // Stop listening to prevent duplicate submissions
+        stopListening();
+        setShowListeningIndicator(false);
+        setIsListeningForFollowUp(false);
+
+        // Submit the question
+        handleChatSubmit(voiceText);
+      }
+    }
+  }, [voiceText, isCoPilotMode, isListeningForFollowUp]);
+
+  // Play welcome message when Co-Pilot Mode is toggled on
+  useEffect(() => {
+    if (isCoPilotMode) {
+      speakText(
+        "Co-Pilot Mode activated. I'll provide context-aware voice responses. How can I help you today?"
+      );
+    }
+  }, [isCoPilotMode]);
 
   // Helper function to directly trigger the Punjab vs Rajasthan comparison
   const showPunjabRajasthanComparison = () => {
@@ -787,6 +962,26 @@ export const INGRESAssistant = ({
           component: <AIResponseRendererV2 response={aiResponse} />,
         };
         setChatHistory((prev) => [...prev, response]);
+
+        // Store the current data context for Co-Pilot Mode
+        if (isCoPilotMode) {
+          setCurrentDataContext(aiResponse);
+          // Speak a summary of the response
+          const summary = `Here's information about ${
+            aiResponse.title || "your query"
+          }. ${
+            aiResponse.components
+              ? `I've prepared ${aiResponse.components.length} visualizations for you.`
+              : ""
+          }`;
+          speakText(summary, () => {
+            // Start listening for follow-up questions after speaking
+            setIsListeningForFollowUp(true);
+            setShowListeningIndicator(true);
+            startListening();
+          });
+        }
+
         setIsThinking(false);
         return;
       }
@@ -799,16 +994,31 @@ export const INGRESAssistant = ({
       );
       if (blockKeyword) {
         await new Promise((resolve) => setTimeout(resolve, 1500));
+        const blockData =
+          groundwaterDB[blockKeyword as keyof typeof groundwaterDB];
         const aiResponse = {
           id: Date.now() + 1,
           type: "ai",
-          component: (
-            <BlockAssessmentCard
-              data={groundwaterDB[blockKeyword as keyof typeof groundwaterDB]}
-            />
-          ),
+          component: <BlockAssessmentCard data={blockData} />,
         };
         setChatHistory((prev) => [...prev, aiResponse]);
+
+        // Store the current data context for Co-Pilot Mode
+        if (isCoPilotMode) {
+          setCurrentDataContext(blockData);
+          // Speak a summary of the block data - handle different types safely
+          let summary = `Here's information about this groundwater block.`;
+          if (blockData.type === "Block") {
+            summary = `Here's information about ${blockData.block} in ${blockData.district}. This is a ${blockData.category} block with groundwater extraction of ${blockData.extraction.total} hectare meters.`;
+          }
+          speakText(summary, () => {
+            // Start listening for follow-up questions after speaking
+            setIsListeningForFollowUp(true);
+            setShowListeningIndicator(true);
+            startListening();
+          });
+        }
+
         setIsThinking(false);
         return;
       }
@@ -906,6 +1116,26 @@ export const INGRESAssistant = ({
         };
 
         setChatHistory((prev) => [...prev, aiResponse]);
+
+        // Store the current data context for Co-Pilot Mode
+        if (isCoPilotMode) {
+          setCurrentDataContext({
+            locations,
+            years,
+            data: formattedData,
+            summary: summaryText,
+          });
+          // Speak a summary of the comparison
+          const locationsList = locations.join(" and ");
+          const summary = `Here's a comparison of groundwater data between ${locationsList}. ${summaryText.extraction}`;
+          speakText(summary, () => {
+            // Start listening for follow-up questions after speaking
+            setIsListeningForFollowUp(true);
+            setShowListeningIndicator(true);
+            startListening();
+          });
+        }
+
         setIsThinking(false);
         return;
       }
@@ -947,6 +1177,35 @@ export const INGRESAssistant = ({
       // --- 4. STRUCTURED AI RESPONSES ---
       // We already tried getAIResponse at the beginning of this function, so this is unnecessary.
       // The AI structured response would have been handled already if it matched.
+
+      // --- SPECIAL LOGIC FOR CO-PILOT MODE CONTEXTUAL QUERIES ---
+      if (
+        isCoPilotMode &&
+        currentDataContext &&
+        (query.includes("explain") ||
+          query.includes("why") ||
+          query.includes("how") ||
+          query.includes("what") ||
+          query.includes("tell me more"))
+      ) {
+        // Call Gemini API with context-aware prompt
+        const response = await callGeminiAPI(text);
+
+        if (response) {
+          const aiResponse = {
+            id: Date.now() + 1,
+            type: "ai",
+            text: response,
+          };
+
+          setChatHistory((prev) => [...prev, aiResponse]);
+
+          // Speak the response
+          speakText(response);
+          setIsThinking(false);
+          return;
+        }
+      }
 
       const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
       if (API_KEY) {
@@ -1061,6 +1320,10 @@ export const INGRESAssistant = ({
     onLanguageChange: handleLanguageChange,
     activeYear: activeYear,
     onYearChange: setActiveYear,
+    isCoPilotMode,
+    onCoPilotModeChange: setIsCoPilotMode,
+    showListeningIndicator,
+    isListeningForFollowUp,
   };
 
   const suggestedPrompts = [
@@ -1322,6 +1585,21 @@ export const INGRESAssistant = ({
           />
         )}
       </AnimatePresence>
+
+      {/* Listening Indicator */}
+      <AnimatePresence>
+        {showListeningIndicator && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.2 }}
+          >
+            <ListeningIndicator />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence mode="wait">
         <motion.div
           key={view}

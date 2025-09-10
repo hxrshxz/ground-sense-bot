@@ -103,7 +103,6 @@ export const GroundwaterComparisonChart: React.FC<any> = ({
       labels: years.map(String),
       datasets: locations.map((loc, index) => ({
         label: loc,
-        // --- INTERACTIVE STEP 2: Pull data dynamically based on activeMetric ---
         data: data[loc]?.[activeMetric] || [],
         borderColor: colors[index % colors.length],
         backgroundColor: (context: any) => {

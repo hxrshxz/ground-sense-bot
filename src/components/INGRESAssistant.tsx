@@ -27,6 +27,7 @@ import {
   ShieldCheck,
   CheckCircle,
   AlertTriangle,
+  AlertCircle,
   Database,
   TrendingUp,
   BarChartHorizontal,
@@ -470,7 +471,7 @@ const INGRESCommandBar = ({
             </div>
             <Button
               onClick={onSubmit}
-              className="rounded-xl h-14 px-8 bg-gradient-to-r from-purple-500 to-sky-500 text-white font-semibold"
+              className="px-4 py-2 rounded-lg text-white [background:linear-gradient(90deg,#3b82f6_0%,#2563eb_100%)]"
             >
               Submit
             </Button>
@@ -495,7 +496,8 @@ const INGRESCommandBar = ({
               size="sm"
               className="bg-white/50 hover:bg-white text-blue-700 border-blue-200"
               onClick={() => {
-                const query = "What crops should I grow in a water-scarce region ?";
+                const query =
+                  "What crops should I grow in a water-scarce region ?";
                 onInputChange({ target: { value: query } } as any);
                 onSubmit();
               }}
@@ -545,8 +547,26 @@ const INGRESCommandBar = ({
                   className="h-auto px-3 py-1.5 rounded-lg"
                   onClick={onLanguageChange}
                 >
-                  <Languages className="h-4 w-4 mr-2" />
-                  <span>{language === "en-US" ? "EN" : "HI"}</span>
+                  <div className="flex items-center gap-2">
+                    <Languages className="h-4 w-4 text-slate-700" />
+                    <select
+                      value={language}
+                      onChange={(e) => onLanguageChange(e.target.value)}
+                      className="rounded-lg bg-slate-200/70 px-3 py-1.5 text-sm font-medium text-slate-700 border-none focus:ring-0"
+                    >
+                      <option value="en-US">English</option>
+                      <option value="hi-IN">Hindi</option>
+                      <option value="bn-IN">Bengali</option>
+                      <option value="gu-IN">Gujarati</option>
+                      <option value="ta-IN">Tamil</option>
+                      <option value="te-IN">Telugu</option>
+                      <option value="mr-IN">Marathi</option>
+                      <option value="kn-IN">Kannada</option>
+                      <option value="ml-IN">Malayalam</option>
+                      <option value="pa-IN">Punjabi</option>
+                      <option value="ur-IN">Urdu</option>
+                    </select>
+                  </div>
                 </Button>
               )}
             </div>
@@ -719,6 +739,23 @@ export const INGRESAssistant = ({
         chatContainerRef.current.scrollHeight;
   }, [chatHistory, isThinking]);
 
+  // Helper function to directly trigger the Punjab vs Rajasthan comparison
+  const showPunjabRajasthanComparison = () => {
+    const punjabRajasthanResponse = getAIResponse(
+      "Punjab Rajasthan comparison"
+    );
+    if (punjabRajasthanResponse) {
+      const response = {
+        id: Date.now() + 1,
+        type: "ai",
+        component: <AIResponseRendererV2 response={punjabRajasthanResponse} />,
+      };
+      setChatHistory((prev) => [...prev, response]);
+    } else {
+      console.error("Failed to get Punjab Rajasthan comparison response");
+    }
+  };
+
   const showToast = (message: string, type = "info") => {
     setToast({ message, type, visible: true });
   };
@@ -731,213 +768,249 @@ export const INGRESAssistant = ({
     setInputValue("");
     setIsThinking(true);
 
-    // Check if we have a predefined structured AI response for this query
-    const aiResponse = getAIResponse(text);
-    if (aiResponse) {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      const response = {
-        id: Date.now() + 1,
-        type: "ai",
-        component: <AIResponseRendererV2 response={aiResponse} />,
-      };
-      setChatHistory((prev) => [...prev, response]);
-      setIsThinking(false);
-      return;
-    }
+    try {
+      // For debugging - log the query
+      console.log("Processing query:", text, "Lowercase:", text.toLowerCase());
 
-    // --- 1. LOGIC FOR SINGLE BLOCK REPORT ---
-    const blockKeyword = Object.keys(groundwaterDB).find(
-      (key) =>
-        query.includes(key) &&
-        groundwaterDB[key as keyof typeof groundwaterDB].type === "Block"
-    );
-    if (blockKeyword) {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      const aiResponse = {
-        id: Date.now() + 1,
-        type: "ai",
-        component: (
-          <BlockAssessmentCard
-            data={groundwaterDB[blockKeyword as keyof typeof groundwaterDB]}
-          />
-        ),
-      };
-      setChatHistory((prev) => [...prev, aiResponse]);
-      setIsThinking(false);
-      return;
-    }
+      // Check if we have a predefined structured AI response for this query
+      const aiResponse = getAIResponse(text);
+      console.log(
+        "AI Response:",
+        aiResponse ? "Found matching response" : "No matching response"
+      );
 
-    // --- 2. LOGIC FOR COMPARISON CHART ---
-    // This logic correctly handles "compare amritsar and ludhiana"
-    if (
-      query.includes("compare") &&
-      (query.includes("ludhiana") ||
-        query.includes("jalandhar") ||
-        query.includes("amritsar"))
-    ) {
-      const locations = [];
-      if (query.includes("ludhiana")) locations.push("Ludhiana");
-      if (query.includes("jalandhar")) locations.push("Jalandhar");
-      if (query.includes("amritsar")) locations.push("Amritsar");
+      if (aiResponse) {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        const response = {
+          id: Date.now() + 1,
+          type: "ai",
+          component: <AIResponseRendererV2 response={aiResponse} />,
+        };
+        setChatHistory((prev) => [...prev, response]);
+        setIsThinking(false);
+        return;
+      }
 
-      if (locations.length < 2) {
-        // Handle case where only one location is mentioned in a compare query
+      // --- 1. LOGIC FOR SINGLE BLOCK REPORT ---
+      const blockKeyword = Object.keys(groundwaterDB).find(
+        (key) =>
+          query.includes(key) &&
+          groundwaterDB[key as keyof typeof groundwaterDB].type === "Block"
+      );
+      if (blockKeyword) {
         await new Promise((resolve) => setTimeout(resolve, 1500));
         const aiResponse = {
           id: Date.now() + 1,
           type: "ai",
-          text: `Please specify at least two locations to compare. For example: "Compare Ludhiana and Jalandhar".`,
+          component: (
+            <BlockAssessmentCard
+              data={groundwaterDB[blockKeyword as keyof typeof groundwaterDB]}
+            />
+          ),
         };
         setChatHistory((prev) => [...prev, aiResponse]);
         setIsThinking(false);
         return;
       }
 
-      const years = [2020, 2021, 2022, 2023, 2024];
+      // --- 2. LOGIC FOR COMPARISON CHART ---
+      // This logic correctly handles "compare amritsar and ludhiana"
+      if (
+        query.includes("compare") &&
+        (query.includes("ludhiana") ||
+          query.includes("jalandhar") ||
+          query.includes("amritsar"))
+      ) {
+        const locations = [];
+        if (query.includes("ludhiana")) locations.push("Ludhiana");
+        if (query.includes("jalandhar")) locations.push("Jalandhar");
+        if (query.includes("amritsar")) locations.push("Amritsar");
 
-      // Create the properly structured data for the chart
-      const formattedData: {
-        [key: string]: {
-          extraction: number[];
-          recharge: number[];
-          net: number[];
-        };
-      } = {};
-      locations.forEach((loc) => {
-        const locationKey = loc.toLowerCase();
-        const locationData = groundwaterDB[locationKey];
-
-        if (
-          locationData &&
-          locationData.type === "District" &&
-          Array.isArray(locationData.extraction)
-        ) {
-          formattedData[loc] = {
-            extraction: locationData.extraction,
-            recharge: locationData.recharge,
-            net: locationData.net,
+        if (locations.length < 2) {
+          // Handle case where only one location is mentioned in a compare query
+          await new Promise((resolve) => setTimeout(resolve, 1500));
+          const aiResponse = {
+            id: Date.now() + 1,
+            type: "ai",
+            text: `Please specify at least two locations to compare. For example: "Compare Ludhiana and Jalandhar".`,
           };
-        } else {
-          // Fallback data if actual data isn't available
-          const extractionData = [0.72, 0.75, 0.78, 0.81, 0.83];
-          const rechargeData = [0.55, 0.53, 0.51, 0.5, 0.48];
-          const netData = extractionData.map((ext, i) => ext - rechargeData[i]);
-
-          formattedData[loc] = {
-            extraction: extractionData,
-            recharge: rechargeData,
-            net: netData,
-          };
+          setChatHistory((prev) => [...prev, aiResponse]);
+          setIsThinking(false);
+          return;
         }
-      });
 
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+        const years = [2020, 2021, 2022, 2023, 2024];
 
-      const summaryText = {
-        extraction: `This chart shows groundwater extraction trends for ${locations.join(
-          " and "
-        )} from 2020 to 2024. The data indicates increasing extraction rates.`,
-        recharge: `The recharge trends for ${locations.join(
-          " and "
-        )} show a concerning decline over the last 5 years, potentially due to reduced rainfall and increased paved surfaces.`,
-        net: `Net water availability is the difference between recharge and extraction. Negative values indicate overdraft conditions that are not sustainable.`,
-      };
+        // Create the properly structured data for the chart
+        const formattedData: {
+          [key: string]: {
+            extraction: number[];
+            recharge: number[];
+            net: number[];
+          };
+        } = {};
+        locations.forEach((loc) => {
+          const locationKey = loc.toLowerCase();
+          const locationData = groundwaterDB[locationKey];
 
-      const aiResponse = {
+          if (
+            locationData &&
+            locationData.type === "District" &&
+            Array.isArray(locationData.extraction)
+          ) {
+            formattedData[loc] = {
+              extraction: locationData.extraction,
+              recharge: locationData.recharge,
+              net: locationData.net,
+            };
+          } else {
+            // Fallback data if actual data isn't available
+            const extractionData = [0.72, 0.75, 0.78, 0.81, 0.83];
+            const rechargeData = [0.55, 0.53, 0.51, 0.5, 0.48];
+            const netData = extractionData.map(
+              (ext, i) => ext - rechargeData[i]
+            );
+
+            formattedData[loc] = {
+              extraction: extractionData,
+              recharge: rechargeData,
+              net: netData,
+            };
+          }
+        });
+
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        const summaryText = {
+          extraction: `This chart shows groundwater extraction trends for ${locations.join(
+            " and "
+          )} from 2020 to 2024. The data indicates increasing extraction rates.`,
+          recharge: `The recharge trends for ${locations.join(
+            " and "
+          )} show a concerning decline over the last 5 years, potentially due to reduced rainfall and increased paved surfaces.`,
+          net: `Net water availability is the difference between recharge and extraction. Negative values indicate overdraft conditions that are not sustainable.`,
+        };
+
+        const aiResponse = {
+          id: Date.now() + 1,
+          type: "ai",
+          component: (
+            <GroundwaterComparisonChart
+              locations={locations}
+              years={years}
+              data={formattedData}
+              summary={summaryText}
+              onFollowUp={handleChatSubmit}
+            />
+          ),
+        };
+
+        setChatHistory((prev) => [...prev, aiResponse]);
+        setIsThinking(false);
+        return;
+      }
+
+      // --- 3. LOGIC FOR PROACTIVE INSIGHTS ---
+      if (
+        query.includes("proactive insight") ||
+        query.includes("generate a summary")
+      ) {
+        // Your logic for ProactiveInsightCard would go here
+        // For now, let's add a placeholder response
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        const aiResponse = {
+          id: Date.now() + 1,
+          type: "ai",
+          text: "Generating a proactive insight summary is a planned feature!",
+        };
+        setChatHistory((prev) => [...prev, aiResponse]);
+        setIsThinking(false);
+        return;
+      }
+
+      if (
+        query.includes("proactive insight") ||
+        query.includes("generate a summary") ||
+        query.includes("generate a report")
+      ) {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        const aiResponse = {
+          id: Date.now() + 1,
+          type: "ai",
+          component: <ProactiveInsightCard />,
+        };
+        setChatHistory((prev) => [...prev, aiResponse]);
+        setIsThinking(false);
+        return;
+      }
+
+      // --- 4. STRUCTURED AI RESPONSES ---
+      // We already tried getAIResponse at the beginning of this function, so this is unnecessary.
+      // The AI structured response would have been handled already if it matched.
+
+      const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+      if (API_KEY) {
+        try {
+          const genAI = new GoogleGenerativeAI(API_KEY);
+          const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+          const dataContext = JSON.stringify(groundwaterDB, null, 2);
+          const prompt = `You are an AI assistant for INGRES, India's National Groundwater Resource Estimation System. Your knowledge base is the following JSON data about a few groundwater blocks in Rajasthan:\n---\n${dataContext}\n---\nBased ONLY on this data, answer the user's question. If the question is about data you don't have (e.g., Punjab), state that you only have data for the provided blocks in Rajasthan. Be concise and helpful. Use Markdown for formatting (e.g., **bold** for emphasis, lists). User's question: "${text}"`;
+
+          const result = await model.generateContent(prompt);
+          const response = await result.response;
+          const aiResponseText = response.text();
+
+          const aiResponse = {
+            id: Date.now() + 1,
+            type: "ai",
+            text: aiResponseText,
+          };
+          setChatHistory((prev) => [...prev, aiResponse]);
+        } catch (error) {
+          console.error("Error calling Gemini API:", error);
+          const aiResponse = {
+            id: Date.now() + 1,
+            type: "ai",
+            text: "Sorry, I encountered an error while connecting to the AI service. The model may be overloaded. Please try again later.",
+          };
+          setChatHistory((prev) => [...prev, aiResponse]);
+        } finally {
+          setIsThinking(false);
+        }
+      } else {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        const aiResponse = {
+          id: Date.now() + 1,
+          type: "ai",
+          text: "I can provide detailed data for blocks like 'Delhi'. (Note: Gemini API key not configured. Please set up your VITE_GEMINI_API_KEY in the .env.local file).",
+        };
+        setChatHistory((prev) => [...prev, aiResponse]);
+        setIsThinking(false);
+      }
+    } catch (error) {
+      console.error("Error processing request:", error);
+      // Add error message to chat history
+      const errorResponse = {
         id: Date.now() + 1,
         type: "ai",
         component: (
-          <GroundwaterComparisonChart
-            locations={locations}
-            years={years}
-            data={formattedData}
-            summary={summaryText}
-            onFollowUp={handleChatSubmit}
-          />
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertCircle className="w-5 h-5 text-red-500" />
+              <h3 className="font-semibold text-red-700">
+                Sorry, I encountered an error
+              </h3>
+            </div>
+            <p className="text-red-600">
+              I was unable to process your request. Please try again later or
+              rephrase your question.
+            </p>
+          </div>
         ),
       };
-
-      setChatHistory((prev) => [...prev, aiResponse]);
-      setIsThinking(false);
-      return;
-    }
-
-    // --- 3. LOGIC FOR PROACTIVE INSIGHTS ---
-    if (
-      query.includes("proactive insight") ||
-      query.includes("generate a summary")
-    ) {
-      // Your logic for ProactiveInsightCard would go here
-      // For now, let's add a placeholder response
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      const aiResponse = {
-        id: Date.now() + 1,
-        type: "ai",
-        text: "Generating a proactive insight summary is a planned feature!",
-      };
-      setChatHistory((prev) => [...prev, aiResponse]);
-      setIsThinking(false);
-      return;
-    }
-
-    if (
-      query.includes("proactive insight") ||
-      query.includes("generate a summary") ||
-      query.includes("generate a report")
-    ) {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      const aiResponse = {
-        id: Date.now() + 1,
-        type: "ai",
-        component: <ProactiveInsightCard />,
-      };
-      setChatHistory((prev) => [...prev, aiResponse]);
-      setIsThinking(false);
-      return;
-    }
-
-    // --- 4. STRUCTURED AI RESPONSES ---
-    // We already tried getAIResponse at the beginning of this function, so this is unnecessary.
-    // The AI structured response would have been handled already if it matched.
-
-    const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-    if (API_KEY) {
-      try {
-        const genAI = new GoogleGenerativeAI(API_KEY);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-        const dataContext = JSON.stringify(groundwaterDB, null, 2);
-        const prompt = `You are an AI assistant for INGRES, India's National Groundwater Resource Estimation System. Your knowledge base is the following JSON data about a few groundwater blocks in Rajasthan:\n---\n${dataContext}\n---\nBased ONLY on this data, answer the user's question. If the question is about data you don't have (e.g., Punjab), state that you only have data for the provided blocks in Rajasthan. Be concise and helpful. Use Markdown for formatting (e.g., **bold** for emphasis, lists). User's question: "${text}"`;
-
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const aiResponseText = response.text();
-
-        const aiResponse = {
-          id: Date.now() + 1,
-          type: "ai",
-          text: aiResponseText,
-        };
-        setChatHistory((prev) => [...prev, aiResponse]);
-      } catch (error) {
-        console.error("Error calling Gemini API:", error);
-        const aiResponse = {
-          id: Date.now() + 1,
-          type: "ai",
-          text: "Sorry, I encountered an error while connecting to the AI service. The model may be overloaded. Please try again later.",
-        };
-        setChatHistory((prev) => [...prev, aiResponse]);
-      } finally {
-        setIsThinking(false);
-      }
-    } else {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      const aiResponse = {
-        id: Date.now() + 1,
-        type: "ai",
-        text: "I can provide detailed data for blocks like 'Delhi'. (Note: Gemini API key not configured. Please set up your VITE_GEMINI_API_KEY in the .env.local file).",
-      };
-      setChatHistory((prev) => [...prev, aiResponse]);
+      setChatHistory((prev) => [...prev, errorResponse]);
+    } finally {
       setIsThinking(false);
     }
   };
@@ -1095,6 +1168,15 @@ export const INGRESAssistant = ({
           <div className="flex items-center gap-3">
             <Bot className="h-6 w-6 text-purple-600" />
             <CardTitle className="text-xl">AI Data Analyst</CardTitle>
+            {/* Development button - only show in development mode */}
+            {process.env.NODE_ENV !== "production" && (
+              <button
+                onClick={showPunjabRajasthanComparison}
+                className="ml-4 px-2 py-1 text-xs bg-red-100 text-red-800 rounded border border-red-200"
+              >
+                Test Punjab vs Rajasthan
+              </button>
+            )}
           </div>
           <div className="flex items-center gap-2">
             {!embedded && <NotificationBell />}

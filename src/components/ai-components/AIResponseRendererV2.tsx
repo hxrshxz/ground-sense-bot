@@ -17,6 +17,9 @@ import {
   ComponentType,
 } from "@/types/ai-response-v2";
 
+// Import animation components
+import { AnimatedAIText } from "./AnimatedAIContent";
+
 // Import simple component renderer
 import { SimpleComponentRenderer } from "./SimpleComponentRenderers";
 
@@ -46,7 +49,7 @@ const DefaultLayout: React.FC<{ response: AIResponse }> = ({ response }) => {
       {response.aiSummary && (
         <div className="mt-8 pt-4 border-t border-gray-200">
           <h3 className="text-lg font-semibold mb-2">AI Summary</h3>
-          <p className="text-gray-700">{response.aiSummary}</p>
+          <AnimatedAIText text={response.aiSummary} />
         </div>
       )}
     </div>
@@ -75,7 +78,7 @@ const GridLayout: React.FC<{ response: AIResponse }> = ({ response }) => {
       {response.aiSummary && (
         <div className="mt-8 pt-4 border-t border-gray-200">
           <h3 className="text-lg font-semibold mb-2">AI Summary</h3>
-          <p className="text-gray-700">{response.aiSummary}</p>
+          <AnimatedAIText text={response.aiSummary} />
         </div>
       )}
     </div>
@@ -112,7 +115,7 @@ const TabsLayout: React.FC<{ response: AIResponse }> = ({ response }) => {
       {response.aiSummary && (
         <div className="mt-8 pt-4 border-t border-gray-200">
           <h3 className="text-lg font-semibold mb-2">AI Summary</h3>
-          <p className="text-gray-700">{response.aiSummary}</p>
+          <AnimatedAIText text={response.aiSummary} />
         </div>
       )}
     </div>
@@ -148,7 +151,7 @@ const AccordionLayout: React.FC<{ response: AIResponse }> = ({ response }) => {
       {response.aiSummary && (
         <div className="mt-8 pt-4 border-t border-gray-200">
           <h3 className="text-lg font-semibold mb-2">AI Summary</h3>
-          <p className="text-gray-700">{response.aiSummary}</p>
+          <AnimatedAIText text={response.aiSummary} />
         </div>
       )}
     </div>

@@ -22,6 +22,7 @@ import { CheckCircle, AlertTriangle, Info, AlertCircle } from "lucide-react";
 import { BlockAssessmentCard } from "@/components/BlockAssessmentCardV2";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { AnimatedAIContent, AnimatedAIText } from "./AnimatedAIContent";
 import {
   AIComponent,
   TextComponent,
@@ -76,7 +77,7 @@ export const SimpleTextRenderer = ({
 }) => (
   <div>
     {title && <h3 className="text-xl font-semibold mb-2">{title}</h3>}
-    <p>{content}</p>
+    <AnimatedAIText text={content} />
   </div>
 );
 
@@ -89,7 +90,7 @@ export const SimpleMarkdownRenderer = ({
 }) => (
   <div>
     {title && <h3 className="text-xl font-semibold mb-2">{title}</h3>}
-    <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+    <AnimatedAIContent content={content} />
   </div>
 );
 
@@ -134,12 +135,95 @@ export const SimpleLineChartRenderer = ({
   datasets: any[];
   title?: string;
 }) => (
-  <div>
-    {title && <h3 className="text-xl font-semibold mb-2">{title}</h3>}
-    <div className="h-[300px]">
+  <div className="w-full">
+    {title && <h3 className="text-xl font-semibold mb-3">{title}</h3>}
+    <div className="h-[400px] p-4 bg-white/80 rounded-xl shadow-md border border-gray-100">
       <Line
-        data={{ labels, datasets }}
-        options={{ responsive: true, maintainAspectRatio: false }}
+        data={{
+          labels,
+          datasets: datasets.map((dataset) => ({
+            ...dataset,
+            fill: true,
+            pointBackgroundColor:
+              dataset.borderColor || "rgba(59, 130, 246, 1)",
+            pointBorderColor: "#fff",
+            pointHoverRadius: 6,
+            pointHoverBackgroundColor:
+              dataset.borderColor || "rgba(59, 130, 246, 1)",
+            pointHoverBorderColor: "#fff",
+            pointHoverBorderWidth: 2,
+            tension: 0.4,
+          })),
+        }}
+        options={{
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: "index",
+            intersect: false,
+          },
+          plugins: {
+            legend: {
+              position: "top",
+              labels: {
+                usePointStyle: true,
+                padding: 20,
+                font: {
+                  size: 12,
+                  weight: "bold",
+                },
+              },
+            },
+            tooltip: {
+              backgroundColor: "rgba(255, 255, 255, 0.9)",
+              titleColor: "#111827",
+              bodyColor: "#374151",
+              borderColor: "rgba(210, 210, 210, 0.5)",
+              borderWidth: 1,
+              padding: 12,
+              cornerRadius: 8,
+              titleFont: {
+                weight: "bold",
+                size: 14,
+              },
+              bodyFont: {
+                size: 13,
+              },
+              displayColors: true,
+              boxPadding: 4,
+            },
+          },
+          scales: {
+            x: {
+              grid: {
+                color: "rgba(226, 232, 240, 0.6)",
+              },
+              border: {
+                display: false,
+              },
+              ticks: {
+                padding: 10,
+                font: {
+                  size: 11,
+                },
+              },
+            },
+            y: {
+              grid: {
+                color: "rgba(226, 232, 240, 0.6)",
+              },
+              border: {
+                display: false,
+              },
+              ticks: {
+                padding: 10,
+                font: {
+                  size: 11,
+                },
+              },
+            },
+          },
+        }}
       />
     </div>
   </div>
@@ -154,12 +238,89 @@ export const SimpleBarChartRenderer = ({
   datasets: any[];
   title?: string;
 }) => (
-  <div>
-    {title && <h3 className="text-xl font-semibold mb-2">{title}</h3>}
-    <div className="h-[300px]">
+  <div className="w-full">
+    {title && <h3 className="text-xl font-semibold mb-3">{title}</h3>}
+    <div className="h-[400px] p-4 bg-white/80 rounded-xl shadow-md border border-gray-100">
       <Bar
-        data={{ labels, datasets }}
-        options={{ responsive: true, maintainAspectRatio: false }}
+        data={{
+          labels,
+          datasets: datasets.map((dataset) => ({
+            ...dataset,
+            borderWidth: 2,
+            borderRadius: 6,
+            hoverBorderWidth: 3,
+            hoverBorderColor: dataset.borderColor || dataset.backgroundColor,
+          })),
+        }}
+        options={{
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: "index",
+            intersect: false,
+          },
+          plugins: {
+            legend: {
+              position: "top",
+              labels: {
+                usePointStyle: true,
+                padding: 20,
+                font: {
+                  size: 12,
+                  weight: "bold",
+                },
+              },
+            },
+            tooltip: {
+              backgroundColor: "rgba(255, 255, 255, 0.9)",
+              titleColor: "#111827",
+              bodyColor: "#374151",
+              borderColor: "rgba(210, 210, 210, 0.5)",
+              borderWidth: 1,
+              padding: 12,
+              cornerRadius: 8,
+              titleFont: {
+                weight: "bold",
+                size: 14,
+              },
+              bodyFont: {
+                size: 13,
+              },
+              displayColors: true,
+              boxPadding: 4,
+            },
+          },
+          scales: {
+            x: {
+              grid: {
+                color: "rgba(226, 232, 240, 0.6)",
+              },
+              border: {
+                display: false,
+              },
+              ticks: {
+                padding: 10,
+                font: {
+                  size: 11,
+                },
+              },
+            },
+            y: {
+              grid: {
+                color: "rgba(226, 232, 240, 0.6)",
+              },
+              border: {
+                display: false,
+              },
+              ticks: {
+                padding: 10,
+                font: {
+                  size: 11,
+                },
+              },
+            },
+          },
+        }}
       />
     </div>
   </div>
@@ -174,12 +335,62 @@ export const SimplePieChartRenderer = ({
   datasets: any[];
   title?: string;
 }) => (
-  <div>
-    {title && <h3 className="text-xl font-semibold mb-2">{title}</h3>}
-    <div className="h-[300px]">
+  <div className="w-full">
+    {title && <h3 className="text-xl font-semibold mb-3">{title}</h3>}
+    <div className="h-[400px] p-4 bg-white/80 rounded-xl shadow-md border border-gray-100">
       <Pie
-        data={{ labels, datasets }}
-        options={{ responsive: true, maintainAspectRatio: false }}
+        data={{
+          labels,
+          datasets: datasets.map((dataset) => ({
+            ...dataset,
+            borderWidth: 2,
+            hoverBorderWidth: 4,
+            hoverBorderColor: "#ffffff",
+            hoverOffset: 10,
+          })),
+        }}
+        options={{
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "right",
+              labels: {
+                usePointStyle: true,
+                padding: 20,
+                font: {
+                  size: 12,
+                  weight: "bold",
+                },
+              },
+            },
+            tooltip: {
+              backgroundColor: "rgba(255, 255, 255, 0.9)",
+              titleColor: "#111827",
+              bodyColor: "#374151",
+              borderColor: "rgba(210, 210, 210, 0.5)",
+              borderWidth: 1,
+              padding: 12,
+              cornerRadius: 8,
+              titleFont: {
+                weight: "bold",
+                size: 14,
+              },
+              bodyFont: {
+                size: 13,
+              },
+              displayColors: true,
+              boxPadding: 4,
+              callbacks: {
+                label: function (context) {
+                  const label = context.label || "";
+                  const value = context.raw || 0;
+                  return ` ${label}: ${value}%`;
+                },
+              },
+            },
+          },
+        }}
       />
     </div>
   </div>
@@ -196,7 +407,9 @@ export const SimpleAlertRenderer = ({
 }) => (
   <Alert variant={alertType as any}>
     {title && <AlertTitle>{title}</AlertTitle>}
-    <AlertDescription>{content}</AlertDescription>
+    <AlertDescription>
+      <AnimatedAIText text={content} />
+    </AlertDescription>
   </Alert>
 );
 

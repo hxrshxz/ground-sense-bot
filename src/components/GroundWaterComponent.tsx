@@ -28,6 +28,7 @@ import {
   ArrowUpCircle,
   BarChart,
 } from "lucide-react";
+import { DownloadReport } from "./DownloadReport";
 
 ChartJS.register(
   CategoryScale,
@@ -81,6 +82,7 @@ export const GroundwaterComparisonChart: React.FC<any> = ({
   onFollowUp,
 }) => {
   const chartRef = useRef<ChartJS<"line">>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
   // --- INTERACTIVE STEP 1: State to manage the currently selected metric ---
   const [activeMetric, setActiveMetric] = useState<Metric>("extraction");
 
@@ -212,9 +214,9 @@ export const GroundwaterComparisonChart: React.FC<any> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="w-full max-w-3xl mx-auto"
+      className="w-full"
     >
-      <Card className="bg-white/95 backdrop-blur-xl border border-slate-200/80 shadow-lg shadow-slate-500/5 rounded-2xl text-slate-900 overflow-hidden">
+      <Card className="w-full overflow-hidden bg-white shadow-lg" ref={cardRef}>
         {/* Add a decorative header gradient band */}
         <div className="h-2 bg-gradient-to-r from-purple-500 to-indigo-600"></div>
         <CardHeader>
@@ -355,6 +357,13 @@ export const GroundwaterComparisonChart: React.FC<any> = ({
                 </Button>
               ));
             })()}
+          </div>
+
+          <div className="flex justify-end pt-4 border-t border-gray-100 mt-4">
+            <DownloadReport
+              targetRef={cardRef}
+              fileName={`groundwater-comparison-${locations.join("-vs-")}`}
+            />
           </div>
         </CardContent>
       </Card>

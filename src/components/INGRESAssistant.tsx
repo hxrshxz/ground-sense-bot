@@ -51,14 +51,14 @@ import { useApiKey } from "./ApiKeyContext";
 //================================================================================
 const ListeningIndicator = () => {
   return (
-    <div className="fixed bottom-24 right-24 z-50 flex items-center justify-center">
+    <div className="inline-flex items-center justify-center gap-2 ml-2">
       <div className="relative">
         <div className="absolute inset-0 rounded-full bg-green-500 opacity-20 animate-ping"></div>
-        <div className="relative rounded-full bg-green-600 p-4 flex items-center justify-center shadow-lg">
-          <Mic className="h-6 w-6 text-white" />
+        <div className="relative rounded-full bg-green-600 p-1 flex items-center justify-center shadow-sm">
+          <Mic className="h-4 w-4 text-white" />
         </div>
       </div>
-      <span className="ml-3 font-medium text-green-600 bg-white/80 px-3 py-1 rounded-full shadow-sm">
+      <span className="text-sm font-medium text-green-600">
         Listening...
       </span>
     </div>
@@ -476,33 +476,39 @@ const INGRESCommandBar = ({
               <Input
                 value={inputValue}
                 onChange={onInputChange}
-                className="w-full bg-transparent border-none text-xl h-auto py-4 pl-12 pr-12 text-slate-900 focus-visible:ring-0"
+                className="w-full bg-transparent border-none text-xl h-auto py-4 pl-12 pr-24 text-slate-900 focus-visible:ring-0"
                 onKeyDown={(e) => e.key === "Enter" && onSubmit()}
               />
               {hasSpeechSupport && (
-                <button
-                  onClick={onMicClick}
-                  className={`absolute right-3 p-2 rounded-full transition-all duration-200 ${
-                    isListening
-                      ? "bg-green-100 shadow-md"
-                      : "hover:bg-slate-200/60"
-                  }`}
-                >
-                  <Mic
-                    className={`h-6 w-6 ${
+                <div className="absolute right-3 flex items-center">
+                  <button
+                    onClick={onMicClick}
+                    className={`p-2 rounded-full transition-all duration-200 ${
                       isListening
-                        ? "text-green-600 animate-pulse"
-                        : "text-slate-500"
+                        ? "bg-green-100 shadow-md"
+                        : "hover:bg-slate-200/60"
                     }`}
-                  />
-                </button>
+                    aria-label={isListening ? "Stop listening" : "Start listening"}
+                  >
+                    <Mic
+                      className={`h-6 w-6 ${
+                        isListening
+                          ? "text-green-600 animate-pulse"
+                          : "text-slate-500"
+                      }`}
+                    />
+                  </button>
+                  {isListening && <ListeningIndicator />}
+                </div>
               )}
             </div>
             <Button
               onClick={onSubmit}
               className="px-4 py-2 rounded-lg text-white [background:linear-gradient(90deg,#3b82f6_0%,#2563eb_100%)]"
+              disabled={!inputValue.trim()}
+              title={inputValue.trim() ? "Send message" : "Type a message first"}
             >
-              Submit
+              {isListening ? "Send" : "Submit"}
             </Button>
           </div>
 
@@ -772,6 +778,7 @@ export const INGRESAssistant = ({
   );
   const [isListeningForFollowUp, setIsListeningForFollowUp] = useState(false);
   const [showListeningIndicator, setShowListeningIndicator] = useState(false);
+  const [voicesLoaded, setVoicesLoaded] = useState(false);
 
   const { apiKey } = useApiKey();
   const {
@@ -782,7 +789,7 @@ export const INGRESAssistant = ({
     hasRecognitionSupport,
   } = useSpeechRecognition({ lang: language });
 
-  // Text-to-speech function for Co-Pilot Mode
+  // Text-to-speech function for Co-Pilot Mode with enhanced voice quality
   const speakText = (text: string, onEnd?: () => void) => {
     if (!isCoPilotMode) return;
 
@@ -793,14 +800,142 @@ export const INGRESAssistant = ({
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = language;
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
+    
+    // Enhanced voice parameters for more natural speech
+    utterance.rate = 0.92; // Slower than default for better clarity
+    utterance.pitch = 1.0; // Natural pitch
+    utterance.volume = 1.0; // Full volume
+    
+    // Process text for better pronunciation
+    // Replace certain technical terms or abbreviations with phonetic equivalents
+    let processedText = text
+      .replace(/INGRES/g, "in-gress") // Ensure INGRES is pronounced correctly
+      .replace(/API/g, "A P I") // Spell out acronyms
+      .replace(/(\d+)\.(\d+)/g, "$1 point $2") // Read decimal numbers naturally
+      .replace(/(\d{4})-(\d{2})-(\d{2})/g, "$1 $2 $3") // Read dates more naturally
+      .replace(/groundwater/g, "ground water") // Better pronunciation for compound words
+      .replace(/recharge/g, "re charge") // Better pronunciation
+      .replace(/extraction/g, "ex traction"); // Better pronunciation
+    
+    utterance.text = processedText;
+    
+    // Select ONLY human-sounding voices - never fall back to default
+    if (voicesLoaded) {
+      const voices = window.speechSynthesis.getVoices();
+      
+      // Human voice name patterns (based on common voice names across platforms)
+      const humanVoicePatterns = [
+        'Samantha', 'Daniel', 'Karen', 'Alex', 'Victoria', 'Tessa', 'Moira', 'Rishi', 
+        'Veena', 'Fiona', 'Arthur', 'James', 'Kate', 'Oliver', 'Serena', 'Google UK', 
+        'Google US', 'Natural', 'Premium', 'Enhanced', 'Neural', 'Microsoft', 'David',
+        'Mark', 'Zira', 'Catherine', 'George', 'Hazel', 'Susan', 'Sean'
+      ];
+      
+      // Voices to avoid - these tend to sound robotic
+      const roboticVoicePatterns = [
+        'Microsoft David', 'Microsoft Zira', 'Microsoft Mark', // Old Microsoft voices
+        'Google US Spanish', 'Google Hindi', // Some specific Google voices
+        'Whisper', 'Whispered', // Whisper voices sound unnatural
+        'Bells', 'Good News', 'Bad News', 'Bubbles', // macOS novelty voices
+        'Ralph', 'Kathy', 'Junior', 'Agnes', // Very old/basic voices
+        'Fred', 'Pipe Organ', 'Cellos', 'Hysterical' // More novelty voices
+      ];
+      
+      // Identify human-sounding voices based on name patterns
+      const humanVoices = voices.filter(voice => {
+        // First check if this is a voice we want to avoid
+        const isRobotic = roboticVoicePatterns.some(pattern => 
+          voice.name.includes(pattern)
+        );
+        
+        if (isRobotic) return false;
+        
+        // Then check if it matches any human voice pattern
+        return humanVoicePatterns.some(pattern => 
+          voice.name.includes(pattern)
+        );
+      });
+      
+      console.log(`Found ${humanVoices.length} human-sounding voices out of ${voices.length} total voices`);
+      
+      // Get language-specific human voices first
+      const languagePrefix = language.split('-')[0];
+      const languageMatches = humanVoices.filter(voice => 
+        voice.lang.startsWith(languagePrefix)
+      );
+      
+      let selectedVoice = null;
+      
+      // First priority: neural/premium voices in correct language
+      selectedVoice = languageMatches.find(voice => 
+        voice.name.includes('Neural') || 
+        voice.name.includes('Premium') || 
+        voice.name.includes('Enhanced') ||
+        voice.name.includes('Natural')
+      );
+      
+      // Second priority: any human voice in correct language
+      if (!selectedVoice && languageMatches.length > 0) {
+        selectedVoice = languageMatches[0];
+      }
+      
+      // Third priority: neural/premium voices in any language
+      if (!selectedVoice) {
+        selectedVoice = humanVoices.find(voice => 
+          voice.name.includes('Neural') || 
+          voice.name.includes('Premium') || 
+          voice.name.includes('Enhanced') ||
+          voice.name.includes('Natural')
+        );
+      }
+      
+      // Last priority: any human voice
+      if (!selectedVoice && humanVoices.length > 0) {
+        selectedVoice = humanVoices[0];
+      }
+      
+      // Set the selected voice and log what we're using
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+        console.log(`Using human voice: ${selectedVoice.name} (${selectedVoice.lang})`);
+      } else {
+        // If we couldn't find a human voice, don't speak at all
+        console.warn('No human-sounding voices available, speech synthesis canceled');
+        if (onEnd) {
+          onEnd();
+        }
+        return;
+      }
+    } else {
+      // Don't speak if voices aren't loaded yet
+      console.warn('Voices not loaded yet, speech synthesis canceled');
+      if (onEnd) {
+        onEnd();
+      }
+      return;
+    }
+    
+    // Add natural pauses and intonation for longer texts
+    if (text.length > 100) {
+      utterance.onboundary = function(event) {
+        if (event.name === 'sentence') {
+          // Slight pause between sentences for more natural rhythm
+          utterance.rate = utterance.rate * 0.95;
+          setTimeout(() => {
+            utterance.rate = utterance.rate / 0.95;
+          }, 150);
+        }
+      };
+    }
 
     if (onEnd) {
       utterance.onend = onEnd;
     }
 
-    window.speechSynthesis.speak(utterance);
+    // Add a small pause before speaking for more natural interaction
+    setTimeout(() => {
+      window.speechSynthesis.speak(utterance);
+    }, 150);
   };
 
   // Function to call Gemini API with context awareness for Co-Pilot Mode
@@ -849,19 +984,24 @@ export const INGRESAssistant = ({
 
   const handleMicClick = () => {
     if (isListening) {
+      // Stop listening first
       stopListening();
       setShowListeningIndicator(false);
       setIsListeningForFollowUp(false);
 
-      // In Co-Pilot Mode, submit the voice text immediately after stopping
+      // In Co-Pilot Mode, only submit if explicitly triggered by the user
+      // The automatic submission is causing issues, so we're removing it
       if (isCoPilotMode && voiceText) {
+        // Just update the input field with the recognized text
         setInputValue(voiceText);
-        // Use a slight delay to allow the UI to update
-        setTimeout(() => {
-          handleChatSubmit(voiceText);
-        }, 300);
+        // Don't automatically submit
       }
     } else {
+      // If starting listening, clear any previous input first
+      if (!isCoPilotMode) {
+        setInputValue("");
+      }
+      
       // If starting listening and we're in Co-Pilot Mode, provide a voice prompt
       if (isCoPilotMode) {
         speakText("I'm listening. How can I help you?", () => {
@@ -888,31 +1028,161 @@ export const INGRESAssistant = ({
     if (voiceText) {
       setInputValue(voiceText);
 
-      // In Co-Pilot Mode, if listening for follow-up, auto-submit the question
+      // Only auto-submit in Co-Pilot Mode AND when specifically listening for follow-up
+      // This ensures we only auto-submit in the correct context
       if (
         isCoPilotMode &&
-        isListeningForFollowUp &&
-        voiceText.trim().length > 5
+        isListeningForFollowUp && // Only auto-submit during follow-up mode
+        voiceText.trim().length > 5 && // Ensure meaningful content
+        !isThinking // Don't submit if already processing
       ) {
         // Stop listening to prevent duplicate submissions
         stopListening();
         setShowListeningIndicator(false);
         setIsListeningForFollowUp(false);
 
-        // Submit the question
-        handleChatSubmit(voiceText);
+        // Submit the question after a short delay to ensure UI is updated
+        setTimeout(() => {
+          handleChatSubmit(voiceText);
+          // Reset the input value after submission
+          setInputValue("");
+        }, 300);
       }
     }
-  }, [voiceText, isCoPilotMode, isListeningForFollowUp]);
+  }, [voiceText, isCoPilotMode, isListeningForFollowUp, isThinking]);
 
   // Play welcome message when Co-Pilot Mode is toggled on
   useEffect(() => {
     if (isCoPilotMode) {
-      speakText(
-        "Co-Pilot Mode activated. I'll provide context-aware voice responses. How can I help you today?"
-      );
+      // Check for voice quality first
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        const voices = window.speechSynthesis.getVoices();
+        
+        // Human voice name patterns
+        const humanVoicePatterns = [
+          'Samantha', 'Daniel', 'Karen', 'Alex', 'Victoria', 'Tessa', 'Moira', 'Rishi', 
+          'Veena', 'Fiona', 'Arthur', 'James', 'Kate', 'Oliver', 'Serena', 'Google UK', 
+          'Google US', 'Natural', 'Premium', 'Enhanced', 'Neural', 'Microsoft', 'David',
+          'Mark', 'Zira', 'Catherine', 'George', 'Hazel', 'Susan', 'Sean'
+        ];
+        
+        const humanVoices = voices.filter(voice => 
+          humanVoicePatterns.some(pattern => voice.name.includes(pattern))
+        );
+        
+        if (humanVoices.length === 0) {
+          console.warn('No human-sounding voices available. Co-Pilot voice features may not work properly.');
+          // Show a toast if no human voices are available
+          setToast({
+            message: "Note: No human-sounding voices found for speech. Voice features may be limited.",
+            type: "info",
+            visible: true,
+          });
+        }
+      }
+      
+      // Speak welcome message with a short delay to allow voice loading
+      setTimeout(() => {
+        speakText(
+          "Co-Pilot Mode activated. I'll provide context-aware voice responses. How can I help you today?"
+        );
+      }, 500);
     }
   }, [isCoPilotMode]);
+  
+  // Initialize and load speech synthesis voices
+  useEffect(() => {
+    // Function to load and initialize voices
+    const initVoices = () => {
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        // Pre-warm the speech synthesis
+        window.speechSynthesis.cancel();
+        
+        // Try to load available voices
+        const voices = window.speechSynthesis.getVoices();
+        
+        if (voices.length > 0) {
+          setVoicesLoaded(true);
+          
+          // Log the available human-sounding voices
+          const humanVoicePatterns = [
+            'Samantha', 'Daniel', 'Karen', 'Alex', 'Victoria', 'Tessa', 'Moira', 'Rishi', 
+            'Veena', 'Fiona', 'Arthur', 'James', 'Kate', 'Oliver', 'Serena', 'Google UK', 
+            'Google US', 'Natural', 'Premium', 'Enhanced', 'Neural', 'Microsoft', 'David',
+            'Mark', 'Zira', 'Catherine', 'George', 'Hazel', 'Susan', 'Sean'
+          ];
+          
+          const humanVoices = voices.filter(voice => 
+            humanVoicePatterns.some(pattern => voice.name.includes(pattern))
+          );
+          
+          console.log(`Loaded ${voices.length} speech synthesis voices (${humanVoices.length} human-sounding)`);
+          console.log('Available human-sounding voices:');
+          humanVoices.forEach(voice => {
+            console.log(`- ${voice.name} (${voice.lang})`);
+          });
+        } else {
+          // If voices aren't available yet, listen for the voiceschanged event
+          window.speechSynthesis.addEventListener('voiceschanged', () => {
+            const updatedVoices = window.speechSynthesis.getVoices();
+            setVoicesLoaded(true);
+            
+            // Log the available human-sounding voices
+            const humanVoicePatterns = [
+              'Samantha', 'Daniel', 'Karen', 'Alex', 'Victoria', 'Tessa', 'Moira', 'Rishi', 
+              'Veena', 'Fiona', 'Arthur', 'James', 'Kate', 'Oliver', 'Serena', 'Google UK', 
+              'Google US', 'Natural', 'Premium', 'Enhanced', 'Neural', 'Microsoft', 'David',
+              'Mark', 'Zira', 'Catherine', 'George', 'Hazel', 'Susan', 'Sean'
+            ];
+            
+            const humanVoices = updatedVoices.filter(voice => 
+              humanVoicePatterns.some(pattern => voice.name.includes(pattern))
+            );
+            
+            console.log(`Loaded ${updatedVoices.length} speech synthesis voices after voiceschanged event (${humanVoices.length} human-sounding)`);
+            console.log('Available human-sounding voices:');
+            humanVoices.forEach(voice => {
+              console.log(`- ${voice.name} (${voice.lang})`);
+            });
+          }, { once: true });
+          
+          // Try to force voice loading with a brief utterance (works in some browsers)
+          try {
+            const silentUtterance = new SpeechSynthesisUtterance('');
+            silentUtterance.volume = 0;
+            silentUtterance.rate = 1;
+            window.speechSynthesis.speak(silentUtterance);
+            window.speechSynthesis.cancel();
+          } catch (e) {
+            console.error('Error pre-warming speech synthesis:', e);
+          }
+          
+          // Some browsers might not trigger voiceschanged, so we'll set a fallback
+          setTimeout(() => {
+            if (!voicesLoaded) {
+              const fallbackVoices = window.speechSynthesis.getVoices();
+              if (fallbackVoices.length > 0) {
+                setVoicesLoaded(true);
+                console.log(`Loaded ${fallbackVoices.length} voices after timeout`);
+              } else {
+                console.warn('No voices available after timeout');
+                setVoicesLoaded(true); // Set to true anyway so we can at least try
+              }
+            }
+          }, 2000);
+        }
+      }
+    };
+    
+    initVoices();
+    
+    // Clean up
+    return () => {
+      if (typeof window !== 'undefined' && window.speechSynthesis && window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
 
   // Helper function to directly trigger the Punjab vs Rajasthan comparison
   const showPunjabRajasthanComparison = () => {
@@ -1312,7 +1582,18 @@ export const INGRESAssistant = ({
     inputValue,
     onInputChange: (e: React.ChangeEvent<HTMLInputElement>) =>
       setInputValue(e.target.value),
-    onSubmit: () => handleChatSubmit(inputValue),
+    onSubmit: () => {
+      if (inputValue.trim()) {
+        handleChatSubmit(inputValue);
+        // Stop listening if active and reset input
+        if (isListening) {
+          stopListening();
+          setShowListeningIndicator(false);
+        }
+        // Reset input field after submission
+        setInputValue("");
+      }
+    },
     isListening,
     onMicClick: handleMicClick,
     hasSpeechSupport: hasRecognitionSupport,
@@ -1586,19 +1867,7 @@ export const INGRESAssistant = ({
         )}
       </AnimatePresence>
 
-      {/* Listening Indicator */}
-      <AnimatePresence>
-        {showListeningIndicator && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.2 }}
-          >
-            <ListeningIndicator />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Removed the global listening indicator since it's now integrated in the command bar */}
 
       <AnimatePresence mode="wait">
         <motion.div

@@ -19,23 +19,27 @@ An intelligent AI-powered chatbot for India's groundwater data analytics, featur
 ### Local Development
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/your-username/ground-sense-bot.git
    cd ground-sense-bot
    ```
 
 2. **Install dependencies:**
+
    ```bash
    npm install
    ```
 
 3. **Set up environment:**
+
    ```bash
    cp .env.example .env
    # Edit .env with your Gemini API key
    ```
 
 4. **Start development server:**
+
    ```bash
    npm run dev
    ```
@@ -73,18 +77,18 @@ Add this script tag to embed the chatbot on any website:
   data-api-key="your-gemini-api-key-here"
   data-position="bottom-right"
   data-theme="dark"
-  data-color="#00d4ff">
-</script>
+  data-color="#00d4ff"
+></script>
 ```
 
 ### Configuration Options
 
-| Attribute | Default | Description |
-|-----------|---------|-------------|
-| `data-api-key` | `null` | Your Gemini AI API key |
-| `data-position` | `bottom-right` | Widget position |
-| `data-theme` | `dark` | Theme: `dark`, `light` |
-| `data-color` | `#00d4ff` | Primary color |
+| Attribute       | Default        | Description            |
+| --------------- | -------------- | ---------------------- |
+| `data-api-key`  | `null`         | Your Gemini AI API key |
+| `data-position` | `bottom-right` | Widget position        |
+| `data-theme`    | `dark`         | Theme: `dark`, `light` |
+| `data-color`    | `#00d4ff`      | Primary color          |
 
 ### Programmatic Control
 
@@ -94,8 +98,8 @@ window.GroundSenseBot.show();
 window.GroundSenseBot.hide();
 
 // Listen for events
-document.addEventListener('groundSenseBotReady', function(event) {
-  console.log('Chatbot is ready!');
+document.addEventListener("groundSenseBotReady", function (event) {
+  console.log("Chatbot is ready!");
 });
 ```
 
@@ -103,15 +107,16 @@ document.addEventListener('groundSenseBotReady', function(event) {
 
 ### Sample Queries
 
-- "Show data for Sanganer block"
+- "Show data for Delhi block"
 - "List all critical blocks in Rajasthan"
 - "Generate a proactive insight summary"
-- "Compare extraction stages of Chaksu and Sanganer"
+- "Compare extraction stages of and Delhi"
 - "What are the rainfall patterns this year?"
 
 ### API Integration
 
 The chatbot integrates with:
+
 - **Google Gemini AI** for natural language processing
 - **Real-time data feeds** for current groundwater levels
 - **Historical databases** for trend analysis
@@ -180,6 +185,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 📞 Support
 
 For support and questions:
+
 - 📧 Email: support@ground-sense-bot.com
 - 🐛 Issues: GitHub Issues
 - 📖 Docs: [Embedding Guide](./EMBEDDING_GUIDE.md)

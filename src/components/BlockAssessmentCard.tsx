@@ -1,16 +1,22 @@
 // /components/BlockAssessmentCard.js
 
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-    TrendingUp, ArrowDown, ArrowUp, Lightbulb, CloudRain, Satellite
+    TrendingUp, ArrowDown, ArrowUp, Lightbulb, CloudRain, Satellite, ChevronDown
 } from "lucide-react";
 import { ResponsiveContainer, AreaChart, XAxis, YAxis, Tooltip, Area, CartesianGrid } from 'recharts';
+import { motion, AnimatePresence } from "framer-motion";
 
 // --- Interactive Chart Sub-Component ---
 const TrendChart = ({ trendData }: { trendData: number[] }) => {
+  // Defensive check: If trendData is not an array, don't render the chart
+  if (!Array.isArray(trendData)) {
+    return <div className="text-center text-xs text-slate-500 py-4">Trend data not available.</div>;
+  }
+
   const chartData = trendData.map((value, index) => ({
     year: (2025 - 4) + index,
     "Extraction Stage (%)": value,
@@ -47,8 +53,45 @@ const TrendChart = ({ trendData }: { trendData: number[] }) => {
   );
 };
 
+// --- Helper component for the collapsible data tables ---
+const DataAccordion = ({ title, value, children }: { title: string; value: string; children: React.ReactNode[] }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    return (
+        <div className="bg-slate-50 rounded-lg border border-slate-200">
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="flex justify-between items-center w-full p-3 text-left"
+            >
+                <div className="flex items-center gap-2">
+                    {children[0]} {/* Icon */}
+                    <span className="font-semibold text-slate-700 text-sm">{title}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="font-bold text-sky-600 text-sm">{value}</span>
+                    <motion.div animate={{ rotate: isOpen ? 180 : 0 }}>
+                        <ChevronDown className="h-4 w-4 text-slate-500" />
+                    </motion.div>
+                </div>
+            </button>
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                    >
+                        <div className="p-3 border-t border-slate-200">
+                           {children[1]} {/* Table */}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    )
+}
 
-// --- Main Block Assessment Card Component ---
+// --- Main Block Assessment Card Component (UPGRADED & MORE ROBUST) ---
 export const BlockAssessmentCard = ({ data }: { data: any }) => {
   const categoryStyles: Record<string, { badge: string; text: string }> = {
     "Over-Exploited": { badge: "bg-red-100 text-red-800", text: "text-red-600" },
@@ -56,48 +99,57 @@ export const BlockAssessmentCard = ({ data }: { data: any }) => {
   };
   const styles = categoryStyles[data.category] || { badge: "bg-slate-100 text-slate-800", text: "text-slate-600" };
 
+  // Helper function to safely format numbers and provide a fallback
+  const formatNumber = (num: number | undefined) => num?.toLocaleString('en-IN') ?? 'N/A';
+
   return (
     <Card className="w-full max-w-lg bg-white/80 backdrop-blur-sm border-slate-200/80 shadow-lg text-slate-900">
       <CardHeader>
         <div className="flex justify-between items-start">
           <div>
-            <p className="text-2xl font-bold">{data.block} Block</p>
-            <p className="text-sm text-slate-500">{data.district}, {data.state}</p>
+            <p className="text-2xl font-bold">{data.block || 'N/A'} Block</p>
+            <p className="text-sm text-slate-500">{data.district || 'N/A'}, {data.state || 'N/A'}</p>
           </div>
-          <Badge className={styles.badge}>{data.category}</Badge>
+          <Badge className={styles.badge}>{data.category || 'N/A'}</Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-3 gap-3 text-center">
-          <div className="p-3 bg-sky-50 rounded-lg border border-sky-100">
-            <p className="text-xs font-semibold text-slate-500">Recharge (MCM)</p>
-            <p className="text-lg font-bold text-sky-800 flex items-center justify-center gap-1"><ArrowDown className="h-4 w-4 text-green-500"/> {data.recharge}</p>
-          </div>
-          <div className="p-3 bg-red-50 rounded-lg border border-red-100">
-            <p className="text-xs font-semibold text-slate-500">Extraction (MCM)</p>
-            <p className="text-lg font-bold text-red-800 flex items-center justify-center gap-1"><ArrowUp className="h-4 w-4 text-red-500"/> {data.extraction}</p>
-          </div>
-          <div className="p-3 bg-purple-50 rounded-lg border border-purple-100">
-            <p className="text-xs font-semibold text-slate-500">Extraction Stage</p>
-            <p className={`text-lg font-bold ${styles.text}`}>{data.stage}</p>
-          </div>
-        </div>
+
+        <DataAccordion title="Groundwater Recharge" value={formatNumber(data.recharge?.total)}>
+            <ArrowDown className="h-4 w-4 text-green-500"/>
+            <table className="w-full text-xs text-slate-600">
+                <thead><tr className="text-left"><th className="pb-1">Source</th><th className="text-right pb-1">Value (ham)</th></tr></thead>
+                <tbody>
+                    <tr className="border-t"><td className="py-1">Rainfall</td><td className="text-right py-1 font-medium">{formatNumber(data.recharge?.rainfall)}</td></tr>
+                    <tr className="border-t"><td className="py-1">Canal</td><td className="text-right py-1 font-medium">{formatNumber(data.recharge?.canal)}</td></tr>
+                </tbody>
+            </table>
+        </DataAccordion>
+        
+        <DataAccordion title="Groundwater Extraction" value={formatNumber(data.extraction?.total)}>
+            <ArrowUp className="h-4 w-4 text-red-500"/>
+            <table className="w-full text-xs text-slate-600">
+                <thead><tr className="text-left"><th className="pb-1">Use</th><th className="text-right pb-1">Value (ham)</th></tr></thead>
+                <tbody>
+                    <tr className="border-t"><td className="py-1">Irrigation</td><td className="text-right py-1 font-medium">{formatNumber(data.extraction?.irrigation)}</td></tr>
+                    <tr className="border-t"><td className="py-1">Domestic</td><td className="text-right py-1 font-medium">{formatNumber(data.extraction?.domestic)}</td></tr>
+                    <tr className="border-t"><td className="py-1">Industry</td><td className="text-right py-1 font-medium">{formatNumber(data.extraction?.industry)}</td></tr>
+                </tbody>
+            </table>
+        </DataAccordion>
+
         <div>
-          <h4 className="text-sm font-semibold text-slate-700 mb-1 flex items-center gap-2"><TrendingUp className="h-4 w-4"/> 5-Year Trend</h4>
+          <h4 className="text-sm font-semibold text-slate-700 mb-1 flex items-center gap-2"><TrendingUp className="h-4 w-4"/> 5-Year Trend (Extraction Stage)</h4>
           <div className="p-2 bg-slate-50 rounded-lg border border-slate-200">
             <TrendChart trendData={data.trend} />
           </div>
         </div>
-        <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
-           <h4 className="text-sm font-semibold text-slate-700">Enriched Data</h4>
-           <p className="text-xs text-slate-600 flex items-center gap-2"><CloudRain className="h-4 w-4 text-sky-500"/>IMD Data: Below-average rainfall recorded.</p>
-           <p className="text-xs text-slate-600 flex items-center gap-2"><Satellite className="h-4 w-4 text-green-500"/>ISRO Data: Increase in water-intensive crops.</p>
-        </div>
+        
         {data.category === "Over-Exploited" && (
             <div className="p-3 bg-red-50 rounded-lg border border-red-200 space-y-2">
                 <h4 className="text-sm font-semibold text-red-800 flex items-center gap-2"><Lightbulb className="h-4 w-4"/> AI Advisor</h4>
-                <p className="text-xs text-slate-700"><b>Forecast:</b> Groundwater level likely to decline.</p>
-                <p className="text-xs text-slate-700"><b>Recommendation:</b> Promote micro-irrigation schemes.</p>
+                <p className="text-xs text-slate-700"><b>Forecast:</b> Groundwater level likely to decline due to high extraction rates.</p>
+                <p className="text-xs text-slate-700"><b>Recommendation:</b> Promote micro-irrigation and crop diversification to reduce water usage.</p>
             </div>
         )}
       </CardContent>

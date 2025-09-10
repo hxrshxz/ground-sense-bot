@@ -37,6 +37,9 @@ import {
   BrainCircuit,
 } from "lucide-react";
 import { GroundwaterComparisonChart } from "./GroundWaterComponent";
+import AIResponseRenderer from "./ai-components/AIResponseRenderer";
+import AIResponseRendererV2 from "./ai-components/AIResponseRendererV2";
+import { getAIResponse } from "../services/aiResponseServiceV2";
 
 //================================================================================
 // --- SHIMMER EFFECT COMPONENT ---
@@ -492,12 +495,12 @@ const INGRESCommandBar = ({
               size="sm"
               className="bg-white/50 hover:bg-white text-blue-700 border-blue-200"
               onClick={() => {
-                const query = "Why is groundwater declining in Punjab?";
+                const query = "What crops should I grow in a water-scarce region ?";
                 onInputChange({ target: { value: query } } as any);
                 onSubmit();
               }}
             >
-              Punjab Decline Factors
+              Crop recommendations
             </Button>
             <Button
               variant="outline"
@@ -728,6 +731,20 @@ export const INGRESAssistant = ({
     setInputValue("");
     setIsThinking(true);
 
+    // Check if we have a predefined structured AI response for this query
+    const aiResponse = getAIResponse(text);
+    if (aiResponse) {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const response = {
+        id: Date.now() + 1,
+        type: "ai",
+        component: <AIResponseRendererV2 response={aiResponse} />,
+      };
+      setChatHistory((prev) => [...prev, response]);
+      setIsThinking(false);
+      return;
+    }
+
     // --- 1. LOGIC FOR SINGLE BLOCK REPORT ---
     const blockKeyword = Object.keys(groundwaterDB).find(
       (key) =>
@@ -878,6 +895,10 @@ export const INGRESAssistant = ({
       setIsThinking(false);
       return;
     }
+
+    // --- 4. STRUCTURED AI RESPONSES ---
+    // We already tried getAIResponse at the beginning of this function, so this is unnecessary.
+    // The AI structured response would have been handled already if it matched.
 
     const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
     if (API_KEY) {

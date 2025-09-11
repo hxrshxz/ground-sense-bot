@@ -9,7 +9,6 @@ An intelligent AI-powered chatbot for India's groundwater data analytics, featur
 - 💬 **Natural Language Chat** - Conversational interface for data queries
 - 📱 **Responsive Design** - Works seamlessly on all devices
 - 🎨 **Modern UI** - Beautiful animations and smooth interactions
-- 🔧 **Embeddable Widget** - Easy integration into any website
 - 🌍 **Multi-language Support** - English and Hindi language options
 - 📁 **File Upload Support** - Analyze custom datasets
 - 🔒 **Secure Authentication** - API key management system
@@ -66,44 +65,6 @@ VITE_GEMINI_API_KEY=your_gemini_api_key_here
 VITE_API_BASE_URL=http://localhost:8080/api/v1
 ```
 
-## 🎯 Embedding on Your Website
-
-### Simple Integration
-
-Add this script tag to embed the chatbot on any website:
-
-```html
-<script
-  src="https://ground-sense-bot.vercel.app/embed.js"
-  data-api-key="your-gemini-api-key-here"
-  data-position="bottom-right"
-  data-theme="dark"
-  data-color="#00d4ff"
-></script>
-```
-
-### Configuration Options
-
-| Attribute       | Default        | Description            |
-| --------------- | -------------- | ---------------------- |
-| `data-api-key`  | `null`         | Your Gemini AI API key |
-| `data-position` | `bottom-right` | Widget position        |
-| `data-theme`    | `dark`         | Theme: `dark`, `light` |
-| `data-color`    | `#00d4ff`      | Primary color          |
-
-### Programmatic Control
-
-```javascript
-// Show/hide the chat widget
-window.GroundSenseBot.show();
-window.GroundSenseBot.hide();
-
-// Listen for events
-document.addEventListener("groundSenseBotReady", function (event) {
-  console.log("Chatbot is ready!");
-});
-```
-
 ## 📚 Usage Examples
 
 ### Sample Queries
@@ -128,9 +89,7 @@ The chatbot integrates with:
 ```
 ground-sense-bot/
 ├── public/
-│   ├── embed.js          # Embeddable script
-│   ├── embed.html        # Embed iframe page
-│   └── example-embed.html # Usage example
+│   └── placeholder.svg    # Default placeholder image
 ├── src/
 │   ├── components/
 │   │   ├── INGRESAssistant.tsx    # Main chatbot component
@@ -144,7 +103,6 @@ ground-sense-bot/
 │   │   └── geminiApi.ts          # Gemini AI integration
 │   └── lib/
 │       └── utils.ts              # Utility functions
-├── EMBEDDING_GUIDE.md            # Detailed embedding guide
 └── README.md                     # This file
 ```
 
@@ -189,7 +147,6 @@ For support and questions:
 
 - 📧 Email: support@ground-sense-bot.com
 - 🐛 Issues: GitHub Issues
-- 📖 Docs: [Embedding Guide](./EMBEDDING_GUIDE.md)
 
 ## � Downloading Reports
 

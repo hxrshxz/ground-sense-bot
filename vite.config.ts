@@ -23,22 +23,13 @@ export default defineConfig(({ mode }) => ({
       name: "configure-response-headers",
       configureServer: (server: any) => {
         server.middlewares.use((req: any, res: any, next: any) => {
-          // Add CORS headers for all routes
+          // Basic response headers
           res.setHeader("Access-Control-Allow-Origin", "*");
           res.setHeader(
             "Access-Control-Allow-Methods",
             "GET,HEAD,PUT,PATCH,POST,DELETE"
           );
           res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
-          // Handle embed.js requests
-          if (req.url === "/embed.js") {
-            res.setHeader("Content-Type", "application/javascript");
-            const embedPath = path.resolve(__dirname, "public/embed.js");
-            const content = fs.readFileSync(embedPath, "utf-8");
-            return res.end(content);
-          }
-
           next();
         });
       },

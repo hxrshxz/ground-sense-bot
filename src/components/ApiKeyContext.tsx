@@ -31,14 +31,6 @@ export const ApiKeyProvider: React.FC<ApiKeyProviderProps> = ({ children }) => {
     if (savedApiKey) {
       setApiKeyState(savedApiKey);
     }
-
-    // Also check URL parameters for embedded mode
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlApiKey = urlParams.get('apiKey');
-    if (urlApiKey) {
-      setApiKeyState(urlApiKey);
-      localStorage.setItem('gemini-api-key', urlApiKey);
-    }
   }, []);
 
   const setApiKey = (key: string) => {

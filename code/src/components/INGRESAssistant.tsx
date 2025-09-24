@@ -1495,14 +1495,24 @@ Your response should sound like it's coming from a knowledgeable human analyst e
         }
       }
 
-      const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+      const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "AIzaSyDSqFidFieMz6EVw1HnFBuYlJ_jtGm22A8";
       if (API_KEY) {
         try {
           const genAI = new GoogleGenerativeAI(API_KEY);
           const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
           const dataContext = JSON.stringify(groundwaterDB, null, 2);
-          const prompt = `You are an AI assistant for INGRES, India's National Groundwater Resource Estimation System. Your knowledge base is the following JSON data about a few groundwater blocks in Rajasthan:\n---\n${dataContext}\n---\nBased ONLY on this data, answer the user's question. If the question is about data you don't have (e.g., Punjab), state that you only have data for the provided blocks in Rajasthan. Be concise and helpful. Use Markdown for formatting (e.g., **bold** for emphasis, lists). User's question: "${text}"`;
+          const prompt = `You are an expert AI assistant for INGRES, India's National Groundwater Resource Estimation System. Your primary knowledge base is the following JSON data about specific groundwater blocks in Rajasthan. Your tone should be helpful, clear, and professional.\n---\n${dataContext}\n---\nInstructions:
+
+1.Answer with Best Available Information: Your first priority is to answer the user's question using the provided JSON data. If the data does not contain the answer, seamlessly transition to your broader knowledge of groundwater resources in India to provide the most helpful response possible.
+          
+2.Distinguish Sources When Combining: If you combine information from the dataset with general knowledge, try to make the distinction clear. For example: "The data for the Jalore block shows X, and generally, in this part of Rajasthan, Y is also a known factor."
+
+    3.Provide General Knowledge: After stating the data limitation, provide a helpful, general answer based on your broader knowledge of groundwater resources in India.
+
+   4. Distinguish Your Sources: Clearly differentiate between information derived from the dataset and information from your general knowledge. For example, start your general answer with a phrase like, "However, speaking generally about groundwater in this region..." or "Based on public knowledge...".
+
+    5.Be Concise and Format Well: Use Markdown for clarity (bolding, lists, etc.) to make the information easy to digest."${text}"`;
 
           const result = await model.generateContent(prompt);
           const response = await result.response;

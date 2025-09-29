@@ -113,14 +113,19 @@ export const GroundwaterExtractionVisualization: React.FC<
         label: "Ludhiana",
         data: scenarioAdjusted.ludhiana,
         borderColor: "#ef4444",
-        backgroundColor: (ctx:any) => {
+        backgroundColor: (ctx: any) => {
           const { chart } = ctx;
-            const { ctx: c, chartArea } = chart;
-            if (!chartArea) return 'rgba(239,68,68,0.2)';
-            const gradient = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-            gradient.addColorStop(0, 'rgba(239,68,68,0.45)');
-            gradient.addColorStop(1, 'rgba(239,68,68,0.05)');
-            return gradient;
+          const { ctx: c, chartArea } = chart;
+          if (!chartArea) return "rgba(239,68,68,0.2)";
+          const gradient = c.createLinearGradient(
+            0,
+            chartArea.top,
+            0,
+            chartArea.bottom
+          );
+          gradient.addColorStop(0, "rgba(239,68,68,0.45)");
+          gradient.addColorStop(1, "rgba(239,68,68,0.05)");
+          return gradient;
         },
         borderWidth: 3,
         tension: 0.45,
@@ -136,14 +141,19 @@ export const GroundwaterExtractionVisualization: React.FC<
         label: "Amritsar",
         data: scenarioAdjusted.amritsar,
         borderColor: "#3b82f6",
-        backgroundColor: (ctx:any) => {
+        backgroundColor: (ctx: any) => {
           const { chart } = ctx;
-            const { ctx: c, chartArea } = chart;
-            if (!chartArea) return 'rgba(59,130,246,0.2)';
-            const gradient = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-            gradient.addColorStop(0, 'rgba(59,130,246,0.45)');
-            gradient.addColorStop(1, 'rgba(59,130,246,0.05)');
-            return gradient;
+          const { ctx: c, chartArea } = chart;
+          if (!chartArea) return "rgba(59,130,246,0.2)";
+          const gradient = c.createLinearGradient(
+            0,
+            chartArea.top,
+            0,
+            chartArea.bottom
+          );
+          gradient.addColorStop(0, "rgba(59,130,246,0.45)");
+          gradient.addColorStop(1, "rgba(59,130,246,0.05)");
+          return gradient;
         },
         borderWidth: 3,
         tension: 0.45,
@@ -173,8 +183,20 @@ export const GroundwaterExtractionVisualization: React.FC<
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { position: "bottom" as const, labels:{ usePointStyle:true, boxWidth:10, boxHeight:10, padding:16 } },
-      title: { display: true, text: "Groundwater Extraction (% of Recharge)", font:{weight:'bold', size:16} },
+      legend: {
+        position: "bottom" as const,
+        labels: {
+          usePointStyle: true,
+          boxWidth: 10,
+          boxHeight: 10,
+          padding: 16,
+        },
+      },
+      title: {
+        display: true,
+        text: "Groundwater Extraction (% of Recharge)",
+        font: { weight: "bold", size: 16 },
+      },
       tooltip: {
         callbacks: {
           label: (ctx: any) => `${ctx.dataset.label}: ${ctx.parsed.y}%`,
@@ -198,8 +220,8 @@ export const GroundwaterExtractionVisualization: React.FC<
       },
       x: { grid: { display: false } },
     },
-    interaction: { mode:'nearest', intersect:false },
-    animation: { duration: 750, easing: 'easeOutQuart' }
+    interaction: { mode: "nearest", intersect: false },
+    animation: { duration: 750, easing: "easeOutQuart" },
   };
 
   const radarData = {
@@ -274,9 +296,9 @@ export const GroundwaterExtractionVisualization: React.FC<
     link.click();
   };
 
-  const summary = useMemo(()=>{
-    const lastIdx = scenarioAdjusted.ludhiana.length-1;
-    const baseLast = ludhiana[ludhiana.length-1];
+  const summary = useMemo(() => {
+    const lastIdx = scenarioAdjusted.ludhiana.length - 1;
+    const baseLast = ludhiana[ludhiana.length - 1];
     const scenarioLast = scenarioAdjusted.ludhiana[lastIdx];
     const delta = scenarioLast - baseLast;
     return { delta, scenarioLast };
@@ -326,10 +348,38 @@ export const GroundwaterExtractionVisualization: React.FC<
           </div>
         </div>
         <div className="grid md:grid-cols-4 gap-4 mb-4">
-          <Indicator label="Avg Ludhiana" value={(scenarioAdjusted.ludhiana.reduce((a,c)=>a+c,0)/scenarioAdjusted.ludhiana.length).toFixed(1)+ '%'} color="red" />
-          <Indicator label="Avg Amritsar" value={(scenarioAdjusted.amritsar.reduce((a,c)=>a+c,0)/scenarioAdjusted.amritsar.length).toFixed(1)+ '%'} color="blue" />
-          <Indicator label="Scenario Delta" value={(summary.delta>0?'+':'') + summary.delta.toFixed(1) + '%'} color={summary.delta>0? 'red':'green'} />
-          <Indicator label="End (Ludhiana)" value={summary.scenarioLast.toFixed(1) + '%'} color="purple" />
+          <Indicator
+            label="Avg Ludhiana"
+            value={
+              (
+                scenarioAdjusted.ludhiana.reduce((a, c) => a + c, 0) /
+                scenarioAdjusted.ludhiana.length
+              ).toFixed(1) + "%"
+            }
+            color="red"
+          />
+          <Indicator
+            label="Avg Amritsar"
+            value={
+              (
+                scenarioAdjusted.amritsar.reduce((a, c) => a + c, 0) /
+                scenarioAdjusted.amritsar.length
+              ).toFixed(1) + "%"
+            }
+            color="blue"
+          />
+          <Indicator
+            label="Scenario Delta"
+            value={
+              (summary.delta > 0 ? "+" : "") + summary.delta.toFixed(1) + "%"
+            }
+            color={summary.delta > 0 ? "red" : "green"}
+          />
+          <Indicator
+            label="End (Ludhiana)"
+            value={summary.scenarioLast.toFixed(1) + "%"}
+            color="purple"
+          />
         </div>
         <div
           className="h-80 bg-gradient-to-br from-slate-50 to-white rounded-lg p-4 shadow-inner border border-slate-200/50 relative"
@@ -356,9 +406,13 @@ export const GroundwaterExtractionVisualization: React.FC<
           </div>
         </div>
         <div className="mt-4 p-3 bg-gradient-to-r from-cyan-50 to-sky-50 rounded-lg border border-cyan-200 text-xs leading-relaxed">
-          <strong>Scenario:</strong> {scenario}. {scenario === 'baseline' && 'Baseline continues current abstraction pattern.'}
-          {scenario === 'intervention' && ' Moderate demand management slows late growth (≈2% relative reduction by end).'}
-          {scenario === 'aggressive' && ' Aggressive measures produce sharper flattening (≈4% relative reduction by end).'}
+          <strong>Scenario:</strong> {scenario}.{" "}
+          {scenario === "baseline" &&
+            "Baseline continues current abstraction pattern."}
+          {scenario === "intervention" &&
+            " Moderate demand management slows late growth (≈2% relative reduction by end)."}
+          {scenario === "aggressive" &&
+            " Aggressive measures produce sharper flattening (≈4% relative reduction by end)."}
         </div>
       </div>
 
@@ -385,17 +439,28 @@ export const GroundwaterExtractionVisualization: React.FC<
   );
 };
 
-interface IndicatorProps { label:string; value:string; color:string }
+interface IndicatorProps {
+  label: string;
+  value: string;
+  color: string;
+}
 const Indicator = ({ label, value, color }: IndicatorProps) => {
-  const palette: Record<string,string> = {
-    red: 'from-red-50 to-red-100 border-red-200 text-red-700',
-    blue: 'from-blue-50 to-blue-100 border-blue-200 text-blue-700',
-    green: 'from-green-50 to-green-100 border-green-200 text-green-700',
-    purple: 'from-purple-50 to-purple-100 border-purple-200 text-purple-700'
+  const palette: Record<string, string> = {
+    red: "from-red-50 to-red-100 border-red-200 text-red-700",
+    blue: "from-blue-50 to-blue-100 border-blue-200 text-blue-700",
+    green: "from-green-50 to-green-100 border-green-200 text-green-700",
+    purple: "from-purple-50 to-purple-100 border-purple-200 text-purple-700",
   };
   return (
-    <div className={`p-3 bg-gradient-to-br rounded-lg border ${palette[color] || 'from-slate-50 to-slate-100 border-slate-200 text-slate-700'} relative overflow-hidden shadow-sm`}> 
-      <div className="text-[10px] font-semibold uppercase tracking-wide opacity-70 mb-1">{label}</div>
+    <div
+      className={`p-3 bg-gradient-to-br rounded-lg border ${
+        palette[color] ||
+        "from-slate-50 to-slate-100 border-slate-200 text-slate-700"
+      } relative overflow-hidden shadow-sm`}
+    >
+      <div className="text-[10px] font-semibold uppercase tracking-wide opacity-70 mb-1">
+        {label}
+      </div>
       <div className="text-sm font-bold">{value}</div>
       <div className="absolute inset-0 pointer-events-none opacity-20 bg-[radial-gradient(circle_at_70%_30%,white,transparent_60%)]" />
     </div>

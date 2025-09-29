@@ -14,7 +14,7 @@ import {
 
 const SectorUsageChart = ({ data }: { data: any }) => {
   const [chartType, setChartType] = useState<"pie" | "bar">("pie");
-  
+
   // Sample sector usage data
   const sectorData = data?.sector_usage || [
     {
@@ -65,7 +65,7 @@ const SectorUsageChart = ({ data }: { data: any }) => {
             </div>
             <div className="mt-2 pt-2 border-t border-gray-200">
               <div className="text-xs text-slate-500">
-                {data.sector === "Agriculture" 
+                {data.sector === "Agriculture"
                   ? "Primarily rice & wheat cultivation"
                   : data.sector === "Domestic"
                   ? "Urban & rural water supply"
@@ -79,7 +79,15 @@ const SectorUsageChart = ({ data }: { data: any }) => {
     return null;
   };
 
-  const CustomPieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, sector }: any) => {
+  const CustomPieLabel = ({
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    percent,
+    sector,
+  }: any) => {
     const RADIAN = Math.PI / 180;
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
@@ -90,7 +98,7 @@ const SectorUsageChart = ({ data }: { data: any }) => {
         x={x}
         y={y}
         fill="white"
-        textAnchor={x > cx ? 'start' : 'end'}
+        textAnchor={x > cx ? "start" : "end"}
         dominantBaseline="central"
         className="font-semibold text-sm drop-shadow-md"
       >
@@ -112,7 +120,7 @@ const SectorUsageChart = ({ data }: { data: any }) => {
             Groundwater Extraction by Major Sectors (HAM)
           </p>
         </div>
-        
+
         <div className="flex gap-2">
           <button
             onClick={() => setChartType("pie")}
@@ -154,59 +162,89 @@ const SectorUsageChart = ({ data }: { data: any }) => {
                 strokeWidth={3}
               >
                 {sectorData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
                 ))}
               </Pie>
               <Tooltip content={<CustomTooltip />} />
             </PieChart>
           ) : (
-            <BarChart data={sectorData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <BarChart
+              data={sectorData}
+              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+            >
               <defs>
-                <linearGradient id="agricultureGradient" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient
+                  id="agricultureGradient"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
                   <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8} />
                   <stop offset="95%" stopColor="#22c55e" stopOpacity={0.3} />
                 </linearGradient>
-                <linearGradient id="domesticGradient" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient
+                  id="domesticGradient"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
                   <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
                   <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.3} />
                 </linearGradient>
-                <linearGradient id="industrialGradient" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient
+                  id="industrialGradient"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
                   <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8} />
                   <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.3} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis 
-                dataKey="sector" 
+              <XAxis
+                dataKey="sector"
                 tick={{ fill: "#64748b", fontSize: 12 }}
                 tickLine={false}
                 axisLine={false}
               />
-              <YAxis 
+              <YAxis
                 tick={{ fill: "#64748b", fontSize: 12 }}
                 tickLine={false}
                 axisLine={false}
-                label={{ 
-                  value: 'Usage (%)', 
-                  angle: -90, 
-                  position: 'insideLeft',
-                  style: { textAnchor: 'middle', fontSize: '12px', fill: '#64748b' }
+                label={{
+                  value: "Usage (%)",
+                  angle: -90,
+                  position: "insideLeft",
+                  style: {
+                    textAnchor: "middle",
+                    fontSize: "12px",
+                    fill: "#64748b",
+                  },
                 }}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Bar 
-                dataKey="percentage" 
+              <Bar
+                dataKey="percentage"
                 radius={[8, 8, 0, 0]}
                 stroke="#ffffff"
                 strokeWidth={2}
               >
                 {sectorData.map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
+                  <Cell
+                    key={`cell-${index}`}
                     fill={
-                      entry.sector === "Agriculture" ? "url(#agricultureGradient)" :
-                      entry.sector === "Domestic" ? "url(#domesticGradient)" :
-                      "url(#industrialGradient)"
+                      entry.sector === "Agriculture"
+                        ? "url(#agricultureGradient)"
+                        : entry.sector === "Domestic"
+                        ? "url(#domesticGradient)"
+                        : "url(#industrialGradient)"
                     }
                   />
                 ))}
@@ -239,11 +277,15 @@ const SectorUsageChart = ({ data }: { data: any }) => {
             <div className="space-y-1">
               <div className="flex justify-between text-xs">
                 <span className="text-slate-500">Share:</span>
-                <span className="font-bold text-slate-700">{sector.percentage}%</span>
+                <span className="font-bold text-slate-700">
+                  {sector.percentage}%
+                </span>
               </div>
               <div className="flex justify-between text-xs">
                 <span className="text-slate-500">Volume:</span>
-                <span className="font-semibold text-slate-700">{sector.usage} HAM</span>
+                <span className="font-semibold text-slate-700">
+                  {sector.usage} HAM
+                </span>
               </div>
             </div>
           </div>
@@ -252,10 +294,16 @@ const SectorUsageChart = ({ data }: { data: any }) => {
 
       {/* Key Insights */}
       <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg border border-blue-200">
-        <h4 className="font-semibold text-sm text-slate-800 mb-2">💡 Key Insights:</h4>
+        <h4 className="font-semibold text-sm text-slate-800 mb-2">
+          💡 Key Insights:
+        </h4>
         <ul className="text-xs text-slate-600 space-y-1">
-          <li>• Agriculture dominates with nearly 90% of total groundwater usage</li>
-          <li>• Industrial usage remains minimal but concentrated in urban centers</li>
+          <li>
+            • Agriculture dominates with nearly 90% of total groundwater usage
+          </li>
+          <li>
+            • Industrial usage remains minimal but concentrated in urban centers
+          </li>
           <li>• Domestic consumption shows steady growth with urbanization</li>
         </ul>
       </div>

@@ -1,7 +1,9 @@
 import { STATE_PROFILE_MAP } from "@/data/stateGroundwaterData";
 
 // Basic list for fuzzy detection; can be expanded with regex variants / abbreviations
-const STATE_KEYS = Object.keys(STATE_PROFILE_MAP).filter(k => !k.includes(" "));
+const STATE_KEYS = Object.keys(STATE_PROFILE_MAP).filter(
+  (k) => !k.includes(" ")
+);
 
 export interface DetectedStateResult {
   key: string | null;
@@ -11,8 +13,11 @@ export interface DetectedStateResult {
 
 // Very lightweight fuzzy matching (substring / edit distance <=2 for short tokens)
 function levenshtein(a: string, b: string): number {
-  const m = a.length, n = b.length;
-  const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+  const m = a.length,
+    n = b.length;
+  const dp: number[][] = Array.from({ length: m + 1 }, () =>
+    Array(n + 1).fill(0)
+  );
   for (let i = 0; i <= m; i++) dp[i][0] = i;
   for (let j = 0; j <= n; j++) dp[0][j] = j;
   for (let i = 1; i <= m; i++) {

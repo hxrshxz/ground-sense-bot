@@ -61,7 +61,10 @@ const StateDeepDiveCard = React.lazy(() => import("./cards/StateDeepDiveCard"));
 import { PUNJAB_PROFILE } from "@/data/stateGroundwaterData";
 import { getAIResponse } from "../services/aiResponseServiceV2";
 import { GeminiApiService } from "../services/geminiApi";
-import { MAP_ANALYSIS_PROMPT, SAMPLE_MAP_ANALYSIS_RESPONSE } from "../data/mapAnalysisPrompt";
+import {
+  MAP_ANALYSIS_PROMPT,
+  SAMPLE_MAP_ANALYSIS_RESPONSE,
+} from "../data/mapAnalysisPrompt";
 import { MapAnalysisDialog } from "./MapAnalysisDialog";
 import { useApiKey } from "./ApiKeyContext";
 import { pickProfileByText } from "@/lib/stateDetection";
@@ -1149,16 +1152,29 @@ export const INGRESAssistant = ({
     try {
       // If no API key, immediately fallback to predefined sample
       if (!apiKey) {
-        console.warn("⚠️ No API key provided. Using offline fallback groundwater analysis sample.");
-        const fallbackResponse = JSON.stringify(SAMPLE_MAP_ANALYSIS_RESPONSE, null, 2);
-        const detectedProfile = pickProfileByText(fallbackResponse) || PUNJAB_PROFILE;
+        console.warn(
+          "⚠️ No API key provided. Using offline fallback groundwater analysis sample."
+        );
+        const fallbackResponse = JSON.stringify(
+          SAMPLE_MAP_ANALYSIS_RESPONSE,
+          null,
+          2
+        );
+        const detectedProfile =
+          pickProfileByText(fallbackResponse) || PUNJAB_PROFILE;
         setChatHistory((prev) => [
           ...prev,
           {
             id: Date.now() + 1,
             type: "ai",
             component: (
-              <React.Suspense fallback={<div className="text-xs text-slate-500">Loading deep dive...</div>}>
+              <React.Suspense
+                fallback={
+                  <div className="text-xs text-slate-500">
+                    Loading deep dive...
+                  </div>
+                }
+              >
                 <StateDeepDiveCard state={detectedProfile} />
               </React.Suspense>
             ),
@@ -1171,19 +1187,26 @@ export const INGRESAssistant = ({
       // Try the live Gemini analysis first
       try {
         const geminiService = new GeminiApiService(apiKey);
-        const response = await geminiService.analyzeImage(
-            imageData,
-            true
-        );
+        const response = await geminiService.analyzeImage(imageData, true);
 
         // If response doesn't look like JSON, wrap into a JSON shell to allow renderer heuristics
-        const normalizedResponse = /"graphs"|"problem_districts"|"sector_usage"/.test(response)
-          ? response
-          : JSON.stringify({ summary: response }, null, 2);
+        const normalizedResponse =
+          /"graphs"|"problem_districts"|"sector_usage"/.test(response)
+            ? response
+            : JSON.stringify({ summary: response }, null, 2);
 
         setChatHistory((prev) => {
-          const detectedProfile = pickProfileByText(normalizedResponse) || PUNJAB_PROFILE;
-          const alreadyRendered = prev.slice(-6).some(m => (m as any).component && JSON.stringify((m as any).component)?.includes('StateDeepDiveCard'));
+          const detectedProfile =
+            pickProfileByText(normalizedResponse) || PUNJAB_PROFILE;
+          const alreadyRendered = prev
+            .slice(-6)
+            .some(
+              (m) =>
+                (m as any).component &&
+                JSON.stringify((m as any).component)?.includes(
+                  "StateDeepDiveCard"
+                )
+            );
           if (alreadyRendered) return prev; // avoid duplication entirely
           return [
             ...prev,
@@ -1191,7 +1214,13 @@ export const INGRESAssistant = ({
               id: Date.now() + 1,
               type: "ai",
               component: (
-                <React.Suspense fallback={<div className="text-xs text-slate-500">Loading deep dive...</div>}>
+                <React.Suspense
+                  fallback={
+                    <div className="text-xs text-slate-500">
+                      Loading deep dive...
+                    </div>
+                  }
+                >
                   <StateDeepDiveCard state={detectedProfile} />
                 </React.Suspense>
               ),
@@ -1200,11 +1229,14 @@ export const INGRESAssistant = ({
               id: Date.now() + 2,
               type: "ai",
               text: "Deep dive generated from live analysis. Multi-chart renderer suppressed per configuration.",
-            }
+            },
           ];
         });
       } catch (apiError) {
-        console.error("Gemini analysis failed, falling back to sample:", apiError);
+        console.error(
+          "Gemini analysis failed, falling back to sample:",
+          apiError
+        );
         const fallbackResponse = JSON.stringify(
           {
             _fallback: true,
@@ -1215,8 +1247,17 @@ export const INGRESAssistant = ({
           2
         );
         setChatHistory((prev) => {
-          const detectedProfile = pickProfileByText(fallbackResponse) || PUNJAB_PROFILE;
-          const alreadyRendered = prev.slice(-6).some(m => (m as any).component && JSON.stringify((m as any).component)?.includes('StateDeepDiveCard'));
+          const detectedProfile =
+            pickProfileByText(fallbackResponse) || PUNJAB_PROFILE;
+          const alreadyRendered = prev
+            .slice(-6)
+            .some(
+              (m) =>
+                (m as any).component &&
+                JSON.stringify((m as any).component)?.includes(
+                  "StateDeepDiveCard"
+                )
+            );
           if (alreadyRendered) return prev;
           return [
             ...prev,
@@ -1224,7 +1265,13 @@ export const INGRESAssistant = ({
               id: Date.now() + 1,
               type: "ai",
               component: (
-                <React.Suspense fallback={<div className="text-xs text-slate-500">Loading deep dive...</div>}>
+                <React.Suspense
+                  fallback={
+                    <div className="text-xs text-slate-500">
+                      Loading deep dive...
+                    </div>
+                  }
+                >
                   <StateDeepDiveCard state={detectedProfile} />
                 </React.Suspense>
               ),
@@ -1233,7 +1280,7 @@ export const INGRESAssistant = ({
               id: Date.now() + 2,
               type: "ai",
               text: "(Fallback) Deep dive rendered. Multi-chart renderer suppressed due to API error.",
-            }
+            },
           ];
         });
       }
@@ -1244,8 +1291,7 @@ export const INGRESAssistant = ({
         {
           id: Date.now() + 1,
           type: "ai",
-          text:
-            "A critical error occurred while processing the map. Please refresh and try again.",
+          text: "A critical error occurred while processing the map. Please refresh and try again.",
         },
       ]);
     } finally {
@@ -1613,22 +1659,43 @@ Your response should sound like it's coming from a knowledgeable human analyst e
     setIsThinking(true);
 
     // Deep dive manual command: "deep dive <state>" or "state deep dive <state>"
-    const deepDiveMatch = query.match(/^(?:state\s+)?deep\s*dive\s+([a-z ]{3,40})$/i);
+    const deepDiveMatch = query.match(
+      /^(?:state\s+)?deep\s*dive\s+([a-z ]{3,40})$/i
+    );
     if (deepDiveMatch) {
       const candidate = deepDiveMatch[1].trim();
-      const profile = pickProfileByText(candidate) || STATE_PROFILE_MAP[candidate];
+      const profile =
+        pickProfileByText(candidate) || STATE_PROFILE_MAP[candidate];
       if (profile) {
-        const already = chatHistory.slice(-8).some(m => (m as any).component && JSON.stringify((m as any).component)?.includes('StateDeepDiveCard') && JSON.stringify((m as any).component)?.includes(profile.name));
+        const already = chatHistory
+          .slice(-8)
+          .some(
+            (m) =>
+              (m as any).component &&
+              JSON.stringify((m as any).component)?.includes(
+                "StateDeepDiveCard"
+              ) &&
+              JSON.stringify((m as any).component)?.includes(profile.name)
+          );
         if (!already) {
-          setChatHistory(prev => [...prev, {
-            id: Date.now() + 1,
-            type: 'ai',
-            component: (
-              <React.Suspense fallback={<div className="text-xs text-slate-500">Loading deep dive...</div>}>
-                <StateDeepDiveCard state={profile} />
-              </React.Suspense>
-            )
-          }]);
+          setChatHistory((prev) => [
+            ...prev,
+            {
+              id: Date.now() + 1,
+              type: "ai",
+              component: (
+                <React.Suspense
+                  fallback={
+                    <div className="text-xs text-slate-500">
+                      Loading deep dive...
+                    </div>
+                  }
+                >
+                  <StateDeepDiveCard state={profile} />
+                </React.Suspense>
+              ),
+            },
+          ]);
         }
         setIsThinking(false);
         return;
@@ -1643,27 +1710,35 @@ Your response should sound like it's coming from a knowledgeable human analyst e
         query.includes("analyzing uploaded ingres map") ||
         query.includes("analyze map") ||
         query.includes("comprehensive groundwater analysis") ||
-        (query.includes("ingres") && query.includes("map") && query.includes("analysis")) ||
-        (query.includes("groundwater") && query.includes("map") && query.includes("analysis"))
+        (query.includes("ingres") &&
+          query.includes("map") &&
+          query.includes("analysis")) ||
+        (query.includes("groundwater") &&
+          query.includes("map") &&
+          query.includes("analysis"))
       ) {
-        console.log("🗺️ Triggering comprehensive map analysis with predefined prompt");
-        
+        console.log(
+          "🗺️ Triggering comprehensive map analysis with predefined prompt"
+        );
+
         // Show thinking message
         await new Promise((r) => setTimeout(r, 800));
-        
+
         // Use Gemini API with the predefined MAP_ANALYSIS_PROMPT
         const geminiService = new GeminiApiService(apiKey);
         let response;
-        
+
         try {
           // Apply the comprehensive MAP_ANALYSIS_PROMPT directly
-          const result = await geminiService.generateResponse(MAP_ANALYSIS_PROMPT + 
-            "\n\nBased on the INGRES groundwater portal data, provide a comprehensive analysis with interactive charts showing extraction vs recharge, sector usage, annual trends, and policy recommendations. Include the JSON structure with graph data as specified in the prompt."
+          const result = await geminiService.generateResponse(
+            MAP_ANALYSIS_PROMPT +
+              "\n\nBased on the INGRES groundwater portal data, provide a comprehensive analysis with interactive charts showing extraction vs recharge, sector usage, annual trends, and policy recommendations. Include the JSON structure with graph data as specified in the prompt."
           );
           response = result.text;
         } catch (error) {
           console.error("Map analysis failed:", error);
-          response = "I apologize, but I encountered an error while generating the comprehensive groundwater analysis. Please ensure you have provided a valid API key and try again.";
+          response =
+            "I apologize, but I encountered an error while generating the comprehensive groundwater analysis. Please ensure you have provided a valid API key and try again.";
         }
 
         const analysisResponse = {
@@ -1709,8 +1784,18 @@ Your response should sound like it's coming from a knowledgeable human analyst e
                 </div>
               }
             >
-              <React.Suspense fallback={<div className="text-xs text-slate-500">Loading deep dive...</div>}>
-                <StateDeepDiveCard state={pickProfileByText("crop recommendations") || PUNJAB_PROFILE} />
+              <React.Suspense
+                fallback={
+                  <div className="text-xs text-slate-500">
+                    Loading deep dive...
+                  </div>
+                }
+              >
+                <StateDeepDiveCard
+                  state={
+                    pickProfileByText("crop recommendations") || PUNJAB_PROFILE
+                  }
+                />
               </React.Suspense>
             </React.Suspense>
           ),
@@ -1749,8 +1834,16 @@ Your response should sound like it's coming from a knowledgeable human analyst e
                 </div>
               }
             >
-              <React.Suspense fallback={<div className="text-xs text-slate-500">Loading deep dive...</div>}>
-                <StateDeepDiveCard state={pickProfileByText("policy recharge") || PUNJAB_PROFILE} />
+              <React.Suspense
+                fallback={
+                  <div className="text-xs text-slate-500">
+                    Loading deep dive...
+                  </div>
+                }
+              >
+                <StateDeepDiveCard
+                  state={pickProfileByText("policy recharge") || PUNJAB_PROFILE}
+                />
               </React.Suspense>
             </React.Suspense>
           ),
@@ -1791,8 +1884,16 @@ Your response should sound like it's coming from a knowledgeable human analyst e
                 </div>
               }
             >
-              <React.Suspense fallback={<div className="text-xs text-slate-500">Loading deep dive...</div>}>
-                <StateDeepDiveCard state={pickProfileByText("rainfall impact") || PUNJAB_PROFILE} />
+              <React.Suspense
+                fallback={
+                  <div className="text-xs text-slate-500">
+                    Loading deep dive...
+                  </div>
+                }
+              >
+                <StateDeepDiveCard
+                  state={pickProfileByText("rainfall impact") || PUNJAB_PROFILE}
+                />
               </React.Suspense>
             </React.Suspense>
           ),
@@ -1867,8 +1968,16 @@ Your response should sound like it's coming from a knowledgeable human analyst e
           id: Date.now() + 1,
           type: "ai",
           component: (
-            <React.Suspense fallback={<div className="text-xs text-slate-500">Loading deep dive...</div>}>
-              <StateDeepDiveCard state={pickProfileByText("policy recharge") || PUNJAB_PROFILE} />
+            <React.Suspense
+              fallback={
+                <div className="text-xs text-slate-500">
+                  Loading deep dive...
+                </div>
+              }
+            >
+              <StateDeepDiveCard
+                state={pickProfileByText("policy recharge") || PUNJAB_PROFILE}
+              />
             </React.Suspense>
           ),
         };
@@ -1902,8 +2011,16 @@ Your response should sound like it's coming from a knowledgeable human analyst e
           id: Date.now() + 1,
           type: "ai",
           component: (
-            <React.Suspense fallback={<div className="text-xs text-slate-500">Loading deep dive...</div>}>
-              <StateDeepDiveCard state={pickProfileByText("rainfall impact") || PUNJAB_PROFILE} />
+            <React.Suspense
+              fallback={
+                <div className="text-xs text-slate-500">
+                  Loading deep dive...
+                </div>
+              }
+            >
+              <StateDeepDiveCard
+                state={pickProfileByText("rainfall impact") || PUNJAB_PROFILE}
+              />
             </React.Suspense>
           ),
         };

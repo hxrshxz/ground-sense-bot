@@ -17,10 +17,30 @@ export const PUNJAB_PROFILE: StateGroundwaterProfile = {
     { name: "Induced", value: 9 },
   ],
   sectors: [
-    { name: "Agriculture", value: 82, icon: null, color: "linear-gradient(90deg,#f97316,#fb923c)" },
-    { name: "Domestic", value: 9, icon: null, color: "linear-gradient(90deg,#2563eb,#3b82f6)" },
-    { name: "Industrial", value: 6, icon: null, color: "linear-gradient(90deg,#475569,#64748b)" },
-    { name: "Commercial", value: 3, icon: null, color: "linear-gradient(90deg,#059669,#10b981)" },
+    {
+      name: "Agriculture",
+      value: 82,
+      icon: null,
+      color: "linear-gradient(90deg,#f97316,#fb923c)",
+    },
+    {
+      name: "Domestic",
+      value: 9,
+      icon: null,
+      color: "linear-gradient(90deg,#2563eb,#3b82f6)",
+    },
+    {
+      name: "Industrial",
+      value: 6,
+      icon: null,
+      color: "linear-gradient(90deg,#475569,#64748b)",
+    },
+    {
+      name: "Commercial",
+      value: 3,
+      icon: null,
+      color: "linear-gradient(90deg,#059669,#10b981)",
+    },
   ],
   drivers: [
     { name: "Free Power", impact: 88 },
@@ -54,7 +74,8 @@ export const PUNJAB_PROFILE: StateGroundwaterProfile = {
     "Mandate precision irrigation adoption (drip/sprinkler) in high-withdrawal blocks with capital subsidy redesign.",
     "Integrate real-time groundwater dashboards at block level to trigger adaptive extraction advisories.",
   ],
-  notes: "Punjab exhibits structurally entrenched extraction drivers amplified by policy incentives and canal system inefficiencies, requiring sequenced demand management plus targeted recharge augmentation.",
+  notes:
+    "Punjab exhibits structurally entrenched extraction drivers amplified by policy incentives and canal system inefficiencies, requiring sequenced demand management plus targeted recharge augmentation.",
 };
 export const DELHI_PROFILE: StateGroundwaterProfile = {
   key: "delhi",
@@ -72,10 +93,30 @@ export const DELHI_PROFILE: StateGroundwaterProfile = {
     { name: "Parks/Green", value: 6 },
   ],
   sectors: [
-    { name: "Domestic", value: 44, icon: null, color: "linear-gradient(90deg,#2563eb,#3b82f6)" },
-    { name: "Commercial", value: 18, icon: null, color: "linear-gradient(90deg,#6366f1,#818cf8)" },
-    { name: "Industrial", value: 21, icon: null, color: "linear-gradient(90deg,#475569,#64748b)" },
-    { name: "Agriculture", value: 17, icon: null, color: "linear-gradient(90deg,#f59e0b,#fbbf24)" },
+    {
+      name: "Domestic",
+      value: 44,
+      icon: null,
+      color: "linear-gradient(90deg,#2563eb,#3b82f6)",
+    },
+    {
+      name: "Commercial",
+      value: 18,
+      icon: null,
+      color: "linear-gradient(90deg,#6366f1,#818cf8)",
+    },
+    {
+      name: "Industrial",
+      value: 21,
+      icon: null,
+      color: "linear-gradient(90deg,#475569,#64748b)",
+    },
+    {
+      name: "Agriculture",
+      value: 17,
+      icon: null,
+      color: "linear-gradient(90deg,#f59e0b,#fbbf24)",
+    },
   ],
   drivers: [
     { name: "Urban Growth", impact: 83 },
@@ -109,7 +150,8 @@ export const DELHI_PROFILE: StateGroundwaterProfile = {
     "Expand managed recharge using permeable pavement & shallow infiltration galleries.",
     "Deploy sub-basin digital twins for scenario stress testing (heat/drought impacts).",
   ],
-  notes: "Delhi's stress profile is dominated by urban growth, infrastructure leakage, and constrained recharge footprint; emphasis should be on demand-side optimization and distributed infiltration retrofits.",
+  notes:
+    "Delhi's stress profile is dominated by urban growth, infrastructure leakage, and constrained recharge footprint; emphasis should be on demand-side optimization and distributed infiltration retrofits.",
 };
 
 export const RAJASTHAN_PROFILE: StateGroundwaterProfile = {
@@ -128,10 +170,30 @@ export const RAJASTHAN_PROFILE: StateGroundwaterProfile = {
     { name: "Induced", value: 5 },
   ],
   sectors: [
-    { name: "Agriculture", value: 76, icon: null, color: "linear-gradient(90deg,#f97316,#fb923c)" },
-    { name: "Domestic", value: 12, icon: null, color: "linear-gradient(90deg,#2563eb,#3b82f6)" },
-    { name: "Industrial", value: 7, icon: null, color: "linear-gradient(90deg,#475569,#64748b)" },
-    { name: "Livestock", value: 5, icon: null, color: "linear-gradient(90deg,#059669,#10b981)" },
+    {
+      name: "Agriculture",
+      value: 76,
+      icon: null,
+      color: "linear-gradient(90deg,#f97316,#fb923c)",
+    },
+    {
+      name: "Domestic",
+      value: 12,
+      icon: null,
+      color: "linear-gradient(90deg,#2563eb,#3b82f6)",
+    },
+    {
+      name: "Industrial",
+      value: 7,
+      icon: null,
+      color: "linear-gradient(90deg,#475569,#64748b)",
+    },
+    {
+      name: "Livestock",
+      value: 5,
+      icon: null,
+      color: "linear-gradient(90deg,#059669,#10b981)",
+    },
   ],
   drivers: [
     { name: "Arid Climate", impact: 82 },
@@ -165,9 +227,19 @@ export const RAJASTHAN_PROFILE: StateGroundwaterProfile = {
     "Expand solar-powered drip modernization with performance-based incentives.",
     "Integrate remote-sensed ET monitoring to target efficiency interventions.",
   ],
-  notes: "Rajasthan's groundwater trajectory reflects structural climatic deficit plus extraction overshoot—requiring aggressive demand moderation blended with decentralized recharge augmentation.",
+  notes:
+    "Rajasthan's groundwater trajectory reflects structural climatic deficit plus extraction overshoot—requiring aggressive demand moderation blended with decentralized recharge augmentation.",
 };
 
-export const SAMPLE_STATE_PROFILES: StateGroundwaterProfile[] = [PUNJAB_PROFILE, DELHI_PROFILE, RAJASTHAN_PROFILE];
+export const SAMPLE_STATE_PROFILES: StateGroundwaterProfile[] = [
+  PUNJAB_PROFILE,
+  DELHI_PROFILE,
+  RAJASTHAN_PROFILE,
+];
 
-export const STATE_PROFILE_MAP: Record<string, StateGroundwaterProfile> = SAMPLE_STATE_PROFILES.reduce((acc, p) => { acc[p.key] = p; acc[p.name.toLowerCase()] = p; return acc; }, {} as Record<string, StateGroundwaterProfile>);
+export const STATE_PROFILE_MAP: Record<string, StateGroundwaterProfile> =
+  SAMPLE_STATE_PROFILES.reduce((acc, p) => {
+    acc[p.key] = p;
+    acc[p.name.toLowerCase()] = p;
+    return acc;
+  }, {} as Record<string, StateGroundwaterProfile>);

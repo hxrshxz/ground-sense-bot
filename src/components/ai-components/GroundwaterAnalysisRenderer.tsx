@@ -5,7 +5,11 @@ import SectorUsageChart from "../charts/SectorUsageChart";
 import AnnualTrendsChart from "../charts/AnnualTrendsChart";
 
 // Enhanced renderer for groundwater analysis responses
-export const GroundwaterAnalysisRenderer = ({ response }: { response: string }) => {
+export const GroundwaterAnalysisRenderer = ({
+  response,
+}: {
+  response: string;
+}) => {
   // Try to extract JSON data from the response
   const extractGroundwaterData = (text: string) => {
     try {
@@ -14,7 +18,7 @@ export const GroundwaterAnalysisRenderer = ({ response }: { response: string }) 
       if (jsonMatch) {
         return JSON.parse(jsonMatch[0]);
       }
-      
+
       // If no JSON found, return null to use default renderer
       return null;
     } catch (error) {
@@ -38,11 +42,11 @@ export const GroundwaterAnalysisRenderer = ({ response }: { response: string }) 
       "over-exploited",
       "critical",
       "semi-critical",
-      "safe"
+      "safe",
     ];
-    
+
     const lowerText = text.toLowerCase();
-    return keywords.some(keyword => lowerText.includes(keyword));
+    return keywords.some((keyword) => lowerText.includes(keyword));
   };
 
   // Extract the groundwater data
@@ -69,7 +73,9 @@ export const GroundwaterAnalysisRenderer = ({ response }: { response: string }) 
     }
 
     // Extract problem districts
-    const problemMatch = text.match(/problem_districts["\s]*:[\s]*\[([\s\S]*?)\]/i);
+    const problemMatch = text.match(
+      /problem_districts["\s]*:[\s]*\[([\s\S]*?)\]/i
+    );
     if (problemMatch) {
       try {
         sections.problemDistricts = JSON.parse(`[${problemMatch[1]}]`);
@@ -79,13 +85,15 @@ export const GroundwaterAnalysisRenderer = ({ response }: { response: string }) 
     }
 
     // Extract interventions
-    const interventionsMatch = text.match(/recommended_interventions["\s]*:[\s]*\[([\s\S]*?)\]/i);
+    const interventionsMatch = text.match(
+      /recommended_interventions["\s]*:[\s]*\[([\s\S]*?)\]/i
+    );
     if (interventionsMatch) {
       try {
         const interventionsStr = interventionsMatch[1];
         sections.interventions = interventionsStr
-          .split(',')
-          .map((item: string) => item.replace(/["\[\]]/g, '').trim())
+          .split(",")
+          .map((item: string) => item.replace(/["\[\]]/g, "").trim())
           .filter((item: string) => item.length > 0);
       } catch (e) {
         console.log("Could not parse interventions");
@@ -157,14 +165,18 @@ export const GroundwaterAnalysisRenderer = ({ response }: { response: string }) 
                 className="p-4 bg-white/60 rounded-lg border border-red-200"
               >
                 <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-semibold text-slate-800">{district.district}</h4>
-                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                    district.category === "Over-Exploited" 
-                      ? "bg-red-100 text-red-800"
-                      : district.category === "Critical"
-                      ? "bg-orange-100 text-orange-800"
-                      : "bg-yellow-100 text-yellow-800"
-                  }`}>
+                  <h4 className="font-semibold text-slate-800">
+                    {district.district}
+                  </h4>
+                  <span
+                    className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                      district.category === "Over-Exploited"
+                        ? "bg-red-100 text-red-800"
+                        : district.category === "Critical"
+                        ? "bg-orange-100 text-orange-800"
+                        : "bg-yellow-100 text-yellow-800"
+                    }`}
+                  >
                     {district.category}
                   </span>
                 </div>
@@ -187,23 +199,27 @@ export const GroundwaterAnalysisRenderer = ({ response }: { response: string }) 
             💡 Recommended Interventions
           </h3>
           <div className="space-y-3">
-            {textData.interventions.map((intervention: string, index: number) => (
-              <div
-                key={index}
-                className="flex items-start p-3 bg-white/60 rounded-lg border border-green-200"
-              >
-                <div className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">
-                  {index + 1}
+            {textData.interventions.map(
+              (intervention: string, index: number) => (
+                <div
+                  key={index}
+                  className="flex items-start p-3 bg-white/60 rounded-lg border border-green-200"
+                >
+                  <div className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">
+                    {index + 1}
+                  </div>
+                  <p className="text-sm text-slate-700 leading-relaxed">
+                    {intervention}
+                  </p>
                 </div>
-                <p className="text-sm text-slate-700 leading-relaxed">{intervention}</p>
-              </div>
-            ))}
+              )
+            )}
           </div>
         </motion.div>
       )}
 
       {/* Raw Response (for debugging) */}
-      {process.env.NODE_ENV === 'development' && (
+      {process.env.NODE_ENV === "development" && (
         <details className="mt-6">
           <summary className="cursor-pointer text-sm text-slate-500 hover:text-slate-700">
             🔧 Raw Response Data (Development)

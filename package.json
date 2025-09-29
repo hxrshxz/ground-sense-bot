@@ -9,8 +9,10 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "automation-server": "node scripts/automationServer.cjs",
-    "test-automation": "node scripts/mapAutomation.cjs"
+    "automation:server": "node scripts/automationServer.cjs",
+    "deploy:setup": "bash scripts/deploy-setup.sh",
+    "deploy:vercel": "npm run deploy:setup && vercel --prod",
+    "demo": "echo '🎭 DEMO INSTRUCTIONS:' && echo '1. Run: npm run dev (starts the app)' && echo '2. Optional: npm run automation:server (for REAL Playwright automation)' && echo '3. Click \"Analyze Map\" in the chat to see automation!'"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -58,6 +60,7 @@
     "lucide-react": "^0.462.0",
     "next-themes": "^0.3.0",
     "playwright": "^1.55.1",
+    "playwright-core": "^1.55.1",
     "react": "^18.3.1",
     "react-chartjs-2": "^5.3.0",
     "react-day-picker": "^8.10.1",

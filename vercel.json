@@ -1,0 +1,11 @@
+{
+  "functions": {
+    "api/map-automation.js": {
+      "runtime": "nodejs18.x",
+      "maxDuration": 300
+    }
+  },
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "installCommand": "npm install"
+}

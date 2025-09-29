@@ -67,7 +67,28 @@ export const MapAnalysisDialog: React.FC<MapAnalysisDialogProps> = ({
     setAutomationResult(result);
 
     if (result.success) {
-      setCurrentStep("completed");
+      // Check if we have base64 image data from Vercel
+      if (result.downloadedImage || result.screenshot) {
+        // Use the downloaded image if available, otherwise use screenshot
+        const imageData = result.downloadedImage
+          ? `data:image/png;base64,${result.downloadedImage}`
+          : `data:image/png;base64,${result.screenshot}`;
+
+        // Automatically trigger image analysis
+        setProgressMessages((prev) => [
+          ...prev,
+          "📊 Analyzing image with AI...",
+        ]);
+        onImageAnalysis(imageData);
+
+        // Close the dialog since analysis is done
+        setTimeout(() => {
+          onClose();
+        }, 1000);
+      } else {
+        // Traditional flow - show completed state for manual upload
+        setCurrentStep("completed");
+      }
     } else {
       setCurrentStep("initial");
     }

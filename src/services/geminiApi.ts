@@ -1,4 +1,4 @@
-import { MAP_ANALYSIS_PROMPT } from '../data/mapAnalysisPrompt';
+import { MAP_ANALYSIS_PROMPT } from "../data/mapAnalysisPrompt";
 
 export interface GeminiResponse {
   text: string;
@@ -169,7 +169,7 @@ User Query: ${userPrompt}`;
     let lastError: any;
 
     // Use the comprehensive map analysis prompt or a simple fallback
-    const analysisPrompt = useMapAnalysisPrompt 
+    const analysisPrompt = useMapAnalysisPrompt
       ? MAP_ANALYSIS_PROMPT + "\n\nPlease analyze this INGRES groundwater map image and provide the comprehensive analysis in the specified JSON format."
       : "Analyze this groundwater map image and provide insights about the water levels, extraction rates, and regional conditions.";
 

@@ -12,6 +12,7 @@ This project is designed to work seamlessly with Vercel's serverless functions, 
 ### Deployment Steps:
 
 1. **Push to GitHub**:
+
    ```bash
    git add .
    git commit -m "Add Vercel serverless automation"
@@ -19,6 +20,7 @@ This project is designed to work seamlessly with Vercel's serverless functions, 
    ```
 
 2. **Deploy to Vercel**:
+
    - Connect your GitHub repo to Vercel
    - Vercel will automatically detect the build settings
    - The `vercel.json` configures the serverless function
@@ -44,6 +46,7 @@ This project is designed to work seamlessly with Vercel's serverless functions, 
 ### Testing:
 
 **Local Development**:
+
 ```bash
 npm run automation:server  # Terminal 1
 npm run dev                # Terminal 2

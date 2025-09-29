@@ -3,7 +3,9 @@
 ## Automatic Deployment Setup
 
 ### Option 1: Super Easy Deploy (Recommended)
+
 1. **Push to GitHub**:
+
    ```bash
    git add .
    git commit -m "Ready for deployment"
@@ -11,12 +13,14 @@
    ```
 
 2. **Connect to Vercel**:
+
    - Go to [vercel.com](https://vercel.com)
    - Click "New Project"
    - Import your GitHub repo
    - Vercel automatically detects it's a Vite project!
 
 3. **Set Environment Variable**:
+
    - In Vercel dashboard → Settings → Environment Variables
    - Add: `VITE_GEMINI_API_KEY` = your Gemini API key
 
@@ -24,6 +28,7 @@
    - Click "Deploy" - that's it! 🎉
 
 ### Option 2: Using Our Scripts
+
 ```bash
 # Setup and build everything
 npm run deploy:setup
@@ -35,16 +40,19 @@ npm run deploy:vercel
 ## What Gets Deployed Automatically
 
 ### ✅ Frontend App
+
 - React app with enhanced UI
-- Visual chart improvements  
+- Visual chart improvements
 - Chat interface with AI integration
 
 ### ✅ Serverless API
+
 - `/api/map-automation` endpoint
 - Runs automation simulation in production
 - Returns realistic map data for AI analysis
 
 ### ✅ Auto-Scaling
+
 - Serverless functions scale automatically
 - No server management needed
 - Pay only for what you use
@@ -52,12 +60,14 @@ npm run deploy:vercel
 ## Features That Work Out of the Box
 
 ### 🎭 For Judges (Demo Mode)
+
 - Just visit the deployed URL
 - Click "Analyze Map" in chat
 - See automation simulation with progress updates
 - AI analyzes generated map data automatically
 
 ### 🤖 For Development (Full Automation)
+
 - `npm run automation:server` + `npm run dev`
 - Real Playwright browser automation
 - Downloads actual INGRES map data
@@ -69,7 +79,7 @@ npm run deploy:vercel
 GitHub Push → Vercel Build → Deploy
      ↓
 ✅ React App (Static)
-✅ API Functions (Serverless)  
+✅ API Functions (Serverless)
 ✅ Environment Variables (Secure)
 ✅ Auto-scaling (Built-in)
 ```
@@ -77,13 +87,15 @@ GitHub Push → Vercel Build → Deploy
 ## Environment Variables Needed
 
 Only one required:
+
 - `VITE_GEMINI_API_KEY` - Your Google Gemini API key
 
 ## GitHub Actions (Automatic)
 
 The repo includes GitHub Actions that:
+
 - ✅ Build and test on every push
-- ✅ Verify everything works  
+- ✅ Verify everything works
 - ✅ Prepare for deployment
 - ✅ Show build status
 
@@ -104,6 +116,7 @@ npm run deploy:setup
 ```
 
 This script:
+
 1. Installs all dependencies
 2. Builds the project
 3. Creates deployment info

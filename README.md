@@ -75,16 +75,53 @@ VITE_API_BASE_URL=http://localhost:8080/api/v1
 - "What are the rainfall patterns this year?"
 
 ### API Integration
+   ## Groundwater State Deep Dive Component
+
+   An advanced `StateDeepDiveCard` component has been added for rich single-state groundwater analytics.
+
+   Usage example (direct import):
+
+   ```tsx
+   import StateDeepDiveCard from "@/components/cards/StateDeepDiveCard";
+   import { PUNJAB_PROFILE } from "@/data/stateGroundwaterData";
+
+   export function Demo() {
+      return <StateDeepDiveCard state={PUNJAB_PROFILE} />;
+   }
+   ```
+
+   Data shape (`StateGroundwaterProfile`) includes:
+   - extractionStage (%), annualDeclineM (m/yr)
+   - timeSeries (extraction, recharge, net)
+   - sectors, drivers, rechargeComponents, riskFactors, recommendations.
+
+   The card provides animated tabs: Overview, Sectors, Trends, Recharge, Drivers, Risk, Actions.
+
+   You can bind future AI or API outputs by mapping model JSON into a `StateGroundwaterProfile` object.
+
+   ### Automatic Trigger
+   When you click the Analyze Map button, after the groundwater analysis response renders, the app now automatically appends a `StateDeepDiveCard` (currently seeded with the Punjab profile) to give an immediate high-fidelity single-state diagnostic. You can later adapt this to dynamically select the state based on detected map region metadata.
+
+   ### Dynamic State Detection & Commands
+   The system now:
+   - Detects state names (Punjab, Delhi, Rajasthan) inside AI / map analysis output and swaps the deep dive to the detected state.
+   - Provides a chat command: `deep dive delhi` (or `state deep dive rajasthan`) to inject the interactive card manually.
+   - Prevents duplicate deep dive cards from appearing back-to-back.
 
 The chatbot integrates with:
-
-- **Google Gemini AI** for natural language processing
-- **Real-time data feeds** for current groundwater levels
-- **Historical databases** for trend analysis
-- **Satellite imagery** for land use analysis
-
 ## 🏗️ Project Structure
 
+```
+
+Or via barrel:
+
+```tsx
+import { StateDeepDiveCard } from "@/components/cards";
+import { PUNJAB_PROFILE } from "@/data/stateGroundwaterData";
+
+export function Demo() {
+   return <StateDeepDiveCard state={PUNJAB_PROFILE} />;
+}
 ```
 ground-sense-bot/
 ├── public/

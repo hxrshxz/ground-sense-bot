@@ -59,12 +59,6 @@ export default async function handler(req, res) {
     await page.getByRole("link", { name: "" }).click();
     await page.getByRole("link", { name: "" }).click();
     await page.getByRole("link", { name: "" }).click();
-    await page.getByRole("link", { name: "" }).click();
-    await page.getByRole("link", { name: "" }).click();
-    await page.getByRole("link", { name: "" }).click();
-    await page.getByRole("link", { name: "" }).click();
-    await page.getByRole("link", { name: "" }).click();
-    await page.getByRole("link", { name: "" }).click();
 
     console.log("🖱️ Clicking empty button...");
     await page.getByRole("button", { name: "" }).click();

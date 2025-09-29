@@ -2,14 +2,13 @@ import { useState, useMemo } from "react";
 import {
   ResponsiveContainer,
   ComposedChart,
-  Area,
   Line,
   Bar,
   XAxis,
   YAxis,
   Tooltip,
   CartesianGrid,
-  Legend,
+  ReferenceLine,
 } from "recharts";
 
 const GroundwaterAnalysisChart = ({ data }: { data: any }) => {
@@ -20,9 +19,16 @@ const GroundwaterAnalysisChart = ({ data }: { data: any }) => {
     extractionStage: true,
   });
   const [hoverRegion, setHoverRegion] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
+  const [sortKey, setSortKey] = useState<
+    "region" | "extraction" | "recharge" | "netBalance" | "extractionStage"
+  >("region");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [filterText, setFilterText] = useState("");
+  const [focusedRegion, setFocusedRegion] = useState<string | null>(null);
 
   // Sample groundwater data structure
-  const groundwaterData = data?.graphs?.extraction_vs_recharge || [
+  const groundwaterDataRaw = data?.graphs?.extraction_vs_recharge || [
     {
       region: "Delhi",
       extraction: 155.8,
@@ -73,9 +79,26 @@ const GroundwaterAnalysisChart = ({ data }: { data: any }) => {
     },
   ];
 
+  const groundwaterData = useMemo(() => {
+    const filtered = groundwaterDataRaw.filter((d: any) =>
+      d.region.toLowerCase().includes(filterText.toLowerCase())
+    );
+    const sorted = [...filtered].sort((a, b) => {
+      const av = a[sortKey];
+      const bv = b[sortKey];
+      if (av === bv) return 0;
+      if (sortDir === "asc") return av > bv ? 1 : -1;
+      return av < bv ? 1 : -1;
+    });
+    return sorted;
+  }, [groundwaterDataRaw, filterText, sortKey, sortDir]);
+
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
-      const data = payload[0]?.payload;
+      const dataPoint = payload[0]?.payload;
+      const avgExtractionVal = indicators.avgExtraction
+        ? parseFloat(String(indicators.avgExtraction))
+        : 0;
       return (
         <div className="p-4 bg-white/95 backdrop-blur-sm border border-blue-200 rounded-xl shadow-lg w-72 font-sans">
           <p className="font-bold text-slate-800 text-lg mb-3">
@@ -101,33 +124,59 @@ const GroundwaterAnalysisChart = ({ data }: { data: any }) => {
                 </span>
               </div>
             ))}
-            {data && (
-              <div className="mt-3 pt-2 border-t border-gray-200">
+            {dataPoint && (
+              <div className="mt-3 pt-2 border-t border-gray-200 space-y-1">
                 <div className="flex justify-between text-xs">
                   <span className="text-slate-500">Risk Level:</span>
                   <span
                     className={`font-semibold ${
-                      data.riskLevel === "Over-Exploited"
+                      dataPoint.riskLevel === "Over-Exploited"
                         ? "text-red-600"
-                        : data.riskLevel === "Critical"
+                        : dataPoint.riskLevel === "Critical"
                         ? "text-orange-600"
-                        : data.riskLevel === "Semi-Critical"
+                        : dataPoint.riskLevel === "Semi-Critical"
                         ? "text-yellow-600"
                         : "text-green-600"
                     }`}
                   >
-                    {data.riskLevel}
+                    {dataPoint.riskLevel}
                   </span>
                 </div>
-                <div className="flex justify-between text-xs mt-1">
+                <div className="flex justify-between text-xs">
                   <span className="text-slate-500">Net Balance:</span>
                   <span
                     className={`font-semibold ${
-                      data.netBalance < 0 ? "text-red-600" : "text-green-600"
+                      dataPoint.netBalance < 0
+                        ? "text-red-600"
+                        : "text-green-600"
                     }`}
                   >
-                    {data.netBalance > 0 ? "+" : ""}
-                    {data.netBalance} HAM
+                    {dataPoint.netBalance > 0 ? "+" : ""}
+                    {dataPoint.netBalance} HAM
+                  </span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-slate-500">Δ Extraction vs Avg:</span>
+                  <span
+                    className={`font-semibold ${
+                      dataPoint.extraction >= avgExtractionVal
+                        ? "text-red-600"
+                        : "text-green-600"
+                    }`}
+                  >
+                    {(dataPoint.extraction - avgExtractionVal).toFixed(1)} HAM
+                  </span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-slate-500">Balance Ratio:</span>
+                  <span className="font-semibold text-slate-700">
+                    {dataPoint.recharge
+                      ? (
+                          (dataPoint.extraction / dataPoint.recharge) *
+                          100
+                        ).toFixed(1)
+                      : "--"}
+                    %
                   </span>
                 </div>
               </div>
@@ -163,7 +212,11 @@ const GroundwaterAnalysisChart = ({ data }: { data: any }) => {
     setSeriesActive((prev) => ({ ...prev, [key]: !prev[key] }));
 
   return (
-    <div className="relative overflow-hidden w-full bg-white/80 p-6 rounded-2xl border my-4 backdrop-blur-md shadow-xl font-sans">
+    <div
+      className={`relative overflow-hidden w-full bg-white/80 p-6 rounded-2xl border my-4 backdrop-blur-md shadow-xl font-sans transition-all duration-500 ${
+        expanded ? "ring-1 ring-sky-300" : ""
+      }`}
+    >
       <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-blue-500 via-cyan-500 to-sky-600 animate-pulse"></div>
       <div className="pointer-events-none absolute inset-0 opacity-25 bg-[radial-gradient(circle_at_70%_30%,rgba(56,189,248,0.25),transparent_60%)]" />
 
@@ -174,66 +227,120 @@ const GroundwaterAnalysisChart = ({ data }: { data: any }) => {
         <p className="text-sm text-slate-500 mb-4 ml-2">
           Regional Extraction vs Recharge Analysis (HAM - Hectare Meter)
         </p>
-      </div>
+        {/* Removed stray closing div after controls */}
 
-      <div className="flex items-center justify-center gap-2 mb-4 p-2 bg-slate-100 rounded-2xl flex-wrap">
-        {[
-          {
-            key: "extraction",
-            label: "🏭 Extraction",
-            on: "bg-red-500 text-white",
-            off: "text-red-700 hover:bg-red-100",
-          },
-          {
-            key: "recharge",
-            label: "🌧️ Recharge",
-            on: "bg-green-500 text-white",
-            off: "text-green-700 hover:bg-green-100",
-          },
-          {
-            key: "netBalance",
-            label: "⚖️ Net Balance",
-            on: "bg-blue-600 text-white",
-            off: "text-blue-700 hover:bg-blue-100",
-          },
-          {
-            key: "extractionStage",
-            label: "📊 Stage",
-            on: "bg-purple-500 text-white",
-            off: "text-purple-700 hover:bg-purple-100",
-          },
-        ].map((b) => (
+        <div className="flex items-center justify-center gap-2 mb-4 p-2 bg-slate-100 rounded-2xl flex-wrap">
+          {[
+            {
+              key: "extraction",
+              label: "🏭 Extraction",
+              on: "bg-red-500 text-white",
+              off: "text-red-700 hover:bg-red-100",
+            },
+            {
+              key: "recharge",
+              label: "🌧️ Recharge",
+              on: "bg-green-500 text-white",
+              off: "text-green-700 hover:bg-green-100",
+            },
+            {
+              key: "netBalance",
+              label: "⚖️ Net Balance",
+              on: "bg-blue-600 text-white",
+              off: "text-blue-700 hover:bg-blue-100",
+            },
+            {
+              key: "extractionStage",
+              label: "📊 Stage",
+              on: "bg-purple-500 text-white",
+              off: "text-purple-700 hover:bg-purple-100",
+            },
+          ].map((b) => (
+            <button
+              key={b.key}
+              onClick={() => toggleSeries(b.key)}
+              className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 shadow-sm ${
+                seriesActive[b.key] ? b.on + " shadow" : b.off + " opacity-70"
+              } relative`}
+            >
+              {b.label}
+              <span
+                className={`ml-2 inline-block w-2 h-2 rounded-full ${
+                  seriesActive[b.key] ? "bg-white" : "bg-slate-400"
+                }`}
+              ></span>
+            </button>
+          ))}
           <button
-            key={b.key}
-            onClick={() => toggleSeries(b.key)}
-            className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 shadow-sm ${
-              seriesActive[b.key] ? b.on + " shadow" : b.off + " opacity-70"
-            } relative`}
+            onClick={() =>
+              setSeriesActive({
+                extraction: true,
+                recharge: true,
+                netBalance: true,
+                extractionStage: true,
+              })
+            }
+            className="px-3 py-1.5 text-[10px] font-semibold rounded-full bg-slate-800 text-white hover:bg-slate-700"
           >
-            {b.label}
-            <span
-              className={`ml-2 inline-block w-2 h-2 rounded-full ${
-                seriesActive[b.key] ? "bg-white" : "bg-slate-400"
-              }`}
-            ></span>
+            Reset
           </button>
-        ))}
-        <button
-          onClick={() =>
-            setSeriesActive({
-              extraction: true,
-              recharge: true,
-              netBalance: true,
-              extractionStage: true,
-            })
-          }
-          className="px-3 py-1.5 text-[10px] font-semibold rounded-full bg-slate-800 text-white hover:bg-slate-700"
-        >
-          Reset
-        </button>
+          <button
+            onClick={() => setExpanded((e) => !e)}
+            className="px-3 py-1.5 text-[10px] font-semibold rounded-full bg-sky-600 text-white hover:bg-sky-500"
+          >
+            {expanded ? "Collapse" : "Expand"}
+          </button>
+        </div>
+
+        <div className="flex flex-wrap gap-3 mb-4 items-center justify-between text-xs">
+          <div className="flex gap-2 items-center">
+            <label className="font-semibold text-slate-600">Sort</label>
+            <select
+              value={sortKey}
+              onChange={(e) => setSortKey(e.target.value as any)}
+              className="border rounded px-2 py-1 bg-white"
+            >
+              <option value="region">Region</option>
+              <option value="extraction">Extraction</option>
+              <option value="recharge">Recharge</option>
+              <option value="netBalance">Net Balance</option>
+              <option value="extractionStage">Stage %</option>
+            </select>
+            <button
+              onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}
+              className="px-2 py-1 border rounded bg-white hover:bg-slate-50"
+            >
+              {sortDir === "asc" ? "↑" : "↓"}
+            </button>
+          </div>
+          <div className="flex gap-2 items-center">
+            <label className="font-semibold text-slate-600">Filter</label>
+            <input
+              value={filterText}
+              onChange={(e) => setFilterText(e.target.value)}
+              placeholder="Type region..."
+              className="border rounded px-2 py-1"
+            />
+          </div>
+          {focusedRegion && (
+            <div className="px-2 py-1 rounded bg-sky-100 text-sky-700 flex items-center gap-2">
+              Focused: {focusedRegion}
+              <button
+                onClick={() => setFocusedRegion(null)}
+                className="text-[10px] px-1 py-0.5 bg-sky-600 text-white rounded"
+              >
+                ×
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="w-full h-[500px]">
+      <div
+        className={`w-full ${
+          expanded ? "h-[720px]" : "h-[560px]"
+        } transition-all duration-500`}
+      >
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={groundwaterData}
@@ -243,6 +350,12 @@ const GroundwaterAnalysisChart = ({ data }: { data: any }) => {
                 setHoverRegion(s.activePayload[0].payload.region);
             }}
             onMouseLeave={() => setHoverRegion(null)}
+            onClick={(s: any) => {
+              if (s?.activeLabel)
+                setFocusedRegion((r) =>
+                  r === s.activeLabel ? null : s.activeLabel
+                );
+            }}
           >
             <defs>
               <linearGradient id="colorExtraction" x1="0" y1="0" x2="0" y2="1">
@@ -375,6 +488,7 @@ const GroundwaterAnalysisChart = ({ data }: { data: any }) => {
                 filter="url(#glowBlue)"
                 isAnimationActive
                 animationDuration={900}
+                strokeOpacity={1}
               />
             )}
             {seriesActive.extractionStage && (
@@ -390,6 +504,35 @@ const GroundwaterAnalysisChart = ({ data }: { data: any }) => {
                 filter="url(#glowBlue)"
                 isAnimationActive
                 animationDuration={950}
+                strokeOpacity={1}
+              />
+            )}
+            {seriesActive.extraction && (
+              <ReferenceLine
+                yAxisId="left"
+                y={parseFloat(String(indicators.avgExtraction))}
+                stroke="#ef4444"
+                strokeDasharray="2 6"
+                label={{
+                  value: "Avg Extraction",
+                  position: "right",
+                  fill: "#ef4444",
+                  fontSize: 10,
+                }}
+              />
+            )}
+            {seriesActive.recharge && (
+              <ReferenceLine
+                yAxisId="left"
+                y={parseFloat(String(indicators.avgRecharge))}
+                stroke="#22c55e"
+                strokeDasharray="2 6"
+                label={{
+                  value: "Avg Recharge",
+                  position: "right",
+                  fill: "#16a34a",
+                  fontSize: 10,
+                }}
               />
             )}
           </ComposedChart>

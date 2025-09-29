@@ -40,4 +40,15 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      external: [
+        "chromium-bidi/lib/cjs/bidiMapper/BidiMapper",
+        "chromium-bidi/lib/cjs/cdp/CdpConnection",
+      ],
+    },
+  },
+  optimizeDeps: {
+    exclude: ["playwright-core", "chromium-bidi"],
+  },
 }));

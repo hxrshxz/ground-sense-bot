@@ -1,6 +1,17 @@
 "use client";
 
-import { ResponsiveContainer, ComposedChart, Bar, Line, Area, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
+import {
+  ResponsiveContainer,
+  ComposedChart,
+  Bar,
+  Line,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Legend,
+} from "recharts";
 
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { motion, AnimatePresence, useInView, useSpring } from "framer-motion";
@@ -47,7 +58,23 @@ import AIResponseRenderer from "./ai-components/AIResponseRenderer";
 import AIResponseRendererV2 from "./ai-components/AIResponseRendererV2";
 import { getAIResponse } from "../services/aiResponseServiceV2";
 import { GeminiApiService } from "../services/geminiApi";
+import { MapAnalysisDialog } from "./MapAnalysisDialog";
 import { useApiKey } from "./ApiKeyContext";
+const GroundwaterExtractionVisualization = React.lazy(
+  () => import("./GroundwaterExtractionVisualization")
+);
+const CropRecommendationCard = React.lazy(
+  () => import("./cards/CropRecommendationCard")
+);
+const PolicyRechargeCard = React.lazy(
+  () => import("./cards/PolicyRechargeCard")
+);
+const RainfallImpactCard = React.lazy(
+  () => import("./cards/RainfallImpactCard")
+);
+const StateComparisonCard = React.lazy(
+  () => import("./cards/StateComparisonCard")
+);
 
 //================================================================================
 // --- LISTENING INDICATOR COMPONENT ---
@@ -420,7 +447,9 @@ const INGRESCommandBar = ({
   onYearChange,
   isCoPilotMode,
   onCoPilotModeChange,
-  onFileSelect
+  onFileSelect,
+  isMapAnalysisOpen,
+  setIsMapAnalysisOpen,
 }: any) => {
   const placeholders = useMemo(
     () =>
@@ -437,7 +466,7 @@ const INGRESCommandBar = ({
             "What policy changes can improve recharge?",
             "How do cropping patterns affect extraction?",
           ]
-        : ["संगनेर ब्लॉक का डेटा दिखाएं...", "جميع ब्लॉकों की सूची बनाएं..."],
+        : ["संगनेर ब्लॉक का डेटा दिखाएं...", "جميع بلوكوں کی فہرست بنائیں..."],
     [language]
   );
   const [currentPlaceholder, setCurrentPlaceholder] = useState(placeholders[0]);
@@ -641,12 +670,12 @@ const INGRESCommandBar = ({
               ref={fileInputRef}
               className="hidden"
               accept="image/*"
-               onChange={onFileSelect}
+              onChange={onFileSelect}
             />
             <Button
               variant="ghost"
               className="h-auto px-3 py-1.5 rounded-lg"
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => setIsMapAnalysisOpen(true)}
             >
               <Camera className="h-4 w-4 mr-2" />
               <span>Analyze Map</span>
@@ -718,6 +747,7 @@ type ChatMessage = {
   type: string;
   text?: string;
   component?: React.ReactNode;
+  imageData?: string;
 };
 
 // --- FIX: Updated component to manage animation and markdown rendering ---
@@ -766,40 +796,87 @@ const AnimatedMarkdownMessage = ({ text }: { text: string }) => {
 // --- Replace your existing HydrogeologicalAnalysisChart component with this complete and corrected version ---
 const HydrogeologicalAnalysisChart = () => {
   // --- State to manage the active chart view ---
-  const [activeSeries, setActiveSeries] = useState('all'); // 'all' is the default view
+  const [activeSeries, setActiveSeries] = useState("all"); // 'all' is the default view
 
   // --- Enriched data with netBalance calculated automatically ---
   const data = [
-    { month: 'Apr', extraction: 5300, recharge: 3108, waterQuality: 92, declineRate: 0.25 },
-    { month: 'May', extraction: 6150, recharge: 1800, waterQuality: 89, declineRate: 0.31 },
-    { month: 'Jun', extraction: 5800, recharge: 4500, waterQuality: 87, declineRate: 0.28 },
-    { month: 'Jul', extraction: 4700, recharge: 8200, waterQuality: 91, declineRate: 0.18 },
-    { month: 'Aug', extraction: 4100, recharge: 7800, waterQuality: 90, declineRate: 0.15 },
-    { month: 'Sep', extraction: 3900, recharge: 6500, waterQuality: 88, declineRate: 0.22 },
-  ].map(d => ({ ...d, netBalance: d.recharge - d.extraction }));
+    {
+      month: "Apr",
+      extraction: 5300,
+      recharge: 3108,
+      waterQuality: 92,
+      declineRate: 0.25,
+    },
+    {
+      month: "May",
+      extraction: 6150,
+      recharge: 1800,
+      waterQuality: 89,
+      declineRate: 0.31,
+    },
+    {
+      month: "Jun",
+      extraction: 5800,
+      recharge: 4500,
+      waterQuality: 87,
+      declineRate: 0.28,
+    },
+    {
+      month: "Jul",
+      extraction: 4700,
+      recharge: 8200,
+      waterQuality: 91,
+      declineRate: 0.18,
+    },
+    {
+      month: "Aug",
+      extraction: 4100,
+      recharge: 7800,
+      waterQuality: 90,
+      declineRate: 0.15,
+    },
+    {
+      month: "Sep",
+      extraction: 3900,
+      recharge: 6500,
+      waterQuality: 88,
+      declineRate: 0.22,
+    },
+  ].map((d) => ({ ...d, netBalance: d.recharge - d.extraction }));
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
         <div className="p-3 bg-white/90 backdrop-blur-sm border border-slate-200 rounded-xl shadow-lg w-64 font-sans">
-          <p className="font-bold text-slate-800 text-lg mb-2">{label} 2025 Summary</p>
+          <p className="font-bold text-slate-800 text-lg mb-2">
+            {label} 2025 Summary
+          </p>
           <div className="space-y-2">
             {payload.map((pld: any) => (
-              <div key={pld.dataKey} className="flex items-center justify-between text-sm">
+              <div
+                key={pld.dataKey}
+                className="flex items-center justify-between text-sm"
+              >
                 <div className="flex items-center">
-                  <div className="w-2 h-2 rounded-full mr-2" style={{ backgroundColor: pld.stroke || pld.fill }}></div>
+                  <div
+                    className="w-2 h-2 rounded-full mr-2"
+                    style={{ backgroundColor: pld.stroke || pld.fill }}
+                  ></div>
                   <span className="text-slate-600">{pld.name}:</span>
                 </div>
-                <span className="font-semibold text-slate-800">{`${pld.value.toLocaleString()}${pld.unit || ''}`}</span>
+                <span className="font-semibold text-slate-800">{`${pld.value.toLocaleString()}${
+                  pld.unit || ""
+                }`}</span>
               </div>
             ))}
           </div>
         </div>
       );
-    } return null;
+    }
+    return null;
   };
 
- // --- Replace the entire return statement of your HydrogeologicalAnalysisChart with this new version ---
+  // --- Replace the entire return statement of your HydrogeologicalAnalysisChart with this new version ---
   // --- Replace the entire return statement of your HydrogeologicalAnalysisChart with this new version ---
   return (
     // --- CHANGE 1: Added `relative` and `overflow-hidden` to the main container ---
@@ -809,39 +886,192 @@ const HydrogeologicalAnalysisChart = () => {
 
       {/* Title and Subtitle Section (no changes here) */}
       <div>
-        <h3 className="font-bold text-xl text-slate-800 mb-1 ml-2">Interactive Groundwater Analysis</h3>
-        <p className="text-sm text-slate-500 mb-4 ml-2">Delhi Block – Six Month Summary (2025)</p>
+        <h3 className="font-bold text-xl text-slate-800 mb-1 ml-2">
+          Interactive Groundwater Analysis
+        </h3>
+        <p className="text-sm text-slate-500 mb-4 ml-2">
+          Delhi Block – Six Month Summary (2025)
+        </p>
       </div>
-      
+
       {/* Interactive Filter Buttons (no changes here) */}
       <div className="flex items-center justify-center gap-2 mb-4 p-1 bg-slate-100 rounded-full">
-        <button onClick={() => setActiveSeries('all')} className={`px-4 py-1.5 text-sm font-semibold rounded-full transition-colors duration-200 ${activeSeries === 'all' ? 'bg-slate-800 text-white shadow' : 'text-slate-600 hover:bg-slate-200'}`}>All</button>
-        <button onClick={() => setActiveSeries('extraction')} className={`px-4 py-1.5 text-sm font-semibold rounded-full transition-colors duration-200 ${activeSeries === 'extraction' ? 'bg-red-500 text-white shadow' : 'text-red-700 hover:bg-red-100'}`}>Extraction</button>
-        <button onClick={() => setActiveSeries('recharge')} className={`px-4 py-1.5 text-sm font-semibold rounded-full transition-colors duration-200 ${activeSeries === 'recharge' ? 'bg-green-500 text-white shadow' : 'text-green-700 hover:bg-green-100'}`}>Recharge</button>
-        <button onClick={() => setActiveSeries('netBalance')} className={`px-4 py-1.5 text-sm font-semibold rounded-full transition-colors duration-200 ${activeSeries === 'netBalance' ? 'bg-amber-600 text-white shadow' : 'text-amber-700 hover:bg-amber-100'}`}>Net Balance</button>
-        <button onClick={() => setActiveSeries('waterQuality')} className={`px-4 py-1.5 text-sm font-semibold rounded-full transition-colors duration-200 ${activeSeries === 'waterQuality' ? 'bg-purple-500 text-white shadow' : 'text-purple-700 hover:bg-purple-100'}`}>Water Quality</button>
+        <button
+          onClick={() => setActiveSeries("all")}
+          className={`px-4 py-1.5 text-sm font-semibold rounded-full transition-colors duration-200 ${
+            activeSeries === "all"
+              ? "bg-slate-800 text-white shadow"
+              : "text-slate-600 hover:bg-slate-200"
+          }`}
+        >
+          All
+        </button>
+        <button
+          onClick={() => setActiveSeries("extraction")}
+          className={`px-4 py-1.5 text-sm font-semibold rounded-full transition-colors duration-200 ${
+            activeSeries === "extraction"
+              ? "bg-red-500 text-white shadow"
+              : "text-red-700 hover:bg-red-100"
+          }`}
+        >
+          Extraction
+        </button>
+        <button
+          onClick={() => setActiveSeries("recharge")}
+          className={`px-4 py-1.5 text-sm font-semibold rounded-full transition-colors duration-200 ${
+            activeSeries === "recharge"
+              ? "bg-green-500 text-white shadow"
+              : "text-green-700 hover:bg-green-100"
+          }`}
+        >
+          Recharge
+        </button>
+        <button
+          onClick={() => setActiveSeries("netBalance")}
+          className={`px-4 py-1.5 text-sm font-semibold rounded-full transition-colors duration-200 ${
+            activeSeries === "netBalance"
+              ? "bg-amber-600 text-white shadow"
+              : "text-amber-700 hover:bg-amber-100"
+          }`}
+        >
+          Net Balance
+        </button>
+        <button
+          onClick={() => setActiveSeries("waterQuality")}
+          className={`px-4 py-1.5 text-sm font-semibold rounded-full transition-colors duration-200 ${
+            activeSeries === "waterQuality"
+              ? "bg-purple-500 text-white shadow"
+              : "text-purple-700 hover:bg-purple-100"
+          }`}
+        >
+          Water Quality
+        </button>
       </div>
 
       {/* The Chart Itself (no changes here) */}
       <div className="w-full h-[500px]">
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={data} margin={{ top: 5, right: 20, left: -10, bottom: 10 }}>
+          <ComposedChart
+            data={data}
+            margin={{ top: 5, right: 20, left: -10, bottom: 10 }}
+          >
             <defs>
-              <linearGradient id="colorExtraction" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#ef4444" stopOpacity={0.4}/><stop offset="95%" stopColor="#ef4444" stopOpacity={0}/></linearGradient>
-              <linearGradient id="colorRecharge" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#22c55e" stopOpacity={0.4}/><stop offset="95%" stopColor="#22c55e" stopOpacity={0}/></linearGradient>
-              <linearGradient id="colorNetBalance" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#d97706" stopOpacity={0.4}/><stop offset="95%" stopColor="#d97706" stopOpacity={0}/></linearGradient>
-              <linearGradient id="colorWaterQuality" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.4}/><stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/></linearGradient>
+              <linearGradient id="colorExtraction" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#ef4444" stopOpacity={0.4} />
+                <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+              </linearGradient>
+              <linearGradient id="colorRecharge" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#22c55e" stopOpacity={0.4} />
+                <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+              </linearGradient>
+              <linearGradient id="colorNetBalance" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#d97706" stopOpacity={0.4} />
+                <stop offset="95%" stopColor="#d97706" stopOpacity={0} />
+              </linearGradient>
+              <linearGradient
+                id="colorWaterQuality"
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
+                <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.4} />
+                <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+              </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false}/>
-            <XAxis dataKey="month" fontSize={12} tickLine={false} axisLine={false} dy={10} tick={{ fill: '#64748b' }} />
-            <YAxis yAxisId="left" unit=" m³" width={80} fontSize={12} tickLine={false} axisLine={false} tick={{ fill: '#64748b' }} tickFormatter={(value) => new Intl.NumberFormat('en-US', { notation: 'compact', compactDisplay: 'short' }).format(value)} />
-            <YAxis yAxisId="right" orientation="right" unit="%" domain={[80, 100]} width={50} fontSize={12} tickLine={false} axisLine={false} tick={{ fill: '#64748b' }} />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(241, 245, 249, 0.7)' }} />
-            
-            {(activeSeries === 'all' || activeSeries === 'extraction') && <Area yAxisId="left" type="monotone" dataKey="extraction" name="Extraction" unit=" m³" fill="url(#colorExtraction)" stroke="#ef4444" strokeWidth={3} />}
-            {(activeSeries === 'all' || activeSeries === 'recharge') && <Area yAxisId="left" type="monotone" dataKey="recharge" name="Recharge" unit=" m³" fill="url(#colorRecharge)" stroke="#22c55e" strokeWidth={3} />}
-            {(activeSeries === 'all' || activeSeries === 'netBalance') && <Area yAxisId="left" type="monotone" dataKey="netBalance" name="Net Balance" unit=" m³" fill="url(#colorNetBalance)" stroke="#d97706" strokeWidth={3} />}
-            {(activeSeries === 'all' || activeSeries === 'waterQuality') && <Line yAxisId="right" type="monotone" dataKey="waterQuality" name="Water Quality" unit="%" stroke="#8b5cf6" strokeWidth={2} strokeDasharray="5 5" dot={false} />}
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="#e2e8f0"
+              vertical={false}
+            />
+            <XAxis
+              dataKey="month"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+              dy={10}
+              tick={{ fill: "#64748b" }}
+            />
+            <YAxis
+              yAxisId="left"
+              unit=" m³"
+              width={80}
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+              tick={{ fill: "#64748b" }}
+              tickFormatter={(value) =>
+                new Intl.NumberFormat("en-US", {
+                  notation: "compact",
+                  compactDisplay: "short",
+                }).format(value)
+              }
+            />
+            <YAxis
+              yAxisId="right"
+              orientation="right"
+              unit="%"
+              domain={[80, 100]}
+              width={50}
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+              tick={{ fill: "#64748b" }}
+            />
+            <Tooltip
+              content={<CustomTooltip />}
+              cursor={{ fill: "rgba(241, 245, 249, 0.7)" }}
+            />
+
+            {(activeSeries === "all" || activeSeries === "extraction") && (
+              <Area
+                yAxisId="left"
+                type="monotone"
+                dataKey="extraction"
+                name="Extraction"
+                unit=" m³"
+                fill="url(#colorExtraction)"
+                stroke="#ef4444"
+                strokeWidth={3}
+              />
+            )}
+            {(activeSeries === "all" || activeSeries === "recharge") && (
+              <Area
+                yAxisId="left"
+                type="monotone"
+                dataKey="recharge"
+                name="Recharge"
+                unit=" m³"
+                fill="url(#colorRecharge)"
+                stroke="#22c55e"
+                strokeWidth={3}
+              />
+            )}
+            {(activeSeries === "all" || activeSeries === "netBalance") && (
+              <Area
+                yAxisId="left"
+                type="monotone"
+                dataKey="netBalance"
+                name="Net Balance"
+                unit=" m³"
+                fill="url(#colorNetBalance)"
+                stroke="#d97706"
+                strokeWidth={3}
+              />
+            )}
+            {(activeSeries === "all" || activeSeries === "waterQuality") && (
+              <Line
+                yAxisId="right"
+                type="monotone"
+                dataKey="waterQuality"
+                name="Water Quality"
+                unit="%"
+                stroke="#8b5cf6"
+                strokeWidth={2}
+                strokeDasharray="5 5"
+                dot={false}
+              />
+            )}
           </ComposedChart>
         </ResponsiveContainer>
       </div>
@@ -856,43 +1086,96 @@ export const INGRESAssistant = ({
 }) => {
   const [view, setView] = useState("dashboard");
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
-// --- 1. Replace your old handler function with this corrected version ---
- const handleFakeMapAnalysis = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // --- 1. Replace your old handler function with this corrected version ---
+  const handleFakeMapAnalysis = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     // This is the new logic to auto-open the chat window
-    setView('chat'); 
+    setView("chat");
 
     const userMessage: ChatMessage = {
       id: Date.now(),
       type: "user",
-      text: `Analyzing map: ${file.name}`
+      text: `Analyzing map: ${file.name}`,
     };
 
     // --- THIS IS THE CRUCIAL FIX ---
     // This now ADDS the message to the end of the previous history instead of replacing it.
-    setChatHistory(previousChatHistory => [...previousChatHistory, userMessage]); 
-    
+    setChatHistory((previousChatHistory) => [
+      ...previousChatHistory,
+      userMessage,
+    ]);
+
     setIsThinking(true);
-    
+
     setTimeout(() => {
       const graphMessage: ChatMessage = {
         id: Date.now() + 1,
-        type: 'bot',
-        component:<HydrogeologicalAnalysisChart /> // Or your preferred graph component name
+        type: "bot",
+        component: <HydrogeologicalAnalysisChart />, // Or your preferred graph component name
       };
 
       // Use the functional update form to guarantee the latest state
-      setChatHistory(previousChatHistory => [...previousChatHistory, graphMessage]);
+      setChatHistory((previousChatHistory) => [
+        ...previousChatHistory,
+        graphMessage,
+      ]);
       setIsThinking(false);
     }, 4000);
 
     // Clear the file input for the next use
     if (event.target) {
-        event.target.value = '';
+      event.target.value = "";
     }
   };
+
+  // Handle image analysis from MapAnalysisDialog
+  const handleImageAnalysis = async (imageData: string) => {
+    setView("chat");
+
+    const userMessage: ChatMessage = {
+      id: Date.now(),
+      type: "user",
+      text: "Analyzing uploaded INGRES map image with comprehensive groundwater analysis...",
+      imageData: imageData,
+    };
+
+    setChatHistory((prev) => [...prev, userMessage]);
+    setIsThinking(true);
+
+    try {
+      // Create Gemini service instance and analyze the image with the predefined comprehensive prompt
+      const geminiService = new GeminiApiService(apiKey);
+      const response = await geminiService.analyzeImage(
+        imageData,
+        true // Use the comprehensive MAP_ANALYSIS_PROMPT
+      );
+
+      const botMessage: ChatMessage = {
+        id: Date.now() + 1,
+        type: "ai",
+        text: response,
+      };
+
+      setChatHistory((prev) => [...prev, botMessage]);
+    } catch (error) {
+      console.error("Image analysis failed:", error);
+
+      const errorMessage: ChatMessage = {
+        id: Date.now() + 1,
+        type: "ai",
+        text: "I apologize, but I encountered an error while analyzing the map image. Please try again or ensure you have provided a valid API key.",
+      };
+
+      setChatHistory((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsThinking(false);
+    }
+  };
+
   const [isThinking, setIsThinking] = useState(false);
   const [currentComparison, setCurrentComparison] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState("");
@@ -912,6 +1195,7 @@ export const INGRESAssistant = ({
   );
   const [isListeningForFollowUp, setIsListeningForFollowUp] = useState(false);
   const [showListeningIndicator, setShowListeningIndicator] = useState(false);
+  const [isMapAnalysisOpen, setIsMapAnalysisOpen] = useState(false);
 
   const { apiKey } = useApiKey();
   const {
@@ -932,110 +1216,122 @@ export const INGRESAssistant = ({
     }
 
     const utterance = new SpeechSynthesisUtterance(text);
-    
+
     // Get available voices
     const voices = window.speechSynthesis.getVoices();
-    
+
     // Find the best natural-sounding voice based on language
     let selectedVoice;
-    
-    if (language.startsWith('en')) {
+
+    if (language.startsWith("en")) {
       // Look for high-quality English voices in this order of preference
       const preferredVoiceNames = [
-        'Google UK English Female', // Very natural-sounding
-        'Microsoft Aria Online (Natural)', 
-        'Microsoft Libby Online (Natural)',
-        'Apple Samantha',
-        'Apple Moira',
-        'Daniel',
-        'Samantha',
-        'Karen',
-        'Google US English',
-        'Alex'
+        "Google UK English Female", // Very natural-sounding
+        "Microsoft Aria Online (Natural)",
+        "Microsoft Libby Online (Natural)",
+        "Apple Samantha",
+        "Apple Moira",
+        "Daniel",
+        "Samantha",
+        "Karen",
+        "Google US English",
+        "Alex",
       ];
-      
+
       // Try to find one of the preferred voices
       for (const voiceName of preferredVoiceNames) {
-        const voice = voices.find(v => v.name === voiceName);
+        const voice = voices.find((v) => v.name === voiceName);
         if (voice) {
           selectedVoice = voice;
           break;
         }
       }
-      
+
       // If no preferred voice found, try to find any natural-sounding voice
       if (!selectedVoice) {
-        selectedVoice = voices.find(voice => 
-          (voice.name.toLowerCase().includes('natural') || 
-           voice.name.toLowerCase().includes('premium') ||
-           voice.name.toLowerCase().includes('enhanced')) && 
-          voice.lang.startsWith('en')
+        selectedVoice = voices.find(
+          (voice) =>
+            (voice.name.toLowerCase().includes("natural") ||
+              voice.name.toLowerCase().includes("premium") ||
+              voice.name.toLowerCase().includes("enhanced")) &&
+            voice.lang.startsWith("en")
         );
       }
-    } else if (language.startsWith('hi')) {
+    } else if (language.startsWith("hi")) {
       // For Hindi, find the best available voice
       const preferredHindiVoices = [
-        'Google हिन्दी',
-        'Microsoft Swara Online (Natural)',
-        'Lekha'
+        "Google हिन्दी",
+        "Microsoft Swara Online (Natural)",
+        "Lekha",
       ];
-      
+
       for (const voiceName of preferredHindiVoices) {
-        const voice = voices.find(v => v.name === voiceName);
+        const voice = voices.find((v) => v.name === voiceName);
         if (voice) {
           selectedVoice = voice;
           break;
         }
       }
     }
-    
+
     // If still no voice found, use any voice matching the language
     if (!selectedVoice) {
-      selectedVoice = voices.find(voice => 
-        voice.lang.startsWith(language.split('-')[0])
+      selectedVoice = voices.find((voice) =>
+        voice.lang.startsWith(language.split("-")[0])
       );
     }
-    
+
     // If a voice was found, use it
     if (selectedVoice) {
       utterance.voice = selectedVoice;
     }
-    
+
     // Optimize parameters for natural speech
     utterance.rate = 0.92; // Slightly slower for more clarity
     utterance.pitch = 1.0; // Natural pitch
-    
+
     // Process text for more natural speech patterns
     // Add slight pauses at punctuation for more natural speech rhythm
-    text = text.replace(/([.,!?;:])/g, '$1 ');
-    
+    text = text.replace(/([.,!?;:])/g, "$1 ");
+
     // Add longer pauses for paragraph breaks
-    text = text.replace(/\n\n/g, '.\n\n');
-    
+    text = text.replace(/\n\n/g, ".\n\n");
+
     // Add emphasis to important terms
-    text = text.replace(/\b(critical|severe|important|significant|Over-Exploited|Critical|Safe)\b/g, ' $1 ');
-    
+    text = text.replace(
+      /\b(critical|severe|important|significant|Over-Exploited|Critical|Safe)\b/g,
+      " $1 "
+    );
+
     // Convert numerical data for better speech
-    text = text.replace(/(\d+)%/g, '$1 percent');
-    text = text.replace(/(\d+)\.(\d+)/g, '$1 point $2');
-    
+    text = text.replace(/(\d+)%/g, "$1 percent");
+    text = text.replace(/(\d+)\.(\d+)/g, "$1 point $2");
+
     // Humanize time references
-    text = text.replace(/(\d{4})-(\d{4})/g, '$1 to $2');
-    
+    text = text.replace(/(\d{4})-(\d{4})/g, "$1 to $2");
+
     // Insert occasional filler words for more natural speech
     const sentences = text.split(/(?<=[.!?])\s+/);
     const processedSentences = sentences.map((sentence, index) => {
       // Add filler words to about 10% of sentences
       if (index > 0 && index % 10 === 0) {
-        const fillers = ["Now, ", "So, ", "Well, ", "You see, ", "Actually, ", "Essentially, "];
-        const randomFiller = fillers[Math.floor(Math.random() * fillers.length)];
+        const fillers = [
+          "Now, ",
+          "So, ",
+          "Well, ",
+          "You see, ",
+          "Actually, ",
+          "Essentially, ",
+        ];
+        const randomFiller =
+          fillers[Math.floor(Math.random() * fillers.length)];
         return randomFiller + sentence;
       }
       return sentence;
     });
-    
-    utterance.text = processedSentences.join(' ');
-    
+
+    utterance.text = processedSentences.join(" ");
+
     if (onEnd) {
       utterance.onend = onEnd;
     }
@@ -1059,14 +1355,14 @@ export const INGRESAssistant = ({
 
       // Prepare context-aware prompt with detailed response guidance
       let contextualPrompt = query;
-      
+
       // Add context from current data if available
       if (currentDataContext) {
         contextualPrompt += `\n\nCurrent context: ${JSON.stringify(
           currentDataContext
         )}`;
       }
-      
+
       // Add instructions for more detailed responses when in co-pilot mode
       if (isCoPilotMode) {
         contextualPrompt += `\n\n
@@ -1084,11 +1380,13 @@ Please provide a comprehensive and detailed response suitable for natural human 
 5. Use natural transitions and speech patterns a human expert would use
 6. Include pauses (with commas and periods) at natural breaking points
 7. Keep sentences relatively short and easy to follow when spoken
+8. Be Concise and Format Well: Use Markdown for clarity (bolding, lists, etc.) to make the information easy to digest
+
 
 Your response should sound like it's coming from a knowledgeable human analyst explaining the information in a clear, conversational manner.`;
       }
 
-      // Call Gemini API
+      // Call Gemini APIPrompt =
       const geminiService = new GeminiApiService(apiKey);
       const response = await geminiService.generateResponse(contextualPrompt);
 
@@ -1109,23 +1407,26 @@ Your response should sound like it's coming from a knowledgeable human analyst e
   // Initialize speech synthesis voices
   useEffect(() => {
     // Safari requires this to be manually triggered to load voices
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
+    if (typeof window !== "undefined" && window.speechSynthesis) {
       // Load voices on first render
       const loadVoices = () => {
         window.speechSynthesis.getVoices();
       };
-      
+
       // Check if voices are already loaded
       if (window.speechSynthesis.getVoices().length === 0) {
         // Set up event listener for when voices are loaded
-        window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
-        
+        window.speechSynthesis.addEventListener("voiceschanged", loadVoices);
+
         // Initial call to load voices
         loadVoices();
-        
+
         // Cleanup event listener
         return () => {
-          window.speechSynthesis.removeEventListener('voiceschanged', loadVoices);
+          window.speechSynthesis.removeEventListener(
+            "voiceschanged",
+            loadVoices
+          );
         };
       }
     }
@@ -1152,10 +1453,13 @@ Your response should sound like it's coming from a knowledgeable human analyst e
     } else {
       // If starting listening and we're in Co-Pilot Mode, provide a voice prompt
       if (isCoPilotMode) {
-        speakText("I'm listening now. How can I assist with your groundwater data analysis?", () => {
-          startListening();
-          setShowListeningIndicator(true);
-        });
+        speakText(
+          "I'm listening now. How can I assist with your groundwater data analysis?",
+          () => {
+            startListening();
+            setShowListeningIndicator(true);
+          }
+        );
       } else {
         startListening();
         setShowListeningIndicator(true);
@@ -1232,29 +1536,330 @@ Your response should sound like it's coming from a knowledgeable human analyst e
     setIsThinking(true);
 
     try {
-      // For debugging - log the query
       console.log("Processing query:", text, "Lowercase:", text.toLowerCase());
 
-      // Check if we have a predefined structured AI response for this query
-      const aiResponse = getAIResponse(text);
-      console.log(
-        "AI Response:",
-        aiResponse ? "Found matching response" : "No matching response"
-      );
+      // EARLY: Crop recommendation trigger
+      if (
+        (query.includes("what crops") ||
+          query.includes("crop recommendation") ||
+          query.includes("water-scarce crops") ||
+          query.includes("drought crops")) &&
+        (query.includes("water") ||
+          query.includes("scarce") ||
+          query.includes("drought"))
+      ) {
+        await new Promise((r) => setTimeout(r, 800));
+        const cropResponse = {
+          id: Date.now() + 1,
+          type: "ai",
+          component: (
+            <React.Suspense
+              fallback={
+                <div className="p-4 text-sm text-muted-foreground">
+                  Loading crop recommendations…
+                </div>
+              }
+            >
+              <CropRecommendationCard />
+            </React.Suspense>
+          ),
+        };
+        setChatHistory((prev) => [...prev, cropResponse]);
+        if (isCoPilotMode) {
+          speakText(
+            "Showing water-efficient crop recommendations for drought-prone regions.",
+            () => {
+              setIsListeningForFollowUp(true);
+              setShowListeningIndicator(true);
+              startListening();
+            }
+          );
+        }
+        setIsThinking(false);
+        return;
+      }
 
+      // EARLY: Policy recharge trigger
+      if (
+        (query.includes("policy") &&
+          (query.includes("recharge") || query.includes("improve"))) ||
+        query.includes("policy changes recharge") ||
+        query.includes("regulatory reforms")
+      ) {
+        await new Promise((r) => setTimeout(r, 800));
+        const policyResponse = {
+          id: Date.now() + 1,
+          type: "ai",
+          component: (
+            <React.Suspense
+              fallback={
+                <div className="p-4 text-sm text-muted-foreground">
+                  Loading policy recommendations…
+                </div>
+              }
+            >
+              <PolicyRechargeCard />
+            </React.Suspense>
+          ),
+        };
+        setChatHistory((prev) => [...prev, policyResponse]);
+        if (isCoPilotMode) {
+          speakText(
+            "Displaying policy interventions to improve groundwater recharge rates.",
+            () => {
+              setIsListeningForFollowUp(true);
+              setShowListeningIndicator(true);
+              startListening();
+            }
+          );
+        }
+        setIsThinking(false);
+        return;
+      }
+
+      // EARLY: Rainfall impact trigger
+      if (
+        (query.includes("rainfall") &&
+          (query.includes("impact") ||
+            query.includes("contribution") ||
+            query.includes("recharge"))) ||
+        query.includes("rainfall impact") ||
+        query.includes("recharge sources")
+      ) {
+        await new Promise((r) => setTimeout(r, 800));
+        const rainfallResponse = {
+          id: Date.now() + 1,
+          type: "ai",
+          component: (
+            <React.Suspense
+              fallback={
+                <div className="p-4 text-sm text-muted-foreground">
+                  Loading rainfall analysis…
+                </div>
+              }
+            >
+              <RainfallImpactCard />
+            </React.Suspense>
+          ),
+        };
+        setChatHistory((prev) => [...prev, rainfallResponse]);
+        if (isCoPilotMode) {
+          speakText(
+            "Analyzing rainfall contribution to groundwater recharge across assessment blocks.",
+            () => {
+              setIsListeningForFollowUp(true);
+              setShowListeningIndicator(true);
+              startListening();
+            }
+          );
+        }
+        setIsThinking(false);
+        return;
+      }
+
+      // EARLY: State comparison trigger (Punjab vs Rajasthan)
+      if (
+        (query.includes("punjab") && query.includes("rajasthan")) ||
+        query.includes("state comparison") ||
+        (query.includes("comparison") &&
+          (query.includes("punjab") || query.includes("rajasthan")))
+      ) {
+        await new Promise((r) => setTimeout(r, 800));
+        const stateResponse = {
+          id: Date.now() + 1,
+          type: "ai",
+          component: (
+            <React.Suspense
+              fallback={
+                <div className="p-4 text-sm text-muted-foreground">
+                  Loading state comparison…
+                </div>
+              }
+            >
+              <StateComparisonCard />
+            </React.Suspense>
+          ),
+        };
+        setChatHistory((prev) => [...prev, stateResponse]);
+        if (isCoPilotMode) {
+          speakText(
+            "Comparing groundwater depletion patterns between Punjab and Rajasthan states.",
+            () => {
+              setIsListeningForFollowUp(true);
+              setShowListeningIndicator(true);
+              startListening();
+            }
+          );
+        }
+        setIsThinking(false);
+        return;
+      }
+
+      // EARLY: Policy recharge intent
+      const policyIntent =
+        (query.includes("recharge") || query.includes("aquifer")) &&
+        (query.includes("policy") ||
+          query.includes("measure") ||
+          query.includes("intervention") ||
+          query.includes("strategy") ||
+          query.includes("actions")) &&
+        (query.includes("improve") ||
+          query.includes("increase") ||
+          query.includes("boost") ||
+          query.includes("enhance"));
+      if (policyIntent) {
+        const response = {
+          id: Date.now() + 1,
+          type: "ai",
+          component: <PolicyRechargeCard />,
+        };
+        setChatHistory((prev) => [...prev, response]);
+        if (isCoPilotMode) {
+          speakText(
+            "Displayed recharge policy stack ranked by impact and feasibility.",
+            () => {
+              setIsListeningForFollowUp(true);
+              setShowListeningIndicator(true);
+              startListening();
+            }
+          );
+        }
+        setIsThinking(false);
+        return;
+      }
+
+      // EARLY: Rainfall impact intent
+      const rainfallIntent =
+        ((query.includes("rainfall") || query.includes("monsoon")) &&
+          (query.includes("impact") ||
+            query.includes("affect") ||
+            query.includes("influence") ||
+            query.includes("effect")) &&
+          (query.includes("recharge") || query.includes("groundwater"))) ||
+        query.includes("rainfall impact") ||
+        query.includes("rainfall recharge split");
+      if (rainfallIntent) {
+        const response = {
+          id: Date.now() + 1,
+          type: "ai",
+          component: <RainfallImpactCard />,
+        };
+        setChatHistory((prev) => [...prev, response]);
+        if (isCoPilotMode) {
+          speakText(
+            "Displayed rainfall to recharge pathway breakdown with overdraft stress index.",
+            () => {
+              setIsListeningForFollowUp(true);
+              setShowListeningIndicator(true);
+              startListening();
+            }
+          );
+        }
+        setIsThinking(false);
+        return;
+      }
+
+      // EARLY: Specific Ludhiana & Amritsar extraction visualization trigger
+      const extractionVizMatch =
+        (query.includes("increasing") ||
+          query.includes("rise") ||
+          query.includes("why") ||
+          query.includes("trend")) &&
+        (query.includes("groundwater") || query.includes("extraction")) &&
+        ((query.includes("ludhiana") && query.includes("amritsar")) ||
+          query.includes("ludhiana and amritsar")) &&
+        (query.includes("extraction") ||
+          query.includes("over-exploited") ||
+          query.includes("overexploited"));
+      if (extractionVizMatch) {
+        const years = [2017, 2018, 2019, 2020, 2021, 2022, 2023];
+        const ludhiana = [165, 172, 178, 183, 188, 193, 198];
+        const amritsar = [173, 176, 179, 181, 183, 185, 188];
+        const projectionYears = [2024, 2025, 2026, 2027, 2028, 2029, 2030];
+        const projectionLudhiana = [202, 206, 209, 213, 217, 220, 224];
+        const projectionAmritsar = [190, 192, 195, 198, 201, 204, 207];
+        const factorWeights = {
+          paddyCropping: 9,
+          freeElectricity: 8,
+          privateTubewells: 8,
+          industryGrowth: 6,
+          urbanExpansion: 5,
+        };
+        const vizResponse = {
+          id: Date.now() + 1,
+          type: "ai",
+          component: (
+            <div className="space-y-6">
+              <React.Suspense
+                fallback={
+                  <div className="p-4 text-sm text-muted-foreground">
+                    Loading visualization…
+                  </div>
+                }
+              >
+                <GroundwaterExtractionVisualization
+                  years={years}
+                  ludhiana={ludhiana}
+                  amritsar={amritsar}
+                  projectionYears={projectionYears}
+                  projectionLudhiana={projectionLudhiana}
+                  projectionAmritsar={projectionAmritsar}
+                  factorWeights={factorWeights}
+                />
+              </React.Suspense>
+              <div className="prose dark:prose-invert max-w-none text-sm">
+                <h3>Summary</h3>
+                <p>
+                  <strong>Why increasing?</strong> Persistent water-intensive
+                  paddy cultivation, subsidized/free power encouraging longer
+                  pump hours, dense private tubewell proliferation, expanding
+                  agro-processing demand, and gradual urban growth are
+                  compounding abstraction pressure.
+                </p>
+                <p>
+                  <strong>Risk trajectory:</strong> If unmitigated, extraction
+                  could exceed 220% of recharge in Ludhiana and move past 205%
+                  in Amritsar by 2030, pushing deeper aquifer stress, higher
+                  lift energy, and localized quality deterioration.
+                </p>
+                <p>
+                  <strong>Recommended levers:</strong> Crop diversification
+                  (paddy → maize / pulses), pre-monsoon pumping regulation,
+                  metered incentive schemes, managed aquifer recharge (check dam
+                  desilting, recharge shafts), and integrated tubewell registry
+                  + abstraction caps.
+                </p>
+              </div>
+            </div>
+          ),
+        };
+        setChatHistory((prev) => [...prev, vizResponse]);
+        if (isCoPilotMode) {
+          speakText(
+            "Displayed extraction trajectory and drivers for Ludhiana and Amritsar with projections to 2030.",
+            () => {
+              setIsListeningForFollowUp(true);
+              setShowListeningIndicator(true);
+              startListening();
+            }
+          );
+        }
+        setIsThinking(false);
+        return;
+      }
+
+      // Predefined structured response fallback (runs only if not matched earlier)
+      const aiResponse = getAIResponse(text);
       if (aiResponse) {
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        await new Promise((r) => setTimeout(r, 800));
         const response = {
           id: Date.now() + 1,
           type: "ai",
           component: <AIResponseRendererV2 response={aiResponse} />,
         };
         setChatHistory((prev) => [...prev, response]);
-
-        // Store the current data context for Co-Pilot Mode
         if (isCoPilotMode) {
           setCurrentDataContext(aiResponse);
-          // Speak a summary of the response
           const summary = `Here's information about ${
             aiResponse.title || "your query"
           }. ${
@@ -1263,13 +1868,11 @@ Your response should sound like it's coming from a knowledgeable human analyst e
               : ""
           }`;
           speakText(summary, () => {
-            // Start listening for follow-up questions after speaking
             setIsListeningForFollowUp(true);
             setShowListeningIndicator(true);
             startListening();
           });
         }
-
         setIsThinking(false);
         return;
       }
@@ -1312,7 +1915,7 @@ Your response should sound like it's coming from a knowledgeable human analyst e
       }
 
       // --- 2. LOGIC FOR COMPARISON CHART ---
-      // This logic correctly handles "compare amritsar and ludhiana"
+      // (Visualization for Ludhiana & Amritsar extraction handled earlier)
       if (
         query.includes("compare") &&
         (query.includes("ludhiana") ||
@@ -1495,11 +2098,25 @@ Your response should sound like it's coming from a knowledgeable human analyst e
         }
       }
 
-      const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "AIzaSyDSqFidFieMz6EVw1HnFBuYlJ_jtGm22A8";
+      const API_KEY =
+        import.meta.env.VITE_GEMINI_API_KEY ||
+        "AIzaSyDSqFidFieMz6EVw1HnFBuYlJ_jtGm22A8";
       if (API_KEY) {
         try {
           const genAI = new GoogleGenerativeAI(API_KEY);
-          const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+          // Prefer configurable model; fall back to latest stable naming conventions
+          const preferredModel =
+            import.meta.env.VITE_GEMINI_MODEL || "gemini-2.0-flash";
+          let model;
+          try {
+            model = genAI.getGenerativeModel({ model: preferredModel });
+          } catch (e) {
+            console.warn(
+              "Falling back to gemini-1.5-flash due to error creating model",
+              e
+            );
+            model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+          }
 
           const dataContext = JSON.stringify(groundwaterDB, null, 2);
           const prompt = `You are an expert AI assistant for INGRES, India's National Groundwater Resource Estimation System. Your primary knowledge base is the following JSON data about specific groundwater blocks in Rajasthan. Your tone should be helpful, clear, and professional.\n---\n${dataContext}\n---\nInstructions:
@@ -1547,7 +2164,6 @@ Your response should sound like it's coming from a knowledgeable human analyst e
       }
     } catch (error) {
       console.error("Error processing request:", error);
-      // Add error message to chat history
       const errorResponse = {
         id: Date.now() + 1,
         type: "ai",
@@ -1679,8 +2295,12 @@ Your response should sound like it's coming from a knowledgeable human analyst e
         </p>
       </div>
       <div className="mt-12">
-        <INGRESCommandBar {...commonCommandBarProps}
-         onFileSelect={handleFakeMapAnalysis} />
+        <INGRESCommandBar
+          {...commonCommandBarProps}
+          onFileSelect={handleFakeMapAnalysis}
+          isMapAnalysisOpen={isMapAnalysisOpen}
+          setIsMapAnalysisOpen={setIsMapAnalysisOpen}
+        />
       </div>
       <motion.div
         initial="hidden"
@@ -1791,68 +2411,68 @@ Your response should sound like it's coming from a knowledgeable human analyst e
             </motion.div>
           )}
           <AnimatePresence>
-          // --- Replace your old chat mapping logic with this new version ---
-{chatHistory.map((msg, index) => {
-    const isLastMessage = index === chatHistory.length - 1;
-    // --- NEW: This line checks if the message contains a component (like our graph) ---
-    const isGraphMessage = !!msg.component;
+            // --- Replace your old chat mapping logic with this new version ---
+            {chatHistory.map((msg, index) => {
+              const isLastMessage = index === chatHistory.length - 1;
+              // --- NEW: This line checks if the message contains a component (like our graph) ---
+              const isGraphMessage = !!msg.component;
 
-    return (
-        <motion.div
-            key={msg.id}
-            layout
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`flex items-start gap-4 ${
-                msg.type === "user" ? "ml-auto justify-end" : "mr-auto"
-            } w-full`} // The outer container is now full-width
-        >
-            {msg.type === "ai" && (
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-sky-100 to-purple-100 flex items-center justify-center">
-                    <Bot className="w-5 h-5 text-sky-600" />
-                </div>
-            )}
+              return (
+                <motion.div
+                  key={msg.id}
+                  layout
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`flex items-start gap-4 ${
+                    msg.type === "user" ? "ml-auto justify-end" : "mr-auto"
+                  } w-full`} // The outer container is now full-width
+                >
+                  {msg.type === "ai" && (
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-sky-100 to-purple-100 flex items-center justify-center">
+                      <Bot className="w-5 h-5 text-sky-600" />
+                    </div>
+                  )}
 
-            {/*
+                  {/*
               --- THIS IS THE CRUCIAL FIX ---
               This div now applies a different width based on whether it's a graph or not.
             */}
-            <div className={isGraphMessage ? 'w-full' : 'max-w-2xl'}>
-                {msg.type === "user" ? (
-                    <div className="bg-purple-500 text-white p-3 rounded-2xl rounded-br-lg shadow-sm">
+                  <div className={isGraphMessage ? "w-full" : "max-w-2xl"}>
+                    {msg.type === "user" ? (
+                      <div className="bg-purple-500 text-white p-3 rounded-2xl rounded-br-lg shadow-sm">
                         <p className="text-base">{msg.text}</p>
-                    </div>
-                ) : msg.component ? (
-                    // If it's a graph component, render it directly without extra styling
-                    msg.component
-                ) : (
-                    // If it's an AI text message, render it inside the styled bubble
-                    <div
+                      </div>
+                    ) : msg.component ? (
+                      // If it's a graph component, render it directly without extra styling
+                      msg.component
+                    ) : (
+                      // If it's an AI text message, render it inside the styled bubble
+                      <div
                         className={`p-4 rounded-2xl rounded-bl-lg border shadow-sm prose prose-base max-w-none ${
-                            embedded
-                                ? "bg-slate-700/50 text-slate-200 border-slate-600"
-                                : "bg-white text-slate-800"
+                          embedded
+                            ? "bg-slate-700/50 text-slate-200 border-slate-600"
+                            : "bg-white text-slate-800"
                         }`}
-                    >
+                      >
                         {isLastMessage ? (
-                            <AnimatedMarkdownMessage text={msg.text || ""} />
+                          <AnimatedMarkdownMessage text={msg.text || ""} />
                         ) : (
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                {msg.text}
-                            </ReactMarkdown>
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {msg.text}
+                          </ReactMarkdown>
                         )}
-                    </div>
-                )}
-            </div>
+                      </div>
+                    )}
+                  </div>
 
-            {msg.type === "user" && (
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center">
-                    <User className="w-5 h-5 text-slate-600" />
-                </div>
-            )}
-        </motion.div>
-    );
-})}
+                  {msg.type === "user" && (
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center">
+                      <User className="w-5 h-5 text-slate-600" />
+                    </div>
+                  )}
+                </motion.div>
+              );
+            })}
             {isThinking && <GeminiShimmerEffect />}
           </AnimatePresence>
         </CardContent>
@@ -1863,8 +2483,12 @@ Your response should sound like it's coming from a knowledgeable human analyst e
               : "border-slate-200/80"
           } pt-4`}
         >
-          <INGRESCommandBar {...commonCommandBarProps}
-           onFileSelect={handleFakeMapAnalysis} />
+          <INGRESCommandBar
+            {...commonCommandBarProps}
+            onFileSelect={handleFakeMapAnalysis}
+            isMapAnalysisOpen={isMapAnalysisOpen}
+            setIsMapAnalysisOpen={setIsMapAnalysisOpen}
+          />
         </CardContent>
       </Card>
     </div>
@@ -1916,6 +2540,13 @@ Your response should sound like it's coming from a knowledgeable human analyst e
           {view === "dashboard" ? renderDashboard() : renderChatView()}
         </motion.div>
       </AnimatePresence>
+
+      {/* Map Analysis Dialog */}
+      <MapAnalysisDialog
+        isOpen={isMapAnalysisOpen}
+        onClose={() => setIsMapAnalysisOpen(false)}
+        onImageAnalysis={handleImageAnalysis}
+      />
     </div>
   );
 };

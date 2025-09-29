@@ -199,6 +199,36 @@
   height: auto !important;
 }
 
+/* Enhanced animations for visual appeal */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+  }
+}
+
+@keyframes gradient-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
 /* Hide unnecessary elements during print */
 @media print {
   body * {

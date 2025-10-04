@@ -25,7 +25,9 @@ export const ShimmerEffect = () => {
   // This effect handles the cycling of the "thinking" phrases
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentPhraseIndex((prevIndex) => (prevIndex + 1) % thinkingPhrases.length);
+      setCurrentPhraseIndex(
+        (prevIndex) => (prevIndex + 1) % thinkingPhrases.length
+      );
     }, 2000); // Change phrase every 2 seconds
 
     return () => clearInterval(interval); // Cleanup on component unmount
@@ -84,9 +86,35 @@ export const ShimmerEffect = () => {
         {/* Dynamic Thinking Indicator */}
         <div className="flex items-center gap-2 pt-2">
           <div className="flex space-x-1">
-            <motion.div className="w-2 h-2 bg-primary/60 rounded-full" animate={{ y: [0, -3, 0] }} transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }} />
-            <motion.div className="w-2 h-2 bg-primary/60 rounded-full" animate={{ y: [0, -3, 0] }} transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut", delay: 0.1 }} />
-            <motion.div className="w-2 h-2 bg-primary/60 rounded-full" animate={{ y: [0, -3, 0] }} transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut", delay: 0.2 }} />
+            <motion.div
+              className="w-2 h-2 bg-primary/60 rounded-full"
+              animate={{ y: [0, -3, 0] }}
+              transition={{
+                duration: 1.2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+            <motion.div
+              className="w-2 h-2 bg-primary/60 rounded-full"
+              animate={{ y: [0, -3, 0] }}
+              transition={{
+                duration: 1.2,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 0.1,
+              }}
+            />
+            <motion.div
+              className="w-2 h-2 bg-primary/60 rounded-full"
+              animate={{ y: [0, -3, 0] }}
+              transition={{
+                duration: 1.2,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 0.2,
+              }}
+            />
           </div>
 
           <div className="text-sm text-slate-600 w-full overflow-hidden">

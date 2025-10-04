@@ -72,12 +72,119 @@ import { STATE_PROFILE_MAP } from "@/data/stateGroundwaterData";
 const GroundwaterExtractionVisualization = React.lazy(
   () => import("./GroundwaterExtractionVisualization")
 );
-// Prefer root-level versions for now (avoid duplicate definitions under /cards if both exist)
-// Removed individual thematic cards in favor of unified StateDeepDiveCard experience
-// (CropRecommendationCard, PolicyRechargeCard, RainfallImpactCard deprecated inline)
+// Import specific thematic cards for different query types
+const CropRecommendationCard = React.lazy(() => import("./CropRecommendationCard").then(module => ({ default: module.CropRecommendationCard })));
+const PolicyRechargeCard = React.lazy(() => import("./PolicyRechargeCard").then(module => ({ default: module.PolicyRechargeCard })));
+const RainfallImpactCard = React.lazy(() => import("./RainfallImpactCard").then(module => ({ default: module.RainfallImpactCard })));
 const StateComparisonCard = React.lazy(
   () => import("./cards/StateComparisonCard")
 );
+// Newly added rich chart components
+const ExtractionTrendLine = React.lazy(() => import("./charts/ExtractionTrendLine"));
+const RechargeCompositionDonut = React.lazy(() => import("./charts/RechargeCompositionDonut"));
+const SectorUsageStackedBar = React.lazy(() => import("./charts/SectorUsageStackedBar"));
+const RiskRadar = React.lazy(() => import("./charts/RiskRadar"));
+const KPIStatGroup = React.lazy(() => import("./charts/KPIStatGroup"));
+const ChartSkeleton = React.lazy(() => import("./charts/ChartSkeleton"));
+
+// Lightweight helper to map a state profile to chart props
+interface StateProfileLite {
+  timeSeries?: { year: number; extraction: number; recharge?: number; net?: number }[];
+  rechargeComponents?: { name: string; value: number }[];
+  sectors?: { name: string; value: number }[];
+  riskFactors?: { factor: string; score: number }[];
+  extractionStage?: number;
+  annualDeclineM?: number;
+  name?: string;
+}
+
+// Composite bundles for predefined graphical prompts
+const CropInsightBundle: React.FC<{ profile: StateProfileLite }> = ({ profile }) => {
+  const trendData = (profile.timeSeries || []).map(d => ({ year: d.year, extraction: d.extraction, recharge: d.recharge, net: d.net }));
+  const rechargeSlices = (profile.rechargeComponents || []).map(r => ({ name: r.name, value: r.value }));
+  const sectorData = (profile.sectors || []).map(s => ({ sector: s.name, value: s.value }));
+  const kpis = [
+    { label: 'Stage', value: (profile.extractionStage ?? '--') + '%', change: undefined, sparkline: trendData.map(t=>t.extraction), color: '#0ea5e9' },
+    { label: 'Decline', value: (profile.annualDeclineM ?? '--') + ' m/yr', change: undefined, sparkline: trendData.map(t=>t.net ?? 0), color: '#ef4444' },
+  ];
+  return (
+    <div className="space-y-6">
+      <CropRecommendationCard region={profile.name || 'Region'} />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2">
+          <React.Suspense fallback={<ChartSkeleton variant='line' height={280} />}>            
+            <ExtractionTrendLine data={trendData} />
+          </React.Suspense>
+        </div>
+        <div className="space-y-6">
+          <React.Suspense fallback={<ChartSkeleton variant='donut' height={260} />}>            
+            <RechargeCompositionDonut data={rechargeSlices} />
+          </React.Suspense>
+          <React.Suspense fallback={<ChartSkeleton variant='kpi' height={160} />}>            
+            <KPIStatGroup items={kpis} />
+          </React.Suspense>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const PolicyRechargeBundle: React.FC<{ profile: StateProfileLite }> = ({ profile }) => {
+  const rechargeSlices = (profile.rechargeComponents || []).map(r => ({ name: r.name, value: r.value }));
+  const riskData = (profile.riskFactors || []).map(r => ({ factor: r.factor, score: r.score }));
+  const kpis = [
+    { label: 'Stage %', value: (profile.extractionStage ?? '--') + '%', sparkline: [], color: '#6366f1' },
+    { label: 'Decline', value: (profile.annualDeclineM ?? '--') + ' m/yr', sparkline: [], color: '#ef4444' },
+  ];
+  return (
+    <div className="space-y-6">
+      <PolicyRechargeCard region={profile.name || 'Target Region'} baselineRecharge={100} />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="space-y-6">
+          <React.Suspense fallback={<ChartSkeleton variant='donut' height={260} />}>            
+            <RechargeCompositionDonut data={rechargeSlices} />
+          </React.Suspense>
+          <React.Suspense fallback={<ChartSkeleton variant='kpi' height={160} />}>            
+            <KPIStatGroup items={kpis} />
+          </React.Suspense>
+        </div>
+        <div className="md:col-span-2">
+          <React.Suspense fallback={<ChartSkeleton variant='radar' height={300} />}>            
+            <RiskRadar data={riskData} />
+          </React.Suspense>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const RainfallImpactBundle: React.FC<{ profile: StateProfileLite }> = ({ profile }) => {
+  const trendData = (profile.timeSeries || []).map(d => ({ year: d.year, extraction: d.extraction, recharge: d.recharge, net: d.net }));
+  const rechargeSlices = (profile.rechargeComponents || []).map(r => ({ name: r.name, value: r.value }));
+  const sectorData = (profile.sectors || []).map(s => ({ sector: s.name, value: s.value }));
+  return (
+    <div className="space-y-6">
+      <RainfallImpactCard region={profile.name || 'Region'} season="Monsoon 2024" stressIndex={profile.extractionStage} />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2">
+          <React.Suspense fallback={<ChartSkeleton variant='line' height={280} />}>            
+            <ExtractionTrendLine data={trendData} />
+          </React.Suspense>
+        </div>
+        <div>
+          <React.Suspense fallback={<ChartSkeleton variant='donut' height={260} />}>            
+            <RechargeCompositionDonut data={rechargeSlices} />
+          </React.Suspense>
+        </div>
+      </div>
+      <div>
+        <React.Suspense fallback={<ChartSkeleton variant='bar' height={260} />}>          
+          <SectorUsageStackedBar data={sectorData} />
+        </React.Suspense>
+      </div>
+    </div>
+  );
+};
 
 //================================================================================
 // --- LISTENING INDICATOR COMPONENT ---
@@ -1762,7 +1869,7 @@ Your response should sound like it's coming from a knowledgeable human analyst e
         return;
       }
 
-      // EARLY: Crop recommendation trigger
+      // EARLY: Crop recommendation trigger - Now with AI response
       if (
         (query.includes("what crops") ||
           query.includes("crop recommendation") ||
@@ -1777,33 +1884,15 @@ Your response should sound like it's coming from a knowledgeable human analyst e
           id: Date.now() + 1,
           type: "ai",
           component: (
-            <React.Suspense
-              fallback={
-                <div className="p-4 text-sm text-muted-foreground">
-                  Loading crop recommendations…
-                </div>
-              }
-            >
-              <React.Suspense
-                fallback={
-                  <div className="text-xs text-slate-500">
-                    Loading deep dive...
-                  </div>
-                }
-              >
-                <StateDeepDiveCard
-                  state={
-                    pickProfileByText("crop recommendations") || PUNJAB_PROFILE
-                  }
-                />
-              </React.Suspense>
+            <React.Suspense fallback={<div className="p-4 text-sm text-muted-foreground">Loading crop insights…</div>}>
+              <CropInsightBundle profile={PUNJAB_PROFILE} />
             </React.Suspense>
           ),
         };
         setChatHistory((prev) => [...prev, cropResponse]);
         if (isCoPilotMode) {
           speakText(
-            "Showing water-efficient crop recommendations for drought-prone regions.",
+            "Showing water-efficient crop recommendations for drought-prone regions with water usage comparisons and gross margin analysis.",
             () => {
               setIsListeningForFollowUp(true);
               setShowListeningIndicator(true);
@@ -1815,7 +1904,7 @@ Your response should sound like it's coming from a knowledgeable human analyst e
         return;
       }
 
-      // EARLY: Policy recharge trigger
+      // EARLY: Policy recharge trigger - Now with AI response
       if (
         (query.includes("policy") &&
           (query.includes("recharge") || query.includes("improve"))) ||
@@ -1827,31 +1916,15 @@ Your response should sound like it's coming from a knowledgeable human analyst e
           id: Date.now() + 1,
           type: "ai",
           component: (
-            <React.Suspense
-              fallback={
-                <div className="p-4 text-sm text-muted-foreground">
-                  Loading policy recommendations…
-                </div>
-              }
-            >
-              <React.Suspense
-                fallback={
-                  <div className="text-xs text-slate-500">
-                    Loading deep dive...
-                  </div>
-                }
-              >
-                <StateDeepDiveCard
-                  state={pickProfileByText("policy recharge") || PUNJAB_PROFILE}
-                />
-              </React.Suspense>
+            <React.Suspense fallback={<div className="p-4 text-sm text-muted-foreground">Loading recharge policy bundle…</div>}>
+              <PolicyRechargeBundle profile={PUNJAB_PROFILE} />
             </React.Suspense>
           ),
         };
         setChatHistory((prev) => [...prev, policyResponse]);
         if (isCoPilotMode) {
           speakText(
-            "Displaying policy interventions to improve groundwater recharge rates.",
+            "Displaying policy interventions to improve groundwater recharge rates with feasibility analysis and implementation timelines.",
             () => {
               setIsListeningForFollowUp(true);
               setShowListeningIndicator(true);
@@ -1863,7 +1936,7 @@ Your response should sound like it's coming from a knowledgeable human analyst e
         return;
       }
 
-      // EARLY: Rainfall impact trigger
+      // EARLY: Rainfall impact trigger - Now with AI response
       if (
         (query.includes("rainfall") &&
           (query.includes("impact") ||
@@ -1877,31 +1950,15 @@ Your response should sound like it's coming from a knowledgeable human analyst e
           id: Date.now() + 1,
           type: "ai",
           component: (
-            <React.Suspense
-              fallback={
-                <div className="p-4 text-sm text-muted-foreground">
-                  Loading rainfall analysis…
-                </div>
-              }
-            >
-              <React.Suspense
-                fallback={
-                  <div className="text-xs text-slate-500">
-                    Loading deep dive...
-                  </div>
-                }
-              >
-                <StateDeepDiveCard
-                  state={pickProfileByText("rainfall impact") || PUNJAB_PROFILE}
-                />
-              </React.Suspense>
+            <React.Suspense fallback={<div className="p-4 text-sm text-muted-foreground">Loading rainfall impact bundle…</div>}>
+              <RainfallImpactBundle profile={PUNJAB_PROFILE} />
             </React.Suspense>
           ),
         };
         setChatHistory((prev) => [...prev, rainfallResponse]);
         if (isCoPilotMode) {
           speakText(
-            "Analyzing rainfall contribution to groundwater recharge across assessment blocks.",
+            "Analyzing rainfall contribution to groundwater recharge across assessment blocks with pathway breakdown and stress indicators.",
             () => {
               setIsListeningForFollowUp(true);
               setShowListeningIndicator(true);
@@ -1951,7 +2008,7 @@ Your response should sound like it's coming from a knowledgeable human analyst e
         return;
       }
 
-      // EARLY: Policy recharge intent
+      // EARLY: Policy recharge intent - Now with AI response
       const policyIntent =
         (query.includes("recharge") || query.includes("aquifer")) &&
         (query.includes("policy") ||
@@ -1968,23 +2025,15 @@ Your response should sound like it's coming from a knowledgeable human analyst e
           id: Date.now() + 1,
           type: "ai",
           component: (
-            <React.Suspense
-              fallback={
-                <div className="text-xs text-slate-500">
-                  Loading deep dive...
-                </div>
-              }
-            >
-              <StateDeepDiveCard
-                state={pickProfileByText("policy recharge") || PUNJAB_PROFILE}
-              />
+            <React.Suspense fallback={<div className="text-xs text-slate-500">Loading policy analysis bundle...</div>}>
+              <PolicyRechargeBundle profile={PUNJAB_PROFILE} />
             </React.Suspense>
           ),
         };
         setChatHistory((prev) => [...prev, response]);
         if (isCoPilotMode) {
           speakText(
-            "Displayed recharge policy stack ranked by impact and feasibility.",
+            "Displayed recharge policy stack ranked by impact and feasibility with implementation timelines.",
             () => {
               setIsListeningForFollowUp(true);
               setShowListeningIndicator(true);
@@ -1996,7 +2045,7 @@ Your response should sound like it's coming from a knowledgeable human analyst e
         return;
       }
 
-      // EARLY: Rainfall impact intent
+      // EARLY: Rainfall impact intent - Now with AI response
       const rainfallIntent =
         ((query.includes("rainfall") || query.includes("monsoon")) &&
           (query.includes("impact") ||
@@ -2011,23 +2060,15 @@ Your response should sound like it's coming from a knowledgeable human analyst e
           id: Date.now() + 1,
           type: "ai",
           component: (
-            <React.Suspense
-              fallback={
-                <div className="text-xs text-slate-500">
-                  Loading deep dive...
-                </div>
-              }
-            >
-              <StateDeepDiveCard
-                state={pickProfileByText("rainfall impact") || PUNJAB_PROFILE}
-              />
+            <React.Suspense fallback={<div className="text-xs text-slate-500">Loading rainfall impact bundle...</div>}>
+              <RainfallImpactBundle profile={PUNJAB_PROFILE} />
             </React.Suspense>
           ),
         };
         setChatHistory((prev) => [...prev, response]);
         if (isCoPilotMode) {
           speakText(
-            "Displayed rainfall to recharge pathway breakdown with overdraft stress index.",
+            "Displayed rainfall to recharge pathway breakdown with overdraft stress index and seasonal analysis.",
             () => {
               setIsListeningForFollowUp(true);
               setShowListeningIndicator(true);

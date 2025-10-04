@@ -1,4 +1,14 @@
 import React, { useState } from "react";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip as ReTooltip,
+  Legend as ReLegend,
+  CartesianGrid,
+} from "recharts";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +29,7 @@ import {
   ArrowUp,
 } from "lucide-react";
 
+// Static illustrative dataset (could be replaced by fetched analytics or AI-derived comparative insights)
 const stateComparisonData = {
   states: {
     punjab: {
@@ -127,9 +138,107 @@ const StateComparisonCard: React.FC = () => {
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-8">
+          {/* KPI Summary Strip: immediate comparative deltas for executive glance */}
+          <div className="grid md:grid-cols-4 gap-4 p-4 rounded-xl bg-gradient-to-r from-slate-50 via-white to-slate-50 border border-slate-200/60">
+            {[
+              {
+                label: "Total Extraction",
+                punjab: `${punjab.extraction} BCM`,
+                rajasthan: `${rajasthan.extraction} BCM`,
+                delta: punjab.extraction - rajasthan.extraction,
+                icon: BarChart3,
+                accent: "from-red-500 to-orange-500",
+              },
+              {
+                label: "Total Recharge",
+                punjab: `${punjab.recharge} BCM`,
+                rajasthan: `${rajasthan.recharge} BCM`,
+                delta: punjab.recharge - rajasthan.recharge,
+                icon: Droplets,
+                accent: "from-cyan-500 to-blue-500",
+              },
+              {
+                label: "Stage of Dev.",
+                punjab: `${punjab.stage}%`,
+                rajasthan: `${rajasthan.stage}%`,
+                delta: punjab.stage - rajasthan.stage,
+                icon: Zap,
+                accent: "from-purple-500 to-violet-500",
+              },
+              {
+                label: "Annual Decline",
+                punjab: `${punjab.decline} m/yr`,
+                rajasthan: `${rajasthan.decline} m/yr`,
+                delta: punjab.decline - rajasthan.decline,
+                icon: TrendingDown,
+                accent: "from-rose-500 to-red-500",
+              },
+            ].map((kpi) => {
+              const Icon = kpi.icon;
+              const worse = kpi.delta > 0; // positive means Punjab higher
+              return (
+                <div
+                  key={kpi.label}
+                  className="group relative overflow-hidden rounded-lg border border-slate-200/70 bg-white/70 backdrop-blur-sm p-4 flex flex-col gap-3 hover:shadow-md transition-shadow"
+                >
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-slate-50/40 to-white/10" />
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className={`p-2 rounded-md bg-gradient-to-br ${kpi.accent} text-white shadow-sm`}>
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      <span className="text-xs font-medium tracking-wide text-slate-600 uppercase">
+                        {kpi.label}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 text-[10px] font-semibold">
+                      {worse ? (
+                        <ArrowUp className="h-3 w-3 text-red-500" />
+                      ) : (
+                        <ArrowDown className="h-3 w-3 text-green-500" />
+                      )}
+                      <span className={worse ? "text-red-600" : "text-green-600"}>
+                        {worse ? "+" : ""}
+                        {kpi.delta.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <div className="text-[11px] font-medium text-slate-500 mb-1">Punjab</div>
+                      <div className="text-xl md:text-2xl font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent leading-none">
+                        {kpi.punjab}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-[11px] font-medium text-slate-500 mb-1">Rajasthan</div>
+                      <div className="text-xl md:text-2xl font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent leading-none">
+                        {kpi.rajasthan}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="h-1 rounded-full bg-slate-100 overflow-hidden">
+                    {/* small relative bar comparing Punjab vs Rajasthan */}
+                    {(() => {
+                      const p = Math.abs(kpi.delta);
+                      const total = Math.max(punjab.extraction, rajasthan.extraction);
+                      // Fallback simple percentage for generic KPI (not exact for stage/decline but conveys delta visually)
+                      const ratio = Math.min(100, (p / total) * 100);
+                      return (
+                        <div
+                          className="h-full bg-gradient-to-r from-slate-400/40 via-slate-500/50 to-slate-600/60"
+                          style={{ width: `${ratio}%` }}
+                        />
+                      );
+                    })()}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
           {/* Tab Navigation */}
-          <div className="flex bg-slate-100 rounded-lg p-1">
+          <div className="flex bg-slate-100 rounded-lg p-1" role="tablist" aria-label="State comparison sections">
             {[
               { key: "overview", label: "Overview", icon: MapPin },
               { key: "sectors", label: "Sector Usage", icon: BarChart3 },
@@ -138,6 +247,9 @@ const StateComparisonCard: React.FC = () => {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key as any)}
+                role="tab"
+                aria-selected={activeTab === tab.key}
+                aria-controls={`panel-${tab.key}`}
                 className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all ${
                   activeTab === tab.key
                     ? "bg-white text-slate-900 shadow-sm"
@@ -160,13 +272,16 @@ const StateComparisonCard: React.FC = () => {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
                 className="space-y-6"
+                role="tabpanel"
+                id="panel-overview"
+                aria-labelledby="panel-overview"
               >
                 {/* Extraction vs Recharge Comparison */}
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid md:grid-cols-2 gap-8">
                   {[punjab, rajasthan].map((state) => (
-                    <div key={state.name} className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-semibold text-slate-800 flex items-center gap-2">
+                    <div key={state.name} className="space-y-5">
+                      <div className="flex items-center justify-between pb-1 border-b border-slate-100/70">
+                        <h4 className="text-base md:text-lg font-semibold text-slate-800 flex items-center gap-2 tracking-tight">
                           <MapPin
                             className="h-4 w-4"
                             style={{ color: state.color }}
@@ -181,14 +296,14 @@ const StateComparisonCard: React.FC = () => {
                       </div>
 
                       {/* Extraction Bar */}
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-slate-600">Extraction</span>
-                          <span className="font-medium">
-                            {state.extraction} BCM
+                      <div className="space-y-2" aria-label={`${state.name} extraction volume`}>
+                        <div className="flex justify-between text-xs md:text-sm font-medium tracking-wide">
+                          <span className="text-slate-500 uppercase">Extraction</span>
+                          <span className="text-slate-800">
+                            {state.extraction} <span className="text-[10px] font-normal text-slate-500">BCM</span>
                           </span>
                         </div>
-                        <div className="w-full bg-slate-100 rounded-full h-3">
+                        <div className="w-full bg-slate-100/80 rounded-full h-3 overflow-hidden">
                           <motion.div
                             initial={{ width: 0 }}
                             animate={{
@@ -197,39 +312,39 @@ const StateComparisonCard: React.FC = () => {
                               }%`,
                             }}
                             transition={{ duration: 1, delay: 0.2 }}
-                            className="h-full rounded-full"
-                            style={{ backgroundColor: state.color }}
+                            className="h-full rounded-full bg-gradient-to-r from-slate-700 via-slate-600 to-slate-500 shadow-inner"
+                            style={{ boxShadow: `0 0 0 1px rgba(255,255,255,0.15) inset` }}
                           />
                         </div>
                       </div>
 
                       {/* Recharge Bar */}
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-slate-600">Recharge</span>
-                          <span className="font-medium">
-                            {state.recharge} BCM
+                      <div className="space-y-2" aria-label={`${state.name} recharge volume`}>
+                        <div className="flex justify-between text-xs md:text-sm font-medium tracking-wide">
+                          <span className="text-slate-500 uppercase">Recharge</span>
+                          <span className="text-slate-800">
+                            {state.recharge} <span className="text-[10px] font-normal text-slate-500">BCM</span>
                           </span>
                         </div>
-                        <div className="w-full bg-slate-100 rounded-full h-3">
+                        <div className="w-full bg-slate-100/80 rounded-full h-3 overflow-hidden">
                           <motion.div
                             initial={{ width: 0 }}
                             animate={{
                               width: `${(state.recharge / maxRecharge) * 100}%`,
                             }}
                             transition={{ duration: 1, delay: 0.4 }}
-                            className="h-full rounded-full bg-gradient-to-r from-blue-400 to-cyan-500"
+                            className="h-full rounded-full bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-400 shadow-inner"
                           />
                         </div>
                       </div>
 
                       {/* Key Metrics */}
-                      <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="grid grid-cols-2 gap-3 text-[11px]">
                         <div
-                          className={`p-2 ${state.bgColor} rounded-lg text-center`}
+                          className={`p-2.5 ${state.bgColor} rounded-md text-center border border-white/60 shadow-sm`}
                         >
                           <div
-                            className="font-bold text-lg"
+                            className="font-bold text-base md:text-lg tracking-tight"
                             style={{ color: state.color }}
                           >
                             {state.decline}m
@@ -237,10 +352,10 @@ const StateComparisonCard: React.FC = () => {
                           <div className="text-slate-600">Annual Decline</div>
                         </div>
                         <div
-                          className={`p-2 ${state.bgColor} rounded-lg text-center`}
+                          className={`p-2.5 ${state.bgColor} rounded-md text-center border border-white/60 shadow-sm`}
                         >
                           <div
-                            className="font-bold text-lg"
+                            className="font-bold text-base md:text-lg tracking-tight"
                             style={{ color: state.color }}
                           >
                             {state.category.split("-")[0]}
@@ -253,22 +368,23 @@ const StateComparisonCard: React.FC = () => {
                 </div>
 
                 {/* Key Drivers Comparison */}
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid md:grid-cols-2 gap-8">
                   {[punjab, rajasthan].map((state) => (
-                    <div key={`${state.name}-drivers`} className="space-y-3">
-                      <h5 className="font-medium text-slate-700">
-                        Key Drivers - {state.name}
+                    <div key={`${state.name}-drivers`} className="space-y-4">
+                      <h5 className="text-sm font-semibold tracking-wide text-slate-600 uppercase flex items-center gap-2">
+                        <span className="h-1 w-6 rounded-full bg-gradient-to-r from-slate-400 to-slate-600" />
+                        Key Drivers – {state.name}
                       </h5>
-                      <div className="space-y-2">
+                      <div className="space-y-2.5">
                         {state.drivers.map((driver, index) => (
                           <div
                             key={driver.name}
-                            className="flex items-center gap-3"
+                            className="flex items-center gap-3 group"
                           >
-                            <div className="w-24 text-xs text-slate-600 truncate">
+                            <div className="w-28 text-[11px] text-slate-500 truncate font-medium group-hover:text-slate-700 transition-colors">
                               {driver.name}
                             </div>
-                            <div className="flex-1 bg-slate-100 rounded-full h-2 relative">
+                            <div className="flex-1 bg-slate-100 rounded-full h-2.5 relative overflow-hidden">
                               <motion.div
                                 initial={{ width: 0 }}
                                 animate={{ width: `${driver.impact}%` }}
@@ -276,11 +392,11 @@ const StateComparisonCard: React.FC = () => {
                                   duration: 0.8,
                                   delay: 0.6 + index * 0.1,
                                 }}
-                                className="h-full rounded-full"
-                                style={{ backgroundColor: state.color }}
+                                className="h-full rounded-full bg-gradient-to-r from-slate-700 via-slate-600 to-slate-500"
+                                style={{ boxShadow: "0 0 0 1px rgba(255,255,255,0.15) inset" }}
                               />
                             </div>
-                            <div className="text-xs font-medium text-slate-700 w-8">
+                            <div className="text-[11px] font-semibold text-slate-700 w-8 tabular-nums">
                               {driver.impact}
                             </div>
                           </div>
@@ -301,6 +417,9 @@ const StateComparisonCard: React.FC = () => {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
                 className="space-y-6"
+                role="tabpanel"
+                id="panel-sectors"
+                aria-labelledby="panel-sectors"
               >
                 <div className="grid md:grid-cols-2 gap-6">
                   {[punjab, rajasthan].map((state) => (
@@ -321,6 +440,7 @@ const StateComparisonCard: React.FC = () => {
                             <div
                               key={sector.name}
                               className="flex items-center gap-3"
+                              aria-label={`${state.name} ${sector.name} usage ${sector.value}%`}
                             >
                               <div className="flex items-center gap-2 w-20">
                                 <Icon
@@ -331,7 +451,7 @@ const StateComparisonCard: React.FC = () => {
                                   {sector.name}
                                 </span>
                               </div>
-                              <div className="flex-1 bg-slate-100 rounded-full h-4 relative">
+                              <div className="flex-1 bg-slate-100/80 rounded-full h-4 relative overflow-hidden">
                                 <motion.div
                                   initial={{ width: 0 }}
                                   animate={{ width: `${sector.value}%` }}
@@ -339,14 +459,16 @@ const StateComparisonCard: React.FC = () => {
                                     duration: 1,
                                     delay: index * 0.1,
                                   }}
-                                  className="h-full rounded-full"
-                                  style={{ backgroundColor: sector.color }}
+                                  className="h-full rounded-full shadow-inner"
+                                  style={{
+                                    background: `linear-gradient(90deg, ${sector.color} 0%, ${sector.color}CC 60%, ${sector.color}99 100%)`,
+                                    boxShadow: "0 0 0 1px rgba(255,255,255,0.15) inset",
+                                  }}
                                 />
                                 <div className="absolute inset-0 flex items-center justify-center">
-                                  <span className="text-xs font-medium text-white">
-                                    {sector.value}%
-                                  </span>
+                                  <span className="text-[10px] font-semibold tracking-wide text-white drop-shadow">{sector.value}%</span>
                                 </div>
+                                <div className="absolute inset-0 opacity-0 animate-pulse group-hover:opacity-40 transition-opacity bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.9),transparent_70%)]" />
                               </div>
                             </div>
                           );
@@ -385,119 +507,93 @@ const StateComparisonCard: React.FC = () => {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
                 className="space-y-6"
+                role="tabpanel"
+                id="panel-decline"
+                aria-labelledby="panel-decline"
               >
-                <h4 className="font-semibold text-slate-800 flex items-center gap-2">
-                  <TrendingDown className="h-4 w-4 text-red-500" />
-                  Cumulative Water Table Decline (2015-2025)
+                <h4 className="text-lg md:text-xl font-semibold text-slate-800 flex items-center gap-2 tracking-tight">
+                  <TrendingDown className="h-5 w-5 text-red-500" />
+                  Cumulative Water Table Decline <span className="text-slate-400 text-sm font-normal">2015–2025</span>
                 </h4>
 
-                {/* Timeline Chart */}
-                <div className="bg-slate-50 rounded-lg p-6 border">
-                  <div className="h-64 relative">
-                    {/* Grid lines */}
-                    <div className="absolute inset-0 flex flex-col justify-between">
-                      {[0, 2.5, 5, 7.5, 10].map((value) => (
-                        <div
-                          key={value}
-                          className="border-b border-slate-200/50 flex-1 relative"
-                        >
-                          <span className="absolute -left-8 -top-2 text-xs text-slate-500">
-                            -{value}m
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Chart bars */}
-                    <div className="absolute inset-0 flex items-end justify-between px-8">
-                      {stateComparisonData.timeSeriesDecline.years.map(
-                        (year, index) => (
-                          <div
-                            key={year}
-                            className="flex flex-col items-center flex-1"
-                          >
-                            {/* Bars container */}
-                            <div className="flex items-end gap-1 h-52 mb-2">
-                              {/* Punjab bar */}
-                              <motion.div
-                                initial={{ height: 0 }}
-                                animate={{
-                                  height: `${
-                                    (stateComparisonData.timeSeriesDecline
-                                      .punjab[index] /
-                                      10) *
-                                    100
-                                  }%`,
-                                }}
-                                transition={{
-                                  duration: 1.2,
-                                  delay: index * 0.15,
-                                }}
-                                className="w-4 bg-gradient-to-t from-red-600 to-red-400 rounded-t shadow-sm relative"
-                                title={`Punjab: -${stateComparisonData.timeSeriesDecline.punjab[index]}m`}
-                              >
-                                <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-red-700">
-                                  {
-                                    stateComparisonData.timeSeriesDecline
-                                      .punjab[index]
-                                  }
+                {/* Grouped bar visualization using Recharts for cumulative decline over time */}
+                <div className="bg-slate-50 rounded-xl p-6 border border-slate-200/70 relative overflow-hidden" aria-label="Cumulative water table decline grouped bar chart" role="group">
+                  <div className="absolute inset-0 pointer-events-none opacity-60 bg-[radial-gradient(circle_at_70%_30%,rgba(255,255,255,0.8),transparent_70%)]" />
+                  <ResponsiveContainer width="100%" height={320}>
+                    <BarChart
+                      data={stateComparisonData.timeSeriesDecline.years.map((year, i) => ({
+                        year,
+                        Punjab: stateComparisonData.timeSeriesDecline.punjab[i],
+                        Rajasthan: stateComparisonData.timeSeriesDecline.rajasthan[i],
+                      }))}
+                      margin={{ top: 10, right: 10, left: 0, bottom: 4 }}
+                    >
+                      <defs>
+                        <linearGradient id="pgBar" x1="0" y1="1" x2="0" y2="0">
+                          <stop offset="0%" stopColor="#b91c1c" stopOpacity={0.9} />
+                          <stop offset="100%" stopColor="#ef4444" stopOpacity={0.8} />
+                        </linearGradient>
+                        <linearGradient id="rjBar" x1="0" y1="1" x2="0" y2="0">
+                          <stop offset="0%" stopColor="#b45309" stopOpacity={0.9} />
+                          <stop offset="100%" stopColor="#f59e0b" stopOpacity={0.85} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                      <XAxis
+                        dataKey="year"
+                        tick={{ fontSize: 12, fill: "#475569" }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <YAxis
+                        tickFormatter={(v) => `-${v}m`}
+                        domain={[0, 10]}
+                        ticks={[0, 2.5, 5, 7.5, 10]}
+                        tick={{ fontSize: 11, fill: "#475569" }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <ReTooltip
+                        cursor={{ fill: "rgba(0,0,0,0.04)" }}
+                        content={({ active, payload, label }) => {
+                          if (!active || !payload?.length) return null;
+                          return (
+                            <div className="rounded-md border bg-white/90 backdrop-blur-md shadow-sm px-3 py-2 text-[11px] text-slate-700">
+                              <div className="font-semibold text-slate-800 text-xs mb-1">{label}</div>
+                              {payload.map((p) => (
+                                <div key={p.dataKey} className="flex items-center gap-2">
+                                  <span
+                                    className="inline-block w-2.5 h-2.5 rounded-sm"
+                                    style={{ background: p.color }}
+                                  />
+                                  <span className="font-medium w-16">{p.dataKey}</span>
+                                  <span className="tabular-nums">-{p.value} m</span>
                                 </div>
-                              </motion.div>
-
-                              {/* Rajasthan bar */}
-                              <motion.div
-                                initial={{ height: 0 }}
-                                animate={{
-                                  height: `${
-                                    (stateComparisonData.timeSeriesDecline
-                                      .rajasthan[index] /
-                                      10) *
-                                    100
-                                  }%`,
-                                }}
-                                transition={{
-                                  duration: 1.2,
-                                  delay: index * 0.15 + 0.1,
-                                }}
-                                className="w-4 bg-gradient-to-t from-amber-600 to-amber-400 rounded-t shadow-sm relative"
-                                title={`Rajasthan: -${stateComparisonData.timeSeriesDecline.rajasthan[index]}m`}
-                              >
-                                <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-amber-700">
-                                  {
-                                    stateComparisonData.timeSeriesDecline
-                                      .rajasthan[index]
-                                  }
-                                </div>
-                              </motion.div>
+                              ))}
                             </div>
-
-                            {/* Year label */}
-                            <div className="text-xs font-medium text-slate-700 mt-1">
-                              {year}
-                            </div>
-                          </div>
-                        )
-                      )}
-                    </div>
-
-                    {/* Enhanced Legend */}
-                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-sm border">
-                      <div className="flex flex-col gap-2 text-sm">
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 bg-gradient-to-t from-red-600 to-red-400 rounded"></div>
-                          <span className="font-medium text-slate-700">
-                            Punjab
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 bg-gradient-to-t from-amber-600 to-amber-400 rounded"></div>
-                          <span className="font-medium text-slate-700">
-                            Rajasthan
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                          );
+                        }}
+                      />
+                      <ReLegend
+                        wrapperStyle={{ fontSize: 12 }}
+                        formatter={(v) => <span className="text-slate-600 font-medium">{v}</span>}
+                        iconType="circle"
+                      />
+                      <Bar
+                        dataKey="Punjab"
+                        fill="url(#pgBar)"
+                        radius={[4, 4, 0, 0]}
+                        maxBarSize={36}
+                      />
+                      <Bar
+                        dataKey="Rajasthan"
+                        fill="url(#rjBar)"
+                        radius={[4, 4, 0, 0]}
+                        maxBarSize={36}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                  <div className="absolute left-4 top-4 text-[10px] font-medium text-slate-500 uppercase tracking-wide">Cumulative Decline</div>
                 </div>
 
                 {/* Decline Rate Comparison */}

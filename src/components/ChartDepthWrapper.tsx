@@ -20,7 +20,7 @@ const clamp = (v: number, min: number, max: number) =>
  */
 export const ChartDepthWrapper: React.FC<ChartDepthWrapperProps> = ({
   children,
-  intensity = 0.6,
+  intensity = 0.6 ,
   className = "",
   glowColor = "#38bdf8",
   maxTiltDeg = 14,

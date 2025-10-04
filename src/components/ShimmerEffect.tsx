@@ -63,13 +63,13 @@ export const ShimmerEffect = () => {
         <BrainCircuit className="w-5 h-5 text-white" />
       </motion.div>
 
-      <div className="p-4 rounded-3xl bg-white/90 backdrop-blur-sm border border-white/60 shadow-soft space-y-3 w-full max-w-lg">
+      <div className="p-4 rounded-3xl bg-white/90 backdrop-blur-sm border border-white/60 shadow-soft space-y-3 w-full max-w-lg overflow-hidden">
         {/* Generative Shimmer Lines */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="space-y-2"
+          className="space-y-2 overflow-hidden"
         >
           {shimmerLines.map((line, index) => (
             <motion.div

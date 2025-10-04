@@ -48,7 +48,12 @@ export interface StateGroundwaterProfile {
   rechargeComponents: { name: string; value: number }[];
   sectors: { name: string; value: number; icon: any; color: string }[];
   drivers: { name: string; impact: number }[];
-  timeSeries: { year: number; extraction: number; recharge: number; net: number }[];
+  timeSeries: {
+    year: number;
+    extraction: number;
+    recharge: number;
+    net: number;
+  }[];
   riskFactors: { factor: string; score: number; weight: number }[];
   recommendations: string[];
   notes?: string;
@@ -115,10 +120,12 @@ const StateDeepDiveCard: React.FC<StateDeepDiveCardProps> = ({ state }) => {
   const latest = state.timeSeries[state.timeSeries.length - 1];
   const first = state.timeSeries[0];
   const extractionGrowthPct = (
-    ((latest.extraction - first.extraction) / first.extraction) * 100
+    ((latest.extraction - first.extraction) / first.extraction) *
+    100
   ).toFixed(1);
   const rechargeChangePct = (
-    ((latest.recharge - first.recharge) / first.recharge) * 100
+    ((latest.recharge - first.recharge) / first.recharge) *
+    100
   ).toFixed(1);
 
   const ChartTooltip = ({ active, payload, label }: any) => {
@@ -168,8 +175,8 @@ const StateDeepDiveCard: React.FC<StateDeepDiveCardProps> = ({ state }) => {
                   </Badge>
                 </CardTitle>
                 <p className="text-xs text-slate-500 mt-1">
-                  Extraction Stage {state.extractionStage}% · {stageStatus.label}
-                  {" "}· Decline {state.annualDeclineM} m/yr
+                  Extraction Stage {state.extractionStage}% ·{" "}
+                  {stageStatus.label} · Decline {state.annualDeclineM} m/yr
                 </p>
               </div>
             </div>
@@ -214,64 +221,161 @@ const StateDeepDiveCard: React.FC<StateDeepDiveCardProps> = ({ state }) => {
                 className="grid md:grid-cols-3 gap-6"
               >
                 <div className="md:col-span-2 space-y-4">
-                  <ChartDepthWrapper glowColor={state.color} className="bg-transparent">
+                  <ChartDepthWrapper
+                    glowColor={state.color}
+                    className="bg-transparent"
+                  >
                     <div className="h-[340px] relative">
                       <ResponsiveContainer width="100%" height="100%">
                         <ComposedChart
                           data={state.timeSeries}
                           margin={{ top: 26, right: 18, left: 6, bottom: 8 }}
                           onMouseMove={(e: any) => {
-                            if (e?.activeLabel) setHoverYear(e.activeLabel as number);
+                            if (e?.activeLabel)
+                              setHoverYear(e.activeLabel as number);
                           }}
                           onMouseLeave={() => setHoverYear(null)}
                         >
                           <defs>
-                            <linearGradient id="extFill" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor={state.color} stopOpacity={0.55} />
-                              <stop offset="90%" stopColor={state.color} stopOpacity={0.06} />
+                            <linearGradient
+                              id="extFill"
+                              x1="0"
+                              y1="0"
+                              x2="0"
+                              y2="1"
+                            >
+                              <stop
+                                offset="0%"
+                                stopColor={state.color}
+                                stopOpacity={0.55}
+                              />
+                              <stop
+                                offset="90%"
+                                stopColor={state.color}
+                                stopOpacity={0.06}
+                              />
                             </linearGradient>
-                            <linearGradient id="recFill" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#0ea5e9" stopOpacity={0.5} />
-                              <stop offset="90%" stopColor="#0ea5e9" stopOpacity={0.05} />
+                            <linearGradient
+                              id="recFill"
+                              x1="0"
+                              y1="0"
+                              x2="0"
+                              y2="1"
+                            >
+                              <stop
+                                offset="0%"
+                                stopColor="#0ea5e9"
+                                stopOpacity={0.5}
+                              />
+                              <stop
+                                offset="90%"
+                                stopColor="#0ea5e9"
+                                stopOpacity={0.05}
+                              />
                             </linearGradient>
-                            <linearGradient id="netStroke" x1="0" y1="0" x2="1" y2="0">
+                            <linearGradient
+                              id="netStroke"
+                              x1="0"
+                              y1="0"
+                              x2="1"
+                              y2="0"
+                            >
                               <stop offset="0%" stopColor="#6366f1" />
                               <stop offset="100%" stopColor="#8b5cf6" />
                             </linearGradient>
                           </defs>
-                          <CartesianGrid strokeDasharray="3 4" stroke="#e2e8f0" vertical={false} />
-                          <XAxis dataKey="year" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
-                          <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
+                          <CartesianGrid
+                            strokeDasharray="3 4"
+                            stroke="#e2e8f0"
+                            vertical={false}
+                          />
+                          <XAxis
+                            dataKey="year"
+                            tickLine={false}
+                            axisLine={false}
+                            tick={{ fontSize: 11, fill: "#64748b" }}
+                          />
+                          <YAxis
+                            tickLine={false}
+                            axisLine={false}
+                            tick={{ fontSize: 11, fill: "#64748b" }}
+                          />
                           <Tooltip content={<ChartTooltip />} cursor={false} />
                           {!hiddenSeries.recharge && (
-                            <Area type="monotoneX" dataKey="recharge" name="Recharge" stroke="#0284c7" strokeWidth={2.2} fill="url(#recFill)" />
+                            <Area
+                              type="monotoneX"
+                              dataKey="recharge"
+                              name="Recharge"
+                              stroke="#0284c7"
+                              strokeWidth={2.2}
+                              fill="url(#recFill)"
+                            />
                           )}
                           {!hiddenSeries.extraction && (
-                            <Area type="monotoneX" dataKey="extraction" name="Extraction" stroke={state.color} strokeWidth={2.2} fill="url(#extFill)" />
+                            <Area
+                              type="monotoneX"
+                              dataKey="extraction"
+                              name="Extraction"
+                              stroke={state.color}
+                              strokeWidth={2.2}
+                              fill="url(#extFill)"
+                            />
                           )}
                           {!hiddenSeries.net && (
-                            <Line type="monotoneX" dataKey="net" name="Net" stroke="url(#netStroke)" strokeWidth={2.4} dot={{ r: 4, fill: '#6366f1', stroke: '#fff', strokeWidth: 1 }} strokeDasharray="6 5" />
+                            <Line
+                              type="monotoneX"
+                              dataKey="net"
+                              name="Net"
+                              stroke="url(#netStroke)"
+                              strokeWidth={2.4}
+                              dot={{
+                                r: 4,
+                                fill: "#6366f1",
+                                stroke: "#fff",
+                                strokeWidth: 1,
+                              }}
+                              strokeDasharray="6 5"
+                            />
                           )}
                         </ComposedChart>
                       </ResponsiveContainer>
                       {hoverYear !== null && (
                         <div className="pointer-events-none absolute inset-0">
                           {(() => {
-                            const idx = state.timeSeries.findIndex(d => d.year === hoverYear);
+                            const idx = state.timeSeries.findIndex(
+                              (d) => d.year === hoverYear
+                            );
                             if (idx === -1) return null;
-                            return <div className="absolute top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-slate-400/60 to-transparent" style={{ left: `${(idx / (state.timeSeries.length - 1)) * 100}%` }} />;
+                            return (
+                              <div
+                                className="absolute top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-slate-400/60 to-transparent"
+                                style={{
+                                  left: `${
+                                    (idx / (state.timeSeries.length - 1)) * 100
+                                  }%`,
+                                }}
+                              />
+                            );
                           })()}
                         </div>
                       )}
                       <div className="absolute -bottom-2 left-0 right-0 flex justify-center gap-3 text-[11px]">
-                        {['extraction','recharge','net'].map(key => {
-                          const labels: Record<string,string> = { extraction: 'Extraction', recharge: 'Recharge', net: 'Net' };
+                        {["extraction", "recharge", "net"].map((key) => {
+                          const labels: Record<string, string> = {
+                            extraction: "Extraction",
+                            recharge: "Recharge",
+                            net: "Net",
+                          };
                           const inactive = hiddenSeries[key];
                           return (
                             <span
                               key={key}
                               onClick={() => toggleSeries(key)}
-                              className={`px-2 py-1 rounded-md cursor-pointer select-none transition-colors border ${inactive ? 'text-slate-400 line-through border-slate-200' : 'text-slate-700 hover:text-slate-900 border-slate-300 bg-white/60 backdrop-blur'} shadow-sm`}
+                              className={`px-2 py-1 rounded-md cursor-pointer select-none transition-colors border ${
+                                inactive
+                                  ? "text-slate-400 line-through border-slate-200"
+                                  : "text-slate-700 hover:text-slate-900 border-slate-300 bg-white/60 backdrop-blur"
+                              } shadow-sm`}
                             >
                               {labels[key]}
                             </span>
@@ -286,7 +390,9 @@ const StateDeepDiveCard: React.FC<StateDeepDiveCardProps> = ({ state }) => {
                       <p className="text-lg font-bold text-slate-800">
                         {state.extractionStage}%
                       </p>
-                      <p className={`text-[10px] mt-1 font-medium ${stageStatus.color}`}>
+                      <p
+                        className={`text-[10px] mt-1 font-medium ${stageStatus.color}`}
+                      >
                         {stageStatus.label}
                       </p>
                     </div>
@@ -295,21 +401,27 @@ const StateDeepDiveCard: React.FC<StateDeepDiveCardProps> = ({ state }) => {
                       <p className="text-lg font-bold text-slate-800">
                         {state.annualDeclineM} m/yr
                       </p>
-                      <p className="text-[10px] mt-1 text-slate-500">Latest trend</p>
+                      <p className="text-[10px] mt-1 text-slate-500">
+                        Latest trend
+                      </p>
                     </div>
                     <div className="p-3 rounded-lg bg-gradient-to-br from-slate-50 to-white border">
                       <p className="text-slate-500">Extraction Growth</p>
                       <p className="text-lg font-bold text-slate-800">
                         {extractionGrowthPct}%
                       </p>
-                      <p className="text-[10px] mt-1 text-slate-500">Since {first.year}</p>
+                      <p className="text-[10px] mt-1 text-slate-500">
+                        Since {first.year}
+                      </p>
                     </div>
                     <div className="p-3 rounded-lg bg-gradient-to-br from-slate-50 to-white border">
                       <p className="text-slate-500">Recharge Change</p>
                       <p className="text-lg font-bold text-slate-800">
                         {rechargeChangePct}%
                       </p>
-                      <p className="text-[10px] mt-1 text-slate-500">Since {first.year}</p>
+                      <p className="text-[10px] mt-1 text-slate-500">
+                        Since {first.year}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -319,7 +431,12 @@ const StateDeepDiveCard: React.FC<StateDeepDiveCardProps> = ({ state }) => {
                       <Info className="h-4 w-4" /> Snapshot
                     </div>
                     <p className="leading-relaxed text-slate-600">
-                      {state.notes || `${state.name} shows an extraction stage of ${state.extractionStage}% indicating ${stageStatus.label.toLowerCase()} conditions. Annual decline is ${state.annualDeclineM} m and net balance is ${latest.net.toFixed(1)} HAM.`}
+                      {state.notes ||
+                        `${state.name} shows an extraction stage of ${
+                          state.extractionStage
+                        }% indicating ${stageStatus.label.toLowerCase()} conditions. Annual decline is ${
+                          state.annualDeclineM
+                        } m and net balance is ${latest.net.toFixed(1)} HAM.`}
                     </p>
                   </div>
                   <div className="p-4 rounded-lg bg-gradient-to-br from-slate-50 to-white border text-xs space-y-3">
@@ -330,9 +447,26 @@ const StateDeepDiveCard: React.FC<StateDeepDiveCardProps> = ({ state }) => {
                       <ResponsiveContainer width="100%" height="100%">
                         <RadarChart data={state.rechargeComponents}>
                           <PolarGrid />
-                          <PolarAngleAxis dataKey="name" tick={{ fontSize: 10 }} />
-                          <PolarRadiusAxis angle={30} domain={[0, Math.max(...state.rechargeComponents.map(r => r.value))]} tick={false} />
-                          <Radar dataKey="value" stroke={state.color} fill={state.color} fillOpacity={0.3} />
+                          <PolarAngleAxis
+                            dataKey="name"
+                            tick={{ fontSize: 10 }}
+                          />
+                          <PolarRadiusAxis
+                            angle={30}
+                            domain={[
+                              0,
+                              Math.max(
+                                ...state.rechargeComponents.map((r) => r.value)
+                              ),
+                            ]}
+                            tick={false}
+                          />
+                          <Radar
+                            dataKey="value"
+                            stroke={state.color}
+                            fill={state.color}
+                            fillOpacity={0.3}
+                          />
                         </RadarChart>
                       </ResponsiveContainer>
                     </div>
@@ -357,12 +491,18 @@ const StateDeepDiveCard: React.FC<StateDeepDiveCardProps> = ({ state }) => {
                     </h4>
                     <div className="space-y-2">
                       {state.sectors.map((s, idx) => {
-                        const Icon = s.icon || sectorIconFallback[s.name] || Activity;
+                        const Icon =
+                          s.icon || sectorIconFallback[s.name] || Activity;
                         return (
                           <div key={s.name} className="flex items-center gap-3">
                             <div className="flex items-center gap-1 w-24">
-                              <Icon className="h-3.5 w-3.5" style={{ color: s.color }} />
-                              <span className="text-xs text-slate-600 truncate">{s.name}</span>
+                              <Icon
+                                className="h-3.5 w-3.5"
+                                style={{ color: s.color }}
+                              />
+                              <span className="text-xs text-slate-600 truncate">
+                                {s.name}
+                              </span>
                             </div>
                             <div className="flex-1 bg-slate-100 rounded-full h-4 relative overflow-hidden">
                               <motion.div
@@ -373,7 +513,9 @@ const StateDeepDiveCard: React.FC<StateDeepDiveCardProps> = ({ state }) => {
                                 style={{ background: s.color }}
                               />
                               <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="text-[10px] font-medium text-white drop-shadow-sm">{s.value}%</span>
+                                <span className="text-[10px] font-medium text-white drop-shadow-sm">
+                                  {s.value}%
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -381,7 +523,9 @@ const StateDeepDiveCard: React.FC<StateDeepDiveCardProps> = ({ state }) => {
                       })}
                     </div>
                     <div className="text-[11px] text-slate-500 pt-2">
-                      Agriculture share dominance highlights irrigation dependency. Diversification & efficiency tech could reduce pressure.
+                      Agriculture share dominance highlights irrigation
+                      dependency. Diversification & efficiency tech could reduce
+                      pressure.
                     </div>
                   </div>
                   <div className="space-y-4">
@@ -391,21 +535,29 @@ const StateDeepDiveCard: React.FC<StateDeepDiveCardProps> = ({ state }) => {
                     <div className="space-y-2">
                       {state.drivers.map((d, idx) => (
                         <div key={d.name} className="flex items-center gap-3">
-                          <div className="w-28 text-xs text-slate-600 truncate">{d.name}</div>
+                          <div className="w-28 text-xs text-slate-600 truncate">
+                            {d.name}
+                          </div>
                           <div className="flex-1 bg-slate-100 rounded-full h-3 relative overflow-hidden">
                             <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${d.impact}%` }}
-                              transition={{ duration: 0.9, delay: 0.3 + idx * 0.06 }}
+                              transition={{
+                                duration: 0.9,
+                                delay: 0.3 + idx * 0.06,
+                              }}
                               className="h-full rounded-full bg-gradient-to-r from-slate-600 to-slate-400"
                             />
                           </div>
-                          <div className="text-[10px] font-medium text-slate-700 w-8">{d.impact}</div>
+                          <div className="text-[10px] font-medium text-slate-700 w-8">
+                            {d.impact}
+                          </div>
                         </div>
                       ))}
                     </div>
                     <div className="text-[11px] text-slate-500 pt-2">
-                      High-impact structural drivers require policy & incentive realignment for sustainable withdrawal.
+                      High-impact structural drivers require policy & incentive
+                      realignment for sustainable withdrawal.
                     </div>
                   </div>
                 </div>
@@ -427,36 +579,87 @@ const StateDeepDiveCard: React.FC<StateDeepDiveCardProps> = ({ state }) => {
                       data={state.timeSeries}
                       margin={{ top: 10, right: 10, left: 0, bottom: 10 }}
                     >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                      <XAxis dataKey="year" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
-                      <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="#e2e8f0"
+                        vertical={false}
+                      />
+                      <XAxis
+                        dataKey="year"
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{ fontSize: 11, fill: "#64748b" }}
+                      />
+                      <YAxis
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{ fontSize: 11, fill: "#64748b" }}
+                      />
                       <Tooltip content={<ChartTooltip />} />
-                      <Area type="monotone" dataKey="recharge" name="Recharge" stroke="#0284c7" strokeWidth={2} fill="#0284c7" fillOpacity={0.15} />
-                      <Area type="monotone" dataKey="extraction" name="Extraction" stroke={state.color} strokeWidth={2} fill={state.color} fillOpacity={0.15} />
-                      <Line type="monotone" dataKey="net" name="Net" stroke="#6366f1" strokeWidth={2} dot={{ r: 4, fill: '#6366f1' }} strokeDasharray="4 3" />
+                      <Area
+                        type="monotone"
+                        dataKey="recharge"
+                        name="Recharge"
+                        stroke="#0284c7"
+                        strokeWidth={2}
+                        fill="#0284c7"
+                        fillOpacity={0.15}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="extraction"
+                        name="Extraction"
+                        stroke={state.color}
+                        strokeWidth={2}
+                        fill={state.color}
+                        fillOpacity={0.15}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="net"
+                        name="Net"
+                        stroke="#6366f1"
+                        strokeWidth={2}
+                        dot={{ r: 4, fill: "#6366f1" }}
+                        strokeDasharray="4 3"
+                      />
                     </ComposedChart>
                   </ResponsiveContainer>
                 </div>
                 <div className="grid md:grid-cols-4 gap-3 text-xs">
                   <div className="p-3 rounded-lg bg-gradient-to-br from-slate-50 to-white border">
                     <p className="text-slate-500">Net Latest</p>
-                    <p className="text-lg font-bold text-slate-800">{latest.net.toFixed(1)} HAM</p>
+                    <p className="text-lg font-bold text-slate-800">
+                      {latest.net.toFixed(1)} HAM
+                    </p>
                     <p className="text-[10px] mt-1 text-slate-500">Balance</p>
                   </div>
                   <div className="p-3 rounded-lg bg-gradient-to-br from-slate-50 to-white border">
                     <p className="text-slate-500">Peak Extraction</p>
-                    <p className="text-lg font-bold text-slate-800">{Math.max(...state.timeSeries.map(d => d.extraction))}</p>
-                    <p className="text-[10px] mt-1 text-slate-500">Yearly Max</p>
+                    <p className="text-lg font-bold text-slate-800">
+                      {Math.max(...state.timeSeries.map((d) => d.extraction))}
+                    </p>
+                    <p className="text-[10px] mt-1 text-slate-500">
+                      Yearly Max
+                    </p>
                   </div>
                   <div className="p-3 rounded-lg bg-gradient-to-br from-slate-50 to-white border">
                     <p className="text-slate-500">Lowest Recharge</p>
-                    <p className="text-lg font-bold text-slate-800">{Math.min(...state.timeSeries.map(d => d.recharge))}</p>
-                    <p className="text-[10px] mt-1 text-slate-500">Sensitivity</p>
+                    <p className="text-lg font-bold text-slate-800">
+                      {Math.min(...state.timeSeries.map((d) => d.recharge))}
+                    </p>
+                    <p className="text-[10px] mt-1 text-slate-500">
+                      Sensitivity
+                    </p>
                   </div>
                   <div className="p-3 rounded-lg bg-gradient-to-br from-slate-50 to-white border">
                     <p className="text-slate-500">Extraction Δ</p>
-                    <p className="text-lg font-bold text-slate-800">{(+extractionGrowthPct).toFixed(1)}%</p>
-                    <p className="text-[10px] mt-1 text-slate-500">Since {first.year}</p>
+                    <p className="text-lg font-bold text-slate-800">
+                      {(+extractionGrowthPct).toFixed(1)}%
+                    </p>
+                    <p className="text-[10px] mt-1 text-slate-500">
+                      Since {first.year}
+                    </p>
                   </div>
                 </div>
               </motion.div>
@@ -480,9 +683,26 @@ const StateDeepDiveCard: React.FC<StateDeepDiveCardProps> = ({ state }) => {
                       <ResponsiveContainer width="100%" height="100%">
                         <RadarChart data={state.rechargeComponents}>
                           <PolarGrid />
-                          <PolarAngleAxis dataKey="name" tick={{ fontSize: 10 }} />
-                          <PolarRadiusAxis angle={30} domain={[0, Math.max(...state.rechargeComponents.map(r => r.value))]} tick={false} />
-                          <Radar dataKey="value" stroke={state.color} fill={state.color} fillOpacity={0.3} />
+                          <PolarAngleAxis
+                            dataKey="name"
+                            tick={{ fontSize: 10 }}
+                          />
+                          <PolarRadiusAxis
+                            angle={30}
+                            domain={[
+                              0,
+                              Math.max(
+                                ...state.rechargeComponents.map((r) => r.value)
+                              ),
+                            ]}
+                            tick={false}
+                          />
+                          <Radar
+                            dataKey="value"
+                            stroke={state.color}
+                            fill={state.color}
+                            fillOpacity={0.3}
+                          />
                         </RadarChart>
                       </ResponsiveContainer>
                     </div>
@@ -492,23 +712,38 @@ const StateDeepDiveCard: React.FC<StateDeepDiveCardProps> = ({ state }) => {
                       <Activity className="h-4 w-4" /> Component Breakdown
                     </h4>
                     <div className="space-y-2 text-xs">
-                      {state.rechargeComponents.map(rc => (
+                      {state.rechargeComponents.map((rc) => (
                         <div key={rc.name} className="flex items-center gap-2">
-                          <div className="w-28 text-slate-600 truncate">{rc.name}</div>
+                          <div className="w-28 text-slate-600 truncate">
+                            {rc.name}
+                          </div>
                           <div className="flex-1 bg-slate-200/60 rounded-full h-2 overflow-hidden">
                             <motion.div
                               initial={{ width: 0 }}
-                              animate={{ width: `${(rc.value / Math.max(...state.rechargeComponents.map(r => r.value))) * 100}%` }}
+                              animate={{
+                                width: `${
+                                  (rc.value /
+                                    Math.max(
+                                      ...state.rechargeComponents.map(
+                                        (r) => r.value
+                                      )
+                                    )) *
+                                  100
+                                }%`,
+                              }}
                               transition={{ duration: 0.8 }}
                               className="h-full bg-gradient-to-r from-slate-600 to-slate-400"
                             />
                           </div>
-                          <div className="w-10 text-right font-medium text-slate-700">{rc.value}</div>
+                          <div className="w-10 text-right font-medium text-slate-700">
+                            {rc.value}
+                          </div>
                         </div>
                       ))}
                     </div>
                     <p className="text-[11px] text-slate-500 pt-2">
-                      Higher rainfall recharge dominance suggests vulnerability to climate variability if monsoon weakens.
+                      Higher rainfall recharge dominance suggests vulnerability
+                      to climate variability if monsoon weakens.
                     </p>
                   </div>
                 </div>
@@ -531,7 +766,9 @@ const StateDeepDiveCard: React.FC<StateDeepDiveCardProps> = ({ state }) => {
                   <div className="space-y-3">
                     {state.drivers.map((d, idx) => (
                       <div key={d.name} className="flex items-center gap-3">
-                        <div className="w-28 text-xs text-slate-600 truncate">{d.name}</div>
+                        <div className="w-28 text-xs text-slate-600 truncate">
+                          {d.name}
+                        </div>
                         <div className="flex-1 bg-slate-100 rounded-full h-3 relative overflow-hidden">
                           <motion.div
                             initial={{ width: 0 }}
@@ -540,12 +777,15 @@ const StateDeepDiveCard: React.FC<StateDeepDiveCardProps> = ({ state }) => {
                             className="h-full rounded-full bg-gradient-to-r from-red-600 to-amber-500"
                           />
                         </div>
-                        <div className="text-[10px] font-medium text-slate-700 w-8">{d.impact}</div>
+                        <div className="text-[10px] font-medium text-slate-700 w-8">
+                          {d.impact}
+                        </div>
                       </div>
                     ))}
                   </div>
                   <p className="text-[11px] text-slate-500">
-                    Drivers with &gt;75 impact require structural or policy-based mitigation to bend trajectory.
+                    Drivers with &gt;75 impact require structural or
+                    policy-based mitigation to bend trajectory.
                   </p>
                 </div>
               </motion.div>
@@ -565,11 +805,18 @@ const StateDeepDiveCard: React.FC<StateDeepDiveCardProps> = ({ state }) => {
                     <AlertTriangle className="h-4 w-4" /> Composite Risk Matrix
                   </h4>
                   <div className="grid md:grid-cols-2 gap-4">
-                    {state.riskFactors.map(rf => (
-                      <div key={rf.factor} className="p-3 bg-slate-50 rounded-lg border text-xs space-y-2">
+                    {state.riskFactors.map((rf) => (
+                      <div
+                        key={rf.factor}
+                        className="p-3 bg-slate-50 rounded-lg border text-xs space-y-2"
+                      >
                         <div className="flex justify-between items-center">
-                          <span className="font-medium text-slate-700 truncate">{rf.factor}</span>
-                          <span className="text-[10px] text-slate-500">Weight {rf.weight}</span>
+                          <span className="font-medium text-slate-700 truncate">
+                            {rf.factor}
+                          </span>
+                          <span className="text-[10px] text-slate-500">
+                            Weight {rf.weight}
+                          </span>
                         </div>
                         <div className="flex items-center gap-3">
                           <div className="flex-1 bg-slate-200/60 rounded-full h-2 overflow-hidden">
@@ -580,13 +827,16 @@ const StateDeepDiveCard: React.FC<StateDeepDiveCardProps> = ({ state }) => {
                               className="h-full bg-gradient-to-r from-rose-600 to-orange-500"
                             />
                           </div>
-                          <div className="w-8 text-right font-semibold text-slate-700">{rf.score}</div>
+                          <div className="w-8 text-right font-semibold text-slate-700">
+                            {rf.score}
+                          </div>
                         </div>
                       </div>
                     ))}
                   </div>
                   <p className="text-[11px] text-slate-500">
-                    Composite risk integrates hydroclimatic variability, structural overuse, and adaptive capacity limitations.
+                    Composite risk integrates hydroclimatic variability,
+                    structural overuse, and adaptive capacity limitations.
                   </p>
                 </div>
               </motion.div>
@@ -603,15 +853,19 @@ const StateDeepDiveCard: React.FC<StateDeepDiveCardProps> = ({ state }) => {
               >
                 <div className="space-y-4">
                   <h4 className="font-semibold text-slate-800 flex items-center gap-2 text-sm">
-                    <Database className="h-4 w-4" /> Strategic Intervention Stack
+                    <Database className="h-4 w-4" /> Strategic Intervention
+                    Stack
                   </h4>
                   <ol className="space-y-2 list-decimal list-inside text-xs text-slate-700">
                     {state.recommendations.map((rec, idx) => (
-                      <li key={idx} className="leading-relaxed">{rec}</li>
+                      <li key={idx} className="leading-relaxed">
+                        {rec}
+                      </li>
                     ))}
                   </ol>
                   <p className="text-[11px] text-slate-500">
-                    Prioritize quick wins (efficiency tech, monitoring) while phasing structural changes (cropping pattern shifts).
+                    Prioritize quick wins (efficiency tech, monitoring) while
+                    phasing structural changes (cropping pattern shifts).
                   </p>
                 </div>
               </motion.div>

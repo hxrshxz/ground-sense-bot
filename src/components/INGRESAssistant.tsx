@@ -73,23 +73,46 @@ const GroundwaterExtractionVisualization = React.lazy(
   () => import("./GroundwaterExtractionVisualization")
 );
 // Import specific thematic cards for different query types
-const CropRecommendationCard = React.lazy(() => import("./CropRecommendationCard").then(module => ({ default: module.CropRecommendationCard })));
-const PolicyRechargeCard = React.lazy(() => import("./PolicyRechargeCard").then(module => ({ default: module.PolicyRechargeCard })));
-const RainfallImpactCard = React.lazy(() => import("./RainfallImpactCard").then(module => ({ default: module.RainfallImpactCard })));
+const CropRecommendationCard = React.lazy(() =>
+  import("./CropRecommendationCard").then((module) => ({
+    default: module.CropRecommendationCard,
+  }))
+);
+const PolicyRechargeCard = React.lazy(() =>
+  import("./PolicyRechargeCard").then((module) => ({
+    default: module.PolicyRechargeCard,
+  }))
+);
+const RainfallImpactCard = React.lazy(() =>
+  import("./RainfallImpactCard").then((module) => ({
+    default: module.RainfallImpactCard,
+  }))
+);
 const StateComparisonCard = React.lazy(
   () => import("./cards/StateComparisonCard")
 );
 // Newly added rich chart components
-const ExtractionTrendLine = React.lazy(() => import("./charts/ExtractionTrendLine"));
-const RechargeCompositionDonut = React.lazy(() => import("./charts/RechargeCompositionDonut"));
-const SectorUsageStackedBar = React.lazy(() => import("./charts/SectorUsageStackedBar"));
+const ExtractionTrendLine = React.lazy(
+  () => import("./charts/ExtractionTrendLine")
+);
+const RechargeCompositionDonut = React.lazy(
+  () => import("./charts/RechargeCompositionDonut")
+);
+const SectorUsageStackedBar = React.lazy(
+  () => import("./charts/SectorUsageStackedBar")
+);
 const RiskRadar = React.lazy(() => import("./charts/RiskRadar"));
 const KPIStatGroup = React.lazy(() => import("./charts/KPIStatGroup"));
 const ChartSkeleton = React.lazy(() => import("./charts/ChartSkeleton"));
 
 // Lightweight helper to map a state profile to chart props
 interface StateProfileLite {
-  timeSeries?: { year: number; extraction: number; recharge?: number; net?: number }[];
+  timeSeries?: {
+    year: number;
+    extraction: number;
+    recharge?: number;
+    net?: number;
+  }[];
   rechargeComponents?: { name: string; value: number }[];
   sectors?: { name: string; value: number }[];
   riskFactors?: { factor: string; score: number }[];
@@ -99,28 +122,59 @@ interface StateProfileLite {
 }
 
 // Composite bundles for predefined graphical prompts
-const CropInsightBundle: React.FC<{ profile: StateProfileLite }> = ({ profile }) => {
-  const trendData = (profile.timeSeries || []).map(d => ({ year: d.year, extraction: d.extraction, recharge: d.recharge, net: d.net }));
-  const rechargeSlices = (profile.rechargeComponents || []).map(r => ({ name: r.name, value: r.value }));
-  const sectorData = (profile.sectors || []).map(s => ({ sector: s.name, value: s.value }));
+const CropInsightBundle: React.FC<{ profile: StateProfileLite }> = ({
+  profile,
+}) => {
+  const trendData = (profile.timeSeries || []).map((d) => ({
+    year: d.year,
+    extraction: d.extraction,
+    recharge: d.recharge,
+    net: d.net,
+  }));
+  const rechargeSlices = (profile.rechargeComponents || []).map((r) => ({
+    name: r.name,
+    value: r.value,
+  }));
+  const sectorData = (profile.sectors || []).map((s) => ({
+    sector: s.name,
+    value: s.value,
+  }));
   const kpis = [
-    { label: 'Stage', value: (profile.extractionStage ?? '--') + '%', change: undefined, sparkline: trendData.map(t=>t.extraction), color: '#0ea5e9' },
-    { label: 'Decline', value: (profile.annualDeclineM ?? '--') + ' m/yr', change: undefined, sparkline: trendData.map(t=>t.net ?? 0), color: '#ef4444' },
+    {
+      label: "Stage",
+      value: (profile.extractionStage ?? "--") + "%",
+      change: undefined,
+      sparkline: trendData.map((t) => t.extraction),
+      color: "#0ea5e9",
+    },
+    {
+      label: "Decline",
+      value: (profile.annualDeclineM ?? "--") + " m/yr",
+      change: undefined,
+      sparkline: trendData.map((t) => t.net ?? 0),
+      color: "#ef4444",
+    },
   ];
   return (
     <div className="space-y-6">
-      <CropRecommendationCard region={profile.name || 'Region'} />
+      <CropRecommendationCard region={profile.name || "Region"} />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
-          <React.Suspense fallback={<ChartSkeleton variant='line' height={280} />}>            
+          <React.Suspense
+            fallback={<ChartSkeleton variant="line" height={280} />}
+          >
             <ExtractionTrendLine data={trendData} />
           </React.Suspense>
         </div>
         <div className="space-y-6">
-          <React.Suspense fallback={<ChartSkeleton variant='donut' height={260} />}>            
+          <React.Suspense
+            fallback={<ChartSkeleton variant="donut" height={260} />}
+          >
             <RechargeCompositionDonut data={rechargeSlices} />
           </React.Suspense>
-          <React.Suspense fallback={<ChartSkeleton variant='kpi' height={160} />}>            
+          <React.Suspense
+            fallback={<ChartSkeleton variant="kpi" height={160} />}
+          >
             <KPIStatGroup items={kpis} />
           </React.Suspense>
         </div>
@@ -129,27 +183,54 @@ const CropInsightBundle: React.FC<{ profile: StateProfileLite }> = ({ profile })
   );
 };
 
-const PolicyRechargeBundle: React.FC<{ profile: StateProfileLite }> = ({ profile }) => {
-  const rechargeSlices = (profile.rechargeComponents || []).map(r => ({ name: r.name, value: r.value }));
-  const riskData = (profile.riskFactors || []).map(r => ({ factor: r.factor, score: r.score }));
+const PolicyRechargeBundle: React.FC<{ profile: StateProfileLite }> = ({
+  profile,
+}) => {
+  const rechargeSlices = (profile.rechargeComponents || []).map((r) => ({
+    name: r.name,
+    value: r.value,
+  }));
+  const riskData = (profile.riskFactors || []).map((r) => ({
+    factor: r.factor,
+    score: r.score,
+  }));
   const kpis = [
-    { label: 'Stage %', value: (profile.extractionStage ?? '--') + '%', sparkline: [], color: '#6366f1' },
-    { label: 'Decline', value: (profile.annualDeclineM ?? '--') + ' m/yr', sparkline: [], color: '#ef4444' },
+    {
+      label: "Stage %",
+      value: (profile.extractionStage ?? "--") + "%",
+      sparkline: [],
+      color: "#6366f1",
+    },
+    {
+      label: "Decline",
+      value: (profile.annualDeclineM ?? "--") + " m/yr",
+      sparkline: [],
+      color: "#ef4444",
+    },
   ];
   return (
     <div className="space-y-6">
-      <PolicyRechargeCard region={profile.name || 'Target Region'} baselineRecharge={100} />
+      <PolicyRechargeCard
+        region={profile.name || "Target Region"}
+        baselineRecharge={100}
+      />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="space-y-6">
-          <React.Suspense fallback={<ChartSkeleton variant='donut' height={260} />}>            
+          <React.Suspense
+            fallback={<ChartSkeleton variant="donut" height={260} />}
+          >
             <RechargeCompositionDonut data={rechargeSlices} />
           </React.Suspense>
-          <React.Suspense fallback={<ChartSkeleton variant='kpi' height={160} />}>            
+          <React.Suspense
+            fallback={<ChartSkeleton variant="kpi" height={160} />}
+          >
             <KPIStatGroup items={kpis} />
           </React.Suspense>
         </div>
         <div className="md:col-span-2">
-          <React.Suspense fallback={<ChartSkeleton variant='radar' height={300} />}>            
+          <React.Suspense
+            fallback={<ChartSkeleton variant="radar" height={300} />}
+          >
             <RiskRadar data={riskData} />
           </React.Suspense>
         </div>
@@ -158,27 +239,48 @@ const PolicyRechargeBundle: React.FC<{ profile: StateProfileLite }> = ({ profile
   );
 };
 
-const RainfallImpactBundle: React.FC<{ profile: StateProfileLite }> = ({ profile }) => {
-  const trendData = (profile.timeSeries || []).map(d => ({ year: d.year, extraction: d.extraction, recharge: d.recharge, net: d.net }));
-  const rechargeSlices = (profile.rechargeComponents || []).map(r => ({ name: r.name, value: r.value }));
-  const sectorData = (profile.sectors || []).map(s => ({ sector: s.name, value: s.value }));
+const RainfallImpactBundle: React.FC<{ profile: StateProfileLite }> = ({
+  profile,
+}) => {
+  const trendData = (profile.timeSeries || []).map((d) => ({
+    year: d.year,
+    extraction: d.extraction,
+    recharge: d.recharge,
+    net: d.net,
+  }));
+  const rechargeSlices = (profile.rechargeComponents || []).map((r) => ({
+    name: r.name,
+    value: r.value,
+  }));
+  const sectorData = (profile.sectors || []).map((s) => ({
+    sector: s.name,
+    value: s.value,
+  }));
   return (
     <div className="space-y-6">
-      <RainfallImpactCard region={profile.name || 'Region'} season="Monsoon 2024" stressIndex={profile.extractionStage} />
+      <RainfallImpactCard
+        region={profile.name || "Region"}
+        season="Monsoon 2024"
+        stressIndex={profile.extractionStage}
+      />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
-          <React.Suspense fallback={<ChartSkeleton variant='line' height={280} />}>            
+          <React.Suspense
+            fallback={<ChartSkeleton variant="line" height={280} />}
+          >
             <ExtractionTrendLine data={trendData} />
           </React.Suspense>
         </div>
         <div>
-          <React.Suspense fallback={<ChartSkeleton variant='donut' height={260} />}>            
+          <React.Suspense
+            fallback={<ChartSkeleton variant="donut" height={260} />}
+          >
             <RechargeCompositionDonut data={rechargeSlices} />
           </React.Suspense>
         </div>
       </div>
       <div>
-        <React.Suspense fallback={<ChartSkeleton variant='bar' height={260} />}>          
+        <React.Suspense fallback={<ChartSkeleton variant="bar" height={260} />}>
           <SectorUsageStackedBar data={sectorData} />
         </React.Suspense>
       </div>
@@ -1884,7 +1986,13 @@ Your response should sound like it's coming from a knowledgeable human analyst e
           id: Date.now() + 1,
           type: "ai",
           component: (
-            <React.Suspense fallback={<div className="p-4 text-sm text-muted-foreground">Loading crop insights…</div>}>
+            <React.Suspense
+              fallback={
+                <div className="p-4 text-sm text-muted-foreground">
+                  Loading crop insights…
+                </div>
+              }
+            >
               <CropInsightBundle profile={PUNJAB_PROFILE} />
             </React.Suspense>
           ),
@@ -1916,7 +2024,13 @@ Your response should sound like it's coming from a knowledgeable human analyst e
           id: Date.now() + 1,
           type: "ai",
           component: (
-            <React.Suspense fallback={<div className="p-4 text-sm text-muted-foreground">Loading recharge policy bundle…</div>}>
+            <React.Suspense
+              fallback={
+                <div className="p-4 text-sm text-muted-foreground">
+                  Loading recharge policy bundle…
+                </div>
+              }
+            >
               <PolicyRechargeBundle profile={PUNJAB_PROFILE} />
             </React.Suspense>
           ),
@@ -1950,7 +2064,13 @@ Your response should sound like it's coming from a knowledgeable human analyst e
           id: Date.now() + 1,
           type: "ai",
           component: (
-            <React.Suspense fallback={<div className="p-4 text-sm text-muted-foreground">Loading rainfall impact bundle…</div>}>
+            <React.Suspense
+              fallback={
+                <div className="p-4 text-sm text-muted-foreground">
+                  Loading rainfall impact bundle…
+                </div>
+              }
+            >
               <RainfallImpactBundle profile={PUNJAB_PROFILE} />
             </React.Suspense>
           ),
@@ -2025,7 +2145,13 @@ Your response should sound like it's coming from a knowledgeable human analyst e
           id: Date.now() + 1,
           type: "ai",
           component: (
-            <React.Suspense fallback={<div className="text-xs text-slate-500">Loading policy analysis bundle...</div>}>
+            <React.Suspense
+              fallback={
+                <div className="text-xs text-slate-500">
+                  Loading policy analysis bundle...
+                </div>
+              }
+            >
               <PolicyRechargeBundle profile={PUNJAB_PROFILE} />
             </React.Suspense>
           ),
@@ -2060,7 +2186,13 @@ Your response should sound like it's coming from a knowledgeable human analyst e
           id: Date.now() + 1,
           type: "ai",
           component: (
-            <React.Suspense fallback={<div className="text-xs text-slate-500">Loading rainfall impact bundle...</div>}>
+            <React.Suspense
+              fallback={
+                <div className="text-xs text-slate-500">
+                  Loading rainfall impact bundle...
+                </div>
+              }
+            >
               <RainfallImpactBundle profile={PUNJAB_PROFILE} />
             </React.Suspense>
           ),

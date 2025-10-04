@@ -22,18 +22,18 @@ import { IngresContextHeader } from "./IngresContextHeader";
 import { ChartDepthWrapper } from "./ChartDepthWrapper";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  Leaf, 
-  Droplets, 
-  Zap, 
-  TrendingUp, 
-  TrendingDown, 
+import {
+  Leaf,
+  Droplets,
+  Zap,
+  TrendingUp,
+  TrendingDown,
   Target,
   Sprout,
   DollarSign,
   BarChart3,
   PieChart as PieChartIcon,
-  Radar as RadarIcon
+  Radar as RadarIcon,
 } from "lucide-react";
 
 interface CropScenario {
@@ -117,22 +117,43 @@ export const CropRecommendationCard: React.FC<Props> = ({
   baselineCrop = "Paddy",
   scenarios = defaultScenarios,
 }) => {
-  const [activeView, setActiveView] = useState<"overview" | "scatter" | "radar">("overview");
-  
+  const [activeView, setActiveView] = useState<
+    "overview" | "scatter" | "radar"
+  >("overview");
+
   const maxMargin = Math.max(...scenarios.map((s) => s.grossMargin));
   const maxWaterSaving = Math.max(...scenarios.map((s) => s.savingVsPaddy));
-  
-    // Enhanced scenarios with INGRES groundwater sustainability scoring
-  const enhancedScenarios = scenarios.map((s, index) => ({
-    ...s,
-    efficiencyScore: (s.savingVsPaddy * 0.25) + (s.grossMargin * 0.15) + (s.adoptionEase * 6) + (s.yieldStability * 5) + (s.groundwaterSustainability * 10) + (s.rechargeImpact * 0.1) - (s.riskFactor * 4),
-    costEffectiveness: Math.round((s.grossMargin / s.waterUse) * 10) / 10,
-    ingresSustainabilityIndex: Math.round(((s.groundwaterSustainability * 20) + (s.rechargeImpact > 0 ? s.rechargeImpact : 0) + (s.savingVsPaddy > 0 ? s.savingVsPaddy : 0)) / 3),
-    color: s.groundwaterSustainability >= 4 ? '#10b981' : s.groundwaterSustainability >= 3 ? '#f59e0b' : '#ef4444', // Green for sustainable, amber for moderate, red for unsustainable
-  })).sort((a, b) => b.efficiencyScore - a.efficiencyScore);
+
+  // Enhanced scenarios with INGRES groundwater sustainability scoring
+  const enhancedScenarios = scenarios
+    .map((s, index) => ({
+      ...s,
+      efficiencyScore:
+        s.savingVsPaddy * 0.25 +
+        s.grossMargin * 0.15 +
+        s.adoptionEase * 6 +
+        s.yieldStability * 5 +
+        s.groundwaterSustainability * 10 +
+        s.rechargeImpact * 0.1 -
+        s.riskFactor * 4,
+      costEffectiveness: Math.round((s.grossMargin / s.waterUse) * 10) / 10,
+      ingresSustainabilityIndex: Math.round(
+        (s.groundwaterSustainability * 20 +
+          (s.rechargeImpact > 0 ? s.rechargeImpact : 0) +
+          (s.savingVsPaddy > 0 ? s.savingVsPaddy : 0)) /
+          3
+      ),
+      color:
+        s.groundwaterSustainability >= 4
+          ? "#10b981"
+          : s.groundwaterSustainability >= 3
+          ? "#f59e0b"
+          : "#ef4444", // Green for sustainable, amber for moderate, red for unsustainable
+    }))
+    .sort((a, b) => b.efficiencyScore - a.efficiencyScore);
 
   const bestAlternatives = enhancedScenarios
-    .filter(s => !s.crop.includes("Paddy"))
+    .filter((s) => !s.crop.includes("Paddy"))
     .sort((a, b) => b.efficiencyScore - a.efficiencyScore)
     .slice(0, 3);
 
@@ -150,16 +171,32 @@ export const CropRecommendationCard: React.FC<Props> = ({
           moduleTag="Crop Module"
           stage={"Over-Exploited"}
           accent="emerald"
-          extraBadges={<>
-            <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">{scenarios.length} Scenarios</Badge>
-            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">AI Ranked</Badge>
-          </>}
+          extraBadges={
+            <>
+              <Badge
+                variant="outline"
+                className="bg-emerald-50 text-emerald-700 border-emerald-200"
+              >
+                {scenarios.length} Scenarios
+              </Badge>
+              <Badge
+                variant="outline"
+                className="bg-blue-50 text-blue-700 border-blue-200"
+              >
+                AI Ranked
+              </Badge>
+            </>
+          }
         />
 
         <CardContent className="space-y-8">
           {/* Contextual introduction */}
           <div className="text-xs text-slate-600 leading-relaxed bg-emerald-50/40 border border-emerald-100 rounded-md p-3">
-            This module evaluates crop alternatives using INGRES-aligned sustainability indices combining relative water demand, economic viability, adoption ease, recharge interaction (±mm), and risk normalization. Higher ranked options reduce abstraction pressure and improve groundwater stage trajectory.
+            This module evaluates crop alternatives using INGRES-aligned
+            sustainability indices combining relative water demand, economic
+            viability, adoption ease, recharge interaction (±mm), and risk
+            normalization. Higher ranked options reduce abstraction pressure and
+            improve groundwater stage trajectory.
           </div>
 
           {/* KPI Summary for Top 3 Alternatives */}
@@ -178,9 +215,9 @@ export const CropRecommendationCard: React.FC<Props> = ({
                     <span className="p-2 rounded-md bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-sm">
                       <Leaf className="h-4 w-4" />
                     </span>
-                                          <span className="text-xs font-medium tracking-wide text-slate-600 uppercase">
-                        INGRES Rank #{index + 1}
-                      </span>
+                    <span className="text-xs font-medium tracking-wide text-slate-600 uppercase">
+                      INGRES Rank #{index + 1}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1 text-[10px] font-semibold">
                     <TrendingUp className="h-3 w-3 text-emerald-500" />
@@ -190,17 +227,28 @@ export const CropRecommendationCard: React.FC<Props> = ({
                   </div>
                 </div>
                 <div className="mb-3">
-                  <div className="text-sm font-bold text-slate-800 mb-1">{crop.crop}</div>
-                  <div className="text-xs text-slate-600">{crop.savingVsPaddy}% water saved vs paddy · GW Index {crop.groundwaterSustainability}/5 · Impact {crop.rechargeImpact > 0 ? '+' : ''}{crop.rechargeImpact}mm</div>
+                  <div className="text-sm font-bold text-slate-800 mb-1">
+                    {crop.crop}
+                  </div>
+                  <div className="text-xs text-slate-600">
+                    {crop.savingVsPaddy}% water saved vs paddy · GW Index{" "}
+                    {crop.groundwaterSustainability}/5 · Impact{" "}
+                    {crop.rechargeImpact > 0 ? "+" : ""}
+                    {crop.rechargeImpact}mm
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-[11px]">
                   <div>
                     <span className="text-slate-500">Margin:</span>
-                    <span className="ml-1 font-semibold">{crop.grossMargin}%</span>
+                    <span className="ml-1 font-semibold">
+                      {crop.grossMargin}%
+                    </span>
                   </div>
                   <div>
                     <span className="text-slate-500">Ease:</span>
-                    <span className="ml-1 font-semibold">{crop.adoptionEase}/5</span>
+                    <span className="ml-1 font-semibold">
+                      {crop.adoptionEase}/5
+                    </span>
                   </div>
                 </div>
                 <div className="h-1 rounded-full bg-slate-100 overflow-hidden mt-3">
@@ -216,7 +264,11 @@ export const CropRecommendationCard: React.FC<Props> = ({
           </div>
 
           {/* Tab Navigation */}
-          <div className="flex bg-slate-100 rounded-lg p-1" role="tablist" aria-label="Crop analysis views">
+          <div
+            className="flex bg-slate-100 rounded-lg p-1"
+            role="tablist"
+            aria-label="Crop analysis views"
+          >
             {[
               { key: "overview", label: "Overview", icon: BarChart3 },
               { key: "scatter", label: "Risk vs Reward", icon: Target },
@@ -278,11 +330,15 @@ export const CropRecommendationCard: React.FC<Props> = ({
                           <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${s.waterUse}%` }}
-                            transition={{ duration: 1, delay: 0.2 + index * 0.05 }}
+                            transition={{
+                              duration: 1,
+                              delay: 0.2 + index * 0.05,
+                            }}
                             className="h-full rounded-full shadow-inner"
-                            style={{ 
+                            style={{
                               background: `linear-gradient(90deg, ${s.color} 0%, ${s.color}CC 60%, ${s.color}99 100%)`,
-                              boxShadow: "0 0 0 1px rgba(255,255,255,0.15) inset"
+                              boxShadow:
+                                "0 0 0 1px rgba(255,255,255,0.15) inset",
                             }}
                           />
                           <span className="absolute inset-0 flex items-center justify-center text-[10px] font-semibold text-white drop-shadow">
@@ -306,8 +362,13 @@ export const CropRecommendationCard: React.FC<Props> = ({
                         <div className="h-4 w-full bg-slate-100/80 rounded-full relative overflow-hidden">
                           <motion.div
                             initial={{ width: 0 }}
-                            animate={{ width: `${(s.grossMargin / maxMargin) * 100}%` }}
-                            transition={{ duration: 1, delay: 0.4 + index * 0.05 }}
+                            animate={{
+                              width: `${(s.grossMargin / maxMargin) * 100}%`,
+                            }}
+                            transition={{
+                              duration: 1,
+                              delay: 0.4 + index * 0.05,
+                            }}
                             className="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full shadow-inner"
                           />
                           <span className="absolute inset-0 flex items-center justify-center text-[10px] font-semibold text-white drop-shadow">
@@ -335,24 +396,47 @@ export const CropRecommendationCard: React.FC<Props> = ({
                   <Target className="h-5 w-5 text-emerald-500" />
                   Risk vs Economic Return Analysis
                 </h4>
-                <ChartDepthWrapper glowColor="#10b981" className="bg-transparent">
+                <ChartDepthWrapper
+                  glowColor="#10b981"
+                  className="bg-transparent"
+                >
                   <div className="absolute inset-0 pointer-events-none opacity-70 bg-[radial-gradient(circle_at_30%_70%,rgba(16,185,129,0.25),transparent_75%)]" />
                   <ResponsiveContainer width="100%" height={380}>
-                    <ScatterChart margin={{ top: 30, right: 30, left: 10, bottom: 20 }}>
-                      <XAxis 
-                        dataKey="riskFactor" 
+                    <ScatterChart
+                      margin={{ top: 30, right: 30, left: 10, bottom: 20 }}
+                    >
+                      <XAxis
+                        dataKey="riskFactor"
                         domain={[1, 5]}
                         tick={{ fontSize: 12, fill: "#475569" }}
                         axisLine={false}
                         tickLine={false}
-                        label={{ value: 'Risk Factor →', position: 'insideBottom', offset: -5, style: { textAnchor: 'middle', fontSize: '11px', fill: '#64748b' } }}
+                        label={{
+                          value: "Risk Factor →",
+                          position: "insideBottom",
+                          offset: -5,
+                          style: {
+                            textAnchor: "middle",
+                            fontSize: "11px",
+                            fill: "#64748b",
+                          },
+                        }}
                       />
-                      <YAxis 
+                      <YAxis
                         dataKey="grossMargin"
                         tick={{ fontSize: 11, fill: "#475569" }}
                         axisLine={false}
                         tickLine={false}
-                        label={{ value: 'Economic Margin →', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fontSize: '11px', fill: '#64748b' } }}
+                        label={{
+                          value: "Economic Margin →",
+                          angle: -90,
+                          position: "insideLeft",
+                          style: {
+                            textAnchor: "middle",
+                            fontSize: "11px",
+                            fill: "#64748b",
+                          },
+                        }}
                       />
                       <ReTooltip
                         content={({ active, payload }) => {
@@ -360,27 +444,74 @@ export const CropRecommendationCard: React.FC<Props> = ({
                           const data = payload[0].payload;
                           return (
                             <div className="rounded-md border bg-white/80 backdrop-blur-xl shadow-xl px-4 py-3 text-[11px] text-slate-700 min-w-[170px]">
-                              <div className="font-semibold text-slate-800 text-xs mb-2 tracking-wide">{data.crop}</div>
+                              <div className="font-semibold text-slate-800 text-xs mb-2 tracking-wide">
+                                {data.crop}
+                              </div>
                               <div className="grid grid-cols-2 gap-x-2 gap-y-1 mt-1">
-                                <span className="text-emerald-600 font-medium">Risk</span><span>{data.riskFactor}/5</span>
-                                <span className="text-indigo-600 font-medium">Margin</span><span>{data.grossMargin}%</span>
-                                <span className="text-sky-600 font-medium">Saving</span><span>{data.savingVsPaddy}%</span>
-                                <span className="text-amber-600 font-medium">Adopt</span><span>{data.adoptionEase}/5</span>
+                                <span className="text-emerald-600 font-medium">
+                                  Risk
+                                </span>
+                                <span>{data.riskFactor}/5</span>
+                                <span className="text-indigo-600 font-medium">
+                                  Margin
+                                </span>
+                                <span>{data.grossMargin}%</span>
+                                <span className="text-sky-600 font-medium">
+                                  Saving
+                                </span>
+                                <span>{data.savingVsPaddy}%</span>
+                                <span className="text-amber-600 font-medium">
+                                  Adopt
+                                </span>
+                                <span>{data.adoptionEase}/5</span>
                               </div>
                             </div>
                           );
                         }}
                       />
-                      <Scatter data={enhancedScenarios.filter(s => !s.crop.includes("Paddy"))}>
-                        {enhancedScenarios.filter(s => !s.crop.includes("Paddy")).map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} stroke="#fff" strokeWidth={1.2} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.25))' }} />
-                        ))}
+                      <Scatter
+                        data={enhancedScenarios.filter(
+                          (s) => !s.crop.includes("Paddy")
+                        )}
+                      >
+                        {enhancedScenarios
+                          .filter((s) => !s.crop.includes("Paddy"))
+                          .map((entry, index) => (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={entry.color}
+                              stroke="#fff"
+                              strokeWidth={1.2}
+                              style={{
+                                filter:
+                                  "drop-shadow(0 2px 4px rgba(0,0,0,0.25))",
+                              }}
+                            />
+                          ))}
                       </Scatter>
                       <defs>
-                        <linearGradient id="scatterOverlayGradient" x1="0" y1="0" x2="1" y2="1">
-                          <stop offset="0%" stopColor="#10b981" stopOpacity={0.18} />
-                          <stop offset="50%" stopColor="#6366f1" stopOpacity={0.07} />
-                          <stop offset="100%" stopColor="#0ea5e9" stopOpacity={0.18} />
+                        <linearGradient
+                          id="scatterOverlayGradient"
+                          x1="0"
+                          y1="0"
+                          x2="1"
+                          y2="1"
+                        >
+                          <stop
+                            offset="0%"
+                            stopColor="#10b981"
+                            stopOpacity={0.18}
+                          />
+                          <stop
+                            offset="50%"
+                            stopColor="#6366f1"
+                            stopOpacity={0.07}
+                          />
+                          <stop
+                            offset="100%"
+                            stopColor="#0ea5e9"
+                            stopOpacity={0.18}
+                          />
                         </linearGradient>
                       </defs>
                       <motion.rect
@@ -395,7 +526,9 @@ export const CropRecommendationCard: React.FC<Props> = ({
                       />
                     </ScatterChart>
                   </ResponsiveContainer>
-                  <div className="absolute left-5 top-5 text-[11px] font-medium text-slate-600 uppercase tracking-wide bg-white/60 backdrop-blur px-2 py-1 rounded shadow-sm">Lower Risk →</div>
+                  <div className="absolute left-5 top-5 text-[11px] font-medium text-slate-600 uppercase tracking-wide bg-white/60 backdrop-blur px-2 py-1 rounded shadow-sm">
+                    Lower Risk →
+                  </div>
                 </ChartDepthWrapper>
               </motion.div>
             )}
@@ -414,19 +547,31 @@ export const CropRecommendationCard: React.FC<Props> = ({
                   <RadarIcon className="h-5 w-5 text-emerald-500" />
                   Multi-Factor Crop Profile
                 </h4>
-                <ChartDepthWrapper glowColor="#6366f1" className="bg-transparent">
+                <ChartDepthWrapper
+                  glowColor="#6366f1"
+                  className="bg-transparent"
+                >
                   <div className="absolute inset-0 pointer-events-none opacity-70 bg-[radial-gradient(circle_at_70%_30%,rgba(99,102,241,0.35),transparent_78%)]" />
                   <ResponsiveContainer width="100%" height={400}>
-                    <RadarChart data={bestAlternatives.map(s => ({
-                      crop: s.crop,
-                      WaterEfficiency: s.savingVsPaddy,
-                      EconomicReturn: s.grossMargin / maxMargin * 100,
-                      AdoptionEase: s.adoptionEase * 20,
-                      YieldStability: s.yieldStability * 20,
-                      LowRisk: (6 - s.riskFactor) * 20,
-                    }))}>
-                      <PolarGrid radialLines={false} stroke="#cbd5e1" strokeOpacity={0.45} />
-                      <PolarAngleAxis dataKey="crop" tick={{ fontSize: 11, fill: "#475569" }} />
+                    <RadarChart
+                      data={bestAlternatives.map((s) => ({
+                        crop: s.crop,
+                        WaterEfficiency: s.savingVsPaddy,
+                        EconomicReturn: (s.grossMargin / maxMargin) * 100,
+                        AdoptionEase: s.adoptionEase * 20,
+                        YieldStability: s.yieldStability * 20,
+                        LowRisk: (6 - s.riskFactor) * 20,
+                      }))}
+                    >
+                      <PolarGrid
+                        radialLines={false}
+                        stroke="#cbd5e1"
+                        strokeOpacity={0.45}
+                      />
+                      <PolarAngleAxis
+                        dataKey="crop"
+                        tick={{ fontSize: 11, fill: "#475569" }}
+                      />
                       <PolarRadiusAxis domain={[0, 100]} tick={false} />
                       <Radar
                         name="Water Efficiency"
@@ -454,29 +599,86 @@ export const CropRecommendationCard: React.FC<Props> = ({
                       />
                       <ReLegend />
                       <defs>
-                        <linearGradient id="radarWater" x1="0" y1="0" x2="1" y2="1">
+                        <linearGradient
+                          id="radarWater"
+                          x1="0"
+                          y1="0"
+                          x2="1"
+                          y2="1"
+                        >
                           <stop offset="0%" stopColor="#10b981" />
                           <stop offset="100%" stopColor="#34d399" />
                         </linearGradient>
-                        <linearGradient id="radarEco" x1="0" y1="0" x2="1" y2="1">
+                        <linearGradient
+                          id="radarEco"
+                          x1="0"
+                          y1="0"
+                          x2="1"
+                          y2="1"
+                        >
                           <stop offset="0%" stopColor="#6366f1" />
                           <stop offset="100%" stopColor="#8b5cf6" />
                         </linearGradient>
-                        <linearGradient id="radarAdopt" x1="0" y1="0" x2="1" y2="1">
+                        <linearGradient
+                          id="radarAdopt"
+                          x1="0"
+                          y1="0"
+                          x2="1"
+                          y2="1"
+                        >
                           <stop offset="0%" stopColor="#f59e0b" />
                           <stop offset="100%" stopColor="#fbbf24" />
                         </linearGradient>
-                        <radialGradient id="radarWaterFill" cx="50%" cy="50%" r="65%">
-                          <stop offset="0%" stopColor="#10b981" stopOpacity={0.55} />
-                          <stop offset="100%" stopColor="#10b981" stopOpacity={0.05} />
+                        <radialGradient
+                          id="radarWaterFill"
+                          cx="50%"
+                          cy="50%"
+                          r="65%"
+                        >
+                          <stop
+                            offset="0%"
+                            stopColor="#10b981"
+                            stopOpacity={0.55}
+                          />
+                          <stop
+                            offset="100%"
+                            stopColor="#10b981"
+                            stopOpacity={0.05}
+                          />
                         </radialGradient>
-                        <radialGradient id="radarEcoFill" cx="50%" cy="50%" r="65%">
-                          <stop offset="0%" stopColor="#6366f1" stopOpacity={0.5} />
-                          <stop offset="100%" stopColor="#6366f1" stopOpacity={0.04} />
+                        <radialGradient
+                          id="radarEcoFill"
+                          cx="50%"
+                          cy="50%"
+                          r="65%"
+                        >
+                          <stop
+                            offset="0%"
+                            stopColor="#6366f1"
+                            stopOpacity={0.5}
+                          />
+                          <stop
+                            offset="100%"
+                            stopColor="#6366f1"
+                            stopOpacity={0.04}
+                          />
                         </radialGradient>
-                        <radialGradient id="radarAdoptFill" cx="50%" cy="50%" r="65%">
-                          <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.45} />
-                          <stop offset="100%" stopColor="#f59e0b" stopOpacity={0.03} />
+                        <radialGradient
+                          id="radarAdoptFill"
+                          cx="50%"
+                          cy="50%"
+                          r="65%"
+                        >
+                          <stop
+                            offset="0%"
+                            stopColor="#f59e0b"
+                            stopOpacity={0.45}
+                          />
+                          <stop
+                            offset="100%"
+                            stopColor="#f59e0b"
+                            stopOpacity={0.03}
+                          />
                         </radialGradient>
                       </defs>
                     </RadarChart>
@@ -489,7 +691,16 @@ export const CropRecommendationCard: React.FC<Props> = ({
           {/* Smart Recommendations */}
           <div className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200/80 rounded-lg p-4">
             <p className="text-sm text-slate-700 leading-relaxed">
-              <strong>INGRES transition advisory:</strong> {bestAlternatives[0].crop} ranks highest on sustainability score with {bestAlternatives[0].savingVsPaddy}% consumptive use reduction and groundwater recharge interaction of {bestAlternatives[0].rechargeImpact > 0 ? '+' : ''}{bestAlternatives[0].rechargeImpact}mm equivalent. Recommended staged adoption: {Math.round(bestAlternatives[0].adoptionEase * 15)}–{Math.round(bestAlternatives[0].adoptionEase * 20)}% area in Year 1 to reduce over-extraction trajectory.
+              <strong>INGRES transition advisory:</strong>{" "}
+              {bestAlternatives[0].crop} ranks highest on sustainability score
+              with {bestAlternatives[0].savingVsPaddy}% consumptive use
+              reduction and groundwater recharge interaction of{" "}
+              {bestAlternatives[0].rechargeImpact > 0 ? "+" : ""}
+              {bestAlternatives[0].rechargeImpact}mm equivalent. Recommended
+              staged adoption:{" "}
+              {Math.round(bestAlternatives[0].adoptionEase * 15)}–
+              {Math.round(bestAlternatives[0].adoptionEase * 20)}% area in Year
+              1 to reduce over-extraction trajectory.
             </p>
           </div>
 

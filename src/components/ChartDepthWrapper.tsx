@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { motion } from 'framer-motion';
+import React, { useRef } from "react";
+import { motion } from "framer-motion";
 
 interface ChartDepthWrapperProps {
   children: React.ReactNode;
@@ -11,7 +11,8 @@ interface ChartDepthWrapperProps {
 }
 
 // Utility: clamp value
-const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+const clamp = (v: number, min: number, max: number) =>
+  Math.min(max, Math.max(min, v));
 
 /**
  * Provides an interactive pseudo-3D tilt, layered glow, and animated ambient gradient for charts.
@@ -20,8 +21,8 @@ const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(mi
 export const ChartDepthWrapper: React.FC<ChartDepthWrapperProps> = ({
   children,
   intensity = 0.6,
-  className = '',
-  glowColor = '#38bdf8',
+  className = "",
+  glowColor = "#38bdf8",
   maxTiltDeg = 14,
   disableHover = false,
 }) => {
@@ -38,18 +39,18 @@ export const ChartDepthWrapper: React.FC<ChartDepthWrapperProps> = ({
     const dy = (y - cy) / cy; // -1 .. 1
     const tiltX = clamp(-(dy * maxTiltDeg), -maxTiltDeg, maxTiltDeg);
     const tiltY = clamp(dx * maxTiltDeg, -maxTiltDeg, maxTiltDeg);
-    ref.current.style.setProperty('--tilt-x', tiltX.toFixed(2) + 'deg');
-    ref.current.style.setProperty('--tilt-y', tiltY.toFixed(2) + 'deg');
-    ref.current.style.setProperty('--glow-x', (dx * 40).toFixed(1) + '%');
-    ref.current.style.setProperty('--glow-y', (dy * 40).toFixed(1) + '%');
+    ref.current.style.setProperty("--tilt-x", tiltX.toFixed(2) + "deg");
+    ref.current.style.setProperty("--tilt-y", tiltY.toFixed(2) + "deg");
+    ref.current.style.setProperty("--glow-x", (dx * 40).toFixed(1) + "%");
+    ref.current.style.setProperty("--glow-y", (dy * 40).toFixed(1) + "%");
   };
 
   const reset = () => {
     if (!ref.current) return;
-    ref.current.style.setProperty('--tilt-x', '0deg');
-    ref.current.style.setProperty('--tilt-y', '0deg');
-    ref.current.style.setProperty('--glow-x', '0%');
-    ref.current.style.setProperty('--glow-y', '0%');
+    ref.current.style.setProperty("--tilt-x", "0deg");
+    ref.current.style.setProperty("--tilt-y", "0deg");
+    ref.current.style.setProperty("--glow-x", "0%");
+    ref.current.style.setProperty("--glow-y", "0%");
   };
 
   return (
@@ -61,19 +62,21 @@ export const ChartDepthWrapper: React.FC<ChartDepthWrapperProps> = ({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5 }}
       className={`relative perspective-[1600px] will-change-transform ${className}`}
-      style={{
-        '--tilt-x': '0deg',
-        '--tilt-y': '0deg',
-        '--glow-x': '0%',
-        '--glow-y': '0%',
-      } as React.CSSProperties}
+      style={
+        {
+          "--tilt-x": "0deg",
+          "--tilt-y": "0deg",
+          "--glow-x": "0%",
+          "--glow-y": "0%",
+        } as React.CSSProperties
+      }
     >
       <div
         className="relative rounded-2xl overflow-hidden shadow-[0_4px_18px_-4px_rgba(0,0,0,0.18),0_10px_32px_-6px_rgba(0,0,0,0.22)] border border-white/10 bg-gradient-to-br from-white/70 via-white/40 to-white/10 backdrop-blur-xl"
         style={{
-          transform: 'rotateX(var(--tilt-x)) rotateY(var(--tilt-y))',
-          transformStyle: 'preserve-3d',
-          transition: 'transform 260ms ease',
+          transform: "rotateX(var(--tilt-x)) rotateY(var(--tilt-y))",
+          transformStyle: "preserve-3d",
+          transition: "transform 260ms ease",
         }}
       >
         {/* Ambient animated gradient */}
@@ -84,12 +87,15 @@ export const ChartDepthWrapper: React.FC<ChartDepthWrapperProps> = ({
           className="pointer-events-none absolute -inset-px"
           style={{
             background: `radial-gradient(circle at calc(50% + var(--glow-x)) calc(50% + var(--glow-y)), ${glowColor}55, transparent 55%)`,
-            mixBlendMode: 'screen',
-            transition: 'background 220ms linear',
+            mixBlendMode: "screen",
+            transition: "background 220ms linear",
           }}
         />
 
-        <div className="relative p-4 md:p-6" style={{ transform: 'translateZ(38px)' }}>
+        <div
+          className="relative p-4 md:p-6"
+          style={{ transform: "translateZ(38px)" }}
+        >
           {children}
         </div>
       </div>

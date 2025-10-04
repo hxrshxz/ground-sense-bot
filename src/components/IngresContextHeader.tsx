@@ -3,7 +3,11 @@ import { CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 
-export type ExtractionStage = "Safe" | "Semi-Critical" | "Critical" | "Over-Exploited";
+export type ExtractionStage =
+  | "Safe"
+  | "Semi-Critical"
+  | "Critical"
+  | "Over-Exploited";
 
 interface IngresContextHeaderProps {
   title: string;
@@ -22,7 +26,10 @@ const stageColor: Record<ExtractionStage, string> = {
   "Over-Exploited": "bg-rose-50 text-rose-700 border-rose-200",
 };
 
-const accentGradient: Record<NonNullable<IngresContextHeaderProps["accent"]>, string> = {
+const accentGradient: Record<
+  NonNullable<IngresContextHeaderProps["accent"]>,
+  string
+> = {
   emerald: "from-emerald-500 via-lime-500 to-green-600",
   sky: "from-sky-500 via-blue-500 to-indigo-600",
   indigo: "from-indigo-500 via-violet-500 to-purple-600",
@@ -40,7 +47,9 @@ export const IngresContextHeader: React.FC<IngresContextHeaderProps> = ({
 }) => {
   return (
     <CardHeader className="pb-4 relative">
-      <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${accentGradient[accent]}`} />
+      <div
+        className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${accentGradient[accent]}`}
+      />
       <div className="flex items-center justify-between">
         <div className="flex items-start gap-3">
           <motion.div
@@ -49,7 +58,11 @@ export const IngresContextHeader: React.FC<IngresContextHeaderProps> = ({
             transition={{ duration: 0.4 }}
             className="relative"
           >
-            <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${accentGradient[accent]} flex items-center justify-center text-white font-semibold text-sm shadow-sm`}>AI</div>
+            <div
+              className={`h-10 w-10 rounded-lg bg-gradient-to-br ${accentGradient[accent]} flex items-center justify-center text-white font-semibold text-sm shadow-sm`}
+            >
+              AI
+            </div>
           </motion.div>
           <div>
             <CardTitle className="text-xl font-bold text-slate-800">
@@ -59,11 +72,17 @@ export const IngresContextHeader: React.FC<IngresContextHeaderProps> = ({
               {subtitle}
             </p>
             <div className="flex flex-wrap gap-1 mt-2">
-              <Badge variant="outline" className="bg-white/70 backdrop-blur-sm border-slate-200 text-slate-600">
+              <Badge
+                variant="outline"
+                className="bg-white/70 backdrop-blur-sm border-slate-200 text-slate-600"
+              >
                 Problem ID: {problemId}
               </Badge>
               {moduleTag && (
-                <Badge variant="outline" className="border-dashed border-slate-300 text-slate-600">
+                <Badge
+                  variant="outline"
+                  className="border-dashed border-slate-300 text-slate-600"
+                >
                   {moduleTag}
                 </Badge>
               )}

@@ -185,7 +185,9 @@ const StateComparisonCard: React.FC = () => {
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-slate-50/40 to-white/10" />
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2">
-                      <span className={`p-2 rounded-md bg-gradient-to-br ${kpi.accent} text-white shadow-sm`}>
+                      <span
+                        className={`p-2 rounded-md bg-gradient-to-br ${kpi.accent} text-white shadow-sm`}
+                      >
                         <Icon className="h-4 w-4" />
                       </span>
                       <span className="text-xs font-medium tracking-wide text-slate-600 uppercase">
@@ -198,7 +200,9 @@ const StateComparisonCard: React.FC = () => {
                       ) : (
                         <ArrowDown className="h-3 w-3 text-green-500" />
                       )}
-                      <span className={worse ? "text-red-600" : "text-green-600"}>
+                      <span
+                        className={worse ? "text-red-600" : "text-green-600"}
+                      >
                         {worse ? "+" : ""}
                         {kpi.delta.toFixed(2)}
                       </span>
@@ -206,13 +210,17 @@ const StateComparisonCard: React.FC = () => {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <div className="text-[11px] font-medium text-slate-500 mb-1">Punjab</div>
+                      <div className="text-[11px] font-medium text-slate-500 mb-1">
+                        Punjab
+                      </div>
                       <div className="text-xl md:text-2xl font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent leading-none">
                         {kpi.punjab}
                       </div>
                     </div>
                     <div>
-                      <div className="text-[11px] font-medium text-slate-500 mb-1">Rajasthan</div>
+                      <div className="text-[11px] font-medium text-slate-500 mb-1">
+                        Rajasthan
+                      </div>
                       <div className="text-xl md:text-2xl font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent leading-none">
                         {kpi.rajasthan}
                       </div>
@@ -222,7 +230,10 @@ const StateComparisonCard: React.FC = () => {
                     {/* small relative bar comparing Punjab vs Rajasthan */}
                     {(() => {
                       const p = Math.abs(kpi.delta);
-                      const total = Math.max(punjab.extraction, rajasthan.extraction);
+                      const total = Math.max(
+                        punjab.extraction,
+                        rajasthan.extraction
+                      );
                       // Fallback simple percentage for generic KPI (not exact for stage/decline but conveys delta visually)
                       const ratio = Math.min(100, (p / total) * 100);
                       return (
@@ -238,7 +249,11 @@ const StateComparisonCard: React.FC = () => {
             })}
           </div>
           {/* Tab Navigation */}
-          <div className="flex bg-slate-100 rounded-lg p-1" role="tablist" aria-label="State comparison sections">
+          <div
+            className="flex bg-slate-100 rounded-lg p-1"
+            role="tablist"
+            aria-label="State comparison sections"
+          >
             {[
               { key: "overview", label: "Overview", icon: MapPin },
               { key: "sectors", label: "Sector Usage", icon: BarChart3 },
@@ -296,11 +311,19 @@ const StateComparisonCard: React.FC = () => {
                       </div>
 
                       {/* Extraction Bar */}
-                      <div className="space-y-2" aria-label={`${state.name} extraction volume`}>
+                      <div
+                        className="space-y-2"
+                        aria-label={`${state.name} extraction volume`}
+                      >
                         <div className="flex justify-between text-xs md:text-sm font-medium tracking-wide">
-                          <span className="text-slate-500 uppercase">Extraction</span>
+                          <span className="text-slate-500 uppercase">
+                            Extraction
+                          </span>
                           <span className="text-slate-800">
-                            {state.extraction} <span className="text-[10px] font-normal text-slate-500">BCM</span>
+                            {state.extraction}{" "}
+                            <span className="text-[10px] font-normal text-slate-500">
+                              BCM
+                            </span>
                           </span>
                         </div>
                         <div className="w-full bg-slate-100/80 rounded-full h-3 overflow-hidden">
@@ -313,17 +336,27 @@ const StateComparisonCard: React.FC = () => {
                             }}
                             transition={{ duration: 1, delay: 0.2 }}
                             className="h-full rounded-full bg-gradient-to-r from-slate-700 via-slate-600 to-slate-500 shadow-inner"
-                            style={{ boxShadow: `0 0 0 1px rgba(255,255,255,0.15) inset` }}
+                            style={{
+                              boxShadow: `0 0 0 1px rgba(255,255,255,0.15) inset`,
+                            }}
                           />
                         </div>
                       </div>
 
                       {/* Recharge Bar */}
-                      <div className="space-y-2" aria-label={`${state.name} recharge volume`}>
+                      <div
+                        className="space-y-2"
+                        aria-label={`${state.name} recharge volume`}
+                      >
                         <div className="flex justify-between text-xs md:text-sm font-medium tracking-wide">
-                          <span className="text-slate-500 uppercase">Recharge</span>
+                          <span className="text-slate-500 uppercase">
+                            Recharge
+                          </span>
                           <span className="text-slate-800">
-                            {state.recharge} <span className="text-[10px] font-normal text-slate-500">BCM</span>
+                            {state.recharge}{" "}
+                            <span className="text-[10px] font-normal text-slate-500">
+                              BCM
+                            </span>
                           </span>
                         </div>
                         <div className="w-full bg-slate-100/80 rounded-full h-3 overflow-hidden">
@@ -393,7 +426,10 @@ const StateComparisonCard: React.FC = () => {
                                   delay: 0.6 + index * 0.1,
                                 }}
                                 className="h-full rounded-full bg-gradient-to-r from-slate-700 via-slate-600 to-slate-500"
-                                style={{ boxShadow: "0 0 0 1px rgba(255,255,255,0.15) inset" }}
+                                style={{
+                                  boxShadow:
+                                    "0 0 0 1px rgba(255,255,255,0.15) inset",
+                                }}
                               />
                             </div>
                             <div className="text-[11px] font-semibold text-slate-700 w-8 tabular-nums">
@@ -462,11 +498,14 @@ const StateComparisonCard: React.FC = () => {
                                   className="h-full rounded-full shadow-inner"
                                   style={{
                                     background: `linear-gradient(90deg, ${sector.color} 0%, ${sector.color}CC 60%, ${sector.color}99 100%)`,
-                                    boxShadow: "0 0 0 1px rgba(255,255,255,0.15) inset",
+                                    boxShadow:
+                                      "0 0 0 1px rgba(255,255,255,0.15) inset",
                                   }}
                                 />
                                 <div className="absolute inset-0 flex items-center justify-center">
-                                  <span className="text-[10px] font-semibold tracking-wide text-white drop-shadow">{sector.value}%</span>
+                                  <span className="text-[10px] font-semibold tracking-wide text-white drop-shadow">
+                                    {sector.value}%
+                                  </span>
                                 </div>
                                 <div className="absolute inset-0 opacity-0 animate-pulse group-hover:opacity-40 transition-opacity bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.9),transparent_70%)]" />
                               </div>
@@ -513,32 +552,63 @@ const StateComparisonCard: React.FC = () => {
               >
                 <h4 className="text-lg md:text-xl font-semibold text-slate-800 flex items-center gap-2 tracking-tight">
                   <TrendingDown className="h-5 w-5 text-red-500" />
-                  Cumulative Water Table Decline <span className="text-slate-400 text-sm font-normal">2015–2025</span>
+                  Cumulative Water Table Decline{" "}
+                  <span className="text-slate-400 text-sm font-normal">
+                    2015–2025
+                  </span>
                 </h4>
 
                 {/* Grouped bar visualization using Recharts for cumulative decline over time */}
-                <div className="bg-slate-50 rounded-xl p-6 border border-slate-200/70 relative overflow-hidden" aria-label="Cumulative water table decline grouped bar chart" role="group">
+                <div
+                  className="bg-slate-50 rounded-xl p-6 border border-slate-200/70 relative overflow-hidden"
+                  aria-label="Cumulative water table decline grouped bar chart"
+                  role="group"
+                >
                   <div className="absolute inset-0 pointer-events-none opacity-60 bg-[radial-gradient(circle_at_70%_30%,rgba(255,255,255,0.8),transparent_70%)]" />
                   <ResponsiveContainer width="100%" height={320}>
                     <BarChart
-                      data={stateComparisonData.timeSeriesDecline.years.map((year, i) => ({
-                        year,
-                        Punjab: stateComparisonData.timeSeriesDecline.punjab[i],
-                        Rajasthan: stateComparisonData.timeSeriesDecline.rajasthan[i],
-                      }))}
+                      data={stateComparisonData.timeSeriesDecline.years.map(
+                        (year, i) => ({
+                          year,
+                          Punjab:
+                            stateComparisonData.timeSeriesDecline.punjab[i],
+                          Rajasthan:
+                            stateComparisonData.timeSeriesDecline.rajasthan[i],
+                        })
+                      )}
                       margin={{ top: 10, right: 10, left: 0, bottom: 4 }}
                     >
                       <defs>
                         <linearGradient id="pgBar" x1="0" y1="1" x2="0" y2="0">
-                          <stop offset="0%" stopColor="#b91c1c" stopOpacity={0.9} />
-                          <stop offset="100%" stopColor="#ef4444" stopOpacity={0.8} />
+                          <stop
+                            offset="0%"
+                            stopColor="#b91c1c"
+                            stopOpacity={0.9}
+                          />
+                          <stop
+                            offset="100%"
+                            stopColor="#ef4444"
+                            stopOpacity={0.8}
+                          />
                         </linearGradient>
                         <linearGradient id="rjBar" x1="0" y1="1" x2="0" y2="0">
-                          <stop offset="0%" stopColor="#b45309" stopOpacity={0.9} />
-                          <stop offset="100%" stopColor="#f59e0b" stopOpacity={0.85} />
+                          <stop
+                            offset="0%"
+                            stopColor="#b45309"
+                            stopOpacity={0.9}
+                          />
+                          <stop
+                            offset="100%"
+                            stopColor="#f59e0b"
+                            stopOpacity={0.85}
+                          />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="#e2e8f0"
+                        vertical={false}
+                      />
                       <XAxis
                         dataKey="year"
                         tick={{ fontSize: 12, fill: "#475569" }}
@@ -559,15 +629,24 @@ const StateComparisonCard: React.FC = () => {
                           if (!active || !payload?.length) return null;
                           return (
                             <div className="rounded-md border bg-white/90 backdrop-blur-md shadow-sm px-3 py-2 text-[11px] text-slate-700">
-                              <div className="font-semibold text-slate-800 text-xs mb-1">{label}</div>
+                              <div className="font-semibold text-slate-800 text-xs mb-1">
+                                {label}
+                              </div>
                               {payload.map((p) => (
-                                <div key={p.dataKey} className="flex items-center gap-2">
+                                <div
+                                  key={p.dataKey}
+                                  className="flex items-center gap-2"
+                                >
                                   <span
                                     className="inline-block w-2.5 h-2.5 rounded-sm"
                                     style={{ background: p.color }}
                                   />
-                                  <span className="font-medium w-16">{p.dataKey}</span>
-                                  <span className="tabular-nums">-{p.value} m</span>
+                                  <span className="font-medium w-16">
+                                    {p.dataKey}
+                                  </span>
+                                  <span className="tabular-nums">
+                                    -{p.value} m
+                                  </span>
                                 </div>
                               ))}
                             </div>
@@ -576,7 +655,11 @@ const StateComparisonCard: React.FC = () => {
                       />
                       <ReLegend
                         wrapperStyle={{ fontSize: 12 }}
-                        formatter={(v) => <span className="text-slate-600 font-medium">{v}</span>}
+                        formatter={(v) => (
+                          <span className="text-slate-600 font-medium">
+                            {v}
+                          </span>
+                        )}
                         iconType="circle"
                       />
                       <Bar
@@ -593,7 +676,9 @@ const StateComparisonCard: React.FC = () => {
                       />
                     </BarChart>
                   </ResponsiveContainer>
-                  <div className="absolute left-4 top-4 text-[10px] font-medium text-slate-500 uppercase tracking-wide">Cumulative Decline</div>
+                  <div className="absolute left-4 top-4 text-[10px] font-medium text-slate-500 uppercase tracking-wide">
+                    Cumulative Decline
+                  </div>
                 </div>
 
                 {/* Decline Rate Comparison */}

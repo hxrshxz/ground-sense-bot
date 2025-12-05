@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -10,7 +10,11 @@ import {
   ReferenceLine,
   Legend,
   Area,
+  Brush,
+  Dot,
 } from "recharts";
+import { motion } from "framer-motion";
+import { TrendingUp, TrendingDown, Droplets, Activity } from "lucide-react";
 
 export interface ExtractionTrendPoint {
   year: number | string;
@@ -32,40 +36,107 @@ const ExtractionTrendLine: React.FC<Props> = ({
   compact = false,
   accent = "#0ea5e9",
 }) => {
+  const [hoveredPoint, setHoveredPoint] = useState<any>(null);
+  const [activeLines, setActiveLines] = useState({
+    extraction: true,
+    recharge: true,
+    net: true,
+  });
+
   const avg = data.length
     ? data.reduce((a, c) => a + c.extraction, 0) / data.length
     : 0;
+
   const gradientId = `grad-extraction-${accent.replace(/[^a-z0-9]/gi, "")}`;
+  const glowId = `glow-${accent.replace(/[^a-z0-9]/gi, "")}`;
+
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="rounded-xl border border-slate-200 bg-white/90 backdrop-blur-sm shadow-lg px-3 py-2 min-w-[140px]">
-          <p className="text-[11px] font-semibold text-slate-700 mb-1">
-            {label}
-          </p>
-          <div className="space-y-1">
-            {payload.map((pl: any) => (
-              <div
-                key={pl.dataKey}
-                className="flex items-center justify-between gap-4 text-[10px]"
-              >
-                <span className="flex items-center gap-1">
-                  <span
-                    className="w-2 h-2 rounded-full"
-                    style={{ background: pl.color }}
-                  />
-                  <span className="text-slate-500">{pl.name}</span>
-                </span>
-                <span className="font-semibold text-slate-800 tabular-nums">
-                  {pl.value}
-                </span>
-              </div>
-            ))}
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0, y: 10 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          className="rounded-2xl border-2 border-slate-300 bg-gradient-to-br from-white via-slate-50 to-white backdrop-blur-xl shadow-2xl px-4 py-3 min-w-[180px]"
+          style={{
+            boxShadow: `0 20px 60px -10px ${accent}40, 0 0 0 1px ${accent}20`,
+          }}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <div className="p-1.5 rounded-lg bg-gradient-to-br from-sky-400 to-blue-500">
+              <Activity className="w-3 h-3 text-white" />
+            </div>
+            <p className="text-xs font-bold text-slate-800">Year {label}</p>
           </div>
-        </div>
+          <div className="space-y-2">
+            {payload.map((pl: any, idx: number) => {
+              const isPositive = pl.value >= 0;
+              const Icon =
+                pl.dataKey === "extraction"
+                  ? TrendingUp
+                  : pl.dataKey === "recharge"
+                  ? Droplets
+                  : isPositive
+                  ? TrendingUp
+                  : TrendingDown;
+              return (
+                <motion.div
+                  key={pl.dataKey}
+                  initial={{ x: -10, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: idx * 0.05 }}
+                  className="flex items-center justify-between gap-4 text-xs group"
+                >
+                  <span className="flex items-center gap-2">
+                    <span
+                      className="w-3 h-3 rounded-full shadow-lg animate-pulse"
+                      style={{
+                        background: pl.color,
+                        boxShadow: `0 0 10px ${pl.color}80`,
+                      }}
+                    />
+                    <Icon className="w-3 h-3" style={{ color: pl.color }} />
+                    <span className="text-slate-600 font-medium">
+                      {pl.name}
+                    </span>
+                  </span>
+                  <span className="font-bold text-slate-900 tabular-nums text-sm">
+                    {typeof pl.value === "number"
+                      ? pl.value.toFixed(1)
+                      : pl.value}
+                  </span>
+                </motion.div>
+              );
+            })}
+          </div>
+        </motion.div>
       );
     }
     return null;
+  };
+
+  const CustomDot = (props: any) => {
+    const { cx, cy, payload, dataKey } = props;
+    if (!activeLines[dataKey as keyof typeof activeLines]) return null;
+
+    return (
+      <g>
+        <circle
+          cx={cx}
+          cy={cy}
+          r={4}
+          fill={props.fill}
+          className="transition-all duration-300 hover:r-6"
+        />
+        <circle
+          cx={cx}
+          cy={cy}
+          r={8}
+          fill={props.fill}
+          opacity={0.2}
+          className="animate-ping"
+        />
+      </g>
+    );
   };
   return (
     <div className={`w-full ${compact ? "h-[200px]" : "h-auto"}`}>

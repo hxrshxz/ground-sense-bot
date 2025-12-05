@@ -1300,11 +1300,12 @@ export const INGRESAssistant = ({
 }) => {
   const [view, setView] = useState("dashboard");
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
-  
+
   // WebSocket Integration
-  const { sendMessage, messages: wsMessages } = useChatWebSocket("ws://localhost:8081/ws", "User");
-
-
+  const { sendMessage, messages: wsMessages } = useChatWebSocket(
+    "ws://localhost:8081/ws",
+    "User"
+  );
 
   // --- 1. Replace your old handler function with this corrected version ---
   const handleFakeMapAnalysis = (
@@ -1751,23 +1752,25 @@ Your response should sound like it's coming from a knowledgeable human analyst e
       // Only add bot messages or user messages that aren't already added locally
       // Actually, we add user messages locally in handleChatSubmit.
       // So we only care about BOT messages here.
-      if (lastMsg.sender === 'bot') {
-         const newMsg: ChatMessage = {
-            id: Number(lastMsg.id) || Date.now(),
-            type: 'ai',
-            text: lastMsg.content,
-            component: lastMsg.payload?.chart ? <ChartRenderer chart={lastMsg.payload.chart} /> : undefined
-         };
-         setChatHistory(prev => {
-             // Avoid duplicates if possible (simple check by ID or content)
-             if (prev.some(m => m.id === newMsg.id)) return prev;
-             return [...prev, newMsg];
-         });
-         
-         // Speak if Co-Pilot is on
-         if (isCoPilotMode && lastMsg.content) {
-             speakText(lastMsg.content);
-         }
+      if (lastMsg.sender === "bot") {
+        const newMsg: ChatMessage = {
+          id: Number(lastMsg.id) || Date.now(),
+          type: "ai",
+          text: lastMsg.content,
+          component: lastMsg.payload?.chart ? (
+            <ChartRenderer chart={lastMsg.payload.chart} />
+          ) : undefined,
+        };
+        setChatHistory((prev) => {
+          // Avoid duplicates if possible (simple check by ID or content)
+          if (prev.some((m) => m.id === newMsg.id)) return prev;
+          return [...prev, newMsg];
+        });
+
+        // Speak if Co-Pilot is on
+        if (isCoPilotMode && lastMsg.content) {
+          speakText(lastMsg.content);
+        }
       }
     }
   }, [wsMessages, isCoPilotMode]);
@@ -2590,7 +2593,7 @@ Your response should sound like it's coming from a knowledgeable human analyst e
       // --- 5. FALLBACK TO WEBSOCKET CHATBOT ---
       // If no specific frontend trigger matched, send to the Go backend via WebSocket
       sendMessage(text);
-      
+
       // The response will be handled by the useEffect hook listening to wsMessages
       setIsThinking(false);
       return;
@@ -2674,33 +2677,7 @@ Your response should sound like it's coming from a knowledgeable human analyst e
     isListeningForFollowUp,
   };
 
-  const suggestedPrompts = [
-    {
-      title: "Get Block Details",
-      text: "Show the status of Delhi block",
-      description: "Fetch a detailed visual report for a specific block.",
-    },
-    {
-      title: "List Critical Areas",
-      text: "List all 'Over-Exploited' blocks in Punjab",
-      description: "Filter and view blocks by category and state.",
-    },
-    {
-      title: "Compare Two Areas",
-      text: "Compare groundwater extraction in Ludhiana and Jalandhar over the last 5 years.",
-      description: "Analyze historical trends between two geographical areas.",
-    },
-    {
-      title: "Predict Future Trends",
-      text: "Forecast the groundwater level for my block for the next 6 months",
-      description: "Use predictive analytics to see future possibilities.",
-    },
-    {
-      title: "Get AI Recommendations",
-      text: "What crops should I plant in a 'Critical' zone in Haryana?",
-      description: "Receive actionable advice based on current data.",
-    },
-  ];
+  // Removed predefined prompts - now fully dynamic AI-powered
 
   const renderDashboard = () => (
     <div
@@ -2814,34 +2791,21 @@ Your response should sound like it's coming from a knowledgeable human analyst e
               animate="visible"
               className="pt-4 pb-8 text-center"
             >
-              <motion.h3
+              <motion.div
                 variants={{
                   hidden: { opacity: 0, y: 20 },
                   visible: { opacity: 1, y: 0 },
                 }}
-                className="text-lg font-semibold text-slate-700 mb-4"
+                className="text-center"
               >
-                Try one of these sample queries...
-              </motion.h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {suggestedPrompts.map((prompt, i) => (
-                  <motion.button
-                    key={i}
-                    variants={{
-                      hidden: { opacity: 0, y: 20 },
-                      visible: { opacity: 1, y: 0 },
-                    }}
-                    onClick={() => handleChatSubmit(prompt.text)}
-                    className={`p-4 rounded-lg text-left text-sm font-medium border shadow-sm hover:shadow-md ${
-                      embedded
-                        ? "bg-slate-700/50 text-slate-200 border-slate-600 hover:bg-slate-600/50"
-                        : "bg-white/60 text-slate-800 hover:bg-slate-100/80"
-                    }`}
-                  >
-                    <p className="font-semibold">{prompt.title}</p>
-                  </motion.button>
-                ))}
-              </div>
+                <p className="text-lg text-slate-600 mb-2">
+                  Ask me anything about groundwater data
+                </p>
+                <p className="text-sm text-slate-500">
+                  Try asking about blocks, trends, comparisons, or filter by
+                  criteria
+                </p>
+              </motion.div>
             </motion.div>
           )}
           <AnimatePresence>

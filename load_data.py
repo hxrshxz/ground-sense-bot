@@ -39,6 +39,11 @@ def load_data():
     
     print("--- Starting Offline Data Ingestion (Index Based) ---")
 
+    # 0. Truncate Tables
+    print("Truncating tables...")
+    cur.execute("TRUNCATE TABLE assessments_summary, assessments_recharge_breakdown, assessments_extraction_breakdown, assessments_discharge_breakdown, blocks, districts, states CASCADE;")
+    conn.commit()
+
     # 1. Load Master Index
     print(f"Loading Master Index from {INDEX_FILE}...")
     with open(INDEX_FILE, 'r') as f:
@@ -85,49 +90,37 @@ def load_data():
     # 4. Ingest Blocks and Assessment Data
     print("Ingesting Blocks and Assessments...")
     
-    # Pre-calculate paths to avoid doing it inside the loop if possible, 
-    # but we need to iterate blocks anyway.
-    
     for b_uuid, b_data in tqdm(blocks.items(), desc="Blocks"):
         b_name = b_data['name']
         d_uuid = b_data['parent_district_uuid']
         
         # Get Parent Names for Path
         d_name = district_names.get(d_uuid)
-        # We need State UUID from District to get State Name
-        # The block entry doesn't have state_uuid, so we look up district entry
         d_entry = districts.get(d_uuid)
         if not d_entry:
-            # print(f"Warning: Parent district {d_uuid} not found for block {b_name}")
             continue
             
         s_uuid = d_entry['parent_state_uuid']
         s_name = state_names.get(s_uuid)
         
         if not d_name or not s_name:
-            # print(f"Warning: Could not resolve path for block {b_name}")
             continue
 
-        # Insert Block
+        # Construct File Path
+        json_path = DATA_DIR / s_name / d_name / f"{b_name}.json"
+        
+        if not json_path.exists():
+            # Skip block if file doesn't exist
+            continue
+
+        # Insert Block ONLY if file exists
         cur.execute("""
             INSERT INTO blocks (block_uuid, block_name, district_uuid, state_uuid, geometry)
             VALUES (%s, %s, %s, %s, NULL)
             ON CONFLICT (block_uuid) DO NOTHING
         """, (b_uuid, b_name, d_uuid, s_uuid))
 
-        # Construct File Path
-        # Data/data/{StateName}/{DistrictName}/{BlockName}.json
-        # NOTE: Filenames might have slight differences (e.g. spaces, case). 
-        # The index names seem to be uppercase. The folders might be mixed?
-        # Let's try exact match first.
-        
-        json_path = DATA_DIR / s_name / d_name / f"{b_name}.json"
-        
-        if not json_path.exists():
-            # Try case-insensitive lookup if exact match fails?
-            # For now, just skip or log.
-            # print(f"File not found: {json_path}")
-            continue
+            
             
         try:
             with open(json_path, 'r') as f:

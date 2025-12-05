@@ -251,22 +251,6 @@ export const BlockAssessmentCard = ({ data }: { data: any }) => {
           </div>
         </div>
 
-        {data.category === "Over-Exploited" && (
-          <div className="p-3 bg-red-50 rounded-lg border border-red-200 space-y-2">
-            <h4 className="text-sm font-semibold text-red-800 flex items-center gap-2">
-              <Lightbulb className="h-4 w-4" /> AI Advisor
-            </h4>
-            <p className="text-xs text-slate-700">
-              <b>Forecast:</b> Groundwater level likely to decline due to high
-              extraction rates.
-            </p>
-            <p className="text-xs text-slate-700">
-              <b>Recommendation:</b> Promote micro-irrigation and crop
-              diversification to reduce water usage.
-            </p>
-          </div>
-        )}
-
         <div className="flex justify-end pt-2">
           <DownloadReport
             targetRef={cardRef}

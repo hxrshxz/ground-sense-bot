@@ -121,3 +121,19 @@ func (s *IngresService) GetStateByName(ctx context.Context, name string) (*model
 func (s *IngresService) GetDistrictByName(ctx context.Context, name string) (*models.District, error) {
 	return s.repo.GetDistrictByName(ctx, name)
 }
+
+func (s *IngresService) GetBlocksByCategoryAndLocation(ctx context.Context, category string, location string) ([]models.Block, error) {
+	return s.repo.GetBlocksByCategoryAndLocation(ctx, category, location)
+}
+
+func (s *IngresService) GetBlocksByRainfall(ctx context.Context, threshold float64, operator string, year string) ([]models.AssessmentSummary, error) {
+	return s.repo.GetBlocksByRainfall(ctx, threshold, operator, year)
+}
+
+func (s *IngresService) GetBlocksByStage(ctx context.Context, threshold float64, operator string, year string) ([]models.AssessmentSummary, error) {
+	return s.repo.GetBlocksByStage(ctx, threshold, operator, year)
+}
+
+func (s *IngresService) GetBlockByUUID(ctx context.Context, blockUUID uuid.UUID) (*models.Block, error) {
+	return s.repo.GetBlockByUUID(ctx, blockUUID)
+}

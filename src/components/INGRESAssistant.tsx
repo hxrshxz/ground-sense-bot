@@ -59,7 +59,6 @@ import AIResponseRendererV2 from "./ai-components/AIResponseRendererV2";
 import GroundwaterAnalysisRenderer from "./ai-components/GroundwaterAnalysisRenderer";
 const StateDeepDiveCard = React.lazy(() => import("./cards/StateDeepDiveCard"));
 import { PUNJAB_PROFILE } from "@/data/stateGroundwaterData";
-import { getAIResponse } from "../services/aiResponseServiceV2";
 import { GeminiApiService } from "../services/geminiApi";
 import {
   MAP_ANALYSIS_PROMPT,
@@ -1877,23 +1876,6 @@ Your response should sound like it's coming from a knowledgeable human analyst e
     }
   }, [isCoPilotMode]);
 
-  // Helper function to directly trigger the Punjab vs Rajasthan comparison
-  const showPunjabRajasthanComparison = () => {
-    const punjabRajasthanResponse = getAIResponse(
-      "Punjab Rajasthan comparison"
-    );
-    if (punjabRajasthanResponse) {
-      const response = {
-        id: Date.now() + 1,
-        type: "ai",
-        component: <AIResponseRendererV2 response={punjabRajasthanResponse} />,
-      };
-      setChatHistory((prev) => [...prev, response]);
-    } else {
-      console.error("Failed to get Punjab Rajasthan comparison response");
-    }
-  };
-
   const showToast = (message: string, type = "info") => {
     setToast({ message, type, visible: true });
   };
@@ -2340,35 +2322,6 @@ Your response should sound like it's coming from a knowledgeable human analyst e
         return;
       }
 
-      // Predefined structured response fallback (runs only if not matched earlier)
-      const aiResponse = getAIResponse(text);
-      if (aiResponse) {
-        await new Promise((r) => setTimeout(r, 800));
-        const response = {
-          id: Date.now() + 1,
-          type: "ai",
-          component: <AIResponseRendererV2 response={aiResponse} />,
-        };
-        setChatHistory((prev) => [...prev, response]);
-        if (isCoPilotMode) {
-          setCurrentDataContext(aiResponse);
-          const summary = `Here's information about ${
-            aiResponse.title || "your query"
-          }. ${
-            aiResponse.components
-              ? `I've prepared ${aiResponse.components.length} visualizations for you.`
-              : ""
-          }`;
-          speakText(summary, () => {
-            setIsListeningForFollowUp(true);
-            setShowListeningIndicator(true);
-            startListening();
-          });
-        }
-        setIsThinking(false);
-        return;
-      }
-
       // --- 1. LOGIC FOR SINGLE BLOCK REPORT ---
       const blockKeyword = Object.keys(groundwaterDB).find(
         (key) =>
@@ -2556,10 +2509,6 @@ Your response should sound like it's coming from a knowledgeable human analyst e
         setIsThinking(false);
         return;
       }
-
-      // --- 4. STRUCTURED AI RESPONSES ---
-      // We already tried getAIResponse at the beginning of this function, so this is unnecessary.
-      // The AI structured response would have been handled already if it matched.
 
       // --- SPECIAL LOGIC FOR CO-PILOT MODE CONTEXTUAL QUERIES ---
       if (

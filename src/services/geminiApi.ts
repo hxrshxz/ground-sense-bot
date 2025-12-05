@@ -21,12 +21,12 @@ export class GeminiApiService {
   private apiKey: string;
   private apiVersion = "v1beta"; // keep v1beta for latest 1.5 models
   private primaryModel =
-    (import.meta.env.VITE_GEMINI_MODEL as string) || "gemini-1.5-flash-latest";
+    (import.meta.env.VITE_GEMINI_MODEL as string) || "gemini-2.5-flash";
   // Fallback order (will try sequentially on model-not-found)
   private fallbackModels = [
     "gemini-1.5-flash",
-    "gemini-1.5-pro-latest",
-    "gemini-1.5-pro",
+    "gemini-2.5-pro-latest",
+    "gemini-2.5-pro",
     "gemini-pro",
   ];
   private triedModels = new Set<string>();

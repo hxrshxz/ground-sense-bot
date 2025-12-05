@@ -1,3 +1,4 @@
+```go
 package routes
 
 import (
@@ -40,7 +41,7 @@ func RegisterRoutes(mux *http.ServeMux, cfg *config.Config, db *database.Service
 	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		chat.ServeWs(hub, w, r)
 	})
-
+	
 	// Register INGRES routes
 	mux.HandleFunc("/api/states", ingresController.GetStates)
 	mux.HandleFunc("/api/districts", ingresController.GetDistricts)

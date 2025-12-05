@@ -268,7 +268,10 @@ const createGradientAreaChart = (
         y2: 1,
         colorStops: [
           { offset: 0, color: `${CHART_COLORS[idx % CHART_COLORS.length]}40` },
-          { offset: 0.5, color: `${CHART_COLORS[idx % CHART_COLORS.length]}20` },
+          {
+            offset: 0.5,
+            color: `${CHART_COLORS[idx % CHART_COLORS.length]}20`,
+          },
           { offset: 1, color: `${CHART_COLORS[idx % CHART_COLORS.length]}05` },
         ],
       },
@@ -335,7 +338,10 @@ const createStackedBarChart = (
   toolbox: {
     feature: {
       saveAsImage: { title: "Download", pixelRatio: 3 },
-      magicType: { type: ["stack", "tiled"], title: { stack: "Stack", tiled: "Tiled" } },
+      magicType: {
+        type: ["stack", "tiled"],
+        title: { stack: "Stack", tiled: "Tiled" },
+      },
       restore: { title: "Reset" },
     },
     right: 20,
@@ -375,7 +381,13 @@ const createStackedBarChart = (
         y2: 1,
         colorStops: [
           { offset: 0, color: CHART_COLORS[idx % CHART_COLORS.length] },
-          { offset: 1, color: adjustColorBrightness(CHART_COLORS[idx % CHART_COLORS.length], -30) },
+          {
+            offset: 1,
+            color: adjustColorBrightness(
+              CHART_COLORS[idx % CHART_COLORS.length],
+              -30
+            ),
+          },
         ],
       },
       shadowColor: `${CHART_COLORS[idx % CHART_COLORS.length]}40`,

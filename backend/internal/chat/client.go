@@ -3,62 +3,16 @@ package chat
 import (
 	"log"
 	"net/http"
-	"sync"
 
 	"github.com/gorilla/websocket"
 	"github.com/hxrshxz/ground-sense-bot/backend/internal/models"
 )
 
 type Client struct {
+	Hub      *Hub
 	Conn     *websocket.Conn
 	Username string
 	Send     chan models.Message
-}
-
-type Hub struct {
-	Clients    map[*Client]bool
-	Broadcast  chan models.Message
-	Register   chan *Client
-	Unregister chan *Client
-	mutex      sync.Mutex
-}
-
-var hub = Hub{
-	Clients:    make(map[*Client]bool),
-	Broadcast:  make(chan models.Message),
-	Register:   make(chan *Client),
-	Unregister: make(chan *Client),
-}
-
-func (h *Hub) Run() {
-	for {
-		select {
-		case client := <-h.Register:
-			h.mutex.Lock()
-			h.Clients[client] = true
-			h.mutex.Unlock()
-			log.Printf("Client %s connected", client.Username)
-		case client := <-h.Unregister:
-			h.mutex.Lock()
-			if _, ok := h.Clients[client]; ok {
-				delete(h.Clients, client)
-				close(client.Send)
-				log.Printf("Client %s disconnected", client.Username)
-			}
-			h.mutex.Unlock()
-		case message := <-h.Broadcast:
-			h.mutex.Lock()
-			for client := range h.Clients {
-				select {
-				case client.Send <- message:
-				default:
-					close(client.Send)
-					delete(h.Clients, client)
-				}
-			}
-			h.mutex.Unlock()
-		}
-	}
 }
 
 var upgrader = websocket.Upgrader{
@@ -69,20 +23,20 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func ServeWs(w http.ResponseWriter, r *http.Request) {
+func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	// For simplicity, we'll use a query param for username. In a real app, you'd get this from the token.
+	// For simplicity, we'll use a query param for username.
 	username := r.URL.Query().Get("username")
 	if username == "" {
 		username = "Anonymous"
 	}
 
-	client := &Client{Conn: conn, Username: username, Send: make(chan models.Message, 256)}
-	hub.Register <- client
+	client := &Client{Hub: hub, Conn: conn, Username: username, Send: make(chan models.Message, 256)}
+	client.Hub.Register <- client
 
 	go client.writePump()
 	go client.readPump()
@@ -90,7 +44,7 @@ func ServeWs(w http.ResponseWriter, r *http.Request) {
 
 func (c *Client) readPump() {
 	defer func() {
-		hub.Unregister <- c
+		c.Hub.Unregister <- c
 		c.Conn.Close()
 	}()
 	for {
@@ -100,7 +54,8 @@ func (c *Client) readPump() {
 			break
 		}
 		msg.Username = c.Username
-		hub.Broadcast <- msg
+		msg.Type = "text" // Ensure type is set
+		c.Hub.Broadcast <- msg
 	}
 }
 
@@ -114,6 +69,3 @@ func (c *Client) writePump() {
 	}
 }
 
-func GetHub() *Hub {
-	return &hub
-}

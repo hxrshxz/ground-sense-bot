@@ -1,0 +1,3505 @@
+[
+  {
+    "locationName": "SHAHPURA",
+    "area": {
+      "non_recharge_worthy": {
+        "commandArea": 0.0,
+        "nonCommandArea": 0.0,
+        "poorQualityArea": 0.0,
+        "hillyArea": 0.0,
+        "forestArea": 0.0,
+        "totalArea": 6012.0,
+        "pavedArea": 0.0,
+        "unpavedArea": 0.0
+      },
+      "total": {
+        "commandArea": 17834.0,
+        "nonCommandArea": 29275.0,
+        "poorQualityArea": 0.0,
+        "hillyArea": 0.0,
+        "forestArea": 0.0,
+        "totalArea": 53121.0,
+        "pavedArea": 0.0,
+        "unpavedArea": 0.0
+      },
+      "recharge_worthy": {
+        "commandArea": 17834.0,
+        "nonCommandArea": 29275.0,
+        "poorQualityArea": 0.0,
+        "hillyArea": 0.0,
+        "forestArea": 0.0,
+        "totalArea": 47109.0,
+        "pavedArea": 0.0,
+        "unpavedArea": 0.0
+      }
+    },
+    "loss": {
+      "poor_quality": 0.0,
+      "total": 544.08,
+      "non_command": 348.93,
+      "command": 195.15
+    },
+    "category": {
+      "total": "safe",
+      "non_command": "semi_critical",
+      "command": "safe"
+    },
+    "reportSummary": {
+      "total": {
+        "BLOCK": {
+          "safe": 1
+        }
+      }
+    },
+    "gwProjectedUtilAllocationDynamicAquifer": {
+      "domestic": {
+        "total": 0.0
+      },
+      "total": {
+        "total": 0.0
+      }
+    },
+    "additionalRecharge": {},
+    "staticGWResource": {
+      "poor_quality": 0.0,
+      "total": 0.0,
+      "non_command": 0.0,
+      "command": 0.0
+    },
+    "totalGWAvailability": {
+      "poor_quality": 0.0,
+      "total": 10337.47,
+      "non_command": 6629.51,
+      "command": 3707.96
+    },
+    "aquiferBusinessData": {
+      "SemiConfined_Aquifer_Piezo_Data": {
+        "total": {
+          "total": 0.0
+        },
+        "in_storage_gw": {
+          "in_storage_gw": 0.0
+        },
+        "dynamic_gw": {
+          "dynamic_gw": 0.0
+        }
+      },
+      "confined_aquifer": {
+        "total": {
+          "total": 0.0
+        },
+        "in_storage_gw": {
+          "in_storage_gw": 0.0
+        },
+        "dynamic_gw": {
+          "dynamic_gw": 0.0
+        }
+      }
+    },
+    "coastalBusinessData": null,
+    "waterDepletedZonesBusinessData": null,
+    "inOutFlow": {
+      "total": 0.0
+    },
+    "baseFlow": {
+      "total": {
+        "lateral_aquifer": 0.0,
+        "vertcal_aquifer": 0.0
+      }
+    },
+    "streamRecharge": {},
+    "additionalbaseflow": null,
+    "envFlows": null,
+    "subject": null,
+    "action": null,
+    "modifiable": null,
+    "isUrban": false,
+    "gwSpecificYield": null,
+    "geology": null,
+    "evaporation": null,
+    "qualityTagging": null,
+    "approvalLevel": 4,
+    "verificStatus": 1,
+    "timeStamp": null,
+    "locationUUID": "8ee34fe7-5e9c-4480-8afc-bb00cad0e42f",
+    "rainfall": {
+      "poor_quality": 1227.3,
+      "total": 1227.3,
+      "non_command": 1227.3,
+      "command": 1227.3
+    },
+    "wtfonly": null,
+    "computationSummary": {
+      "annual": {
+        "envFlow": {
+          "envFlow": {}
+        },
+        "acquifer_info": {
+          "SemiConfined_Aquifer_Piezo_Data": {},
+          "confined_aquifer": {}
+        },
+        "availFutureUse": {
+          "poor_quality": 0.0,
+          "non_command": 1686.3,
+          "command": 2040.72
+        },
+        "alloc2025": {
+          "poor_quality": {
+            "domestic": {
+              "total": {
+                "postalloc": "0.0",
+                "prealloc": "0.0"
+              }
+            },
+            "common": {
+              "total": {
+                "pty": "0.0",
+                "ty": "2035",
+                "pry": "0.0",
+                "ry": "2011"
+              }
+            },
+            "industry": {}
+          },
+          "non_command": {
+            "domestic": {
+              "total": {
+                "postalloc": "388.83",
+                "prealloc": "388.83"
+              },
+              "urban": {
+                "lpcd": "0.0",
+                "poprefyr": "0",
+                "refyr": "2011",
+                "lg": "0.0",
+                "gr": "0.0",
+                "postalloc": "0.0"
+              },
+              "rural": {
+                "lpcd": "60.0",
+                "poprefyr": "125109",
+                "refyr": "2011",
+                "lg": "1.0",
+                "gr": "1.45",
+                "postalloc": "388.83"
+              }
+            },
+            "common": {
+              "total": {
+                "pty": "176741.0",
+                "ty": "2035",
+                "pry": "125109.0",
+                "ry": "2011"
+              },
+              "urban": {
+                "d": "0.0",
+                "suarea": "29275.0",
+                "pty": "0.0",
+                "pry": "0",
+                "lpcd": "0.0",
+                "gr": "0.0"
+              },
+              "rural": {
+                "d": "0.6",
+                "suarea": "29275.0",
+                "pty": "176741.0",
+                "pry": "125109",
+                "lpcd": "60.0",
+                "gr": "1.45"
+              }
+            },
+            "industry": {}
+          },
+          "command": {
+            "domestic": {
+              "total": {
+                "postalloc": "196.66",
+                "prealloc": "196.66"
+              },
+              "urban": {
+                "lpcd": "0.0",
+                "poprefyr": "0",
+                "refyr": "2011",
+                "lg": "0.0",
+                "gr": "0.0",
+                "postalloc": "0.0"
+              },
+              "rural": {
+                "lpcd": "60.0",
+                "poprefyr": "63276",
+                "refyr": "2011",
+                "lg": "1.0",
+                "gr": "1.45",
+                "postalloc": "196.66"
+              }
+            },
+            "common": {
+              "total": {
+                "pty": "89390.0",
+                "ty": "2035",
+                "pry": "63276.0",
+                "ry": "2011"
+              },
+              "urban": {
+                "d": "0.0",
+                "suarea": "17834.0",
+                "pty": "0.0",
+                "pry": "0",
+                "lpcd": "0.0",
+                "gr": "0.0"
+              },
+              "rural": {
+                "d": "0.5",
+                "suarea": "17834.0",
+                "pty": "89390.0",
+                "pry": "63276",
+                "lpcd": "60.0",
+                "gr": "1.45"
+              }
+            },
+            "industry": {}
+          }
+        },
+        "stage": {
+          "total": {
+            "av": "10337.47"
+          },
+          "non_command": {
+            "av": "6629.51"
+          },
+          "command": {
+            "av": "3707.96"
+          }
+        },
+        "alloc2025_dy": {
+          "poor_quality": {
+            "domestic": {},
+            "common": {}
+          },
+          "non_command": {
+            "domestic": {},
+            "common": {}
+          },
+          "command": {
+            "domestic": {},
+            "common": {}
+          }
+        }
+      },
+      "non_monsoon": {
+        "loss": {
+          "loss": {
+            "poor_quality": {
+              "p": "10.0",
+              "v": "0.0"
+            },
+            "non_command": {
+              "p": "5.0",
+              "v": "46.02"
+            },
+            "command": {
+              "p": "5.0",
+              "v": "30.59"
+            }
+          }
+        },
+        "rf": {
+          "a": 0.0,
+          "n": 111.6
+        },
+        "stage": {
+          "total": {
+            "av": "10337.47"
+          },
+          "non_command": {
+            "av": "6629.51"
+          },
+          "command": {
+            "av": "3707.96"
+          }
+        },
+        "recharge": {
+          "agriculture": {},
+          "rainfall": {
+            "poor_quality": {
+              "S3": "0.087",
+              "lastNYr": "{\"2021-2022\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":0.112,\"recGW\":0.0,\"preGW\":0.0},\"2024-2025\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":0.112,\"recGW\":0.0,\"preGW\":0.0},\"2018-2019\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":0.112,\"recGW\":0.0,\"preGW\":0.0},\"2023-2024\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":0.112,\"recGW\":0.0,\"preGW\":0.0},\"2017-2018\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":0.112,\"recGW\":0.0,\"preGW\":0.0},\"2019-2020\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":0.112,\"recGW\":0.0,\"preGW\":0.0},\"2022-2023\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":0.112,\"recGW\":0.0,\"preGW\":0.0}}",
+              "S4": "0.0",
+              "rflows": "0.0",
+              "an_rf": "0.0",
+              "unpaved": "0.0",
+              "N": "7.0",
+              "e_m2": "0.0",
+              "an_nrf": "1227.3",
+              "dv": "null",
+              "ros": "0.0",
+              "paved": "0.0",
+              "if": "0.0",
+              "fac_a": "0.0",
+              "fac_b": "0.0",
+              "a": "0.0",
+              "nrf": "111.6",
+              "m1": "0.0",
+              "sy": "0.0",
+              "gwsc": "0.0",
+              "td": "0.0",
+              "rc": "0.0",
+              "gwc": "null",
+              "at": "poor_quality",
+              "th": "122.73",
+              "rf": "0.0",
+              "S1": "0.781",
+              "rp": "false",
+              "S2": "0.0"
+            },
+            "non_command": {
+              "S3": "0.011",
+              "lastNYr": "{\"2021-2022\":{\"postGW\":6.79,\"changeGW\":-1.4,\"rf\":0.034,\"recGW\":268.702,\"preGW\":5.39},\"2024-2025\":{\"postGW\":0.0,\"changeGW\":3.6,\"rf\":0.099,\"recGW\":9759.802,\"preGW\":3.6},\"2018-2019\":{\"postGW\":7.27,\"changeGW\":-2.0,\"rf\":0.029,\"recGW\":-870.23,\"preGW\":5.27},\"2023-2024\":{\"postGW\":7.5,\"changeGW\":-2.0,\"rf\":0.13,\"recGW\":-870.23,\"preGW\":5.5},\"2017-2018\":{\"postGW\":7.19,\"changeGW\":-2.14,\"rf\":0.025,\"recGW\":-1135.981,\"preGW\":5.05},\"2019-2020\":{\"postGW\":6.47,\"changeGW\":-2.38,\"rf\":0.038,\"recGW\":-1591.554,\"preGW\":4.09},\"2022-2023\":{\"postGW\":7.77,\"changeGW\":-3.39,\"rf\":0.129,\"recGW\":-3508.756,\"preGW\":4.38}}",
+              "S4": "970.476",
+              "rflows": "0.0",
+              "an_rf": "1250.6",
+              "unpaved": "0.0",
+              "N": "2.0",
+              "e_m2": "11366.133",
+              "an_nrf": "1227.3",
+              "dv": "null",
+              "ros": "920.31",
+              "paved": "0.0",
+              "if": "0.18",
+              "fac_a": "140839.937",
+              "fac_b": "-4351.604",
+              "a": "29275.0",
+              "nrf": "111.6",
+              "m1": "0.0",
+              "sy": "0.065",
+              "gwsc": "6833.59",
+              "td": "3846.52",
+              "rc": "0.0",
+              "gwc": "null",
+              "at": "non_command",
+              "th": "122.73",
+              "rf": "98.5",
+              "S1": "0.133",
+              "rp": "false",
+              "S2": "10028.504"
+            },
+            "command": {
+              "S3": "0.01",
+              "lastNYr": "{\"2021-2022\":{\"postGW\":3.5,\"changeGW\":-1.89,\"rf\":0.034,\"recGW\":-1906.132,\"preGW\":1.61},\"2024-2025\":{\"postGW\":0.0,\"changeGW\":2.075,\"rf\":0.099,\"recGW\":3247.575,\"preGW\":2.075},\"2018-2019\":{\"postGW\":4.93,\"changeGW\":-2.88,\"rf\":0.029,\"recGW\":-3192.934,\"preGW\":2.05},\"2023-2024\":{\"postGW\":3.7,\"changeGW\":-2.25,\"rf\":0.13,\"recGW\":-2374.06,\"preGW\":1.45},\"2017-2018\":{\"postGW\":5.0,\"changeGW\":-2.12,\"rf\":0.025,\"recGW\":-2205.086,\"preGW\":2.88},\"2019-2020\":{\"postGW\":4.75,\"changeGW\":-2.3,\"rf\":0.038,\"recGW\":-2439.05,\"preGW\":2.45},\"2022-2023\":{\"postGW\":3.9,\"changeGW\":-2.45,\"rf\":0.129,\"recGW\":-2634.02,\"preGW\":1.45}}",
+              "S4": "319.886",
+              "rflows": "0.0",
+              "an_rf": "1250.6",
+              "unpaved": "0.0",
+              "N": "1.0",
+              "e_m2": "3144.753",
+              "an_nrf": "1227.3",
+              "dv": "null",
+              "ros": "611.82",
+              "paved": "0.0",
+              "if": "0.189",
+              "fac_a": "-8160.427",
+              "fac_b": "4055.457",
+              "a": "17834.0",
+              "nrf": "111.6",
+              "m1": "0.0",
+              "sy": "0.073",
+              "gwsc": "2697.09",
+              "td": "1162.31",
+              "rc": "0.0",
+              "gwc": "null",
+              "at": "command",
+              "th": "122.73",
+              "rf": "98.5",
+              "S1": "0.099",
+              "rp": "false",
+              "S2": "3247.575"
+            }
+          },
+          "total": {
+            "poor_quality": 0.0,
+            "total": 1532.13,
+            "non_command": 920.31,
+            "command": 611.82
+          },
+          "surface_irrigation": {
+            "poor_quality": {
+              "total": "0.0",
+              "can_rel": [
+                {
+                  "rec": "0.0",
+                  "ddc": "3.74",
+                  "ad": "2.24",
+                  "nonPaddy": "{\"0.0\":{\"name\":\"0.0\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"poor_quality\":0.0},\"dischargeDays\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0},\"weightedFlowFactor\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0}}}",
+                  "out_name": "Piparia Canal ",
+                  "rel": "0.0",
+                  "dist": "Sub-minor",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Piparia Canal ",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"poor_quality\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "14.64",
+                  "ad": "8.78",
+                  "nonPaddy": "{\"0.0\":{\"name\":\"0.0\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"poor_quality\":0.0},\"dischargeDays\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0},\"weightedFlowFactor\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0}}}",
+                  "out_name": "Belkhedi Canal ",
+                  "rel": "0.0",
+                  "dist": "Distributory",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Belkhedi Canal ",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"poor_quality\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "2.72",
+                  "ad": "1.63",
+                  "nonPaddy": "{\"0.0\":{\"name\":\"0.0\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"poor_quality\":0.0},\"dischargeDays\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0},\"weightedFlowFactor\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0}}}",
+                  "out_name": "Shahpura Canal ",
+                  "rel": "0.0",
+                  "dist": "Distributory",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Shahpura Canal ",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"poor_quality\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "4.13",
+                  "ad": "2.48",
+                  "nonPaddy": "{\"0.0\":{\"name\":\"0.0\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"poor_quality\":0.0},\"dischargeDays\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0},\"weightedFlowFactor\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0}}}",
+                  "out_name": "Shahpura Canal ",
+                  "rel": "0.0",
+                  "dist": "Distributory",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Shahpura Canal ",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"poor_quality\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "rel": "0.0"
+                }
+              ],
+              "crop_w_req": [
+                {
+                  "cs": "0.0",
+                  "rff": "0.3",
+                  "nonPaddy": "{\"cropName\":\"0.0\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"waterRequired\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"poor_quality\":0.0}}",
+                  "name": "0.0",
+                  "wr": "0.0",
+                  "type": "nonPaddy",
+                  "ca": "0.0",
+                  "cr": "0.0"
+                },
+                {
+                  "cs": "0.0",
+                  "rff": "0.5",
+                  "name": "paddy",
+                  "wr": "0.0",
+                  "type": "paddy",
+                  "ca": "0.0",
+                  "cr": "0.0",
+                  "paddy": "{\"cropName\":\"paddy\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"waterRequired\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"poor_quality\":0.0}}"
+                },
+                {
+                  "nonPaddy_wr": "0.0",
+                  "paddy_rec": "0.0",
+                  "nonPaddy_rec": "0.0",
+                  "paddy_wr": "0.0"
+                }
+              ],
+              "rff_calc": {
+                "nonPaddy_area": "0.0",
+                "pre": "0",
+                "paddy_area": "0.0",
+                "post": "0",
+                "nonPaddy_rff": "0.3",
+                "paddy_rff": "0.5",
+                "wrff": "0.3",
+                "gwl": "0"
+              }
+            },
+            "non_command": {
+              "total": "0.0",
+              "can_rel": [
+                {
+                  "rec": "0.0",
+                  "ddc": "3.74",
+                  "ad": "2.24",
+                  "nonPaddy": "{\"0.0\":{\"name\":\"0.0\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"non_command\":0.0},\"dischargeDays\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":0.0},\"weightedFlowFactor\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":0.0}}}",
+                  "out_name": "Piparia Canal ",
+                  "rel": "0.0",
+                  "dist": "Sub-minor",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Piparia Canal ",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{},\"continousWS\":{\"non_command\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "14.64",
+                  "ad": "8.78",
+                  "nonPaddy": "{\"0.0\":{\"name\":\"0.0\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"non_command\":0.0},\"dischargeDays\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":0.0},\"weightedFlowFactor\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":0.0}}}",
+                  "out_name": "Belkhedi Canal ",
+                  "rel": "0.0",
+                  "dist": "Distributory",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Belkhedi Canal ",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{},\"continousWS\":{\"non_command\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "2.72",
+                  "ad": "1.63",
+                  "nonPaddy": "{\"0.0\":{\"name\":\"0.0\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"non_command\":0.0},\"dischargeDays\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":0.0},\"weightedFlowFactor\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":0.0}}}",
+                  "out_name": "Shahpura Canal ",
+                  "rel": "0.0",
+                  "dist": "Distributory",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Shahpura Canal ",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{},\"continousWS\":{\"non_command\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "4.13",
+                  "ad": "2.48",
+                  "nonPaddy": "{\"0.0\":{\"name\":\"0.0\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"non_command\":0.0},\"dischargeDays\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":0.0},\"weightedFlowFactor\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":0.0}}}",
+                  "out_name": "Shahpura Canal ",
+                  "rel": "0.0",
+                  "dist": "Distributory",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Shahpura Canal ",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{},\"continousWS\":{\"non_command\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "rel": "0.0"
+                }
+              ],
+              "crop_w_req": [
+                {
+                  "cs": "0.0",
+                  "rff": "0.3",
+                  "nonPaddy": "{\"cropName\":\"0.0\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"waterRequired\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"non_command\":0.0}}",
+                  "name": "0.0",
+                  "wr": "0.0",
+                  "type": "nonPaddy",
+                  "ca": "0.0",
+                  "cr": "0.0"
+                },
+                {
+                  "cs": "0.0",
+                  "rff": "0.5",
+                  "name": "paddy",
+                  "wr": "0.0",
+                  "type": "paddy",
+                  "ca": "0.0",
+                  "cr": "0.0",
+                  "paddy": "{\"cropName\":\"paddy\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"waterRequired\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"non_command\":0.0}}"
+                },
+                {
+                  "nonPaddy_wr": "0.0",
+                  "paddy_rec": "0.0",
+                  "nonPaddy_rec": "0.0",
+                  "paddy_wr": "0.0"
+                }
+              ],
+              "rff_calc": {
+                "nonPaddy_area": "0.0",
+                "pre": "0",
+                "paddy_area": "0.0",
+                "post": "0",
+                "nonPaddy_rff": "0.3",
+                "paddy_rff": "0.5",
+                "wrff": "0.3",
+                "gwl": "0"
+              }
+            },
+            "command": {
+              "total": "162.25",
+              "can_rel": [
+                {
+                  "rec": "30.29",
+                  "ddc": "3.74",
+                  "ad": "2.24",
+                  "nonPaddy": "{\"crop 1\":{\"name\":\"crop 1\",\"cropArea\":{},\"returnFlowFactor\":{\"monsoon\":0.3,\"non_monsoon\":0.3},\"continousWS\":{\"command\":0.0},\"dischargeDays\":{\"command_non_monsoon\":45.0,\"command_monsoon\":0.0},\"weightedFlowFactor\":{\"command_non_monsoon\":0.3,\"command_monsoon\":0.3}}}",
+                  "out_name": "Piparia Canal ",
+                  "rel": "100.98",
+                  "dist": "Sub-minor",
+                  "days": "45",
+                  "wRff": "0.3",
+                  "outlet": "Piparia Canal ",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{\"command\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "118.58",
+                  "ddc": "14.64",
+                  "ad": "8.78",
+                  "nonPaddy": "{\"crop 1\":{\"name\":\"crop 1\",\"cropArea\":{},\"returnFlowFactor\":{\"monsoon\":0.3,\"non_monsoon\":0.3},\"continousWS\":{\"command\":0.0},\"dischargeDays\":{\"command_non_monsoon\":45.0,\"command_monsoon\":0.0},\"weightedFlowFactor\":{\"command_non_monsoon\":0.3,\"command_monsoon\":0.3}}}",
+                  "out_name": "Belkhedi Canal ",
+                  "rel": "395.28000000000003",
+                  "dist": "Distributory",
+                  "days": "45",
+                  "wRff": "0.3",
+                  "outlet": "Belkhedi Canal ",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{\"command\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "22.03",
+                  "ddc": "2.72",
+                  "ad": "1.63",
+                  "nonPaddy": "{\"crop 1\":{\"name\":\"crop 1\",\"cropArea\":{},\"returnFlowFactor\":{\"monsoon\":0.3,\"non_monsoon\":0.3},\"continousWS\":{\"command\":0.0},\"dischargeDays\":{\"command_non_monsoon\":45.0,\"command_monsoon\":0.0},\"weightedFlowFactor\":{\"command_non_monsoon\":0.3,\"command_monsoon\":0.3}}}",
+                  "out_name": "Shahpura Canal ",
+                  "rel": "73.44000000000001",
+                  "dist": "Distributory",
+                  "days": "45",
+                  "wRff": "0.3",
+                  "outlet": "Shahpura Canal ",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{\"command\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "33.44",
+                  "ddc": "4.13",
+                  "ad": "2.48",
+                  "nonPaddy": "{\"crop 1\":{\"name\":\"crop 1\",\"cropArea\":{},\"returnFlowFactor\":{\"monsoon\":0.3,\"non_monsoon\":0.3},\"continousWS\":{\"command\":0.0},\"dischargeDays\":{\"command_non_monsoon\":45.0,\"command_monsoon\":0.0},\"weightedFlowFactor\":{\"command_non_monsoon\":0.3,\"command_monsoon\":0.3}}}",
+                  "out_name": "Shahpura Canal ",
+                  "rel": "111.45599999999999",
+                  "dist": "Distributory",
+                  "days": "45",
+                  "wRff": "0.3",
+                  "outlet": "Shahpura Canal ",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{\"command\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "204.35",
+                  "rel": "681.16"
+                }
+              ],
+              "crop_w_req": [
+                {
+                  "cs": "0.0",
+                  "rff": "0.3",
+                  "nonPaddy": "{\"cropName\":\"crop1 \",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":2925.0},\"waterRequired\":{\"monsoon\":0.0,\"non_monsoon\":184.896},\"returnFlowFactor\":{\"monsoon\":0.3,\"non_monsoon\":0.3},\"continousWS\":{\"command\":0.0}}",
+                  "name": "crop1 ",
+                  "wr": "0.18489599999999998",
+                  "type": "nonPaddy",
+                  "ca": "2925.0",
+                  "cr": "162.24623999999997"
+                },
+                {
+                  "cs": "0.0",
+                  "rff": "0.3",
+                  "name": "paddy",
+                  "wr": "0.0",
+                  "type": "paddy",
+                  "ca": "0.0",
+                  "cr": "0.0",
+                  "paddy": "{\"cropName\":\"paddy\",\"cropArea\":{\"monsoon\":654.0,\"non_monsoon\":0.0},\"waterRequired\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.5,\"non_monsoon\":0.3},\"continousWS\":{\"command\":0.0}}"
+                },
+                {
+                  "nonPaddy_wr": "0.18",
+                  "paddy_rec": "0.0",
+                  "nonPaddy_rec": "162.25",
+                  "paddy_wr": "0.0"
+                }
+              ],
+              "rff_calc": {
+                "nonPaddy_area": "2925.0",
+                "pre": "0",
+                "paddy_area": "0.0",
+                "post": "0",
+                "nonPaddy_rff": "0",
+                "paddy_rff": "0",
+                "wrff": "0.3",
+                "gwl": "0"
+              }
+            }
+          },
+          "water_body": {
+            "poor_quality": {
+              "rc": "0.0",
+              "wbi": {
+                "Tank18": {
+                  "no": "0.0",
+                  "esa": "0.0",
+                  "r": "0.0",
+                  "d": "0",
+                  "if": "0.0",
+                  "sa": "0.0"
+                },
+                "Tank17": {
+                  "no": "0.0",
+                  "esa": "0.0",
+                  "r": "0.0",
+                  "d": "0",
+                  "if": "0.0",
+                  "sa": "0.0"
+                },
+                "Tank19": {
+                  "no": "0.0",
+                  "esa": "0.0",
+                  "r": "0.0",
+                  "d": "0",
+                  "if": "0.0",
+                  "sa": "0.0"
+                },
+                "Tank14": {
+                  "no": "0.0",
+                  "esa": "0.0",
+                  "r": "0.0",
+                  "d": "0",
+                  "if": "0.0",
+                  "sa": "0.0"
+                },
+                "Tank16": {
+                  "no": "0.0",
+                  "esa": "0.0",
+                  "r": "0.0",
+                  "d": "0",
+                  "if": "0.0",
+                  "sa": "0.0"
+                },
+                "Tank15": {
+                  "no": "0.0",
+                  "esa": "0.0",
+                  "r": "0.0",
+                  "d": "0",
+                  "if": "0.0",
+                  "sa": "0.0"
+                }
+              }
+            },
+            "non_command": {
+              "rc": "12.95",
+              "wbi": {
+                "Kosamghat Tank ": {
+                  "no": "1.0",
+                  "esa": "10.5",
+                  "r": "1.36",
+                  "d": "90",
+                  "if": "0.00144",
+                  "sa": "0.0"
+                },
+                "Lodhi Tank ": {
+                  "no": "1.0",
+                  "esa": "18.0",
+                  "r": "2.33",
+                  "d": "90",
+                  "if": "0.00144",
+                  "sa": "0.0"
+                },
+                "Saliwada Tank ": {
+                  "no": "1.0",
+                  "esa": "16.3",
+                  "r": "2.11",
+                  "d": "90",
+                  "if": "0.00144",
+                  "sa": "0.0"
+                },
+                "Balwara Tank ": {
+                  "no": "1.0",
+                  "esa": "20.5",
+                  "r": "2.66",
+                  "d": "90",
+                  "if": "0.00144",
+                  "sa": "0.0"
+                },
+                "Indradaman Tank ": {
+                  "no": "1.0",
+                  "esa": "19.49",
+                  "r": "2.53",
+                  "d": "90",
+                  "if": "0.00144",
+                  "sa": "0.0"
+                },
+                "Kyolari Tank ": {
+                  "no": "1.0",
+                  "esa": "15.12",
+                  "r": "1.96",
+                  "d": "90",
+                  "if": "0.00144",
+                  "sa": "0.0"
+                }
+              }
+            },
+            "command": {
+              "rc": "7.86",
+              "wbi": {
+                "Belkhedi Tank ": {
+                  "no": "1.0",
+                  "esa": "25.72",
+                  "r": "2.22",
+                  "d": "60",
+                  "if": "0.00144",
+                  "sa": "0.0"
+                },
+                "Balwara Tank ": {
+                  "no": "0.0",
+                  "esa": "0.0",
+                  "r": "0.0",
+                  "d": "0",
+                  "if": "0.0",
+                  "sa": "0.0"
+                },
+                "Indradaman Tank ": {
+                  "no": "0.0",
+                  "esa": "0.0",
+                  "r": "0.0",
+                  "d": "0",
+                  "if": "0.0",
+                  "sa": "0.0"
+                },
+                " Piparia Tank ": {
+                  "no": "1.0",
+                  "esa": "31.8",
+                  "r": "2.75",
+                  "d": "60",
+                  "if": "0.00144",
+                  "sa": "0.0"
+                },
+                "Kyolari Tank ": {
+                  "no": "0.0",
+                  "esa": "0.0",
+                  "r": "0.0",
+                  "d": "0",
+                  "if": "0.0",
+                  "sa": "0.0"
+                },
+                "Shahpura Tank": {
+                  "no": "1.0",
+                  "esa": "33.4",
+                  "r": "2.89",
+                  "d": "60",
+                  "if": "0.00144",
+                  "sa": "0.0"
+                }
+              }
+            }
+          },
+          "gw_irrigation": {
+            "poor_quality": {
+              "r": "0.0",
+              "w_rff": "0.0",
+              "nonPaddy": [],
+              "gwIrr": {
+                "gwrff": "0.0",
+                "gwIrrPer": "100"
+              },
+              "irr_dr": "0.0"
+            },
+            "non_command": {
+              "r": "874.41",
+              "w_rff": "0.25",
+              "nonPaddy": [
+                {
+                  "cs": "0.0",
+                  "area": "10600.0",
+                  "rff": "0.25",
+                  "name": "crop 2"
+                }
+              ],
+              "gwIrr": {
+                "gwrff": "0.25",
+                "gwIrrPer": "100"
+              },
+              "irr_dr": "3497.64",
+              "paddy": [
+                {
+                  "cs": "0.0",
+                  "area": "0.0",
+                  "rff": "0.0",
+                  "name": "paddy"
+                }
+              ]
+            },
+            "command": {
+              "r": "262.6",
+              "w_rff": "0.25",
+              "nonPaddy": [
+                {
+                  "cs": "0.0",
+                  "area": "8542.0",
+                  "rff": "0.25",
+                  "name": "Crop 1"
+                }
+              ],
+              "gwIrr": {
+                "gwrff": "0.25",
+                "gwIrrPer": "100"
+              },
+              "irr_dr": "1050.41"
+            }
+          },
+          "drainage": {},
+          "canal": {
+            "poor_quality": {
+              "rc": "0.0",
+              "ci": {
+                "Outlet 2124": {
+                  "ss": "0.0",
+                  "bt": "",
+                  "adf": "0.0",
+                  "r": "0.0",
+                  "sf": "0.0",
+                  "t": "Distributory",
+                  "d": "0",
+                  "bw": "0.0",
+                  "ddf": "0.0",
+                  "wp": "0.0",
+                  "wa": "0.0",
+                  "l": "0.0"
+                }
+              }
+            },
+            "non_command": {},
+            "command": {
+              "rc": "115.29",
+              "ci": {
+                "Shahpura Canal 2": {
+                  "ss": "0.0",
+                  "bt": "lined",
+                  "adf": "0.0",
+                  "r": "27.85",
+                  "sf": "5.0",
+                  "t": "Sub-minor",
+                  "d": "60",
+                  "bw": "0.0",
+                  "ddf": "0.0",
+                  "wp": "1.8",
+                  "wa": "0.09284",
+                  "l": "0.0"
+                },
+                "Shahpura Canal 1": {
+                  "ss": "0.0",
+                  "bt": "lined",
+                  "adf": "0.0",
+                  "r": "23.36",
+                  "sf": "5.0",
+                  "t": "Sub-minor",
+                  "d": "60",
+                  "bw": "0.0",
+                  "ddf": "0.0",
+                  "wp": "3.3",
+                  "wa": "0.07788",
+                  "l": "0.0"
+                },
+                "Belkhedi Canal ": {
+                  "ss": "0.0",
+                  "bt": "lined",
+                  "adf": "0.0",
+                  "r": "48.96",
+                  "sf": "5.0",
+                  "t": "Distributory",
+                  "d": "60",
+                  "bw": "0.0",
+                  "ddf": "0.0",
+                  "wp": "4.8",
+                  "wa": "0.1632",
+                  "l": "0.0"
+                },
+                "Piparia Canal ": {
+                  "ss": "0.0",
+                  "bt": "lined",
+                  "adf": "0.0",
+                  "r": "15.12",
+                  "sf": "5.0",
+                  "t": "Distributory",
+                  "d": "60",
+                  "bw": "0.0",
+                  "ddf": "0.0",
+                  "wp": "4.2",
+                  "wa": "0.0504",
+                  "l": "0.0"
+                }
+              }
+            }
+          },
+          "streamRecharge": {
+            "poor_quality": {},
+            "non_command": {},
+            "command": {}
+          },
+          "artificial_structure": {
+            "poor_quality": {},
+            "non_command": {
+              "rc": "32.95",
+              "wcsi": {
+                "Mini Percolation tank": {
+                  "sc": "0.15",
+                  "r": "2.7",
+                  "c": "30",
+                  "eif": "0.2",
+                  "nos": "30.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                },
+                "Construction of  Earthen contour Bund/Earthen graded Bund/Earthen Gully Plug/Earthen peripheral Bund/Stone contour Bund/Stone graded Bund /Stone boulder Gully Plugs /Stone Spur/Soak Pit /Recharge Pits/Upland Bench /Level Bench Terrace/Pebble Bunding/Pebble graded Bund/Pebble peripheral Bund/Pebble contour Bund /Cross bund/Farm Bund": {
+                  "sc": "0.0",
+                  "r": "0.34",
+                  "c": "563",
+                  "eif": "0.2",
+                  "nos": "563.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                },
+                "Amrt Sarovar ": {
+                  "sc": "1.0",
+                  "r": "10.8",
+                  "c": "18",
+                  "eif": "0.2",
+                  "nos": "18.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                },
+                "Farm Pond": {
+                  "sc": "0.12",
+                  "r": "0.43",
+                  "c": "6",
+                  "eif": "0.2",
+                  "nos": "6.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                },
+                "Check Dam/Stop Dam": {
+                  "sc": "0.15",
+                  "r": "7.11",
+                  "c": "79",
+                  "eif": "0.2",
+                  "nos": "79.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                },
+                "Water Absorption Trench/ CCT(Continuous contour trench )//SCT(Staggered contour trench )/BOXTR(Box trench )/Water Courses/Field Channel/": {
+                  "sc": "0.0",
+                  "r": "0.05",
+                  "c": "78",
+                  "eif": "0.2",
+                  "nos": "78.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                },
+                "Gabions/Gabion Anicut/ Boulder Anicut Check Dam/ Brushwood Checkdam": {
+                  "sc": "0.0",
+                  "r": "0.11",
+                  "c": "178",
+                  "eif": "0.2",
+                  "nos": "178.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                },
+                "Fisheries Ponds for Community": {
+                  "sc": "0.1",
+                  "r": "1.08",
+                  "c": "18",
+                  "eif": "0.2",
+                  "nos": "18.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                },
+                "Underground Dykes ": {
+                  "sc": "0.1",
+                  "r": "0.12",
+                  "c": "2",
+                  "eif": "0.2",
+                  "nos": "2.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                },
+                " Percolation tank": {
+                  "sc": "0.2",
+                  "r": "5.04",
+                  "c": "42",
+                  "eif": "0.2",
+                  "nos": "42.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                },
+                "Artificial Recharge of Well Through Sand Filter/Sand filter - openwell recharge for Grps/borewellrecharge": {
+                  "sc": "0.0",
+                  "r": "0.01",
+                  "c": "20",
+                  "eif": "0.2",
+                  "nos": "20.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                },
+                "Water Harvesting Ponds": {
+                  "sc": "0.1",
+                  "r": "5.16",
+                  "c": "86",
+                  "eif": "0.2",
+                  "nos": "86.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                }
+              }
+            },
+            "command": {
+              "rc": "21.72",
+              "wcsi": {
+                "Percolation Tank - 1": {
+                  "sc": "0.2",
+                  "r": "21.48",
+                  "c": "179",
+                  "eif": "0.2",
+                  "nos": "179.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                },
+                " Chek Dam 1": {
+                  "sc": "0.2",
+                  "r": "0.24",
+                  "c": "2",
+                  "eif": "0.2",
+                  "nos": "2.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                }
+              }
+            }
+          }
+        },
+        "draft": {
+          "agriculture": {
+            "decision": {
+              "non_command": {
+                "pc_dr": "0.0",
+                "dev1": "-100.0",
+                "dev2": "-100.0",
+                "dev": "-100.0",
+                "e_dr": "3497.6448",
+                "u_dr": "3497.64",
+                "cwr_dr": "0.0"
+              },
+              "command": {
+                "pc_dr": "0.0",
+                "dev1": "-100.0",
+                "dev2": "-100.0",
+                "dev": "-100.0",
+                "e_dr": "1050.408",
+                "u_dr": "1050.41",
+                "cwr_dr": "0.0"
+              }
+            },
+            "power_consumption_requirement": {
+              "total": {
+                "irrDr": 0.0
+              },
+              "non_command": {
+                "consumed": 0.0,
+                "irrDr": 0.0,
+                "required": 0.0
+              },
+              "command": {
+                "consumed": 0.0,
+                "irrDr": 0.0,
+                "required": 0.0
+              }
+            },
+            "crop_water_requirement": {
+              "non_command": {
+                "nonPaddy": {
+                  "ca": "0.0",
+                  "dr": "0.0",
+                  "cwr": "0.0",
+                  "cropInfo": [
+                    {
+                      "area": "0.0",
+                      "name": "0.0",
+                      "dr": "0.0",
+                      "cwr": "0.0"
+                    }
+                  ]
+                },
+                "paddy": {
+                  "ca": "0.0",
+                  "dr": "0.0",
+                  "cwr": "0.0",
+                  "cropInfo": [
+                    {
+                      "area": "0.0",
+                      "name": "paddy",
+                      "dr": "0.0",
+                      "cwr": "0.0"
+                    }
+                  ]
+                }
+              },
+              "command": {
+                "nonPaddy": {
+                  "ca": "0.0",
+                  "dr": "0.0",
+                  "cwr": "0.0",
+                  "cropInfo": [
+                    {
+                      "area": "0.0",
+                      "name": "Crop 1",
+                      "dr": "0.0",
+                      "cwr": "0.0"
+                    }
+                  ]
+                },
+                "paddy": {
+                  "ca": "0.0",
+                  "dr": "0.0",
+                  "cwr": "0.0",
+                  "cropInfo": [
+                    {
+                      "area": "0.0",
+                      "name": "paddy",
+                      "dr": "0.0",
+                      "cwr": "0.0"
+                    }
+                  ]
+                }
+              }
+            },
+            "unit_draft": {
+              "non_command": {
+                "Dug Well with Pump": {
+                  "cy": "2024",
+                  "y": "0.7776",
+                  "noi": "0",
+                  "und": "0.7776",
+                  "cyc": "1006",
+                  "ryc": "1006",
+                  "ndr": "782.2656",
+                  "dr": "782.2656",
+                  "ud": "0.7776"
+                },
+                "Bore Well": {
+                  "cy": "2024",
+                  "y": "1.5552",
+                  "noi": "0",
+                  "und": "1.5552",
+                  "cyc": "1746",
+                  "ryc": "1746",
+                  "ndr": "2715.3792",
+                  "dr": "2715.3792",
+                  "ud": "1.5552"
+                },
+                "ndr": "3497.6448",
+                "dr": "3497.6448"
+              },
+              "command": {
+                "Dug Well with Pump": {
+                  "cy": "2024",
+                  "y": "0.324",
+                  "noi": "0",
+                  "und": "0.324",
+                  "cyc": "956",
+                  "ryc": "956",
+                  "ndr": "309.744",
+                  "dr": "309.744",
+                  "ud": "0.324"
+                },
+                "Bore Well": {
+                  "cy": "2024",
+                  "y": "0.648",
+                  "noi": "0",
+                  "und": "0.648",
+                  "cyc": "1143",
+                  "ryc": "1143",
+                  "ndr": "740.664",
+                  "dr": "740.664",
+                  "ud": "0.648"
+                },
+                "ndr": "1050.408",
+                "dr": "1050.408"
+              }
+            }
+          },
+          "domestic": {
+            "decision": {
+              "non_command": {
+                "dev": "100.0",
+                "cons_use": "221.24",
+                "e_dr": "221.24",
+                "u_dr": "0.0"
+              },
+              "command": {
+                "dev": "100.0",
+                "cons_use": "111.9",
+                "e_dr": "111.9",
+                "u_dr": "0.0"
+              }
+            },
+            "consumptive_use_method": {
+              "non_command": {
+                "total": {
+                  "nod": "245",
+                  "ry": "2011",
+                  "ay": "2024",
+                  "pop_ay": "150506",
+                  "pop_ry": "125109",
+                  "dr": "221.24"
+                },
+                "urban": {
+                  "lpcd": "0.0",
+                  "pop_ay": "0",
+                  "pop_ry": "0",
+                  "lg": "0.0",
+                  "gr": "0.0",
+                  "dr": "0.0"
+                },
+                "rural": {
+                  "lpcd": "60.0",
+                  "pop_ay": "150506",
+                  "pop_ry": "125109",
+                  "lg": "1.0",
+                  "gr": "1.45",
+                  "dr": "221.24"
+                }
+              },
+              "command": {
+                "total": {
+                  "nod": "245",
+                  "ry": "2011",
+                  "ay": "2024",
+                  "pop_ay": "76121",
+                  "pop_ry": "63276",
+                  "dr": "111.9"
+                },
+                "urban": {
+                  "lpcd": "0.0",
+                  "pop_ay": "0",
+                  "pop_ry": "0",
+                  "lg": "0.0",
+                  "gr": "0.0",
+                  "dr": "0.0"
+                },
+                "rural": {
+                  "lpcd": "60.0",
+                  "pop_ay": "76121",
+                  "pop_ry": "63276",
+                  "lg": "1.0",
+                  "gr": "1.45",
+                  "dr": "111.9"
+                }
+              }
+            },
+            "unit_draft": {
+              "non_command": {
+                "Structure 17": {
+                  "cy": "2024",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0"
+                },
+                "ndr": "0.0",
+                "dr": "0.0"
+              },
+              "command": {
+                "Structure 16": {
+                  "cy": "2024",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0"
+                },
+                "ndr": "0.0",
+                "dr": "0.0"
+              }
+            }
+          },
+          "total": {
+            "total": 5008.83,
+            "non_command": 3846.52,
+            "command": 1162.31
+          },
+          "industry": {
+            "decision": {
+              "non_command": {
+                "dev": "-100.0",
+                "cons_use": "0.0",
+                "e_dr": "127.64",
+                "u_dr": "127.64"
+              },
+              "command": {
+                "dev": "0.0",
+                "cons_use": "0.0",
+                "e_dr": "0.0",
+                "u_dr": "0.0"
+              }
+            },
+            "consumptive_use_pattern": {
+              "non_command": {
+                "b3c27b": {
+                  "nod": "0.0",
+                  "tdr": "0.0",
+                  "noi": "0",
+                  "lg": "0.0",
+                  "dr": "0.0"
+                }
+              },
+              "command": {
+                "58587d": {
+                  "nod": "0.0",
+                  "tdr": "0.0",
+                  "noi": "0",
+                  "lg": "0.0",
+                  "dr": "0.0"
+                }
+              }
+            },
+            "unit_draft": {
+              "non_command": {
+                "Filter Point Tube Well / Bore well with hand pump##Industry 37": {
+                  "cy": "2024",
+                  "y": "127.63502499999998",
+                  "noi": "0",
+                  "und": "127.63502499999998",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "127.63502499999998",
+                  "dr": "127.63502499999998",
+                  "ud": "127.63502499999998",
+                  "toi": "Industry 37"
+                },
+                "Dug well with Pump ##Industry 36": {
+                  "cy": "2024",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0",
+                  "toi": "Industry 36"
+                },
+                "Dug well ##Industry 35": {
+                  "cy": "2024",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0",
+                  "toi": "Industry 35"
+                },
+                "ndr": "127.63502499999998",
+                "dr": "127.63502499999998"
+              },
+              "command": {
+                "Filter Point Tube Well / Bore well with hand pump##Industry 34": {
+                  "cy": "2024",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0",
+                  "toi": "Industry 34"
+                },
+                "Dug well ##Industry 32": {
+                  "cy": "2024",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0",
+                  "toi": "Industry 32"
+                },
+                "Dug well with Pump ##Industry 33": {
+                  "cy": "2024",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0",
+                  "toi": "Industry 33"
+                },
+                "ndr": "0.0",
+                "dr": "0.0"
+              }
+            }
+          }
+        },
+        "availability": {
+          "poor_quality": {
+            "av": 0.0
+          },
+          "non_command": {
+            "av": 874.29
+          },
+          "command": {
+            "av": 581.23
+          }
+        },
+        "lateral_aquifer": {
+          "total": []
+        },
+        "vertcal_aquifer": {
+          "total": []
+        }
+      },
+      "monsoon": {
+        "loss": {
+          "loss": {
+            "poor_quality": {
+              "p": "10.0",
+              "v": "0.0"
+            },
+            "non_command": {
+              "p": "5.0",
+              "v": "302.91"
+            },
+            "command": {
+              "p": "5.0",
+              "v": "164.56"
+            }
+          }
+        },
+        "staticGWResource": {
+          "poor_quality": {
+            "pre": 0.0,
+            "b": 0.0,
+            "sy": 0.0
+          },
+          "non_command": {
+            "pre": 7.273999999999999,
+            "b": 0.0,
+            "sy": 0.0
+          },
+          "command": {
+            "pre": 3.786,
+            "b": 0.0,
+            "sy": 0.0
+          }
+        },
+        "rf": {
+          "a": 0.0,
+          "n": 1115.7
+        },
+        "stage": {
+          "total": {
+            "av": "10337.47"
+          },
+          "non_command": {
+            "av": "6629.51"
+          },
+          "command": {
+            "av": "3707.96"
+          }
+        },
+        "recharge": {
+          "agriculture": {},
+          "rainfall": {
+            "poor_quality": {
+              "S3": "8.714",
+              "lastNYr": "{\"2021-2022\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":1.116,\"recGW\":0.0,\"preGW\":0.0},\"2024-2025\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":1.116,\"recGW\":0.0,\"preGW\":0.0},\"2018-2019\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":1.116,\"recGW\":0.0,\"preGW\":0.0},\"2023-2024\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":1.116,\"recGW\":0.0,\"preGW\":0.0},\"2017-2018\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":1.116,\"recGW\":0.0,\"preGW\":0.0},\"2019-2020\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":1.116,\"recGW\":0.0,\"preGW\":0.0},\"2022-2023\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":1.116,\"recGW\":0.0,\"preGW\":0.0}}",
+              "S4": "0.0",
+              "rflows": "0.0",
+              "an_rf": "0.0",
+              "unpaved": "0.0",
+              "N": "7.0",
+              "e_m2": "0.0",
+              "an_nrf": "1227.3",
+              "dv": "null",
+              "ros": "0.0",
+              "paved": "0.0",
+              "if": "0.0",
+              "fac_a": "0.0",
+              "fac_b": "0.0",
+              "a": "0.0",
+              "nrf": "1115.7",
+              "m1": "0.0",
+              "sy": "0.0",
+              "gwsc": "0.0",
+              "td": "0.0",
+              "rc": "0.0",
+              "gwc": "0.0",
+              "at": "poor_quality",
+              "th": "122.73",
+              "rf": "0.0",
+              "S1": "7.81",
+              "rp": "true",
+              "S2": "0.0"
+            },
+            "non_command": {
+              "S3": "8.394",
+              "lastNYr": "{\"2021-2022\":{\"postGW\":5.39,\"changeGW\":2.45,\"rf\":0.829,\"recGW\":5421.829,\"preGW\":7.84},\"2024-2025\":{\"postGW\":3.6,\"changeGW\":3.9,\"rf\":1.152,\"recGW\":8174.248,\"preGW\":7.5},\"2018-2019\":{\"postGW\":5.27,\"changeGW\":1.92,\"rf\":0.755,\"recGW\":4415.772,\"preGW\":7.19},\"2023-2024\":{\"postGW\":5.5,\"changeGW\":2.27,\"rf\":1.197,\"recGW\":5080.149,\"preGW\":7.77},\"2017-2018\":{\"postGW\":5.05,\"changeGW\":1.8,\"rf\":0.822,\"recGW\":4187.986,\"preGW\":6.85},\"2019-2020\":{\"postGW\":4.09,\"changeGW\":3.18,\"rf\":1.513,\"recGW\":6807.53,\"preGW\":7.27},\"2022-2023\":{\"postGW\":4.38,\"changeGW\":2.41,\"rf\":1.189,\"recGW\":5345.9,\"preGW\":6.79}}",
+              "S4": "43420.237",
+              "rflows": "0.0",
+              "an_rf": "1250.6",
+              "unpaved": "0.0",
+              "N": "7.0",
+              "e_m2": "5791.85",
+              "an_nrf": "1227.3",
+              "dv": "10.42",
+              "ros": "266.28",
+              "paved": "0.0",
+              "if": "0.18",
+              "fac_a": "3135.16",
+              "fac_b": "2293.952",
+              "a": "29275.0",
+              "nrf": "1115.7",
+              "m1": "5245.42",
+              "m2": "8174.248",
+              "sy": "0.065",
+              "m2n": "5791.85",
+              "gwsc": "7403.06",
+              "td": "1037.47",
+              "rc": "5791.85",
+              "gwc": "3.9",
+              "at": "non_command",
+              "th": "122.73",
+              "rf": "1152.1",
+              "S1": "7.456",
+              "rp": "true",
+              "S2": "39433.415"
+            },
+            "command": {
+              "S3": "8.394",
+              "lastNYr": "{\"2021-2022\":{\"postGW\":1.61,\"changeGW\":1.47,\"rf\":0.829,\"recGW\":2248.046,\"preGW\":3.08},\"2024-2025\":{\"postGW\":2.075,\"changeGW\":1.625,\"rf\":1.152,\"recGW\":2449.515,\"preGW\":3.7},\"2018-2019\":{\"postGW\":2.05,\"changeGW\":2.95,\"rf\":0.755,\"recGW\":4171.75,\"preGW\":5.0},\"2023-2024\":{\"postGW\":1.45,\"changeGW\":2.45,\"rf\":1.197,\"recGW\":3521.85,\"preGW\":3.9},\"2017-2018\":{\"postGW\":2.88,\"changeGW\":2.1,\"rf\":0.822,\"recGW\":3066.92,\"preGW\":4.98},\"2019-2020\":{\"postGW\":2.45,\"changeGW\":2.48,\"rf\":1.513,\"recGW\":3560.844,\"preGW\":4.93},\"2022-2023\":{\"postGW\":1.45,\"changeGW\":2.05,\"rf\":1.189,\"recGW\":3001.93,\"preGW\":3.5}}",
+              "S4": "23525.309",
+              "rflows": "0.0",
+              "an_rf": "1250.6",
+              "unpaved": "0.0",
+              "N": "7.0",
+              "e_m2": "3153.655",
+              "an_nrf": "1227.3",
+              "dv": "-6.02",
+              "ros": "137.63",
+              "paved": "0.0",
+              "if": "0.189",
+              "fac_a": "154.661",
+              "fac_b": "2981.1",
+              "a": "17834.0",
+              "nrf": "1115.7",
+              "m1": "3355.67",
+              "m2": "2449.515",
+              "sy": "0.073",
+              "m2n": "3153.655",
+              "gwsc": "2112.17",
+              "td": "474.97",
+              "rc": "3153.66",
+              "gwc": "1.625",
+              "at": "command",
+              "th": "122.73",
+              "rf": "1152.1",
+              "S1": "7.456",
+              "rp": "true",
+              "S2": "22020.855"
+            }
+          },
+          "total": {
+            "poor_quality": 0.0,
+            "total": 9349.42,
+            "non_command": 6058.13,
+            "command": 3291.29
+          },
+          "surface_irrigation": {
+            "poor_quality": {
+              "total": "0.0",
+              "can_rel": [
+                {
+                  "rec": "0.0",
+                  "ddc": "3.74",
+                  "ad": "2.24",
+                  "nonPaddy": "{\"0.0\":{\"name\":\"0.0\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"poor_quality\":0.0},\"dischargeDays\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0},\"weightedFlowFactor\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0}}}",
+                  "out_name": "Piparia Canal ",
+                  "rel": "0.0",
+                  "dist": "Sub-minor",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Piparia Canal ",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"poor_quality\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "14.64",
+                  "ad": "8.78",
+                  "nonPaddy": "{\"0.0\":{\"name\":\"0.0\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"poor_quality\":0.0},\"dischargeDays\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0},\"weightedFlowFactor\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0}}}",
+                  "out_name": "Belkhedi Canal ",
+                  "rel": "0.0",
+                  "dist": "Distributory",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Belkhedi Canal ",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"poor_quality\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "2.72",
+                  "ad": "1.63",
+                  "nonPaddy": "{\"0.0\":{\"name\":\"0.0\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"poor_quality\":0.0},\"dischargeDays\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0},\"weightedFlowFactor\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0}}}",
+                  "out_name": "Shahpura Canal ",
+                  "rel": "0.0",
+                  "dist": "Distributory",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Shahpura Canal ",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"poor_quality\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "4.13",
+                  "ad": "2.48",
+                  "nonPaddy": "{\"0.0\":{\"name\":\"0.0\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"poor_quality\":0.0},\"dischargeDays\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0},\"weightedFlowFactor\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0}}}",
+                  "out_name": "Shahpura Canal ",
+                  "rel": "0.0",
+                  "dist": "Distributory",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Shahpura Canal ",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"poor_quality\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "rel": "0.0"
+                }
+              ],
+              "crop_w_req": [
+                {
+                  "cs": "0.0",
+                  "rff": "0.3",
+                  "nonPaddy": "{\"cropName\":\"0.0\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"waterRequired\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"poor_quality\":0.0}}",
+                  "name": "0.0",
+                  "wr": "0.0",
+                  "type": "nonPaddy",
+                  "ca": "0.0",
+                  "cr": "0.0"
+                },
+                {
+                  "cs": "0.0",
+                  "rff": "0.5",
+                  "name": "paddy",
+                  "wr": "0.0",
+                  "type": "paddy",
+                  "ca": "0.0",
+                  "cr": "0.0",
+                  "paddy": "{\"cropName\":\"paddy\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"waterRequired\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"poor_quality\":0.0}}"
+                },
+                {
+                  "nonPaddy_wr": "0.0",
+                  "paddy_rec": "0.0",
+                  "nonPaddy_rec": "0.0",
+                  "paddy_wr": "0.0"
+                }
+              ],
+              "rff_calc": {
+                "nonPaddy_area": "0.0",
+                "pre": "0",
+                "paddy_area": "0.0",
+                "post": "0",
+                "nonPaddy_rff": "0.3",
+                "paddy_rff": "0.5",
+                "wrff": "0.5",
+                "gwl": "0"
+              }
+            },
+            "non_command": {
+              "total": "0.0",
+              "can_rel": [
+                {
+                  "rec": "0.0",
+                  "ddc": "3.74",
+                  "ad": "2.24",
+                  "nonPaddy": "{\"0.0\":{\"name\":\"0.0\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"non_command\":0.0},\"dischargeDays\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":0.0},\"weightedFlowFactor\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":0.0}}}",
+                  "out_name": "Piparia Canal ",
+                  "rel": "0.0",
+                  "dist": "Sub-minor",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Piparia Canal ",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{},\"continousWS\":{\"non_command\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "14.64",
+                  "ad": "8.78",
+                  "nonPaddy": "{\"0.0\":{\"name\":\"0.0\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"non_command\":0.0},\"dischargeDays\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":0.0},\"weightedFlowFactor\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":0.0}}}",
+                  "out_name": "Belkhedi Canal ",
+                  "rel": "0.0",
+                  "dist": "Distributory",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Belkhedi Canal ",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{},\"continousWS\":{\"non_command\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "2.72",
+                  "ad": "1.63",
+                  "nonPaddy": "{\"0.0\":{\"name\":\"0.0\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"non_command\":0.0},\"dischargeDays\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":0.0},\"weightedFlowFactor\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":0.0}}}",
+                  "out_name": "Shahpura Canal ",
+                  "rel": "0.0",
+                  "dist": "Distributory",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Shahpura Canal ",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{},\"continousWS\":{\"non_command\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "4.13",
+                  "ad": "2.48",
+                  "nonPaddy": "{\"0.0\":{\"name\":\"0.0\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"non_command\":0.0},\"dischargeDays\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":0.0},\"weightedFlowFactor\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":0.0}}}",
+                  "out_name": "Shahpura Canal ",
+                  "rel": "0.0",
+                  "dist": "Distributory",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Shahpura Canal ",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{},\"continousWS\":{\"non_command\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "rel": "0.0"
+                }
+              ],
+              "crop_w_req": [
+                {
+                  "cs": "0.0",
+                  "rff": "0.3",
+                  "nonPaddy": "{\"cropName\":\"0.0\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"waterRequired\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"non_command\":0.0}}",
+                  "name": "0.0",
+                  "wr": "0.0",
+                  "type": "nonPaddy",
+                  "ca": "0.0",
+                  "cr": "0.0"
+                },
+                {
+                  "cs": "0.0",
+                  "rff": "0.5",
+                  "name": "paddy",
+                  "wr": "0.0",
+                  "type": "paddy",
+                  "ca": "0.0",
+                  "cr": "0.0",
+                  "paddy": "{\"cropName\":\"paddy\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"waterRequired\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"non_command\":0.0}}"
+                },
+                {
+                  "nonPaddy_wr": "0.0",
+                  "paddy_rec": "0.0",
+                  "nonPaddy_rec": "0.0",
+                  "paddy_wr": "0.0"
+                }
+              ],
+              "rff_calc": {
+                "nonPaddy_area": "0.0",
+                "pre": "7",
+                "paddy_area": "0.0",
+                "post": "3",
+                "nonPaddy_rff": "0.3",
+                "paddy_rff": "0.5",
+                "wrff": "0.5",
+                "gwl": "5"
+              }
+            },
+            "command": {
+              "total": "0.0",
+              "can_rel": [
+                {
+                  "rec": "0.0",
+                  "ddc": "3.74",
+                  "ad": "2.24",
+                  "nonPaddy": "{\"crop 1\":{\"name\":\"crop 1\",\"cropArea\":{},\"returnFlowFactor\":{\"monsoon\":0.3,\"non_monsoon\":0.3},\"continousWS\":{\"command\":0.0},\"dischargeDays\":{\"command_non_monsoon\":45.0,\"command_monsoon\":0.0},\"weightedFlowFactor\":{\"command_non_monsoon\":0.3,\"command_monsoon\":0.3}}}",
+                  "out_name": "Piparia Canal ",
+                  "rel": "0.0",
+                  "dist": "Sub-minor",
+                  "days": "0",
+                  "wRff": "0.3",
+                  "outlet": "Piparia Canal ",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{\"command\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "14.64",
+                  "ad": "8.78",
+                  "nonPaddy": "{\"crop 1\":{\"name\":\"crop 1\",\"cropArea\":{},\"returnFlowFactor\":{\"monsoon\":0.3,\"non_monsoon\":0.3},\"continousWS\":{\"command\":0.0},\"dischargeDays\":{\"command_non_monsoon\":45.0,\"command_monsoon\":0.0},\"weightedFlowFactor\":{\"command_non_monsoon\":0.3,\"command_monsoon\":0.3}}}",
+                  "out_name": "Belkhedi Canal ",
+                  "rel": "0.0",
+                  "dist": "Distributory",
+                  "days": "0",
+                  "wRff": "0.3",
+                  "outlet": "Belkhedi Canal ",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{\"command\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "2.72",
+                  "ad": "1.63",
+                  "nonPaddy": "{\"crop 1\":{\"name\":\"crop 1\",\"cropArea\":{},\"returnFlowFactor\":{\"monsoon\":0.3,\"non_monsoon\":0.3},\"continousWS\":{\"command\":0.0},\"dischargeDays\":{\"command_non_monsoon\":45.0,\"command_monsoon\":0.0},\"weightedFlowFactor\":{\"command_non_monsoon\":0.3,\"command_monsoon\":0.3}}}",
+                  "out_name": "Shahpura Canal ",
+                  "rel": "0.0",
+                  "dist": "Distributory",
+                  "days": "0",
+                  "wRff": "0.3",
+                  "outlet": "Shahpura Canal ",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{\"command\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "4.13",
+                  "ad": "2.48",
+                  "nonPaddy": "{\"crop 1\":{\"name\":\"crop 1\",\"cropArea\":{},\"returnFlowFactor\":{\"monsoon\":0.3,\"non_monsoon\":0.3},\"continousWS\":{\"command\":0.0},\"dischargeDays\":{\"command_non_monsoon\":45.0,\"command_monsoon\":0.0},\"weightedFlowFactor\":{\"command_non_monsoon\":0.3,\"command_monsoon\":0.3}}}",
+                  "out_name": "Shahpura Canal ",
+                  "rel": "0.0",
+                  "dist": "Distributory",
+                  "days": "0",
+                  "wRff": "0.3",
+                  "outlet": "Shahpura Canal ",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{\"command\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "rel": "0.0"
+                }
+              ],
+              "crop_w_req": [
+                {
+                  "cs": "0.0",
+                  "rff": "0.3",
+                  "nonPaddy": "{\"cropName\":\"crop1 \",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":2925.0},\"waterRequired\":{\"monsoon\":0.0,\"non_monsoon\":184.896},\"returnFlowFactor\":{\"monsoon\":0.3,\"non_monsoon\":0.3},\"continousWS\":{\"command\":0.0}}",
+                  "name": "crop1 ",
+                  "wr": "0.0",
+                  "type": "nonPaddy",
+                  "ca": "0.0",
+                  "cr": "0.0"
+                },
+                {
+                  "cs": "0.0",
+                  "rff": "0.5",
+                  "name": "paddy",
+                  "wr": "0.0",
+                  "type": "paddy",
+                  "ca": "654.0",
+                  "cr": "0.0",
+                  "paddy": "{\"cropName\":\"paddy\",\"cropArea\":{\"monsoon\":654.0,\"non_monsoon\":0.0},\"waterRequired\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.5,\"non_monsoon\":0.3},\"continousWS\":{\"command\":0.0}}"
+                },
+                {
+                  "nonPaddy_wr": "0.0",
+                  "paddy_rec": "0.0",
+                  "nonPaddy_rec": "0.0",
+                  "paddy_wr": "0.0"
+                }
+              ],
+              "rff_calc": {
+                "nonPaddy_area": "0.0",
+                "pre": "3",
+                "paddy_area": "654.0",
+                "post": "2",
+                "nonPaddy_rff": "0",
+                "paddy_rff": "0",
+                "wrff": "0.5",
+                "gwl": "2"
+              }
+            }
+          },
+          "water_body": {
+            "poor_quality": {
+              "rc": "0.0",
+              "wbi": {
+                "Tank18": {
+                  "no": "0.0",
+                  "esa": "0.0",
+                  "r": "0.0",
+                  "d": "0",
+                  "if": "0.0",
+                  "sa": "0.0"
+                },
+                "Tank17": {
+                  "no": "0.0",
+                  "esa": "0.0",
+                  "r": "0.0",
+                  "d": "0",
+                  "if": "0.0",
+                  "sa": "0.0"
+                },
+                "Tank19": {
+                  "no": "0.0",
+                  "esa": "0.0",
+                  "r": "0.0",
+                  "d": "0",
+                  "if": "0.0",
+                  "sa": "0.0"
+                },
+                "Tank14": {
+                  "no": "0.0",
+                  "esa": "0.0",
+                  "r": "0.0",
+                  "d": "0",
+                  "if": "0.0",
+                  "sa": "0.0"
+                },
+                "Tank16": {
+                  "no": "0.0",
+                  "esa": "0.0",
+                  "r": "0.0",
+                  "d": "0",
+                  "if": "0.0",
+                  "sa": "0.0"
+                },
+                "Tank15": {
+                  "no": "0.0",
+                  "esa": "0.0",
+                  "r": "0.0",
+                  "d": "0",
+                  "if": "0.0",
+                  "sa": "0.0"
+                }
+              }
+            },
+            "non_command": {
+              "rc": "14.73",
+              "wbi": {
+                "Kosamghat Tank ": {
+                  "no": "1.0",
+                  "esa": "15.5",
+                  "r": "1.34",
+                  "d": "60",
+                  "if": "0.00144",
+                  "sa": "0.0"
+                },
+                "Lodhi Tank ": {
+                  "no": "1.0",
+                  "esa": "32.21",
+                  "r": "2.78",
+                  "d": "60",
+                  "if": "0.00144",
+                  "sa": "0.0"
+                },
+                "Saliwada Tank ": {
+                  "no": "1.0",
+                  "esa": "31.3",
+                  "r": "2.7",
+                  "d": "60",
+                  "if": "0.00144",
+                  "sa": "0.0"
+                },
+                "Balwara Tank ": {
+                  "no": "1.0",
+                  "esa": "35.5",
+                  "r": "3.07",
+                  "d": "60",
+                  "if": "0.00144",
+                  "sa": "0.0"
+                },
+                "Indradaman Tank ": {
+                  "no": "1.0",
+                  "esa": "30.84",
+                  "r": "2.66",
+                  "d": "60",
+                  "if": "0.00144",
+                  "sa": "0.0"
+                },
+                "Kyolari Tank ": {
+                  "no": "1.0",
+                  "esa": "25.2",
+                  "r": "2.18",
+                  "d": "60",
+                  "if": "0.00144",
+                  "sa": "0.0"
+                }
+              }
+            },
+            "command": {
+              "rc": "10.87",
+              "wbi": {
+                "Belkhedi Tank ": {
+                  "no": "1.0",
+                  "esa": "45.63",
+                  "r": "2.96",
+                  "d": "45",
+                  "if": "0.00144",
+                  "sa": "0.0"
+                },
+                "Balwara Tank ": {
+                  "no": "0.0",
+                  "esa": "0.0",
+                  "r": "0.0",
+                  "d": "0",
+                  "if": "0.0",
+                  "sa": "0.0"
+                },
+                "Indradaman Tank ": {
+                  "no": "0.0",
+                  "esa": "0.0",
+                  "r": "0.0",
+                  "d": "0",
+                  "if": "0.0",
+                  "sa": "0.0"
+                },
+                " Piparia Tank ": {
+                  "no": "1.0",
+                  "esa": "63.6",
+                  "r": "4.12",
+                  "d": "45",
+                  "if": "0.00144",
+                  "sa": "0.0"
+                },
+                "Kyolari Tank ": {
+                  "no": "0.0",
+                  "esa": "0.0",
+                  "r": "0.0",
+                  "d": "0",
+                  "if": "0.0",
+                  "sa": "0.0"
+                },
+                "Shahpura Tank": {
+                  "no": "1.0",
+                  "esa": "58.5",
+                  "r": "3.79",
+                  "d": "45",
+                  "if": "0.00144",
+                  "sa": "0.0"
+                }
+              }
+            }
+          },
+          "gw_irrigation": {
+            "poor_quality": {
+              "r": "0.0",
+              "w_rff": "0.0",
+              "nonPaddy": [],
+              "gwIrr": {
+                "gwrff": "0.0",
+                "gwIrrPer": "100"
+              },
+              "irr_dr": "0.0",
+              "paddy": [
+                {
+                  "cs": "0.0",
+                  "area": "0.0",
+                  "rff": "0.0",
+                  "name": "paddy"
+                }
+              ]
+            },
+            "non_command": {
+              "r": "218.6",
+              "w_rff": "0.25",
+              "nonPaddy": [
+                {
+                  "cs": "0.0",
+                  "area": "0.0",
+                  "rff": "0.25",
+                  "name": "crop 2"
+                }
+              ],
+              "gwIrr": {
+                "gwrff": "0.25",
+                "gwIrrPer": "100"
+              },
+              "irr_dr": "874.41",
+              "paddy": [
+                {
+                  "cs": "0.0",
+                  "area": "1500.0",
+                  "rff": "0.0",
+                  "name": "paddy"
+                }
+              ]
+            },
+            "command": {
+              "r": "105.04",
+              "w_rff": "0.25",
+              "nonPaddy": [
+                {
+                  "cs": "0.0",
+                  "area": "2100.0",
+                  "rff": "0.25",
+                  "name": "Crop 1"
+                }
+              ],
+              "gwIrr": {
+                "gwrff": "0.25",
+                "gwIrrPer": "100"
+              },
+              "irr_dr": "420.16",
+              "paddy": [
+                {
+                  "cs": "0.0",
+                  "area": "0.0",
+                  "rff": "0.0",
+                  "name": "paddy"
+                }
+              ]
+            }
+          },
+          "drainage": {},
+          "canal": {
+            "poor_quality": {
+              "rc": "0.0",
+              "ci": {
+                "Outlet 2124": {
+                  "ss": "0.0",
+                  "bt": "",
+                  "adf": "0.0",
+                  "r": "0.0",
+                  "sf": "0.0",
+                  "t": "Distributory",
+                  "d": "0",
+                  "bw": "0.0",
+                  "ddf": "0.0",
+                  "wp": "0.0",
+                  "wa": "0.0",
+                  "l": "0.0"
+                }
+              }
+            },
+            "non_command": {},
+            "command": {
+              "rc": "0.0",
+              "ci": {
+                "Shahpura Canal 2": {
+                  "ss": "0.0",
+                  "bt": "lined",
+                  "adf": "0.0",
+                  "r": "0.0",
+                  "sf": "5.0",
+                  "t": "Sub-minor",
+                  "d": "0",
+                  "bw": "0.0",
+                  "ddf": "0.0",
+                  "wp": "1.8",
+                  "wa": "0.09284",
+                  "l": "0.0"
+                },
+                "Shahpura Canal 1": {
+                  "ss": "0.0",
+                  "bt": "lined",
+                  "adf": "0.0",
+                  "r": "0.0",
+                  "sf": "5.0",
+                  "t": "Sub-minor",
+                  "d": "0",
+                  "bw": "0.0",
+                  "ddf": "0.0",
+                  "wp": "3.3",
+                  "wa": "0.07788",
+                  "l": "0.0"
+                },
+                "Belkhedi Canal ": {
+                  "ss": "0.0",
+                  "bt": "lined",
+                  "adf": "0.0",
+                  "r": "0.0",
+                  "sf": "5.0",
+                  "t": "Distributory",
+                  "d": "0",
+                  "bw": "0.0",
+                  "ddf": "0.0",
+                  "wp": "4.8",
+                  "wa": "0.1632",
+                  "l": "0.0"
+                },
+                "Piparia Canal ": {
+                  "ss": "0.0",
+                  "bt": "lined",
+                  "adf": "0.0",
+                  "r": "0.0",
+                  "sf": "5.0",
+                  "t": "Distributory",
+                  "d": "0",
+                  "bw": "0.0",
+                  "ddf": "0.0",
+                  "wp": "4.2",
+                  "wa": "0.0504",
+                  "l": "0.0"
+                }
+              }
+            }
+          },
+          "streamRecharge": {
+            "poor_quality": {},
+            "non_command": {},
+            "command": {}
+          },
+          "artificial_structure": {
+            "poor_quality": {},
+            "non_command": {
+              "rc": "32.95",
+              "wcsi": {
+                "Mini Percolation tank": {
+                  "sc": "0.15",
+                  "r": "2.7",
+                  "c": "30",
+                  "eif": "0.2",
+                  "nos": "30.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                },
+                "Construction of  Earthen contour Bund/Earthen graded Bund/Earthen Gully Plug/Earthen peripheral Bund/Stone contour Bund/Stone graded Bund /Stone boulder Gully Plugs /Stone Spur/Soak Pit /Recharge Pits/Upland Bench /Level Bench Terrace/Pebble Bunding/Pebble graded Bund/Pebble peripheral Bund/Pebble contour Bund /Cross bund/Farm Bund": {
+                  "sc": "0.0",
+                  "r": "0.34",
+                  "c": "563",
+                  "eif": "0.2",
+                  "nos": "563.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                },
+                "Amrt Sarovar ": {
+                  "sc": "1.0",
+                  "r": "10.8",
+                  "c": "18",
+                  "eif": "0.2",
+                  "nos": "18.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                },
+                "Farm Pond": {
+                  "sc": "0.12",
+                  "r": "0.43",
+                  "c": "6",
+                  "eif": "0.2",
+                  "nos": "6.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                },
+                "Check Dam/Stop Dam": {
+                  "sc": "0.15",
+                  "r": "7.11",
+                  "c": "79",
+                  "eif": "0.2",
+                  "nos": "79.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                },
+                "Water Absorption Trench/ CCT(Continuous contour trench )//SCT(Staggered contour trench )/BOXTR(Box trench )/Water Courses/Field Channel/": {
+                  "sc": "0.0",
+                  "r": "0.05",
+                  "c": "78",
+                  "eif": "0.2",
+                  "nos": "78.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                },
+                "Gabions/Gabion Anicut/ Boulder Anicut Check Dam/ Brushwood Checkdam": {
+                  "sc": "0.0",
+                  "r": "0.11",
+                  "c": "178",
+                  "eif": "0.2",
+                  "nos": "178.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                },
+                "Fisheries Ponds for Community": {
+                  "sc": "0.1",
+                  "r": "1.08",
+                  "c": "18",
+                  "eif": "0.2",
+                  "nos": "18.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                },
+                "Underground Dykes ": {
+                  "sc": "0.1",
+                  "r": "0.12",
+                  "c": "2",
+                  "eif": "0.2",
+                  "nos": "2.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                },
+                " Percolation tank": {
+                  "sc": "0.2",
+                  "r": "5.04",
+                  "c": "42",
+                  "eif": "0.2",
+                  "nos": "42.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                },
+                "Artificial Recharge of Well Through Sand Filter/Sand filter - openwell recharge for Grps/borewellrecharge": {
+                  "sc": "0.0",
+                  "r": "0.01",
+                  "c": "20",
+                  "eif": "0.2",
+                  "nos": "20.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                },
+                "Water Harvesting Ponds": {
+                  "sc": "0.1",
+                  "r": "5.16",
+                  "c": "86",
+                  "eif": "0.2",
+                  "nos": "86.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                }
+              }
+            },
+            "command": {
+              "rc": "21.72",
+              "wcsi": {
+                "Percolation Tank - 1": {
+                  "sc": "0.2",
+                  "r": "21.48",
+                  "c": "179",
+                  "eif": "0.2",
+                  "nos": "179.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                },
+                " Chek Dam 1": {
+                  "sc": "0.2",
+                  "r": "0.24",
+                  "c": "2",
+                  "eif": "0.2",
+                  "nos": "2.0",
+                  "fil": "3.0",
+                  "if": "0.2"
+                }
+              }
+            }
+          }
+        },
+        "draft": {
+          "agriculture": {
+            "decision": {
+              "non_command": {
+                "pc_dr": "0.0",
+                "dev1": "-100.0",
+                "dev2": "-100.0",
+                "dev": "-100.0",
+                "e_dr": "874.4112",
+                "u_dr": "874.41",
+                "cwr_dr": "0.0"
+              },
+              "command": {
+                "pc_dr": "0.0",
+                "dev1": "-100.0",
+                "dev2": "-100.0",
+                "dev": "-100.0",
+                "e_dr": "420.1632",
+                "u_dr": "420.16",
+                "cwr_dr": "0.0"
+              }
+            },
+            "power_consumption_requirement": {
+              "total": {
+                "irrDr": 0.0
+              },
+              "non_command": {
+                "consumed": 0.0,
+                "irrDr": 0.0,
+                "required": 0.0
+              },
+              "command": {
+                "consumed": 0.0,
+                "irrDr": 0.0,
+                "required": 0.0
+              }
+            },
+            "crop_water_requirement": {
+              "non_command": {
+                "nonPaddy": {
+                  "ca": "0.0",
+                  "dr": "0.0",
+                  "cwr": "0.0",
+                  "cropInfo": [
+                    {
+                      "area": "0.0",
+                      "name": "0.0",
+                      "dr": "0.0",
+                      "cwr": "0.0"
+                    }
+                  ]
+                },
+                "paddy": {
+                  "ca": "0.0",
+                  "dr": "0.0",
+                  "cwr": "0.0",
+                  "cropInfo": [
+                    {
+                      "area": "0.0",
+                      "name": "paddy",
+                      "dr": "0.0",
+                      "cwr": "0.0"
+                    }
+                  ]
+                }
+              },
+              "command": {
+                "nonPaddy": {
+                  "ca": "0.0",
+                  "dr": "0.0",
+                  "cwr": "0.0",
+                  "cropInfo": [
+                    {
+                      "area": "0.0",
+                      "name": "Crop 1",
+                      "dr": "0.0",
+                      "cwr": "0.0"
+                    }
+                  ]
+                },
+                "paddy": {
+                  "ca": "0.0",
+                  "dr": "0.0",
+                  "cwr": "0.0",
+                  "cropInfo": [
+                    {
+                      "area": "0.0",
+                      "name": "paddy",
+                      "dr": "0.0",
+                      "cwr": "0.0"
+                    }
+                  ]
+                }
+              }
+            },
+            "unit_draft": {
+              "non_command": {
+                "Dug Well with Pump": {
+                  "cy": "2024",
+                  "y": "0.1944",
+                  "noi": "0",
+                  "und": "0.1944",
+                  "cyc": "1006",
+                  "ryc": "1006",
+                  "ndr": "195.5664",
+                  "dr": "195.5664",
+                  "ud": "0.1944"
+                },
+                "Bore Well": {
+                  "cy": "2024",
+                  "y": "0.3888",
+                  "noi": "0",
+                  "und": "0.3888",
+                  "cyc": "1746",
+                  "ryc": "1746",
+                  "ndr": "678.8448",
+                  "dr": "678.8448",
+                  "ud": "0.3888"
+                },
+                "ndr": "874.4112",
+                "dr": "874.4112"
+              },
+              "command": {
+                "Dug Well with Pump": {
+                  "cy": "2024",
+                  "y": "0.1296",
+                  "noi": "0",
+                  "und": "0.1296",
+                  "cyc": "956",
+                  "ryc": "956",
+                  "ndr": "123.8976",
+                  "dr": "123.8976",
+                  "ud": "0.1296"
+                },
+                "Bore Well": {
+                  "cy": "2024",
+                  "y": "0.2592",
+                  "noi": "0",
+                  "und": "0.2592",
+                  "cyc": "1143",
+                  "ryc": "1143",
+                  "ndr": "296.2656",
+                  "dr": "296.2656",
+                  "ud": "0.2592"
+                },
+                "ndr": "420.1632",
+                "dr": "420.1632"
+              }
+            }
+          },
+          "domestic": {
+            "decision": {
+              "non_command": {
+                "dev": "100.0",
+                "cons_use": "108.36",
+                "e_dr": "108.36",
+                "u_dr": "0.0"
+              },
+              "command": {
+                "dev": "100.0",
+                "cons_use": "54.81",
+                "e_dr": "54.81",
+                "u_dr": "0.0"
+              }
+            },
+            "consumptive_use_method": {
+              "non_command": {
+                "total": {
+                  "nod": "120",
+                  "ry": "2011",
+                  "ay": "2024",
+                  "pop_ay": "150506",
+                  "pop_ry": "125109",
+                  "dr": "108.36"
+                },
+                "urban": {
+                  "lpcd": "0.0",
+                  "pop_ay": "0",
+                  "pop_ry": "0",
+                  "lg": "0.0",
+                  "gr": "0.0",
+                  "dr": "0.0"
+                },
+                "rural": {
+                  "lpcd": "60.0",
+                  "pop_ay": "150506",
+                  "pop_ry": "125109",
+                  "lg": "1.0",
+                  "gr": "1.45",
+                  "dr": "108.36"
+                }
+              },
+              "command": {
+                "total": {
+                  "nod": "120",
+                  "ry": "2011",
+                  "ay": "2024",
+                  "pop_ay": "76121",
+                  "pop_ry": "63276",
+                  "dr": "54.81"
+                },
+                "urban": {
+                  "lpcd": "0.0",
+                  "pop_ay": "0",
+                  "pop_ry": "0",
+                  "lg": "0.0",
+                  "gr": "0.0",
+                  "dr": "0.0"
+                },
+                "rural": {
+                  "lpcd": "60.0",
+                  "pop_ay": "76121",
+                  "pop_ry": "63276",
+                  "lg": "1.0",
+                  "gr": "1.45",
+                  "dr": "54.81"
+                }
+              }
+            },
+            "unit_draft": {
+              "non_command": {
+                "Structure 17": {
+                  "cy": "2024",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0"
+                },
+                "ndr": "0.0",
+                "dr": "0.0"
+              },
+              "command": {
+                "Structure 16": {
+                  "cy": "2024",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0"
+                },
+                "ndr": "0.0",
+                "dr": "0.0"
+              }
+            }
+          },
+          "total": {
+            "total": 1512.44,
+            "non_command": 1037.47,
+            "command": 474.97
+          },
+          "industry": {
+            "decision": {
+              "non_command": {
+                "dev": "-100.0",
+                "cons_use": "0.0",
+                "e_dr": "54.7",
+                "u_dr": "54.7"
+              },
+              "command": {
+                "dev": "0.0",
+                "cons_use": "0.0",
+                "e_dr": "0.0",
+                "u_dr": "0.0"
+              }
+            },
+            "consumptive_use_pattern": {
+              "non_command": {
+                "b3c27b": {
+                  "nod": "0.0",
+                  "tdr": "0.0",
+                  "noi": "0",
+                  "lg": "0.0",
+                  "dr": "0.0"
+                }
+              },
+              "command": {
+                "58587d": {
+                  "nod": "0.0",
+                  "tdr": "0.0",
+                  "noi": "0",
+                  "lg": "0.0",
+                  "dr": "0.0"
+                }
+              }
+            },
+            "unit_draft": {
+              "non_command": {
+                "Filter Point Tube Well / Bore well with hand pump##Industry 37": {
+                  "cy": "2024",
+                  "y": "54.700725",
+                  "noi": "0",
+                  "und": "54.700725",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "54.700725",
+                  "dr": "54.700725",
+                  "ud": "54.700725",
+                  "toi": "Industry 37"
+                },
+                "Dug well with Pump ##Industry 36": {
+                  "cy": "2024",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0",
+                  "toi": "Industry 36"
+                },
+                "Dug well ##Industry 35": {
+                  "cy": "2024",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0",
+                  "toi": "Industry 35"
+                },
+                "ndr": "54.700725",
+                "dr": "54.700725"
+              },
+              "command": {
+                "Filter Point Tube Well / Bore well with hand pump##Industry 34": {
+                  "cy": "2024",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0",
+                  "toi": "Industry 34"
+                },
+                "Dug well ##Industry 32": {
+                  "cy": "2024",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0",
+                  "toi": "Industry 32"
+                },
+                "Dug well with Pump ##Industry 33": {
+                  "cy": "2024",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0",
+                  "toi": "Industry 33"
+                },
+                "ndr": "0.0",
+                "dr": "0.0"
+              }
+            }
+          }
+        },
+        "availability": {
+          "poor_quality": {
+            "av": 0.0
+          },
+          "non_command": {
+            "av": 5755.22
+          },
+          "command": {
+            "av": 3126.73
+          }
+        },
+        "lateral_aquifer": {
+          "total": []
+        },
+        "vertcal_aquifer": {
+          "total": []
+        }
+      }
+    },
+    "draftData": {
+      "agriculture": {
+        "total": 5842.627199999999,
+        "non_command": 4372.0560000000005,
+        "command": 1470.5711999999999
+      },
+      "domestic": {
+        "total": 496.31313,
+        "non_command": 329.60814,
+        "command": 166.70499
+      },
+      "total": {
+        "total": 6521.27,
+        "non_command": 4883.99,
+        "command": 1637.28
+      },
+      "industry": {
+        "total": 182.33575,
+        "non_command": 182.33575,
+        "command": 0.0
+      }
+    },
+    "rechargeData": {
+      "agriculture": {
+        "poor_quality": 0.0,
+        "total": 1665.0,
+        "non_command": 1093.01,
+        "command": 571.99
+      },
+      "rainfall": {
+        "poor_quality": 0.0,
+        "total": 8945.51,
+        "non_command": 5791.85,
+        "command": 3153.66
+      },
+      "total": {
+        "poor_quality": 0.0,
+        "total": 10881.55,
+        "non_command": 6978.4400000000005,
+        "command": 3903.11
+      },
+      "surface_irrigation": {
+        "poor_quality": 0.0,
+        "total": 204.35,
+        "non_command": 0.0,
+        "command": 204.34680000000003
+      },
+      "gw_irrigation": {
+        "poor_quality": 0.0,
+        "total": 1460.65,
+        "non_command": 1093.01,
+        "command": 367.64000000000004
+      },
+      "water_body": {
+        "poor_quality": 0.0,
+        "total": 46.41,
+        "non_command": 27.68,
+        "command": 18.73
+      },
+      "canal": {
+        "poor_quality": 0.0,
+        "total": 115.29,
+        "command": 115.29
+      },
+      "artificial_structure": {
+        "total": 109.332,
+        "non_command": 65.892,
+        "command": 43.44
+      }
+    },
+    "currentAvailabilityForAllPurposes": {
+      "poor_quality": 0.0,
+      "total": 10337.470000000001,
+      "non_command": 6629.51,
+      "command": 3707.96
+    },
+    "availabilityForFutureUse": {
+      "poor_quality": 0.0,
+      "total": 3727.02,
+      "non_command": 1686.3,
+      "command": 2040.72
+    },
+    "gwallocation": {
+      "domestic": {
+        "poor_quality": 0.0,
+        "total": 585.49,
+        "non_command": 388.83,
+        "command": 196.66
+      },
+      "total": {
+        "poor_quality": 0.0,
+        "total": 585.49,
+        "non_command": 388.83,
+        "command": 196.66
+      },
+      "industry": {
+        "poor_quality": 0.0,
+        "total": 0.0
+      }
+    },
+    "stageOfExtraction": {
+      "total": 63.08381064225579,
+      "non_command": 73.67045226570289,
+      "command": 44.1558161360964
+    },
+    "gwlevelData": {
+      "poor_quality": {
+        "pre": [
+          [
+            2016.0,
+            0.0
+          ],
+          [
+            2017.0,
+            0.0
+          ],
+          [
+            2018.0,
+            0.0
+          ],
+          [
+            2019.0,
+            0.0
+          ],
+          [
+            2020.0,
+            0.0
+          ],
+          [
+            2021.0,
+            0.0
+          ],
+          [
+            2022.0,
+            0.0
+          ],
+          [
+            2023.0,
+            0.0
+          ],
+          [
+            2024.0,
+            0.0
+          ],
+          [
+            2015.0,
+            0.0
+          ]
+        ],
+        "post": [
+          [
+            2016.0,
+            0.0
+          ],
+          [
+            2017.0,
+            0.0
+          ],
+          [
+            2018.0,
+            0.0
+          ],
+          [
+            2019.0,
+            0.0
+          ],
+          [
+            2020.0,
+            0.0
+          ],
+          [
+            2021.0,
+            0.0
+          ],
+          [
+            2022.0,
+            0.0
+          ],
+          [
+            2023.0,
+            0.0
+          ],
+          [
+            2024.0,
+            0.0
+          ],
+          [
+            2015.0,
+            0.0
+          ]
+        ]
+      },
+      "total": {},
+      "non_command": {
+        "pre": [
+          [
+            2016.0,
+            7.19
+          ],
+          [
+            2017.0,
+            6.85
+          ],
+          [
+            2018.0,
+            7.19
+          ],
+          [
+            2019.0,
+            7.27
+          ],
+          [
+            2020.0,
+            6.47
+          ],
+          [
+            2021.0,
+            7.84
+          ],
+          [
+            2022.0,
+            6.79
+          ],
+          [
+            2023.0,
+            7.77
+          ],
+          [
+            2024.0,
+            7.5
+          ],
+          [
+            2015.0,
+            6.76
+          ]
+        ],
+        "post": [
+          [
+            2016.0,
+            3.82
+          ],
+          [
+            2017.0,
+            5.05
+          ],
+          [
+            2018.0,
+            5.27
+          ],
+          [
+            2019.0,
+            4.09
+          ],
+          [
+            2020.0,
+            5.05
+          ],
+          [
+            2021.0,
+            5.39
+          ],
+          [
+            2022.0,
+            4.38
+          ],
+          [
+            2023.0,
+            5.5
+          ],
+          [
+            2024.0,
+            3.6
+          ],
+          [
+            2015.0,
+            5.0
+          ]
+        ]
+      },
+      "command": {
+        "pre": [
+          [
+            2016.0,
+            4.93
+          ],
+          [
+            2017.0,
+            4.98
+          ],
+          [
+            2018.0,
+            5.0
+          ],
+          [
+            2019.0,
+            4.93
+          ],
+          [
+            2020.0,
+            4.75
+          ],
+          [
+            2021.0,
+            3.08
+          ],
+          [
+            2022.0,
+            3.5
+          ],
+          [
+            2023.0,
+            3.9
+          ],
+          [
+            2024.0,
+            3.7
+          ],
+          [
+            2015.0,
+            4.9
+          ]
+        ],
+        "post": [
+          [
+            2016.0,
+            2.23
+          ],
+          [
+            2017.0,
+            2.88
+          ],
+          [
+            2018.0,
+            2.05
+          ],
+          [
+            2019.0,
+            2.45
+          ],
+          [
+            2020.0,
+            2.05
+          ],
+          [
+            2021.0,
+            1.61
+          ],
+          [
+            2022.0,
+            1.45
+          ],
+          [
+            2023.0,
+            1.45
+          ],
+          [
+            2024.0,
+            2.08
+          ],
+          [
+            2015.0,
+            2.78
+          ]
+        ]
+      }
+    },
+    "gwanalysisSeason": "monsoon",
+    "gwtrendSlope": {
+      "poor_quality": {},
+      "total": {},
+      "non_command": {
+        "pre": -7.0121212121212135,
+        "post": 1.7393939393939395
+      },
+      "command": {
+        "pre": 19.0,
+        "post": 12.503030303030298
+      }
+    },
+    "waterTableRiseFall": {
+      "poor_quality": {},
+      "total": {},
+      "non_command": {
+        "pre": "Neither Rising Nor Falling",
+        "post": "Neither Rising Nor Falling"
+      },
+      "command": {
+        "pre": "Rising",
+        "post": "Rising"
+      }
+    },
+    "gwtrendAttention": {},
+    "waterTableCategory": {
+      "non_command": "critical/semi_critical",
+      "command": "safe"
+    },
+    "message": null
+  },
+  {
+    "locationName": "total",
+    "area": {
+      "non_recharge_worthy": {
+        "commandArea": 0.0,
+        "nonCommandArea": 0.0,
+        "poorQualityArea": 0.0,
+        "hillyArea": 0.0,
+        "forestArea": 0.0,
+        "totalArea": 6012.0,
+        "pavedArea": 0.0,
+        "unpavedArea": 0.0
+      },
+      "total": {
+        "commandArea": 17834.0,
+        "nonCommandArea": 29275.0,
+        "poorQualityArea": 0.0,
+        "hillyArea": 0.0,
+        "forestArea": 0.0,
+        "totalArea": 53121.0,
+        "pavedArea": 0.0,
+        "unpavedArea": 0.0
+      },
+      "recharge_worthy": {
+        "commandArea": 17834.0,
+        "nonCommandArea": 29275.0,
+        "poorQualityArea": 0.0,
+        "hillyArea": 0.0,
+        "forestArea": 0.0,
+        "totalArea": 47109.0,
+        "pavedArea": 0.0,
+        "unpavedArea": 0.0
+      }
+    },
+    "loss": {
+      "poor_quality": 0.0,
+      "total": 544.08,
+      "non_command": 348.93,
+      "command": 195.15
+    },
+    "category": null,
+    "reportSummary": {
+      "total": {
+        "BLOCK": {
+          "safe": 1
+        }
+      },
+      "8ee34fe7-5e9c-4480-8afc-bb00cad0e42f": {
+        "BLOCK": {
+          "safe": 1
+        }
+      }
+    },
+    "gwProjectedUtilAllocationDynamicAquifer": {
+      "domestic": {
+        "total": 0.0
+      },
+      "total": {
+        "total": 0.0
+      }
+    },
+    "additionalRecharge": {},
+    "staticGWResource": {
+      "poor_quality": 0.0,
+      "total": 0.0,
+      "non_command": 0.0,
+      "command": 0.0
+    },
+    "totalGWAvailability": {
+      "poor_quality": 0.0,
+      "total": 10337.47,
+      "non_command": 6629.51,
+      "command": 3707.96
+    },
+    "aquiferBusinessData": {
+      "SemiConfined Aquifer Piezo Data": null,
+      "confined_aquifer": {
+        "total": {
+          "total": 0.0
+        },
+        "in_storage_gw": {
+          "in_storage_gw": 0.0
+        },
+        "dynamic_gw": {
+          "dynamic_gw": 0.0
+        }
+      }
+    },
+    "coastalBusinessData": null,
+    "waterDepletedZonesBusinessData": null,
+    "inOutFlow": {
+      "total": 0.0
+    },
+    "baseFlow": {
+      "total": {
+        "lateral_aquifer": 0.0,
+        "vertcal_aquifer": 0.0
+      }
+    },
+    "streamRecharge": null,
+    "additionalbaseflow": null,
+    "envFlows": null,
+    "subject": null,
+    "action": null,
+    "modifiable": null,
+    "isUrban": null,
+    "gwSpecificYield": null,
+    "geology": null,
+    "evaporation": {},
+    "qualityTagging": null,
+    "approvalLevel": null,
+    "verificStatus": null,
+    "timeStamp": null,
+    "locationUUID": null,
+    "rainfall": {
+      "poor_quality": 0.0,
+      "total": 1227.3,
+      "non_command": 1227.3,
+      "command": 1227.3
+    },
+    "wtfonly": null,
+    "computationSummary": null,
+    "draftData": {
+      "agriculture": {
+        "total": 5842.627199999999,
+        "non_command": 4372.0560000000005,
+        "command": 1470.5711999999999
+      },
+      "domestic": {
+        "total": 496.31313,
+        "non_command": 329.60814,
+        "command": 166.70499
+      },
+      "total": {
+        "total": 6521.27,
+        "non_command": 4883.99,
+        "command": 1637.28
+      },
+      "industry": {
+        "total": 182.33575,
+        "non_command": 182.33575,
+        "command": 0.0
+      }
+    },
+    "rechargeData": {
+      "agriculture": {
+        "poor_quality": 0.0,
+        "total": 1665.0,
+        "non_command": 1093.01,
+        "command": 571.99
+      },
+      "rainfall": {
+        "poor_quality": 0.0,
+        "total": 8945.51,
+        "non_command": 5791.85,
+        "command": 3153.66
+      },
+      "total": {
+        "poor_quality": 0.0,
+        "total": 10881.55,
+        "non_command": 6978.4400000000005,
+        "command": 3903.11
+      },
+      "surface_irrigation": {
+        "poor_quality": 0.0,
+        "total": 204.35,
+        "non_command": 0.0,
+        "command": 204.34680000000003
+      },
+      "gw_irrigation": {
+        "poor_quality": 0.0,
+        "total": 1460.65,
+        "non_command": 1093.01,
+        "command": 367.64000000000004
+      },
+      "water_body": {
+        "poor_quality": 0.0,
+        "total": 46.41,
+        "non_command": 27.68,
+        "command": 18.73
+      },
+      "canal": {
+        "poor_quality": 0.0,
+        "total": 115.29,
+        "command": 115.29
+      },
+      "artificial_structure": {
+        "total": 109.332,
+        "non_command": 65.892,
+        "command": 43.44
+      }
+    },
+    "currentAvailabilityForAllPurposes": {
+      "poor_quality": 0.0,
+      "total": 10337.470000000001,
+      "non_command": 6629.51,
+      "command": 3707.96
+    },
+    "availabilityForFutureUse": {
+      "poor_quality": 0.0,
+      "total": 3727.02,
+      "non_command": 1686.3,
+      "command": 2040.72
+    },
+    "gwallocation": {
+      "domestic": {
+        "poor_quality": 0.0,
+        "total": 585.49,
+        "non_command": 388.83,
+        "command": 196.66
+      },
+      "total": {
+        "poor_quality": 0.0,
+        "total": 585.49,
+        "non_command": 388.83,
+        "command": 196.66
+      },
+      "industry": {
+        "poor_quality": 0.0,
+        "total": 0.0
+      }
+    },
+    "stageOfExtraction": {
+      "poor_quality": 0.0,
+      "total": 63.08381064225579,
+      "non_command": 73.67045226570289,
+      "command": 44.1558161360964
+    },
+    "gwlevelData": null,
+    "gwanalysisSeason": null,
+    "gwtrendSlope": null,
+    "waterTableRiseFall": null,
+    "gwtrendAttention": null,
+    "waterTableCategory": null,
+    "message": null
+  }
+]

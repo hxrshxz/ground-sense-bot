@@ -17,6 +17,7 @@ type Config struct {
 	Email    EmailConfig
 	Storage  StorageConfig
 	RateLimit RateLimitConfig
+	Gemini    GeminiConfig
 }
 
 type ServerConfig struct {
@@ -79,16 +80,16 @@ func Load() *Config {
 	return &Config{
 		Server: ServerConfig{
 			Host:         getEnv("SERVER_HOST", "localhost"),
-			Port:         getEnv("SERVER_PORT", "8080"),
+			Port:         getEnv("SERVER_PORT", "8081"),
 			ReadTimeout:  getEnvAsDuration("SERVER_READ_TIMEOUT", 15*time.Second),
 			WriteTimeout: getEnvAsDuration("SERVER_WRITE_TIMEOUT", 15*time.Second),
 			IdleTimeout:  getEnvAsDuration("SERVER_IDLE_TIMEOUT", 60*time.Second),
 		},
 		Database: DatabaseConfig{
 			Host:     getEnv("DB_HOST", "localhost"),
-			Port:     getEnv("DB_PORT", "5432"),
-			User:     getEnv("DB_USER", "postgres"),
-			Password: getEnv("DB_PASSWORD", ""),
+			Port:     getEnv("DB_PORT", "5433"),
+			User:     getEnv("DB_USER", "admin"),
+			Password: getEnv("DB_PASSWORD", "admin"),
 			DBName:   getEnv("DB_NAME", "ground_sense_bot"),
 			SSLMode:  getEnv("DB_SSLMODE", "disable"),
 		},
@@ -121,7 +122,14 @@ func Load() *Config {
 			RequestsPerHour: getEnvAsInt("RATE_LIMIT_REQUESTS", 1000),
 			BurstSize:       getEnvAsInt("RATE_LIMIT_BURST", 100),
 		},
+		Gemini: GeminiConfig{
+			APIKey: getEnv("GEMINI_API_KEY", ""),
+		},
 	}
+}
+
+type GeminiConfig struct {
+	APIKey string
 }
 
 func getEnv(key, defaultValue string) string {

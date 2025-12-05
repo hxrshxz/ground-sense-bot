@@ -5,7 +5,6 @@ import { cn } from "../lib/utils";
 
 import { Server } from "lucide-react";
 import { INGRESAssistant } from "./INGRESAssistant";
-import { ApiKeyProvider } from "./ApiKeyContext";
 
 // Import your main tool component
 // --- Lamp Effect Component ---
@@ -161,7 +160,9 @@ export const BusinessTools = () => {
           transition={{ delay: 0.5, duration: 0.8, ease: "easeInOut" }}
           className="mt-4 font-normal text-base text-slate-400 max-w-lg text-center mx-auto"
         >
-An AI-powered chatbot assistant for monitoring and analyzing groundwater levels, seamlessly integrated with Ingress Database for real-time data insights.
+          An AI-powered chatbot assistant for monitoring and analyzing
+          groundwater levels, seamlessly integrated with Ingress Database for
+          real-time data insights.
         </motion.p>
       </LampContainer>
 
@@ -238,11 +239,7 @@ An AI-powered chatbot assistant for monitoring and analyzing groundwater levels,
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  {activeTool === "dba" && (
-                    <ApiKeyProvider>
-                      <INGRESAssistant />
-                    </ApiKeyProvider>
-                  )}
+                  {activeTool === "dba" && <INGRESAssistant />}
                 </motion.div>
               </AnimatePresence>
             </div>

@@ -1,0 +1,4604 @@
+[
+  {
+    "locationName": "Mansa",
+    "area": {
+      "non_recharge_worthy": {
+        "commandArea": 0.0,
+        "nonCommandArea": 0.0,
+        "poorQualityArea": 0.0,
+        "hillyArea": 0.0,
+        "forestArea": 0.0,
+        "totalArea": 0.0,
+        "pavedArea": 0.0,
+        "unpavedArea": 0.0
+      },
+      "total": {
+        "commandArea": 36042.24,
+        "nonCommandArea": 0.0,
+        "poorQualityArea": 3134.76,
+        "hillyArea": 0.0,
+        "forestArea": 0.0,
+        "totalArea": 39177.0,
+        "pavedArea": 0.0,
+        "unpavedArea": 0.0
+      },
+      "recharge_worthy": {
+        "commandArea": 36042.24,
+        "nonCommandArea": 0.0,
+        "poorQualityArea": 3134.76,
+        "hillyArea": 0.0,
+        "forestArea": 0.0,
+        "totalArea": 39177.0,
+        "pavedArea": 0.0,
+        "unpavedArea": 0.0
+      }
+    },
+    "loss": {
+      "poor_quality": 775.92,
+      "transpiration": 0.0,
+      "total": 2394.2599999999998,
+      "non_command": 0.0,
+      "evaporation": 0.0,
+      "command": 1618.3400000000001,
+      "et": 0.0
+    },
+    "category": {
+      "poor_quality": "over_exploited",
+      "total": "over_exploited",
+      "command": "over_exploited"
+    },
+    "reportSummary": {
+      "total": {
+        "BLOCK": {
+          "over_exploited": 1
+        }
+      }
+    },
+    "gwProjectedUtilAllocationDynamicAquifer": {
+      "domestic": {
+        "total": 0.0
+      },
+      "total": {
+        "total": 0.0
+      }
+    },
+    "additionalRecharge": {
+      "total": {
+        "total": 0.0
+      },
+      "floodProneArea": {
+        "total": 0.0
+      },
+      "shallowArea": {
+        "total": 0.0
+      },
+      "springDischarge": {
+        "total": 0.0
+      }
+    },
+    "staticGWResource": {
+      "poor_quality": 0.0,
+      "total": 0.0,
+      "non_command": 0.0,
+      "command": 0.0
+    },
+    "totalGWAvailability": {
+      "poor_quality": 6983.23,
+      "total": 21548.35,
+      "non_command": 0.0,
+      "command": 14565.12
+    },
+    "aquiferBusinessData": {
+      "SemiConfined_Aquifer_Piezo_Data": {
+        "total": {
+          "total": 0.0
+        },
+        "in_storage_gw": {
+          "in_storage_gw": 0.0
+        },
+        "dynamic_gw": {
+          "dynamic_gw": 0.0
+        }
+      },
+      "confined_aquifer": {
+        "total": {
+          "total": 1353520.43
+        },
+        "in_storage_gw": {
+          "in_storage_gw": 1353360.06
+        },
+        "dynamic_gw": {
+          "dynamic_gw": 160.36
+        }
+      }
+    },
+    "coastalBusinessData": null,
+    "waterDepletedZonesBusinessData": null,
+    "inOutFlow": {
+      "poor_quality": 0.0,
+      "total": 0.0,
+      "non_command": 0.0,
+      "command": 0.0
+    },
+    "baseFlow": {
+      "poor_quality": {},
+      "total": {
+        "lateral_aquifer": 0.0,
+        "vertcal_aquifer": 0.0
+      },
+      "non_command": {},
+      "command": {}
+    },
+    "streamRecharge": {},
+    "additionalbaseflow": null,
+    "envFlows": null,
+    "subject": null,
+    "action": null,
+    "modifiable": null,
+    "isUrban": false,
+    "gwSpecificYield": null,
+    "geology": null,
+    "evaporation": {
+      "transpiration": {
+        "poor_quality": 0.0,
+        "total": 0.0,
+        "non_command": 0.0,
+        "command": 0.0
+      },
+      "evaporation": {
+        "poor_quality": 0.0,
+        "total": 0.0,
+        "non_command": 0.0,
+        "command": 0.0
+      },
+      "et": {
+        "poor_quality": 0.0,
+        "total": 0.0,
+        "non_command": 0.0,
+        "command": 0.0
+      }
+    },
+    "qualityTagging": {
+      "poor_quality": {
+        "majorParameter": null,
+        "otherParameters": [
+          "Uranium"
+        ]
+      },
+      "non_command": {
+        "majorParameter": null,
+        "otherParameters": []
+      },
+      "command": {
+        "majorParameter": "Salinity",
+        "otherParameters": []
+      }
+    },
+    "approvalLevel": 4,
+    "verificStatus": 1,
+    "timeStamp": null,
+    "locationUUID": "e913f3ca-694a-4785-b50d-add14f280507",
+    "rainfall": {
+      "poor_quality": 366.0,
+      "total": 365.99999999999994,
+      "non_command": 0.0,
+      "command": 366.0
+    },
+    "wtfonly": null,
+    "computationSummary": {
+      "annual": {
+        "envFlow": {
+          "envFlow": {}
+        },
+        "acquifer_info": {
+          "SemiConfined_Aquifer_Piezo_Data": {
+            "Semi-Confined": {
+              "pmph": 0.0,
+              "ab": 0.0,
+              "total": 0.0,
+              "be": 0.0,
+              "in_storage_gw": 0.0,
+              "coa": 0.0,
+              "premph": 0.0,
+              "postmph": 0.0,
+              "dynamic_gw": 0.0,
+              "spy": 0.12,
+              "sto": 0.0
+            }
+          },
+          "confined_aquifer": {
+            "Confined": {
+              "pmph": 12.13,
+              "ab": 300.0,
+              "total": 1353520.43,
+              "be": 1.0,
+              "in_storage_gw": 1353360.06,
+              "coa": 39177.0,
+              "premph": 12.13,
+              "postmph": 12.16,
+              "dynamic_gw": 160.36,
+              "spy": 0.12,
+              "sto": 0.0
+            }
+          }
+        },
+        "availFutureUse": {
+          "poor_quality": 0.0,
+          "non_command": 0.0,
+          "command": 0.0
+        },
+        "qt": {
+          "qt": {
+            "poor_quality": {
+              "otherParameters": [
+                "Uranium"
+              ]
+            },
+            "non_command": {
+              "otherParameters": []
+            },
+            "command": {
+              "majorParameter": "Salinity",
+              "otherParameters": []
+            }
+          }
+        },
+        "alloc2025": {
+          "poor_quality": {
+            "domestic": {
+              "total": {
+                "postalloc": "0.0",
+                "prealloc": "0.0"
+              }
+            },
+            "common": {
+              "total": {
+                "pty": "0.0",
+                "ty": "2035",
+                "pry": "0.0",
+                "ry": "0"
+              }
+            },
+            "industry": {}
+          },
+          "non_command": {
+            "domestic": {
+              "total": {
+                "postalloc": "0.0",
+                "prealloc": "0.0"
+              }
+            },
+            "common": {
+              "total": {
+                "pty": "0.0",
+                "ty": "2035",
+                "pry": "0.0",
+                "ry": "0"
+              }
+            },
+            "industry": {}
+          },
+          "command": {
+            "domestic": {
+              "total": {
+                "postalloc": "0.0",
+                "prealloc": "0.0"
+              },
+              "urban": {
+                "lpcd": "0.0",
+                "poprefyr": "0",
+                "refyr": "2024",
+                "lg": "0.0",
+                "gr": "0.0",
+                "postalloc": "0.0"
+              },
+              "rural": {
+                "lpcd": "100.0",
+                "poprefyr": "248294",
+                "refyr": "2024",
+                "lg": "0.0",
+                "gr": "0.25",
+                "postalloc": "0.0"
+              }
+            },
+            "common": {
+              "total": {
+                "pty": "255208.0",
+                "ty": "2035",
+                "pry": "248294.0",
+                "ry": "2024"
+              },
+              "urban": {
+                "d": "0.0",
+                "suarea": "36042.24",
+                "pty": "0.0",
+                "pry": "0",
+                "lpcd": "0.0",
+                "gr": "0.0"
+              },
+              "rural": {
+                "d": "0.71",
+                "suarea": "36042.24",
+                "pty": "255208.0",
+                "pry": "248294",
+                "lpcd": "100.0",
+                "gr": "0.25"
+              }
+            },
+            "industry": {}
+          }
+        },
+        "stage": {
+          "poor_quality": {
+            "av": "6983.23"
+          },
+          "total": {
+            "av": "14565.12"
+          },
+          "command": {
+            "av": "14565.12"
+          }
+        },
+        "pot_rec": {
+          "floodProneArea": {
+            "ar": 0.0,
+            "days": 0.0,
+            "fac": 1.4
+          },
+          "shallowArea": {
+            "gwRanges": {
+              "2.0-2.5": {
+                "area": 0.0,
+                "resource": 0.0
+              },
+              "3.0-3.5": {
+                "area": 0.0,
+                "resource": 0.0
+              },
+              "4.5-5.0": {
+                "area": 0.0,
+                "resource": 0.0
+              },
+              "0.5-1.0": {
+                "area": 0.0,
+                "resource": 0.0
+              },
+              "1.0-1.5": {
+                "area": 0.0,
+                "resource": 0.0
+              },
+              "2.5-3.0": {
+                "area": 0.0,
+                "resource": 0.0
+              },
+              "4.0-4.5": {
+                "area": 0.0,
+                "resource": 0.0
+              },
+              "0.0-0.5": {
+                "area": 0.0,
+                "resource": 0.0
+              },
+              "1.5-2.0": {
+                "area": 0.0,
+                "resource": 0.0
+              },
+              "3.5-4.0": {
+                "area": 0.0,
+                "resource": 0.0
+              }
+            },
+            "spYield": 0.12
+          }
+        },
+        "alloc2025_dy": {
+          "poor_quality": {
+            "domestic": {},
+            "common": {}
+          },
+          "non_command": {
+            "domestic": {},
+            "common": {}
+          },
+          "command": {
+            "domestic": {},
+            "common": {}
+          }
+        }
+      },
+      "non_monsoon": {
+        "loss": {
+          "loss": {
+            "poor_quality": {
+              "p": "10.0",
+              "v": "219.28"
+            },
+            "non_command": {
+              "p": "10.0",
+              "v": "0.0"
+            },
+            "command": {
+              "p": "10.0",
+              "v": "516.39"
+            }
+          }
+        },
+        "rf": {
+          "a": 29.08,
+          "n": 71.0
+        },
+        "stage": {
+          "poor_quality": {
+            "av": "6983.23"
+          },
+          "total": {
+            "av": "14565.12"
+          },
+          "command": {
+            "av": "14565.12"
+          }
+        },
+        "pot_rec": {
+          "springDischarge": {
+            "null": {
+              "sDays": 0.0,
+              "dis": 0.0,
+              "sr": 0.0
+            }
+          }
+        },
+        "recharge": {
+          "agriculture": {},
+          "rainfall": {
+            "poor_quality": {
+              "S3": "0.001",
+              "lastNYr": "{\"2016-2017\":{\"postGW\":11.15,\"changeGW\":-0.25,\"rf\":0.042,\"recGW\":-581.803,\"preGW\":10.9},\"2021-2022\":{\"postGW\":12.84,\"changeGW\":-0.2,\"rf\":0.025,\"recGW\":-562.994,\"preGW\":12.64},\"2024-2025\":{\"postGW\":0.0,\"changeGW\":14.52,\"rf\":0.029,\"recGW\":4974.246,\"preGW\":14.52},\"2018-2019\":{\"postGW\":11.85,\"changeGW\":0.23,\"rf\":0.025,\"recGW\":-401.241,\"preGW\":12.08},\"2015-2016\":{\"postGW\":10.66,\"changeGW\":0.0,\"rf\":0.097,\"recGW\":-487.76,\"preGW\":10.66},\"2023-2024\":{\"postGW\":13.78,\"changeGW\":0.0,\"rf\":0.077,\"recGW\":-487.76,\"preGW\":13.78},\"2020-2021\":{\"postGW\":12.36,\"changeGW\":-0.2,\"rf\":0.13,\"recGW\":-562.994,\"preGW\":12.16},\"2017-2018\":{\"postGW\":11.55,\"changeGW\":-0.28,\"rf\":0.036,\"recGW\":-593.088,\"preGW\":11.27},\"2019-2020\":{\"postGW\":12.13,\"changeGW\":0.18,\"rf\":0.098,\"recGW\":-420.049,\"preGW\":12.31},\"2022-2023\":{\"postGW\":12.87,\"changeGW\":-0.42,\"rf\":0.082,\"recGW\":-645.752,\"preGW\":12.45}}",
+              "S4": "144.651",
+              "rflows": "0.0",
+              "an_rf": "218.57",
+              "N": "1.0",
+              "e_m2": "5079.342",
+              "an_nrf": "366.0",
+              "dv": "null",
+              "ros": "2169.04",
+              "if": "0.22",
+              "fac_a": "2502.302",
+              "fac_b": "4901.679",
+              "a": "3134.76",
+              "nrf": "71.0",
+              "m1": "23.72",
+              "sy": "0.12",
+              "gwsc": "5462.01",
+              "td": "1681.28",
+              "rc": "23.72",
+              "gwc": "null",
+              "at": "poor_quality",
+              "th": "36.6",
+              "rf": "29.08",
+              "S1": "0.029",
+              "rp": "true",
+              "S2": "4974.246"
+            },
+            "non_command": {
+              "S3": "0.0",
+              "lastNYr": "{\"2016-2017\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":0.0},\"2021-2022\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":0.0},\"2024-2025\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":0.0},\"2018-2019\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":0.0},\"2015-2016\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":0.0},\"2023-2024\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":0.0},\"2020-2021\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":0.0},\"2017-2018\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":0.0},\"2019-2020\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":0.0},\"2022-2023\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":0.0}}",
+              "S4": "0.0",
+              "rflows": "0.0",
+              "an_rf": "0.0",
+              "N": "10.0",
+              "e_m2": "0.0",
+              "an_nrf": "0.0",
+              "dv": "null",
+              "ros": "0.0",
+              "if": "0.22",
+              "fac_a": "null",
+              "fac_b": "null",
+              "a": "0.0",
+              "nrf": "0.0",
+              "m1": "0.0",
+              "sy": "0.12",
+              "gwsc": "0.0",
+              "td": "0.0",
+              "rc": "0.0",
+              "gwc": "null",
+              "at": "non_command",
+              "th": "0.0",
+              "rf": "0.0",
+              "S1": "0.0",
+              "rp": "true",
+              "S2": "0.0"
+            },
+            "command": {
+              "S3": "0.011",
+              "lastNYr": "{\"2016-2017\":{\"postGW\":11.15,\"changeGW\":-0.25,\"rf\":0.042,\"recGW\":-1390.047,\"preGW\":10.9},\"2021-2022\":{\"postGW\":12.84,\"changeGW\":-0.2,\"rf\":0.025,\"recGW\":-1173.794,\"preGW\":12.64},\"2024-2025\":{\"postGW\":0.0,\"changeGW\":14.52,\"rf\":0.029,\"recGW\":62491.219,\"preGW\":14.52},\"2018-2019\":{\"postGW\":11.85,\"changeGW\":0.23,\"rf\":0.025,\"recGW\":685.986,\"preGW\":12.08},\"2015-2016\":{\"postGW\":10.66,\"changeGW\":0.0,\"rf\":0.097,\"recGW\":-308.78,\"preGW\":10.66},\"2023-2024\":{\"postGW\":13.78,\"changeGW\":0.0,\"rf\":0.077,\"recGW\":-308.78,\"preGW\":13.78},\"2020-2021\":{\"postGW\":12.36,\"changeGW\":-0.2,\"rf\":0.13,\"recGW\":-1173.794,\"preGW\":12.16},\"2017-2018\":{\"postGW\":11.55,\"changeGW\":-0.28,\"rf\":0.036,\"recGW\":-1519.799,\"preGW\":11.27},\"2019-2020\":{\"postGW\":12.13,\"changeGW\":0.18,\"rf\":0.098,\"recGW\":469.732,\"preGW\":12.31},\"2022-2023\":{\"postGW\":12.87,\"changeGW\":-0.42,\"rf\":0.082,\"recGW\":-2125.309,\"preGW\":12.45}}",
+              "S4": "1880.428",
+              "rflows": "0.0",
+              "an_rf": "218.57",
+              "N": "3.0",
+              "e_m2": "12928.928",
+              "an_nrf": "366.0",
+              "dv": "null",
+              "ros": "4891.17",
+              "if": "0.22",
+              "fac_a": "-407543.495",
+              "fac_b": "41864.516",
+              "a": "36042.24",
+              "nrf": "71.0",
+              "m1": "272.77",
+              "sy": "0.12",
+              "gwsc": "62800.0",
+              "td": "4582.39",
+              "rc": "272.77",
+              "gwc": "null",
+              "at": "command",
+              "th": "36.6",
+              "rf": "29.08",
+              "S1": "0.152",
+              "rp": "true",
+              "S2": "63646.937"
+            }
+          },
+          "total": {
+            "poor_quality": 2192.76,
+            "total": 7356.7,
+            "non_command": 0.0,
+            "command": 5163.94
+          },
+          "surface_irrigation": {
+            "poor_quality": {
+              "total": "0.0",
+              "can_rel": [
+                {
+                  "rec": "1210.23",
+                  "ddc": "55.8",
+                  "ad": "33.48",
+                  "nonPaddy": "{\"wheat,cotton\":{\"name\":\"wheat,cotton\",\"cropArea\":{\"monsoon\":457.6,\"non_monsoon\":2765.6},\"returnFlowFactor\":{\"monsoon\":0.273,\"non_monsoon\":0.273},\"continousWS\":{\"poor_quality\":0.0},\"dischargeDays\":{\"poor_quality_non_monsoon\":102.89999999999999,\"poor_quality_monsoon\":191.1},\"weightedFlowFactor\":{\"poor_quality_non_monsoon\":0.35096288598574826,\"poor_quality_monsoon\":0.35096288598574826}}}",
+                  "out_name": "Canal",
+                  "rel": "3448.3261265632655",
+                  "dist": "Outlet",
+                  "days": "103",
+                  "wRff": "0.35",
+                  "outlet": "Canal",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{\"monsoon\":2165.6,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.467,\"non_monsoon\":0.467},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "1210.23",
+                  "rel": "3448.33"
+                }
+              ],
+              "crop_w_req": [
+                {
+                  "cs": "0.0",
+                  "rff": "0.5",
+                  "name": "paddy",
+                  "wr": "0.0",
+                  "type": "paddy",
+                  "ca": "0.0",
+                  "cr": "0.0",
+                  "paddy": "{\"cropName\":\"paddy\",\"cropArea\":{},\"waterRequired\":{},\"returnFlowFactor\":{},\"continousWS\":{}}"
+                },
+                {
+                  "paddy_rec": "0.0",
+                  "paddy_wr": "0.0"
+                }
+              ],
+              "rff_calc": {
+                "nonPaddy_area": "32100.0",
+                "pre": "0",
+                "paddy_area": "0.0",
+                "post": "0",
+                "nonPaddy_rff": "0",
+                "paddy_rff": "0.5",
+                "wrff": "0.24",
+                "gwl": "0"
+              }
+            },
+            "non_command": {
+              "total": "0.0",
+              "can_rel": [
+                {
+                  "rec": "0.0",
+                  "ddc": "55.8",
+                  "ad": "33.48",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":0.0},\"weightedFlowFactor\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":0.0}}}",
+                  "out_name": "Canal",
+                  "rel": "0.0",
+                  "dist": "Outlet",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "rel": "0.0"
+                }
+              ],
+              "crop_w_req": [
+                {
+                  "cs": "0.0",
+                  "rff": "0.5",
+                  "name": "paddy",
+                  "wr": "0.0",
+                  "type": "paddy",
+                  "ca": "0.0",
+                  "cr": "0.0",
+                  "paddy": "{\"cropName\":\"paddy\",\"cropArea\":{},\"waterRequired\":{},\"returnFlowFactor\":{},\"continousWS\":{}}"
+                },
+                {
+                  "paddy_rec": "0.0",
+                  "paddy_wr": "0.0"
+                }
+              ],
+              "rff_calc": {
+                "nonPaddy_area": "32100.0",
+                "pre": "0",
+                "paddy_area": "0.0",
+                "post": "0",
+                "nonPaddy_rff": "0",
+                "paddy_rff": "0.5",
+                "wrff": "0.24",
+                "gwl": "0"
+              }
+            },
+            "command": {
+              "total": "346.68",
+              "can_rel": [
+                {
+                  "rec": "1210.23",
+                  "ddc": "55.8",
+                  "ad": "33.48",
+                  "nonPaddy": "{\"wheat\":{\"name\":\"wheat\",\"cropArea\":{\"monsoon\":5262.4,\"non_monsoon\":31804.4},\"returnFlowFactor\":{\"monsoon\":0.273,\"non_monsoon\":0.273},\"continousWS\":{\"command\":0.0},\"dischargeDays\":{\"command_non_monsoon\":102.89999999999999,\"command_monsoon\":191.1},\"weightedFlowFactor\":{\"command_non_monsoon\":0.35096288598574826,\"command_monsoon\":0.35096288598574826}}}",
+                  "out_name": "Canal",
+                  "rel": "3448.3261265632655",
+                  "dist": "Outlet",
+                  "days": "103",
+                  "wRff": "0.35",
+                  "outlet": "Canal",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{\"monsoon\":24904.4,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.467,\"non_monsoon\":0.467},\"continousWS\":{\"command\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "1210.23",
+                  "rel": "3448.33"
+                }
+              ],
+              "crop_w_req": [
+                {
+                  "cs": "0.0",
+                  "rff": "0.27",
+                  "nonPaddy": "{\"cropName\":\"wheat\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":32100.0},\"waterRequired\":{\"monsoon\":0.0,\"non_monsoon\":40.0},\"returnFlowFactor\":{\"monsoon\":0.27,\"non_monsoon\":0.27},\"continousWS\":{\"command\":0.0}}",
+                  "name": "wheat",
+                  "wr": "0.04",
+                  "type": "nonPaddy",
+                  "ca": "32100.0",
+                  "cr": "346.68"
+                },
+                {
+                  "cs": "0.0",
+                  "rff": "0.467",
+                  "name": "paddy",
+                  "wr": "0.0",
+                  "type": "paddy",
+                  "ca": "0.0",
+                  "cr": "0.0",
+                  "paddy": "{\"cropName\":\"paddy\",\"cropArea\":{\"monsoon\":24300.0,\"non_monsoon\":0.0},\"waterRequired\":{\"monsoon\":135.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.467,\"non_monsoon\":0.467},\"continousWS\":{\"command\":0.0}}"
+                },
+                {
+                  "nonPaddy_wr": "0.04",
+                  "paddy_rec": "0.0",
+                  "nonPaddy_rec": "346.68",
+                  "paddy_wr": "0.0"
+                }
+              ],
+              "rff_calc": {
+                "nonPaddy_area": "32100.0",
+                "pre": "0",
+                "paddy_area": "0.0",
+                "post": "0",
+                "nonPaddy_rff": "0",
+                "paddy_rff": "0.5",
+                "wrff": "0.24",
+                "gwl": "0"
+              }
+            }
+          },
+          "water_body": {
+            "poor_quality": {},
+            "non_command": {},
+            "command": {
+              "rc": "73.09",
+              "wbi": {
+                "Pond": {
+                  "no": "126.0",
+                  "esa": "1.38",
+                  "r": "73.09",
+                  "d": "300",
+                  "if": "0.0014",
+                  "sa": "1.38"
+                }
+              }
+            }
+          },
+          "gw_irrigation": {
+            "poor_quality": {
+              "r": "771.66",
+              "w_rff": "0.46",
+              "nonPaddy": [
+                {
+                  "cs": "0.0",
+                  "area": "2765.6",
+                  "rff": "0.42",
+                  "name": "wheat,cotton"
+                }
+              ],
+              "gwIrr": {
+                "gwrff": "0.46",
+                "gwIrrPer": "100"
+              },
+              "irr_dr": "1681.28",
+              "paddy": [
+                {
+                  "cs": "0.0",
+                  "area": "0.0",
+                  "rff": "0.42",
+                  "name": "paddy"
+                }
+              ]
+            },
+            "non_command": {
+              "r": "0.0",
+              "w_rff": "0.0",
+              "nonPaddy": [],
+              "gwIrr": {
+                "gwrff": "0.0",
+                "gwIrrPer": "100"
+              },
+              "irr_dr": "0.0"
+            },
+            "command": {
+              "r": "2100.21",
+              "w_rff": "0.46",
+              "nonPaddy": [
+                {
+                  "cs": "0.0",
+                  "area": "31804.4",
+                  "rff": "0.42",
+                  "name": "wheat"
+                }
+              ],
+              "gwIrr": {
+                "gwrff": "0.46",
+                "gwIrrPer": "100"
+              },
+              "irr_dr": "4575.88",
+              "paddy": [
+                {
+                  "cs": "0.0",
+                  "area": "0.0",
+                  "rff": "0.42",
+                  "name": "paddy"
+                }
+              ]
+            }
+          },
+          "drainage": {},
+          "canal": {
+            "poor_quality": {
+              "rc": "187.15",
+              "ci": {
+                "Minor no 1 of Uddat Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "28.17",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "223",
+                  "bw": "1.75",
+                  "ddf": "0.0",
+                  "wp": "2.74",
+                  "wa": "0.03158",
+                  "l": "2820.0"
+                },
+                "Mussa Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "147.82",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "226",
+                  "bw": "4.11",
+                  "ddf": "0.0",
+                  "wp": "5.52",
+                  "wa": "0.16352",
+                  "l": "1780.0"
+                },
+                "Gharagana Minor": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "11.16",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "202",
+                  "bw": "1.94",
+                  "ddf": "0.0",
+                  "wp": "2.44",
+                  "wa": "0.01381",
+                  "l": "1320.0"
+                }
+              }
+            },
+            "non_command": {},
+            "command": {
+              "rc": "1507.64",
+              "ci": {
+                "Minor no 1 of Uddat Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "28.17",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "223",
+                  "bw": "1.75",
+                  "ddf": "0.0",
+                  "wp": "2.74",
+                  "wa": "0.03158",
+                  "l": "7380.0"
+                },
+                "Jagga Branch(19000-23000)": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "11.7",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "233",
+                  "bw": "5.11",
+                  "ddf": "0.0",
+                  "wp": "6.11",
+                  "wa": "0.01255",
+                  "l": "1220.0"
+                },
+                "Samaon Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "20.5",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "179",
+                  "bw": "2.32",
+                  "ddf": "0.0",
+                  "wp": "3.11",
+                  "wa": "0.02863",
+                  "l": "5469.0"
+                },
+                "Bhaini Disty": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "196.15",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "241",
+                  "bw": "6.1",
+                  "ddf": "0.0",
+                  "wp": "7.9",
+                  "wa": "0.20347",
+                  "l": "15299.0"
+                },
+                "Uddat Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "140.77",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "223",
+                  "bw": "3.18",
+                  "ddf": "0.0",
+                  "wp": "6.67",
+                  "wa": "0.15781",
+                  "l": "14054.0"
+                },
+                "MINOR NO 1": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "5.92",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "83",
+                  "bw": "2.56",
+                  "ddf": "0.0",
+                  "wp": "3.23",
+                  "wa": "0.01782",
+                  "l": "3277.0"
+                },
+                "Minor no 2 of Uddat Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "4.82",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "223",
+                  "bw": "1.03",
+                  "ddf": "0.0",
+                  "wp": "1.66",
+                  "wa": "0.00541",
+                  "l": "1935.0"
+                },
+                "Minor no 5 of Uddat Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "12.01",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "223",
+                  "bw": "1.55",
+                  "ddf": "0.0",
+                  "wp": "2.49",
+                  "wa": "0.01346",
+                  "l": "3211.0"
+                },
+                "Gharagana Minor": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "11.16",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "202",
+                  "bw": "1.94",
+                  "ddf": "0.0",
+                  "wp": "2.44",
+                  "wa": "0.01381",
+                  "l": "1600.0"
+                },
+                "Burj Hari Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "16.76",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "241",
+                  "bw": "1.45",
+                  "ddf": "0.0",
+                  "wp": "1.85",
+                  "wa": "0.01739",
+                  "l": "5583.0"
+                },
+                "Sub Minor no.1 of Mandi Minor": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "14.39",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "83",
+                  "bw": "5.26",
+                  "ddf": "0.0",
+                  "wp": "7.26",
+                  "wa": "0.04334",
+                  "l": "5970.0"
+                },
+                "Mussa Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "147.82",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "226",
+                  "bw": "4.11",
+                  "ddf": "0.0",
+                  "wp": "5.52",
+                  "wa": "0.16352",
+                  "l": "15050.0"
+                },
+                "Maur Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "51.18",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "198",
+                  "bw": "2.71",
+                  "ddf": "0.0",
+                  "wp": "4.2",
+                  "wa": "0.06463",
+                  "l": "9140.0"
+                },
+                "Joga Disty": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "9.63",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "83",
+                  "bw": "2.99",
+                  "ddf": "0.0",
+                  "wp": "3.78",
+                  "wa": "0.029",
+                  "l": "4557.0"
+                },
+                "Jagga Branch(0-13000)": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "37.91",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "233",
+                  "bw": "5.13",
+                  "ddf": "0.0",
+                  "wp": "6.19",
+                  "wa": "0.04067",
+                  "l": "3903.0"
+                },
+                "Sandoha Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "218.27",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "214",
+                  "bw": "5.54",
+                  "ddf": "0.0",
+                  "wp": "7.34",
+                  "wa": "0.25498",
+                  "l": "20635.0"
+                },
+                "Kotla Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "392.36",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "236",
+                  "bw": "17.2",
+                  "ddf": "0.0",
+                  "wp": "18.0",
+                  "wa": "0.41564",
+                  "l": "13716.0"
+                },
+                "Minor no 3 of Uddat Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "6.52",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "223",
+                  "bw": "1.37",
+                  "ddf": "0.0",
+                  "wp": "2.85",
+                  "wa": "0.00731",
+                  "l": "1524.0"
+                },
+                "Minor no 4 of Uddat Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "9.25",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "223",
+                  "bw": "1.29",
+                  "ddf": "0.0",
+                  "wp": "2.02",
+                  "wa": "0.01037",
+                  "l": "3048.0"
+                },
+                "Atla Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "15.89",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "189",
+                  "bw": "2.55",
+                  "ddf": "0.0",
+                  "wp": "3.47",
+                  "wa": "0.02102",
+                  "l": "3599.0"
+                },
+                "Ghuman Disty.": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "156.46",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "198",
+                  "bw": "6.18",
+                  "ddf": "0.0",
+                  "wp": "7.7",
+                  "wa": "0.19756",
+                  "l": "15240.0"
+                }
+              }
+            }
+          },
+          "streamRecharge": {
+            "poor_quality": {},
+            "non_command": {},
+            "command": {}
+          },
+          "artificial_structure": {
+            "poor_quality": {},
+            "non_command": {},
+            "command": {}
+          }
+        },
+        "draft": {
+          "agriculture": {
+            "decision": {
+              "poor_quality": {
+                "pc_dr": "0.0",
+                "dev1": "-100.0",
+                "dev2": "-100.0",
+                "dev": "-100.0",
+                "e_dr": "1681.28",
+                "u_dr": "1681.28",
+                "cwr_dr": "0.0"
+              },
+              "command": {
+                "pc_dr": "0.0",
+                "dev1": "-100.0",
+                "dev2": "-100.0",
+                "dev": "-100.0",
+                "e_dr": "4575.88",
+                "u_dr": "4575.88",
+                "cwr_dr": "0.0"
+              }
+            },
+            "crop_water_requirement": {
+              "poor_quality": {
+                "paddy": {
+                  "ca": "0.0",
+                  "dr": "0.0",
+                  "cwr": "0.0",
+                  "cropInfo": []
+                }
+              },
+              "command": {
+                "paddy": {
+                  "ca": "0.0",
+                  "dr": "0.0",
+                  "cwr": "0.0",
+                  "cropInfo": []
+                }
+              }
+            },
+            "unit_draft": {
+              "poor_quality": {
+                "Electric Tubewell": {
+                  "cy": "2024",
+                  "y": "0.37",
+                  "noi": "0",
+                  "und": "0.37",
+                  "cyc": "4544",
+                  "ryc": "4544",
+                  "ndr": "1681.28",
+                  "dr": "1681.28",
+                  "ud": "0.37"
+                },
+                "ndr": "1681.28",
+                "dr": "1681.28"
+              },
+              "command": {
+                "Electric Tubewell": {
+                  "cy": "2024",
+                  "y": "0.37",
+                  "noi": "0",
+                  "und": "0.37",
+                  "cyc": "5995",
+                  "ryc": "5995",
+                  "ndr": "2218.15",
+                  "dr": "2218.15",
+                  "ud": "0.37"
+                },
+                "Diesel Tubewell": {
+                  "cy": "2024",
+                  "y": "0.67",
+                  "noi": "0",
+                  "und": "0.67",
+                  "cyc": "3519",
+                  "ryc": "3519",
+                  "ndr": "2357.73",
+                  "dr": "2357.73",
+                  "ud": "0.67"
+                },
+                "ndr": "4575.88",
+                "dr": "4575.88"
+              }
+            }
+          },
+          "domestic": {
+            "decision": {
+              "poor_quality": {
+                "dev": "0.0",
+                "cons_use": "0.0",
+                "e_dr": "0.0",
+                "u_dr": "0.0"
+              },
+              "command": {
+                "dev": "0.0",
+                "cons_use": "0.0",
+                "e_dr": "0.0",
+                "u_dr": "0.0"
+              }
+            },
+            "consumptive_use_method": {
+              "poor_quality": {
+                "total": {
+                  "nod": "241",
+                  "ry": "0",
+                  "ay": "2024",
+                  "pop_ay": "0",
+                  "pop_ry": "0",
+                  "dr": "0.0"
+                },
+                "urban": {
+                  "lpcd": "0.0",
+                  "pop_ay": "0",
+                  "pop_ry": "0",
+                  "lg": "0.0",
+                  "gr": "0.0",
+                  "dr": "0.0"
+                },
+                "rural": {
+                  "lpcd": "0.0",
+                  "pop_ay": "0",
+                  "pop_ry": "0",
+                  "lg": "0.0",
+                  "gr": "0.0",
+                  "dr": "0.0"
+                }
+              },
+              "command": {
+                "total": {
+                  "nod": "290",
+                  "ry": "2024",
+                  "ay": "2024",
+                  "pop_ay": "248294",
+                  "pop_ry": "248294",
+                  "dr": "0.0"
+                },
+                "urban": {
+                  "lpcd": "0.0",
+                  "pop_ay": "0",
+                  "pop_ry": "0",
+                  "lg": "0.0",
+                  "gr": "0.0",
+                  "dr": "0.0"
+                },
+                "rural": {
+                  "lpcd": "100.0",
+                  "pop_ay": "248294",
+                  "pop_ry": "248294",
+                  "lg": "0.0",
+                  "gr": "0.25",
+                  "dr": "0.0"
+                }
+              }
+            },
+            "unit_draft": {
+              "poor_quality": {
+                "4395a7": {
+                  "cy": "2024",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0"
+                },
+                "ndr": "0.0",
+                "dr": "0.0"
+              },
+              "command": {
+                "Canal": {
+                  "cy": "2024",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0"
+                },
+                "ndr": "0.0",
+                "dr": "0.0"
+              }
+            }
+          },
+          "total": {
+            "poor_quality": 1681.28,
+            "total": 6263.67,
+            "command": 4582.39
+          },
+          "industry": {
+            "decision": {
+              "poor_quality": {
+                "dev": "0.0",
+                "cons_use": "0.0",
+                "e_dr": "0.0",
+                "u_dr": "0.0"
+              },
+              "command": {
+                "dev": "-100.0",
+                "cons_use": "0.0",
+                "e_dr": "6.51",
+                "u_dr": "6.51"
+              }
+            },
+            "consumptive_use_pattern": {
+              "poor_quality": {
+                "92df83": {
+                  "nod": "0.0",
+                  "tdr": "0.0",
+                  "noi": "0",
+                  "lg": "0.0",
+                  "dr": "0.0"
+                }
+              },
+              "command": {
+                "9c230a": {
+                  "nod": "0.0",
+                  "tdr": "0.0",
+                  "noi": "0",
+                  "lg": "0.0",
+                  "dr": "0.0"
+                }
+              }
+            },
+            "unit_draft": {
+              "poor_quality": {
+                "0.0##0": {
+                  "cy": "2024",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0",
+                  "toi": "0"
+                },
+                "ndr": "0.0",
+                "dr": "0.0"
+              },
+              "command": {
+                "Tubewell##0": {
+                  "cy": "2024",
+                  "y": "0.93",
+                  "noi": "0",
+                  "und": "0.93",
+                  "cyc": "7",
+                  "ryc": "7",
+                  "ndr": "6.510000000000001",
+                  "dr": "6.510000000000001",
+                  "ud": "0.93",
+                  "toi": "0"
+                },
+                "ndr": "6.510000000000001",
+                "dr": "6.510000000000001"
+              }
+            }
+          }
+        },
+        "availability": {
+          "poor_quality": {
+            "av": 1973.48
+          },
+          "non_command": {
+            "av": 0.0
+          },
+          "command": {
+            "av": 4647.55
+          }
+        },
+        "lateral_aquifer": {
+          "poor_quality": [],
+          "total": [],
+          "non_command": [],
+          "command": []
+        },
+        "vertcal_aquifer": {
+          "poor_quality": [],
+          "total": [],
+          "non_command": [],
+          "command": []
+        },
+        "et": {
+          "transpiration": {
+            "poor_quality": {
+              "2.0-2.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 2.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "3.0-3.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 3.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "4.5-5.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 4.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "0.5-1.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 0.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "1.0-1.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 1.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "2.5-3.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 2.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "4.0-4.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 4.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "0.0-0.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 0.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "1.5-2.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 1.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "3.5-4.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 3.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              }
+            },
+            "non_command": {
+              "2.0-2.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 2.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "3.0-3.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 3.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "4.5-5.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 4.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "0.5-1.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 0.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "1.0-1.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 1.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "2.5-3.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 2.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "4.0-4.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 4.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "0.0-0.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 0.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "1.5-2.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 1.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "3.5-4.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 3.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              }
+            },
+            "command": {
+              "2.0-2.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 2.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "3.0-3.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 3.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "4.5-5.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 4.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "0.5-1.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 0.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "1.0-1.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 1.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "2.5-3.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 2.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "4.0-4.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 4.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "0.0-0.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 0.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "1.5-2.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 1.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "3.5-4.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 3.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              }
+            }
+          },
+          "evaporation": {
+            "poor_quality": {
+              "0.5-1.0": {
+                "area": 0.0,
+                "zn": "",
+                "agl": 0.75,
+                "nodays": 0.0,
+                "evaporation": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "1.0-1.5": {
+                "area": 0.0,
+                "zn": "",
+                "agl": 1.25,
+                "nodays": 0.0,
+                "evaporation": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "0.0-0.5": {
+                "area": 0.0,
+                "zn": "",
+                "agl": 0.25,
+                "nodays": 0.0,
+                "evaporation": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "1.5-2.0": {
+                "area": 0.0,
+                "zn": "",
+                "agl": 1.75,
+                "nodays": 0.0,
+                "evaporation": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              }
+            },
+            "non_command": {
+              "0.5-1.0": {
+                "area": 0.0,
+                "zn": "",
+                "agl": 0.75,
+                "nodays": 0.0,
+                "evaporation": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "1.0-1.5": {
+                "area": 0.0,
+                "zn": "",
+                "agl": 1.25,
+                "nodays": 0.0,
+                "evaporation": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "0.0-0.5": {
+                "area": 0.0,
+                "zn": "",
+                "agl": 0.25,
+                "nodays": 0.0,
+                "evaporation": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "1.5-2.0": {
+                "area": 0.0,
+                "zn": "",
+                "agl": 1.75,
+                "nodays": 0.0,
+                "evaporation": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              }
+            },
+            "command": {
+              "0.5-1.0": {
+                "area": 0.0,
+                "zn": "",
+                "agl": 0.75,
+                "nodays": 0.0,
+                "evaporation": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "1.0-1.5": {
+                "area": 0.0,
+                "zn": "",
+                "agl": 1.25,
+                "nodays": 0.0,
+                "evaporation": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "0.0-0.5": {
+                "area": 0.0,
+                "zn": "",
+                "agl": 0.25,
+                "nodays": 0.0,
+                "evaporation": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "1.5-2.0": {
+                "area": 0.0,
+                "zn": "",
+                "agl": 1.75,
+                "nodays": 0.0,
+                "evaporation": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              }
+            }
+          },
+          "et": {
+            "poor_quality": {
+              "2.0-2.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 2.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "3.0-3.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 3.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "4.5-5.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 4.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "0.5-1.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 0.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "1.0-1.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 1.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "2.5-3.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 2.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "4.0-4.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 4.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "0.0-0.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 0.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "1.5-2.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 1.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "3.5-4.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 3.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              }
+            },
+            "non_command": {
+              "2.0-2.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 2.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "3.0-3.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 3.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "4.5-5.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 4.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "0.5-1.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 0.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "1.0-1.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 1.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "2.5-3.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 2.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "4.0-4.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 4.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "0.0-0.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 0.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "1.5-2.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 1.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "3.5-4.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 3.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              }
+            },
+            "command": {
+              "2.0-2.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 2.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "3.0-3.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 3.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "4.5-5.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 4.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "0.5-1.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 0.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "1.0-1.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 1.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "2.5-3.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 2.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "4.0-4.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 4.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "0.0-0.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 0.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "1.5-2.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 1.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "3.5-4.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 3.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              }
+            }
+          }
+        }
+      },
+      "monsoon": {
+        "loss": {
+          "loss": {
+            "poor_quality": {
+              "p": "10.0",
+              "v": "556.64"
+            },
+            "non_command": {
+              "p": "10.0",
+              "v": "0.0"
+            },
+            "command": {
+              "p": "10.0",
+              "v": "1101.95"
+            }
+          }
+        },
+        "staticGWResource": {
+          "poor_quality": {
+            "pre": 12.796,
+            "b": 0.0,
+            "sy": 0.0
+          },
+          "non_command": {
+            "pre": 0.0,
+            "b": 0.0,
+            "sy": 0.0
+          },
+          "command": {
+            "pre": 12.796,
+            "b": 0.0,
+            "sy": 0.0
+          }
+        },
+        "rf": {
+          "a": 189.49,
+          "n": 295.0
+        },
+        "stage": {
+          "poor_quality": {
+            "av": "6983.23"
+          },
+          "total": {
+            "av": "14565.12"
+          },
+          "command": {
+            "av": "14565.12"
+          }
+        },
+        "pot_rec": {
+          "springDischarge": {
+            "null": {
+              "sDays": 0.0,
+              "dis": 0.0,
+              "sr": 0.0
+            }
+          }
+        },
+        "recharge": {
+          "agriculture": {},
+          "rainfall": {
+            "poor_quality": {
+              "S3": "0.422",
+              "lastNYr": "{\"2016-2017\":{\"postGW\":10.9,\"changeGW\":-0.24,\"rf\":0.187,\"recGW\":1191.419,\"preGW\":10.66},\"2021-2022\":{\"postGW\":12.64,\"changeGW\":-0.28,\"rf\":0.184,\"recGW\":1176.372,\"preGW\":12.36},\"2024-2025\":{\"postGW\":14.52,\"changeGW\":-0.74,\"rf\":0.189,\"recGW\":1003.333,\"preGW\":13.78},\"2018-2019\":{\"postGW\":12.08,\"changeGW\":-0.53,\"rf\":0.253,\"recGW\":1082.329,\"preGW\":11.55},\"2015-2016\":{\"postGW\":10.66,\"changeGW\":-1.01,\"rf\":0.204,\"recGW\":901.767,\"preGW\":9.65},\"2023-2024\":{\"postGW\":13.78,\"changeGW\":-0.91,\"rf\":0.126,\"recGW\":939.384,\"preGW\":12.87},\"2020-2021\":{\"postGW\":12.16,\"changeGW\":-0.03,\"rf\":0.231,\"recGW\":1270.415,\"preGW\":12.13},\"2017-2018\":{\"postGW\":11.27,\"changeGW\":-0.12,\"rf\":0.263,\"recGW\":1236.559,\"preGW\":11.15},\"2019-2020\":{\"postGW\":12.31,\"changeGW\":-0.46,\"rf\":0.185,\"recGW\":1108.661,\"preGW\":11.85},\"2022-2023\":{\"postGW\":12.45,\"changeGW\":0.39,\"rf\":0.198,\"recGW\":1428.407,\"preGW\":12.84}}",
+              "S4": "2311.265",
+              "rflows": "0.0",
+              "an_rf": "218.57",
+              "N": "10.0",
+              "e_m2": "1272.821",
+              "an_nrf": "366.0",
+              "dv": "614.25",
+              "ros": "5352.54",
+              "if": "0.22",
+              "fac_a": "1494.148",
+              "fac_b": "832.047",
+              "a": "3134.76",
+              "nrf": "295.0",
+              "m1": "178.2",
+              "m2": "1003.333",
+              "sy": "0.12",
+              "m2n": "1272.821",
+              "gwsc": "-278.37",
+              "td": "6634.24",
+              "rc": "213.85",
+              "gwc": "-0.74",
+              "at": "poor_quality",
+              "th": "36.6",
+              "rf": "189.49",
+              "S1": "2.02",
+              "rp": "true",
+              "S2": "11338.647"
+            },
+            "non_command": {
+              "S3": "0.0",
+              "lastNYr": "{\"2016-2017\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":0.0},\"2021-2022\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":0.0},\"2024-2025\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":0.0},\"2018-2019\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":0.0},\"2015-2016\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":0.0},\"2023-2024\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":0.0},\"2020-2021\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":0.0},\"2017-2018\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":0.0},\"2019-2020\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":0.0},\"2022-2023\":{\"postGW\":0.0,\"changeGW\":0.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":0.0}}",
+              "S4": "0.0",
+              "rflows": "0.0",
+              "an_rf": "0.0",
+              "N": "10.0",
+              "e_m2": "0.0",
+              "an_nrf": "0.0",
+              "dv": "null",
+              "ros": "0.0",
+              "if": "0.22",
+              "fac_a": "null",
+              "fac_b": "null",
+              "a": "0.0",
+              "nrf": "0.0",
+              "m1": "0.0",
+              "sy": "0.12",
+              "gwsc": "0.0",
+              "td": "0.0",
+              "rc": "0.0",
+              "gwc": "0.0",
+              "at": "non_command",
+              "th": "0.0",
+              "rf": "0.0",
+              "S1": "0.0",
+              "rp": "true",
+              "S2": "0.0"
+            },
+            "command": {
+              "S3": "0.38",
+              "lastNYr": "{\"2016-2017\":{\"postGW\":10.9,\"changeGW\":-0.24,\"rf\":0.187,\"recGW\":2935.383,\"preGW\":10.66},\"2021-2022\":{\"postGW\":12.64,\"changeGW\":-0.28,\"rf\":0.184,\"recGW\":2762.381,\"preGW\":12.36},\"2024-2025\":{\"postGW\":14.52,\"changeGW\":-0.74,\"rf\":0.189,\"recGW\":772.849,\"preGW\":13.78},\"2018-2019\":{\"postGW\":12.08,\"changeGW\":-0.53,\"rf\":0.253,\"recGW\":1681.114,\"preGW\":11.55},\"2015-2016\":{\"postGW\":10.66,\"changeGW\":-1.01,\"rf\":0.204,\"recGW\":-394.919,\"preGW\":9.65},\"2023-2024\":{\"postGW\":13.78,\"changeGW\":-0.91,\"rf\":0.126,\"recGW\":37.587,\"preGW\":12.87},\"2020-2021\":{\"postGW\":12.16,\"changeGW\":-0.03,\"rf\":0.231,\"recGW\":3843.648,\"preGW\":12.13},\"2017-2018\":{\"postGW\":11.27,\"changeGW\":-0.12,\"rf\":0.263,\"recGW\":3454.392,\"preGW\":11.15},\"2019-2020\":{\"postGW\":12.31,\"changeGW\":-0.46,\"rf\":0.185,\"recGW\":1983.868,\"preGW\":11.85},\"2022-2023\":{\"postGW\":12.45,\"changeGW\":0.39,\"rf\":0.198,\"recGW\":5660.177,\"preGW\":12.84}}",
+              "S4": "4914.982",
+              "rflows": "0.0",
+              "an_rf": "218.57",
+              "N": "9.0",
+              "e_m2": "4270.766",
+              "an_nrf": "366.0",
+              "dv": "108.44",
+              "ros": "8560.8",
+              "if": "0.22",
+              "fac_a": "18242.545",
+              "fac_b": "-1110.785",
+              "a": "36042.24",
+              "nrf": "295.0",
+              "m1": "2048.93",
+              "m2": "772.849",
+              "sy": "0.12",
+              "m2n": "4270.766",
+              "gwsc": "-3200.55",
+              "td": "12534.2",
+              "rc": "2458.72",
+              "gwc": "-0.74",
+              "at": "command",
+              "th": "36.6",
+              "rf": "189.49",
+              "S1": "1.816",
+              "rp": "true",
+              "S2": "23131.399"
+            }
+          },
+          "total": {
+            "poor_quality": 5566.39,
+            "total": 16585.91,
+            "non_command": 0.0,
+            "command": 11019.52
+          },
+          "surface_irrigation": {
+            "poor_quality": {
+              "total": "0.0",
+              "can_rel": [
+                {
+                  "rec": "2244.22",
+                  "ddc": "55.8",
+                  "ad": "33.48",
+                  "nonPaddy": "{\"wheat,cotton\":{\"name\":\"wheat,cotton\",\"cropArea\":{\"monsoon\":457.6,\"non_monsoon\":2765.6},\"returnFlowFactor\":{\"monsoon\":0.273,\"non_monsoon\":0.273},\"continousWS\":{\"poor_quality\":0.0},\"dischargeDays\":{\"poor_quality_non_monsoon\":102.89999999999999,\"poor_quality_monsoon\":191.1},\"weightedFlowFactor\":{\"poor_quality_non_monsoon\":0.35096288598574826,\"poor_quality_monsoon\":0.35096288598574826}}}",
+                  "out_name": "Canal",
+                  "rel": "6394.468836636735",
+                  "dist": "Outlet",
+                  "days": "191",
+                  "wRff": "0.35",
+                  "outlet": "Canal",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{\"monsoon\":2165.6,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.467,\"non_monsoon\":0.467},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "2244.22",
+                  "rel": "6394.47"
+                }
+              ],
+              "crop_w_req": [
+                {
+                  "cs": "0.0",
+                  "rff": "0.45",
+                  "name": "paddy",
+                  "wr": "0.0",
+                  "type": "paddy",
+                  "ca": "0.0",
+                  "cr": "0.0",
+                  "paddy": "{\"cropName\":\"paddy\",\"cropArea\":{},\"waterRequired\":{},\"returnFlowFactor\":{},\"continousWS\":{}}"
+                },
+                {
+                  "paddy_rec": "0.0",
+                  "paddy_wr": "0.0"
+                }
+              ],
+              "rff_calc": {
+                "nonPaddy_area": "0.0",
+                "pre": "13",
+                "paddy_area": "0.0",
+                "post": "14",
+                "nonPaddy_rff": "0",
+                "paddy_rff": "0.45",
+                "wrff": "0.41",
+                "gwl": "13"
+              }
+            },
+            "non_command": {
+              "total": "0.0",
+              "can_rel": [
+                {
+                  "rec": "0.0",
+                  "ddc": "55.8",
+                  "ad": "33.48",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":0.0},\"weightedFlowFactor\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":0.0}}}",
+                  "out_name": "Canal",
+                  "rel": "0.0",
+                  "dist": "Outlet",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "rel": "0.0"
+                }
+              ],
+              "crop_w_req": [
+                {
+                  "cs": "0.0",
+                  "rff": "0.5",
+                  "name": "paddy",
+                  "wr": "0.0",
+                  "type": "paddy",
+                  "ca": "0.0",
+                  "cr": "0.0",
+                  "paddy": "{\"cropName\":\"paddy\",\"cropArea\":{},\"waterRequired\":{},\"returnFlowFactor\":{},\"continousWS\":{}}"
+                },
+                {
+                  "paddy_rec": "0.0",
+                  "paddy_wr": "0.0"
+                }
+              ],
+              "rff_calc": {
+                "nonPaddy_area": "0.0",
+                "pre": "0",
+                "paddy_area": "0.0",
+                "post": "0",
+                "nonPaddy_rff": "0",
+                "paddy_rff": "0.5",
+                "wrff": "0.41",
+                "gwl": "0"
+              }
+            },
+            "command": {
+              "total": "1531.99",
+              "can_rel": [
+                {
+                  "rec": "2244.22",
+                  "ddc": "55.8",
+                  "ad": "33.48",
+                  "nonPaddy": "{\"wheat\":{\"name\":\"wheat\",\"cropArea\":{\"monsoon\":5262.4,\"non_monsoon\":31804.4},\"returnFlowFactor\":{\"monsoon\":0.273,\"non_monsoon\":0.273},\"continousWS\":{\"command\":0.0},\"dischargeDays\":{\"command_non_monsoon\":102.89999999999999,\"command_monsoon\":191.1},\"weightedFlowFactor\":{\"command_non_monsoon\":0.35096288598574826,\"command_monsoon\":0.35096288598574826}}}",
+                  "out_name": "Canal",
+                  "rel": "6394.468836636735",
+                  "dist": "Outlet",
+                  "days": "191",
+                  "wRff": "0.35",
+                  "outlet": "Canal",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{\"monsoon\":24904.4,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.467,\"non_monsoon\":0.467},\"continousWS\":{\"command\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "2244.22",
+                  "rel": "6394.47"
+                }
+              ],
+              "crop_w_req": [
+                {
+                  "cs": "0.0",
+                  "rff": "0.27",
+                  "nonPaddy": "{\"cropName\":\"wheat\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":32100.0},\"waterRequired\":{\"monsoon\":0.0,\"non_monsoon\":40.0},\"returnFlowFactor\":{\"monsoon\":0.27,\"non_monsoon\":0.27},\"continousWS\":{\"command\":0.0}}",
+                  "name": "wheat",
+                  "wr": "0.0",
+                  "type": "nonPaddy",
+                  "ca": "0.0",
+                  "cr": "0.0"
+                },
+                {
+                  "cs": "0.0",
+                  "rff": "0.467",
+                  "name": "paddy",
+                  "wr": "0.135",
+                  "type": "paddy",
+                  "ca": "24300.0",
+                  "cr": "1531.9935",
+                  "paddy": "{\"cropName\":\"paddy\",\"cropArea\":{\"monsoon\":24300.0,\"non_monsoon\":0.0},\"waterRequired\":{\"monsoon\":135.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.467,\"non_monsoon\":0.467},\"continousWS\":{\"command\":0.0}}"
+                },
+                {
+                  "nonPaddy_wr": "0.0",
+                  "paddy_rec": "1531.99",
+                  "nonPaddy_rec": "0.0",
+                  "paddy_wr": "0.14"
+                }
+              ],
+              "rff_calc": {
+                "nonPaddy_area": "0.0",
+                "pre": "13",
+                "paddy_area": "24300.0",
+                "post": "14",
+                "nonPaddy_rff": "0",
+                "paddy_rff": "0.45",
+                "wrff": "0.41",
+                "gwl": "13"
+              }
+            }
+          },
+          "water_body": {
+            "poor_quality": {},
+            "non_command": {},
+            "command": {
+              "rc": "12.18",
+              "wbi": {
+                "Pond": {
+                  "no": "126.0",
+                  "esa": "1.38",
+                  "r": "12.18",
+                  "d": "50",
+                  "if": "0.0014",
+                  "sa": "1.38"
+                }
+              }
+            }
+          },
+          "gw_irrigation": {
+            "poor_quality": {
+              "r": "3044.95",
+              "w_rff": "0.46",
+              "nonPaddy": [
+                {
+                  "cs": "0.0",
+                  "area": "457.6",
+                  "rff": "0.42",
+                  "name": "wheat,cotton"
+                }
+              ],
+              "gwIrr": {
+                "gwrff": "0.46",
+                "gwIrrPer": "100"
+              },
+              "irr_dr": "6634.24",
+              "paddy": [
+                {
+                  "cs": "0.0",
+                  "area": "2165.6",
+                  "rff": "0.42",
+                  "name": "paddy"
+                }
+              ]
+            },
+            "non_command": {
+              "r": "0.0",
+              "w_rff": "0.0",
+              "nonPaddy": [],
+              "gwIrr": {
+                "gwrff": "0.0",
+                "gwIrrPer": "100"
+              },
+              "irr_dr": "0.0"
+            },
+            "command": {
+              "r": "5745.46",
+              "w_rff": "0.46",
+              "nonPaddy": [
+                {
+                  "cs": "0.0",
+                  "area": "5262.4",
+                  "rff": "0.42",
+                  "name": "wheat"
+                }
+              ],
+              "gwIrr": {
+                "gwrff": "0.46",
+                "gwIrrPer": "100"
+              },
+              "irr_dr": "12518.03",
+              "paddy": [
+                {
+                  "cs": "0.0",
+                  "area": "24904.4",
+                  "rff": "0.42",
+                  "name": "paddy"
+                }
+              ]
+            }
+          },
+          "drainage": {},
+          "canal": {
+            "poor_quality": {
+              "rc": "63.37",
+              "ci": {
+                "Minor no 1 of Uddat Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "9.09",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "72",
+                  "bw": "1.75",
+                  "ddf": "0.0",
+                  "wp": "2.74",
+                  "wa": "0.03158",
+                  "l": "2820.0"
+                },
+                "Mussa Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "51.02",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "78",
+                  "bw": "4.11",
+                  "ddf": "0.0",
+                  "wp": "5.52",
+                  "wa": "0.16352",
+                  "l": "1780.0"
+                },
+                "Gharagana Minor": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "3.26",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "59",
+                  "bw": "1.94",
+                  "ddf": "0.0",
+                  "wp": "2.44",
+                  "wa": "0.01381",
+                  "l": "1320.0"
+                }
+              }
+            },
+            "non_command": {},
+            "command": {
+              "rc": "558.94",
+              "ci": {
+                "Minor no 1 of Uddat Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "9.09",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "72",
+                  "bw": "1.75",
+                  "ddf": "0.0",
+                  "wp": "2.74",
+                  "wa": "0.03158",
+                  "l": "7380.0"
+                },
+                "Jagga Branch(19000-23000)": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "4.22",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "84",
+                  "bw": "5.11",
+                  "ddf": "0.0",
+                  "wp": "6.11",
+                  "wa": "0.01255",
+                  "l": "1220.0"
+                },
+                "Samaon Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "6.07",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "53",
+                  "bw": "2.32",
+                  "ddf": "0.0",
+                  "wp": "3.11",
+                  "wa": "0.02863",
+                  "l": "5469.0"
+                },
+                "Bhaini Disty": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "65.11",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "80",
+                  "bw": "6.1",
+                  "ddf": "0.0",
+                  "wp": "7.9",
+                  "wa": "0.20347",
+                  "l": "15299.0"
+                },
+                "Uddat Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "45.45",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "72",
+                  "bw": "3.18",
+                  "ddf": "0.0",
+                  "wp": "6.67",
+                  "wa": "0.15781",
+                  "l": "14054.0"
+                },
+                "MINOR NO 1": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "8.55",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "120",
+                  "bw": "2.56",
+                  "ddf": "0.0",
+                  "wp": "3.23",
+                  "wa": "0.01782",
+                  "l": "3277.0"
+                },
+                "Minor no 2 of Uddat Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "1.56",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "72",
+                  "bw": "1.03",
+                  "ddf": "0.0",
+                  "wp": "1.66",
+                  "wa": "0.00541",
+                  "l": "1935.0"
+                },
+                "Minor no 5 of Uddat Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "3.88",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "72",
+                  "bw": "1.55",
+                  "ddf": "0.0",
+                  "wp": "2.49",
+                  "wa": "0.01346",
+                  "l": "3211.0"
+                },
+                "Gharagana Minor": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "3.26",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "59",
+                  "bw": "1.94",
+                  "ddf": "0.0",
+                  "wp": "2.44",
+                  "wa": "0.01381",
+                  "l": "1600.0"
+                },
+                "Burj Hari Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "5.56",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "80",
+                  "bw": "1.45",
+                  "ddf": "0.0",
+                  "wp": "1.85",
+                  "wa": "0.01739",
+                  "l": "5583.0"
+                },
+                "Sub Minor no.1 of Mandi Minor": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "20.8",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "120",
+                  "bw": "5.26",
+                  "ddf": "0.0",
+                  "wp": "7.26",
+                  "wa": "0.04334",
+                  "l": "5970.0"
+                },
+                "Mussa Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "51.02",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "78",
+                  "bw": "4.11",
+                  "ddf": "0.0",
+                  "wp": "5.52",
+                  "wa": "0.16352",
+                  "l": "15050.0"
+                },
+                "Maur Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "17.58",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "68",
+                  "bw": "2.71",
+                  "ddf": "0.0",
+                  "wp": "4.2",
+                  "wa": "0.06463",
+                  "l": "9140.0"
+                },
+                "Joga Disty": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "13.92",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "120",
+                  "bw": "2.99",
+                  "ddf": "0.0",
+                  "wp": "3.78",
+                  "wa": "0.029",
+                  "l": "4557.0"
+                },
+                "Jagga Branch(0-13000)": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "13.67",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "84",
+                  "bw": "5.13",
+                  "ddf": "0.0",
+                  "wp": "6.19",
+                  "wa": "0.04067",
+                  "l": "3903.0"
+                },
+                "Sandoha Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "81.6",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "80",
+                  "bw": "5.54",
+                  "ddf": "0.0",
+                  "wp": "7.34",
+                  "wa": "0.25498",
+                  "l": "20635.0"
+                },
+                "Kotla Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "144.64",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "87",
+                  "bw": "17.2",
+                  "ddf": "0.0",
+                  "wp": "18.0",
+                  "wa": "0.41564",
+                  "l": "13716.0"
+                },
+                "Minor no 3 of Uddat Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "2.11",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "72",
+                  "bw": "1.37",
+                  "ddf": "0.0",
+                  "wp": "2.85",
+                  "wa": "0.00731",
+                  "l": "1524.0"
+                },
+                "Minor no 4 of Uddat Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "2.99",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "72",
+                  "bw": "1.29",
+                  "ddf": "0.0",
+                  "wp": "2.02",
+                  "wa": "0.01037",
+                  "l": "3048.0"
+                },
+                "Atla Branch": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "4.12",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "49",
+                  "bw": "2.55",
+                  "ddf": "0.0",
+                  "wp": "3.47",
+                  "wa": "0.02102",
+                  "l": "3599.0"
+                },
+                "Ghuman Disty.": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.0",
+                  "r": "53.74",
+                  "sf": "4.0",
+                  "t": "",
+                  "d": "68",
+                  "bw": "6.18",
+                  "ddf": "0.0",
+                  "wp": "7.7",
+                  "wa": "0.19756",
+                  "l": "15240.0"
+                }
+              }
+            }
+          },
+          "streamRecharge": {
+            "poor_quality": {},
+            "non_command": {},
+            "command": {}
+          },
+          "artificial_structure": {
+            "poor_quality": {},
+            "non_command": {},
+            "command": {}
+          }
+        },
+        "draft": {
+          "agriculture": {
+            "decision": {
+              "poor_quality": {
+                "pc_dr": "0.0",
+                "dev1": "-100.0",
+                "dev2": "-100.0",
+                "dev": "-100.0",
+                "e_dr": "6634.24",
+                "u_dr": "6634.24",
+                "cwr_dr": "0.0"
+              },
+              "command": {
+                "pc_dr": "0.0",
+                "dev1": "-100.0",
+                "dev2": "-100.0",
+                "dev": "-100.0",
+                "e_dr": "12518.029999999999",
+                "u_dr": "12518.03",
+                "cwr_dr": "0.0"
+              }
+            },
+            "crop_water_requirement": {
+              "poor_quality": {
+                "paddy": {
+                  "ca": "0.0",
+                  "dr": "0.0",
+                  "cwr": "0.0",
+                  "cropInfo": []
+                }
+              },
+              "command": {
+                "paddy": {
+                  "ca": "0.0",
+                  "dr": "0.0",
+                  "cwr": "0.0",
+                  "cropInfo": []
+                }
+              }
+            },
+            "unit_draft": {
+              "poor_quality": {
+                "Electric Tubewell": {
+                  "cy": "2024",
+                  "y": "1.46",
+                  "noi": "0",
+                  "und": "1.46",
+                  "cyc": "4544",
+                  "ryc": "4544",
+                  "ndr": "6634.24",
+                  "dr": "6634.24",
+                  "ud": "1.46"
+                },
+                "ndr": "6634.24",
+                "dr": "6634.24"
+              },
+              "command": {
+                "Electric Tubewell": {
+                  "cy": "2024",
+                  "y": "1.46",
+                  "noi": "0",
+                  "und": "1.46",
+                  "cyc": "5995",
+                  "ryc": "5995",
+                  "ndr": "8752.699999999999",
+                  "dr": "8752.699999999999",
+                  "ud": "1.46"
+                },
+                "Diesel Tubewell": {
+                  "cy": "2024",
+                  "y": "1.07",
+                  "noi": "0",
+                  "und": "1.07",
+                  "cyc": "3519",
+                  "ryc": "3519",
+                  "ndr": "3765.3300000000004",
+                  "dr": "3765.3300000000004",
+                  "ud": "1.07"
+                },
+                "ndr": "12518.029999999999",
+                "dr": "12518.029999999999"
+              }
+            }
+          },
+          "domestic": {
+            "decision": {
+              "poor_quality": {
+                "dev": "0.0",
+                "cons_use": "0.0",
+                "e_dr": "0.0",
+                "u_dr": "0.0"
+              },
+              "command": {
+                "dev": "0.0",
+                "cons_use": "0.0",
+                "e_dr": "0.0",
+                "u_dr": "0.0"
+              }
+            },
+            "consumptive_use_method": {
+              "poor_quality": {
+                "total": {
+                  "nod": "122",
+                  "ry": "0",
+                  "ay": "2024",
+                  "pop_ay": "0",
+                  "pop_ry": "0",
+                  "dr": "0.0"
+                },
+                "urban": {
+                  "lpcd": "0.0",
+                  "pop_ay": "0",
+                  "pop_ry": "0",
+                  "lg": "0.0",
+                  "gr": "0.0",
+                  "dr": "0.0"
+                },
+                "rural": {
+                  "lpcd": "0.0",
+                  "pop_ay": "0",
+                  "pop_ry": "0",
+                  "lg": "0.0",
+                  "gr": "0.0",
+                  "dr": "0.0"
+                }
+              },
+              "command": {
+                "total": {
+                  "nod": "75",
+                  "ry": "2024",
+                  "ay": "2024",
+                  "pop_ay": "248294",
+                  "pop_ry": "248294",
+                  "dr": "0.0"
+                },
+                "urban": {
+                  "lpcd": "0.0",
+                  "pop_ay": "0",
+                  "pop_ry": "0",
+                  "lg": "0.0",
+                  "gr": "0.0",
+                  "dr": "0.0"
+                },
+                "rural": {
+                  "lpcd": "100.0",
+                  "pop_ay": "248294",
+                  "pop_ry": "248294",
+                  "lg": "0.0",
+                  "gr": "0.25",
+                  "dr": "0.0"
+                }
+              }
+            },
+            "unit_draft": {
+              "poor_quality": {
+                "4395a7": {
+                  "cy": "2024",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0"
+                },
+                "ndr": "0.0",
+                "dr": "0.0"
+              },
+              "command": {
+                "Canal": {
+                  "cy": "2024",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0"
+                },
+                "ndr": "0.0",
+                "dr": "0.0"
+              }
+            }
+          },
+          "total": {
+            "poor_quality": 6634.24,
+            "total": 19168.44,
+            "command": 12534.2
+          },
+          "industry": {
+            "decision": {
+              "poor_quality": {
+                "dev": "0.0",
+                "cons_use": "0.0",
+                "e_dr": "0.0",
+                "u_dr": "0.0"
+              },
+              "command": {
+                "dev": "-100.0",
+                "cons_use": "0.0",
+                "e_dr": "16.17",
+                "u_dr": "16.17"
+              }
+            },
+            "consumptive_use_pattern": {
+              "poor_quality": {
+                "92df83": {
+                  "nod": "0.0",
+                  "tdr": "0.0",
+                  "noi": "0",
+                  "lg": "0.0",
+                  "dr": "0.0"
+                }
+              },
+              "command": {
+                "9c230a": {
+                  "nod": "0.0",
+                  "tdr": "0.0",
+                  "noi": "0",
+                  "lg": "0.0",
+                  "dr": "0.0"
+                }
+              }
+            },
+            "unit_draft": {
+              "poor_quality": {
+                "0.0##0": {
+                  "cy": "2024",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0",
+                  "toi": "0"
+                },
+                "ndr": "0.0",
+                "dr": "0.0"
+              },
+              "command": {
+                "Tubewell##0": {
+                  "cy": "2024",
+                  "y": "2.31",
+                  "noi": "0",
+                  "und": "2.31",
+                  "cyc": "7",
+                  "ryc": "7",
+                  "ndr": "16.17",
+                  "dr": "16.17",
+                  "ud": "2.31",
+                  "toi": "0"
+                },
+                "ndr": "16.17",
+                "dr": "16.17"
+              }
+            }
+          }
+        },
+        "availability": {
+          "poor_quality": {
+            "av": 5009.75
+          },
+          "non_command": {
+            "av": 0.0
+          },
+          "command": {
+            "av": 9917.57
+          }
+        },
+        "lateral_aquifer": {
+          "poor_quality": [],
+          "total": [],
+          "non_command": [],
+          "command": []
+        },
+        "vertcal_aquifer": {
+          "poor_quality": [],
+          "total": [],
+          "non_command": [],
+          "command": []
+        },
+        "et": {
+          "transpiration": {
+            "poor_quality": {
+              "2.0-2.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 2.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "3.0-3.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 3.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "4.5-5.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 4.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "0.5-1.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 0.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "1.0-1.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 1.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "2.5-3.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 2.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "4.0-4.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 4.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "0.0-0.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 0.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "1.5-2.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 1.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "3.5-4.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 3.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              }
+            },
+            "non_command": {
+              "2.0-2.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 2.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "3.0-3.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 3.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "4.5-5.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 4.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "0.5-1.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 0.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "1.0-1.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 1.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "2.5-3.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 2.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "4.0-4.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 4.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "0.0-0.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 0.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "1.5-2.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 1.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "3.5-4.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 3.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              }
+            },
+            "command": {
+              "2.0-2.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 2.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "3.0-3.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 3.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "4.5-5.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 4.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "0.5-1.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 0.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "1.0-1.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 1.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "2.5-3.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 2.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "4.0-4.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 4.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "0.0-0.5": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 0.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "1.5-2.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 1.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "3.5-4.0": {
+                "area": 0.0,
+                "transpiration": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 3.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              }
+            }
+          },
+          "evaporation": {
+            "poor_quality": {
+              "0.5-1.0": {
+                "area": 0.0,
+                "zn": "",
+                "agl": 0.75,
+                "nodays": 0.0,
+                "evaporation": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "1.0-1.5": {
+                "area": 0.0,
+                "zn": "",
+                "agl": 1.25,
+                "nodays": 0.0,
+                "evaporation": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "0.0-0.5": {
+                "area": 0.0,
+                "zn": "",
+                "agl": 0.25,
+                "nodays": 0.0,
+                "evaporation": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "1.5-2.0": {
+                "area": 0.0,
+                "zn": "",
+                "agl": 1.75,
+                "nodays": 0.0,
+                "evaporation": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              }
+            },
+            "non_command": {
+              "0.5-1.0": {
+                "area": 0.0,
+                "zn": "",
+                "agl": 0.75,
+                "nodays": 0.0,
+                "evaporation": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "1.0-1.5": {
+                "area": 0.0,
+                "zn": "",
+                "agl": 1.25,
+                "nodays": 0.0,
+                "evaporation": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "0.0-0.5": {
+                "area": 0.0,
+                "zn": "",
+                "agl": 0.25,
+                "nodays": 0.0,
+                "evaporation": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "1.5-2.0": {
+                "area": 0.0,
+                "zn": "",
+                "agl": 1.75,
+                "nodays": 0.0,
+                "evaporation": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              }
+            },
+            "command": {
+              "0.5-1.0": {
+                "area": 0.0,
+                "zn": "",
+                "agl": 0.75,
+                "nodays": 0.0,
+                "evaporation": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "1.0-1.5": {
+                "area": 0.0,
+                "zn": "",
+                "agl": 1.25,
+                "nodays": 0.0,
+                "evaporation": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "0.0-0.5": {
+                "area": 0.0,
+                "zn": "",
+                "agl": 0.25,
+                "nodays": 0.0,
+                "evaporation": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              },
+              "1.5-2.0": {
+                "area": 0.0,
+                "zn": "",
+                "agl": 1.75,
+                "nodays": 0.0,
+                "evaporation": 0.0,
+                "etrate": 0.0,
+                "cr": 1.0
+              }
+            }
+          },
+          "et": {
+            "poor_quality": {
+              "2.0-2.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 2.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "3.0-3.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 3.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "4.5-5.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 4.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "0.5-1.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 0.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "1.0-1.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 1.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "2.5-3.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 2.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "4.0-4.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 4.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "0.0-0.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 0.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "1.5-2.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 1.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "3.5-4.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 3.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              }
+            },
+            "non_command": {
+              "2.0-2.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 2.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "3.0-3.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 3.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "4.5-5.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 4.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "0.5-1.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 0.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "1.0-1.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 1.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "2.5-3.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 2.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "4.0-4.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 4.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "0.0-0.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 0.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "1.5-2.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 1.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "3.5-4.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 3.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              }
+            },
+            "command": {
+              "2.0-2.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 2.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "3.0-3.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 3.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "4.5-5.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 4.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "0.5-1.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 0.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "1.0-1.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 1.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "2.5-3.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 2.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "4.0-4.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 4.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "0.0-0.5": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 0.25,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "1.5-2.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 1.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              },
+              "3.5-4.0": {
+                "area": 0.0,
+                "rd": 2.5,
+                "zn": "",
+                "agl": 3.75,
+                "nodays": 0.0,
+                "etrate": 0.0,
+                "et": 0.0,
+                "cr": 1.0
+              }
+            }
+          }
+        }
+      }
+    },
+    "draftData": {
+      "agriculture": {
+        "poor_quality": 8315.52,
+        "total": 25409.429999999997,
+        "command": 17093.91
+      },
+      "domestic": {
+        "poor_quality": 0.0,
+        "total": 0.0,
+        "command": 0.0
+      },
+      "total": {
+        "poor_quality": 8315.52,
+        "total": 25432.11,
+        "command": 17116.59
+      },
+      "industry": {
+        "poor_quality": 0.0,
+        "total": 22.680000000000003,
+        "command": 22.680000000000003
+      }
+    },
+    "rechargeData": {
+      "agriculture": {
+        "poor_quality": 7271.06,
+        "total": 18571.18,
+        "non_command": 0.0,
+        "command": 11300.12
+      },
+      "rainfall": {
+        "poor_quality": 237.57,
+        "total": 2969.0600000000004,
+        "non_command": 0.0,
+        "command": 2731.49
+      },
+      "total": {
+        "poor_quality": 7759.150000000001,
+        "total": 23942.61,
+        "non_command": 0.0,
+        "command": 16183.46
+      },
+      "surface_irrigation": {
+        "poor_quality": 3454.4557264506584,
+        "total": 6908.9,
+        "non_command": 0.0,
+        "command": 3454.4557264506584
+      },
+      "gw_irrigation": {
+        "poor_quality": 3816.6099999999997,
+        "total": 11662.279999999999,
+        "non_command": 0.0,
+        "command": 7845.67
+      },
+      "water_body": {
+        "total": 85.27000000000001,
+        "command": 85.27000000000001
+      },
+      "canal": {
+        "poor_quality": 250.52,
+        "total": 2317.1,
+        "command": 2066.58
+      }
+    },
+    "currentAvailabilityForAllPurposes": {
+      "poor_quality": 6983.23,
+      "total": 21548.35,
+      "non_command": 0.0,
+      "command": 14565.119999999999
+    },
+    "availabilityForFutureUse": {
+      "poor_quality": 0.0,
+      "total": 0.0,
+      "non_command": 0.0,
+      "command": 0.0
+    },
+    "gwallocation": {
+      "domestic": {
+        "poor_quality": 0.0,
+        "total": 0.0,
+        "non_command": 0.0,
+        "command": 0.0
+      },
+      "total": {
+        "poor_quality": 0.0,
+        "total": 0.0,
+        "non_command": 0.0,
+        "command": 0.0
+      },
+      "industry": {
+        "poor_quality": 0.0,
+        "total": 0.0
+      }
+    },
+    "stageOfExtraction": {
+      "poor_quality": 119.07842073080796,
+      "total": 117.51767235697339,
+      "command": 117.51767235697339
+    },
+    "gwlevelData": {
+      "poor_quality": {
+        "pre": [
+          [
+            2016.0,
+            10.66
+          ],
+          [
+            2017.0,
+            11.15
+          ],
+          [
+            2018.0,
+            11.55
+          ],
+          [
+            2019.0,
+            11.85
+          ],
+          [
+            2020.0,
+            12.13
+          ],
+          [
+            2021.0,
+            12.36
+          ],
+          [
+            2022.0,
+            12.84
+          ],
+          [
+            2023.0,
+            12.87
+          ],
+          [
+            2024.0,
+            13.78
+          ],
+          [
+            2015.0,
+            9.65
+          ]
+        ],
+        "post": [
+          [
+            2016.0,
+            10.9
+          ],
+          [
+            2017.0,
+            11.27
+          ],
+          [
+            2018.0,
+            12.08
+          ],
+          [
+            2019.0,
+            12.31
+          ],
+          [
+            2020.0,
+            12.16
+          ],
+          [
+            2021.0,
+            12.64
+          ],
+          [
+            2022.0,
+            12.45
+          ],
+          [
+            2023.0,
+            13.78
+          ],
+          [
+            2024.0,
+            14.52
+          ],
+          [
+            2015.0,
+            10.66
+          ]
+        ]
+      },
+      "total": {},
+      "non_command": {
+        "pre": [
+          [
+            2016.0,
+            0.0
+          ],
+          [
+            2017.0,
+            0.0
+          ],
+          [
+            2018.0,
+            0.0
+          ],
+          [
+            2019.0,
+            0.0
+          ],
+          [
+            2020.0,
+            0.0
+          ],
+          [
+            2021.0,
+            0.0
+          ],
+          [
+            2022.0,
+            0.0
+          ],
+          [
+            2023.0,
+            0.0
+          ],
+          [
+            2024.0,
+            0.0
+          ],
+          [
+            2015.0,
+            0.0
+          ]
+        ],
+        "post": [
+          [
+            2016.0,
+            0.0
+          ],
+          [
+            2017.0,
+            0.0
+          ],
+          [
+            2018.0,
+            0.0
+          ],
+          [
+            2019.0,
+            0.0
+          ],
+          [
+            2020.0,
+            0.0
+          ],
+          [
+            2021.0,
+            0.0
+          ],
+          [
+            2022.0,
+            0.0
+          ],
+          [
+            2023.0,
+            0.0
+          ],
+          [
+            2024.0,
+            0.0
+          ],
+          [
+            2015.0,
+            0.0
+          ]
+        ]
+      },
+      "command": {
+        "pre": [
+          [
+            2016.0,
+            10.66
+          ],
+          [
+            2017.0,
+            11.15
+          ],
+          [
+            2018.0,
+            11.55
+          ],
+          [
+            2019.0,
+            11.85
+          ],
+          [
+            2020.0,
+            12.13
+          ],
+          [
+            2021.0,
+            12.36
+          ],
+          [
+            2022.0,
+            12.84
+          ],
+          [
+            2023.0,
+            12.87
+          ],
+          [
+            2024.0,
+            13.78
+          ],
+          [
+            2015.0,
+            9.65
+          ]
+        ],
+        "post": [
+          [
+            2016.0,
+            10.9
+          ],
+          [
+            2017.0,
+            11.27
+          ],
+          [
+            2018.0,
+            12.08
+          ],
+          [
+            2019.0,
+            12.31
+          ],
+          [
+            2020.0,
+            12.16
+          ],
+          [
+            2021.0,
+            12.64
+          ],
+          [
+            2022.0,
+            12.45
+          ],
+          [
+            2023.0,
+            13.78
+          ],
+          [
+            2024.0,
+            14.52
+          ],
+          [
+            2015.0,
+            10.66
+          ]
+        ]
+      }
+    },
+    "gwanalysisSeason": "monsoon",
+    "gwtrendSlope": {
+      "poor_quality": {
+        "pre": -38.66666666666665,
+        "post": -37.77575757575757
+      },
+      "total": {},
+      "non_command": {},
+      "command": {
+        "pre": -38.66666666666665,
+        "post": -37.77575757575757
+      }
+    },
+    "waterTableRiseFall": {
+      "poor_quality": {
+        "pre": "Falling",
+        "post": "Falling"
+      },
+      "total": {},
+      "non_command": {},
+      "command": {
+        "pre": "Falling",
+        "post": "Falling"
+      }
+    },
+    "gwtrendAttention": {},
+    "waterTableCategory": {
+      "poor_quality": "over_exploited",
+      "command": "over_exploited"
+    },
+    "message": null
+  },
+  {
+    "locationName": "total",
+    "area": {
+      "non_recharge_worthy": {
+        "commandArea": 0.0,
+        "nonCommandArea": 0.0,
+        "poorQualityArea": 0.0,
+        "hillyArea": 0.0,
+        "forestArea": 0.0,
+        "totalArea": 0.0,
+        "pavedArea": 0.0,
+        "unpavedArea": 0.0
+      },
+      "total": {
+        "commandArea": 36042.24,
+        "nonCommandArea": 0.0,
+        "poorQualityArea": 3134.76,
+        "hillyArea": 0.0,
+        "forestArea": 0.0,
+        "totalArea": 39177.0,
+        "pavedArea": 0.0,
+        "unpavedArea": 0.0
+      },
+      "recharge_worthy": {
+        "commandArea": 36042.24,
+        "nonCommandArea": 0.0,
+        "poorQualityArea": 3134.76,
+        "hillyArea": 0.0,
+        "forestArea": 0.0,
+        "totalArea": 39177.0,
+        "pavedArea": 0.0,
+        "unpavedArea": 0.0
+      }
+    },
+    "loss": {
+      "poor_quality": 775.92,
+      "transpiration": 0.0,
+      "total": 2394.2599999999998,
+      "non_command": 0.0,
+      "evaporation": 0.0,
+      "command": 1618.3400000000001,
+      "et": 0.0
+    },
+    "category": null,
+    "reportSummary": {
+      "total": {
+        "BLOCK": {
+          "over_exploited": 1
+        }
+      },
+      "e913f3ca-694a-4785-b50d-add14f280507": {
+        "BLOCK": {
+          "over_exploited": 1
+        }
+      }
+    },
+    "gwProjectedUtilAllocationDynamicAquifer": {
+      "domestic": {
+        "total": 0.0
+      },
+      "total": {
+        "total": 0.0
+      }
+    },
+    "additionalRecharge": {
+      "total": {
+        "total": 0.0
+      },
+      "floodProneArea": {
+        "total": 0.0
+      },
+      "shallowArea": {
+        "total": 0.0
+      },
+      "springDischarge": {
+        "total": 0.0
+      }
+    },
+    "staticGWResource": {
+      "poor_quality": 0.0,
+      "total": 0.0,
+      "non_command": 0.0,
+      "command": 0.0
+    },
+    "totalGWAvailability": {
+      "poor_quality": 6983.23,
+      "total": 21548.35,
+      "non_command": 0.0,
+      "command": 14565.12
+    },
+    "aquiferBusinessData": {
+      "SemiConfined Aquifer Piezo Data": null,
+      "confined_aquifer": {
+        "total": {
+          "total": 1353520.43
+        },
+        "in_storage_gw": {
+          "in_storage_gw": 1353360.06
+        },
+        "dynamic_gw": {
+          "dynamic_gw": 160.36
+        }
+      }
+    },
+    "coastalBusinessData": null,
+    "waterDepletedZonesBusinessData": null,
+    "inOutFlow": {
+      "poor_quality": 0.0,
+      "total": 0.0,
+      "non_command": 0.0,
+      "command": 0.0
+    },
+    "baseFlow": {
+      "poor_quality": {},
+      "total": {
+        "lateral_aquifer": 0.0,
+        "vertcal_aquifer": 0.0
+      },
+      "non_command": {},
+      "command": {}
+    },
+    "streamRecharge": null,
+    "additionalbaseflow": null,
+    "envFlows": null,
+    "subject": null,
+    "action": null,
+    "modifiable": null,
+    "isUrban": null,
+    "gwSpecificYield": null,
+    "geology": null,
+    "evaporation": {
+      "transpiration": {
+        "poor_quality": 0.0,
+        "total": 0.0,
+        "non_command": 0.0,
+        "command": 0.0
+      },
+      "evaporation": {
+        "poor_quality": 0.0,
+        "total": 0.0,
+        "non_command": 0.0,
+        "command": 0.0
+      },
+      "et": {
+        "poor_quality": 0.0,
+        "total": 0.0,
+        "non_command": 0.0,
+        "command": 0.0
+      }
+    },
+    "qualityTagging": null,
+    "approvalLevel": null,
+    "verificStatus": null,
+    "timeStamp": null,
+    "locationUUID": null,
+    "rainfall": {
+      "poor_quality": 366.0,
+      "total": 365.99999999999994,
+      "non_command": 0.0,
+      "command": 366.0
+    },
+    "wtfonly": null,
+    "computationSummary": null,
+    "draftData": {
+      "agriculture": {
+        "poor_quality": 8315.52,
+        "total": 25409.429999999997,
+        "command": 17093.91
+      },
+      "domestic": {
+        "poor_quality": 0.0,
+        "total": 0.0,
+        "command": 0.0
+      },
+      "total": {
+        "poor_quality": 8315.52,
+        "total": 25432.11,
+        "command": 17116.59
+      },
+      "industry": {
+        "poor_quality": 0.0,
+        "total": 22.680000000000003,
+        "command": 22.680000000000003
+      }
+    },
+    "rechargeData": {
+      "agriculture": {
+        "poor_quality": 7271.06,
+        "total": 18571.18,
+        "non_command": 0.0,
+        "command": 11300.12
+      },
+      "rainfall": {
+        "poor_quality": 237.57,
+        "total": 2969.0600000000004,
+        "non_command": 0.0,
+        "command": 2731.49
+      },
+      "total": {
+        "poor_quality": 7759.150000000001,
+        "total": 23942.61,
+        "non_command": 0.0,
+        "command": 16183.46
+      },
+      "surface_irrigation": {
+        "poor_quality": 3454.4557264506584,
+        "total": 6908.9,
+        "non_command": 0.0,
+        "command": 3454.4557264506584
+      },
+      "gw_irrigation": {
+        "poor_quality": 3816.6099999999997,
+        "total": 11662.279999999999,
+        "non_command": 0.0,
+        "command": 7845.67
+      },
+      "water_body": {
+        "total": 85.27000000000001,
+        "command": 85.27000000000001
+      },
+      "canal": {
+        "poor_quality": 250.52,
+        "total": 2317.1,
+        "command": 2066.58
+      }
+    },
+    "currentAvailabilityForAllPurposes": {
+      "poor_quality": 6983.23,
+      "total": 21548.35,
+      "non_command": 0.0,
+      "command": 14565.119999999999
+    },
+    "availabilityForFutureUse": {
+      "poor_quality": 0.0,
+      "total": 0.0,
+      "non_command": 0.0,
+      "command": 0.0
+    },
+    "gwallocation": {
+      "domestic": {
+        "poor_quality": 0.0,
+        "total": 0.0,
+        "non_command": 0.0,
+        "command": 0.0
+      },
+      "total": {
+        "poor_quality": 0.0,
+        "total": 0.0,
+        "non_command": 0.0,
+        "command": 0.0
+      },
+      "industry": {
+        "poor_quality": 0.0,
+        "total": 0.0
+      }
+    },
+    "stageOfExtraction": {
+      "poor_quality": 119.07842073080796,
+      "total": 117.51767235697339,
+      "non_command": 0.0,
+      "command": 117.51767235697339
+    },
+    "gwlevelData": null,
+    "gwanalysisSeason": null,
+    "gwtrendSlope": null,
+    "waterTableRiseFall": null,
+    "gwtrendAttention": null,
+    "waterTableCategory": null,
+    "message": null
+  }
+]

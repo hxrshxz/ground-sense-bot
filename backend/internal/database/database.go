@@ -214,6 +214,79 @@ func (s *Service) runMigrations(ctx context.Context) error {
 			user_agent TEXT,
 			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 		)`,
+
+		// States table
+		`CREATE TABLE IF NOT EXISTS states (
+			state_uuid UUID PRIMARY KEY,
+			state_name VARCHAR(255) NOT NULL,
+			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+		)`,
+
+		// Districts table
+		`CREATE TABLE IF NOT EXISTS districts (
+			district_uuid UUID PRIMARY KEY,
+			district_name VARCHAR(255) NOT NULL,
+			state_uuid UUID NOT NULL REFERENCES states(state_uuid) ON DELETE CASCADE,
+			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+		)`,
+
+		// Blocks table
+		`CREATE TABLE IF NOT EXISTS blocks (
+			block_uuid UUID PRIMARY KEY,
+			block_name VARCHAR(255) NOT NULL,
+			district_uuid UUID NOT NULL REFERENCES districts(district_uuid) ON DELETE CASCADE,
+			state_uuid UUID NOT NULL REFERENCES states(state_uuid) ON DELETE CASCADE,
+			geometry TEXT,
+			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+		)`,
+
+		// Assessments Summary table
+		`CREATE TABLE IF NOT EXISTS assessments_summary (
+			assessment_id SERIAL PRIMARY KEY,
+			block_uuid UUID NOT NULL REFERENCES blocks(block_uuid) ON DELETE CASCADE,
+			year VARCHAR(20) NOT NULL,
+			rainfall FLOAT,
+			total_recharge FLOAT,
+			total_discharge FLOAT,
+			total_extractable FLOAT,
+			total_extraction FLOAT,
+			category VARCHAR(50),
+			stage FLOAT,
+			availability FLOAT,
+			raw JSONB,
+			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			UNIQUE(block_uuid, year)
+		)`,
+
+		// Recharge Breakdown table
+		`CREATE TABLE IF NOT EXISTS assessments_recharge_breakdown (
+			id SERIAL PRIMARY KEY,
+			assessment_id INT NOT NULL REFERENCES assessments_summary(assessment_id) ON DELETE CASCADE,
+			source VARCHAR(100),
+			command FLOAT,
+			non_command FLOAT,
+			total FLOAT
+		)`,
+
+		// Discharge Breakdown table
+		`CREATE TABLE IF NOT EXISTS assessments_discharge_breakdown (
+			id SERIAL PRIMARY KEY,
+			assessment_id INT NOT NULL REFERENCES assessments_summary(assessment_id) ON DELETE CASCADE,
+			source VARCHAR(100),
+			command FLOAT,
+			non_command FLOAT,
+			total FLOAT
+		)`,
+
+		// Extraction Breakdown table
+		`CREATE TABLE IF NOT EXISTS assessments_extraction_breakdown (
+			id SERIAL PRIMARY KEY,
+			assessment_id INT NOT NULL REFERENCES assessments_summary(assessment_id) ON DELETE CASCADE,
+			source VARCHAR(100),
+			command FLOAT,
+			non_command FLOAT,
+			total FLOAT
+		)`,
 	}
 
 	for i, migration := range migrations {

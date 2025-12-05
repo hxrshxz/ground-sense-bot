@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -34,16 +33,20 @@ func main() {
 	}
 	defer db.Close()
 
+	// Create HTTP mux
+	mux := http.NewServeMux()
+
+	// Register routes
+	routes.RegisterRoutes(mux, cfg, db, logger)
+
 	// Create HTTP server
 	server := &http.Server{
 		Addr:         cfg.Server.Host + ":" + cfg.Server.Port,
+		Handler:      mux,
 		ReadTimeout:  cfg.Server.ReadTimeout,
 		WriteTimeout: cfg.Server.WriteTimeout,
 		IdleTimeout:  cfg.Server.IdleTimeout,
 	}
-
-	// Register routes
-	routes.RegisterRoutes(server.Handler.(*http.ServeMux), cfg, db, logger)
 
 	// Start server in a goroutine
 	go func() {

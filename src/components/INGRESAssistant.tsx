@@ -66,7 +66,6 @@ import {
   SAMPLE_MAP_ANALYSIS_RESPONSE,
 } from "../data/mapAnalysisPrompt";
 import { MapAnalysisDialog } from "./MapAnalysisDialog";
-import { useApiKey } from "./ApiKeyContext";
 import { pickProfileByText } from "@/lib/stateDetection";
 import { STATE_PROFILE_MAP } from "@/data/stateGroundwaterData";
 const GroundwaterExtractionVisualization = React.lazy(
@@ -1291,6 +1290,9 @@ const HydrogeologicalAnalysisChart = () => {
   );
 };
 // --- Main INGRES Assistant Component ---
+import { useChatWebSocket } from "@/hooks/useChatWebSocket";
+import ChartRenderer from "./charts/echarts/ChartRenderer";
+
 export const INGRESAssistant = ({
   embedded = false,
 }: {
@@ -1298,6 +1300,12 @@ export const INGRESAssistant = ({
 }) => {
   const [view, setView] = useState("dashboard");
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  
+  // WebSocket Integration
+  const { sendMessage, messages: wsMessages } = useChatWebSocket("ws://localhost:8081/ws", "User");
+
+
+
   // --- 1. Replace your old handler function with this corrected version ---
   const handleFakeMapAnalysis = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -1529,7 +1537,7 @@ export const INGRESAssistant = ({
   const [showListeningIndicator, setShowListeningIndicator] = useState(false);
   const [isMapAnalysisOpen, setIsMapAnalysisOpen] = useState(false);
 
-  const { apiKey } = useApiKey();
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
   const {
     text: voiceText,
     startListening,
@@ -1735,6 +1743,34 @@ Your response should sound like it's coming from a knowledgeable human analyst e
       setIsThinking(false);
     }
   };
+
+  // Sync WebSocket messages to chat history
+  useEffect(() => {
+    if (wsMessages.length > 0) {
+      const lastMsg = wsMessages[wsMessages.length - 1];
+      // Only add bot messages or user messages that aren't already added locally
+      // Actually, we add user messages locally in handleChatSubmit.
+      // So we only care about BOT messages here.
+      if (lastMsg.sender === 'bot') {
+         const newMsg: ChatMessage = {
+            id: Number(lastMsg.id) || Date.now(),
+            type: 'ai',
+            text: lastMsg.content,
+            component: lastMsg.payload?.chart ? <ChartRenderer chart={lastMsg.payload.chart} /> : undefined
+         };
+         setChatHistory(prev => {
+             // Avoid duplicates if possible (simple check by ID or content)
+             if (prev.some(m => m.id === newMsg.id)) return prev;
+             return [...prev, newMsg];
+         });
+         
+         // Speak if Co-Pilot is on
+         if (isCoPilotMode && lastMsg.content) {
+             speakText(lastMsg.content);
+         }
+      }
+    }
+  }, [wsMessages, isCoPilotMode]);
 
   // Initialize speech synthesis voices
   useEffect(() => {
@@ -2551,70 +2587,15 @@ Your response should sound like it's coming from a knowledgeable human analyst e
         }
       }
 
-      const API_KEY =
-        import.meta.env.VITE_GEMINI_API_KEY ||
-        "AIzaSyDSqFidFieMz6EVw1HnFBuYlJ_jtGm22A8";
-      if (API_KEY) {
-        try {
-          const genAI = new GoogleGenerativeAI(API_KEY);
-          // Prefer configurable model; fall back to latest stable naming conventions
-          const preferredModel =
-            import.meta.env.VITE_GEMINI_MODEL || "gemini-2.0-flash";
-          let model;
-          try {
-            model = genAI.getGenerativeModel({ model: preferredModel });
-          } catch (e) {
-            console.warn(
-              "Falling back to gemini-1.5-flash due to error creating model",
-              e
-            );
-            model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-          }
+      // --- 5. FALLBACK TO WEBSOCKET CHATBOT ---
+      // If no specific frontend trigger matched, send to the Go backend via WebSocket
+      sendMessage(text);
+      
+      // The response will be handled by the useEffect hook listening to wsMessages
+      setIsThinking(false);
+      return;
 
-          const dataContext = JSON.stringify(groundwaterDB, null, 2);
-          const prompt = `You are an expert AI assistant for INGRES, India's National Groundwater Resource Estimation System. Your primary knowledge base is the following JSON data about specific groundwater blocks in Rajasthan. Your tone should be helpful, clear, and professional.\n---\n${dataContext}\n---\nInstructions:
-
-1.Answer with Best Available Information: Your first priority is to answer the user's question using the provided JSON data. If the data does not contain the answer, seamlessly transition to your broader knowledge of groundwater resources in India to provide the most helpful response possible.
-          
-2.Distinguish Sources When Combining: If you combine information from the dataset with general knowledge, try to make the distinction clear. For example: "The data for the Jalore block shows X, and generally, in this part of Rajasthan, Y is also a known factor."
-
-    3.Provide General Knowledge: After stating the data limitation, provide a helpful, general answer based on your broader knowledge of groundwater resources in India.
-
-   4. Distinguish Your Sources: Clearly differentiate between information derived from the dataset and information from your general knowledge. For example, start your general answer with a phrase like, "However, speaking generally about groundwater in this region..." or "Based on public knowledge...".
-
-    5.Be Concise and Format Well: Use Markdown for clarity (bolding, lists, etc.) to make the information easy to digest."${text}"`;
-
-          const result = await model.generateContent(prompt);
-          const response = await result.response;
-          const aiResponseText = response.text();
-
-          const aiResponse = {
-            id: Date.now() + 1,
-            type: "ai",
-            text: aiResponseText,
-          };
-          setChatHistory((prev) => [...prev, aiResponse]);
-        } catch (error) {
-          console.error("Error calling Gemini API:", error);
-          const aiResponse = {
-            id: Date.now() + 1,
-            type: "ai",
-            text: "Sorry, I encountered an error while connecting to the AI service. The model may be overloaded. Please try again later.",
-          };
-          setChatHistory((prev) => [...prev, aiResponse]);
-        } finally {
-          setIsThinking(false);
-        }
-      } else {
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-        const aiResponse = {
-          id: Date.now() + 1,
-          type: "ai",
-          text: "I can provide detailed data for blocks like 'Delhi'. (Note: Gemini API key not configured. Please set up your VITE_GEMINI_API_KEY in the .env.local file).",
-        };
-        setChatHistory((prev) => [...prev, aiResponse]);
-        setIsThinking(false);
-      }
+      /* Legacy Gemini Implementation Removed */
     } catch (error) {
       console.error("Error processing request:", error);
       const errorResponse = {

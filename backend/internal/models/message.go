@@ -2,6 +2,7 @@ package models
 
 import (
 	"time"
+
 	"github.com/google/uuid"
 )
 
@@ -23,6 +24,11 @@ type Message struct {
 	Sender         *User         `json:"sender,omitempty" db:"-"`
 	Conversation   *Conversation `json:"conversation,omitempty" db:"-"`
 	Reactions      []Reaction    `json:"reactions,omitempty" db:"-"`
+	Username       string        `json:"username,omitempty" db:"-"`
+	
+	// Chatbot fields
+	Type           string        `json:"type,omitempty" db:"-"` // "text", "response"
+	Payload        interface{}   `json:"payload,omitempty" db:"-"`
 }
 
 type MessageType string

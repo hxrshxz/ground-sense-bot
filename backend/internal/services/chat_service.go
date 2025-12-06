@@ -139,6 +139,11 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 		}, nil
 	}
 
+	fmt.Println("\n" + strings.Repeat("=", 80))
+	fmt.Printf("📨 NEW USER MESSAGE | User: %s | Time: %s\n", username, time.Now().Format("15:04:05"))
+	fmt.Printf("💬 Query: \"%s\"\n", message)
+	fmt.Println(strings.Repeat("=", 80))
+
 	// Get or create session
 	s.mu.Lock()
 	if s.sessions == nil {
@@ -146,11 +151,14 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 	}
 	session, exists := s.sessions[username]
 	if !exists {
+		fmt.Printf("🆕 Creating new session for user: %s\n", username)
 		session = &UserSession{
 			MaxHistoryLength: 10,
 			ConversationHistory: make([]ConversationEntry, 0),
 		}
 		s.sessions[username] = session
+	} else {
+		fmt.Printf("♻️  Using existing session (History: %d entries)\n", len(session.ConversationHistory))
 	}
 	s.mu.Unlock()
 
@@ -159,7 +167,15 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 		s.nlp.llm.AddToHistory("user", message)
 	}
 
+	fmt.Println("\n🧠 AI PROCESSING PIPELINE")
+	fmt.Println("├─ Step 1: Intent Classification & Entity Extraction...")
 	intent, entities, sqlQuery := s.nlp.ParseMessage(message)
+	fmt.Printf("├─ ✅ Intent Detected: %s\n", intent)
+	fmt.Printf("├─ 📍 Locations Found: %v\n", entities.Locations)
+	fmt.Printf("├─ 📅 Year: %s\n", entities.Year)
+	if sqlQuery != "" {
+		fmt.Printf("├─ 🗄️  Dynamic SQL Generated: %s\n", sqlQuery[:min(100, len(sqlQuery))]+(func() string { if len(sqlQuery) > 100 { return "..." }; return "" })())
+	}
 	
 	// Context Merging Logic
 	// If new entities are missing locations but we have them in session, and the user implies context
@@ -169,7 +185,7 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 		// Check for context clues or just default to previous location if it makes sense
 		// Simple heuristic: If intent requires location (Trend, Compare, ListBlocks) and we have none, use previous.
 		if intent == IntentTrend || intent == IntentCompare || intent == IntentListBlocks || intent == IntentSummary {
-			fmt.Printf("DEBUG: Using context location: %v\n", session.LastEntities.Locations)
+			fmt.Printf("├─ 🔗 Context Merging: Using previous location %v\n", session.LastEntities.Locations)
 			entities.Locations = session.LastEntities.Locations
 			contextUsed = true
 		}
@@ -211,6 +227,7 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 		
 		// Handle empty results
 		if len(results) == 0 {
+			fmt.Println("├─ ⚠️  No results found in database")
 			response.Text = "No data found matching your criteria. Please try different parameters or check the location name."
 			
 			// Track in history
@@ -222,11 +239,14 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 		}
 		
 		// Use LLM to pick chart shape but keep visuals hardcoded on frontend
+		fmt.Printf("├─ ✅ Retrieved %d rows from database\n", len(results))
+		fmt.Println("├─ Step 3: Chart Generation with LLM")
 		response.Text = fmt.Sprintf("Here is the data you requested (%d results).", len(results))
 		response.Data = results
 
 		chartPayload, vizText := s.buildChartWithLLM(results, sqlQuery, message)
 		if chartPayload != nil {
+			fmt.Printf("├─ 📊 Chart Type: %s\n", chartPayload.Type)
 			response.Chart = chartPayload
 			if vizText != "" {
 				response.Text = vizText
@@ -253,15 +273,20 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 	}
 	
 	// Process with intent handlers
+	fmt.Println("\n├─ Step 2: Intent Handler Routing")
+	fmt.Printf("├─ 🎯 Routing to handler: %s\n", intent)
 	var handlerResult *models.ChatResponse
 	var handlerErr error
 	
 	switch intent {
 	case IntentSummary:
+		fmt.Println("├─ 📋 Executing Summary Handler...")
 		handlerResult, handlerErr = s.handleSummary(ctx, entities, response)
 	case IntentTrend:
+		fmt.Println("├─ 📈 Executing Trend Analysis Handler...")
 		handlerResult, handlerErr = s.handleTrend(ctx, entities, response)
 	case IntentCompare:
+		fmt.Println("├─ ⚖️  Executing Comparison Handler...")
 		handlerResult, handlerErr = s.handleCompare(ctx, entities, response)
 	case IntentRechargeBreakdown:
 		handlerResult, handlerErr = s.handleRechargeBreakdown(ctx, entities, response)
@@ -291,6 +316,18 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 	
 	// Track in conversation history
 	if handlerResult != nil {
+		fmt.Println("\n📤 RESPONSE SUMMARY")
+		fmt.Printf("├─ Intent: %s\n", intent)
+		if handlerResult.Chart != nil {
+			fmt.Printf("├─ Chart Type: %s\n", handlerResult.Chart.Type)
+			fmt.Printf("├─ Chart Title: %s\n", handlerResult.Chart.Title)
+		}
+		if handlerResult.Map != nil {
+			fmt.Printf("├─ Map Data: %d locations\n", len(handlerResult.Map.Features))
+		}
+		fmt.Printf("├─ Response Length: %d characters\n", len(handlerResult.Text))
+		fmt.Println(strings.Repeat("=", 80) + "\n")
+		
 		s.mu.Lock()
 		session.AddToHistory(message, handlerResult.Text, string(intent), entities.Locations)
 		s.mu.Unlock()

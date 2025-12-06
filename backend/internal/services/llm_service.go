@@ -280,7 +280,26 @@ Choose the BEST visualization for this data:
 | Multi-year temporal data | timeline-bar | Animated progression |
 | Large dataset (50+ points) | large-area | Optimized for scale |
 | Breakdown sources | brush-bar | Multi-series comparison |
-| Ranking/Top N | horizontal-bar | Clear ranking display |
+| Ranking/Top N with SINGLE metric | horizontal-bar | Clear ranking display |
+| Ranking/Top N with MULTIPLE metrics | stacked-bar | Shows composition + ranking |
+
+⚠️⚠️⚠️ CRITICAL RULE FOR RANKING QUERIES:
+When user asks for "Top N", "worst blocks", "best performers", "highest", "lowest" AND
+the data has MULTIPLE numeric columns (stage_percent, extraction_mcm, recharge_mcm, deficit_mcm):
+
+YOU MUST USE "stacked-bar" TYPE:
+{
+  "type": "stacked-bar",
+  "xAxis": { "type": "value" },
+  "yAxis": { "type": "category", "data": ["Location 1", "Location 2", ...] },
+  "series": [
+    { "name": "Extraction (MCM)", "type": "bar", "stack": "total", "data": [450, 380], "itemStyle": { "color": "#f97316" } },
+    { "name": "Deficit (MCM)", "type": "bar", "stack": "total", "data": [120, 95], "itemStyle": { "color": "#ef4444" } },
+    { "name": "Stage (%)", "type": "bar", "stack": "total", "data": [180, 165], "itemStyle": { "color": "#dc2626" } }
+  ]
+}
+
+Color Guide: stage/deficit=#ef4444 (red), extraction=#f97316 (orange), recharge=#3b82f6 (blue)
 
 STEP 3 - EXTRACT INSIGHTS:
 Based on groundwater domain knowledge:
@@ -293,7 +312,7 @@ STEP 4 - GENERATE JSON:
 Return ONLY valid JSON (no markdown, no code blocks):
 
 {
-  "type": "gradient-area|brush-bar|rose-pie|stacked-area|timeline-bar|large-area|horizontal-bar",
+  "type": "gradient-area|brush-bar|rose-pie|stacked-area|timeline-bar|large-area|horizontal-bar|stacked-bar",
   "title": "Clear, descriptive title",
   "explanation": "2-3 sentence data-driven insight with specific numbers. Highlight concerning trends or good patterns.",
   "insights": [
@@ -301,9 +320,18 @@ Return ONLY valid JSON (no markdown, no code blocks):
     "Key finding 2 with comparison",
     "Actionable recommendation"
   ],
-  "xAxis": { "data": ["label1", "label2", ...] },
+  "xAxis": { "data": ["label1", "label2", ...], "type": "category|value" },
+  "yAxis": { "data": ["label1", "label2", ...], "type": "category|value" },
   "series": [
-    { "name": "Series Name", "data": [val1, val2, ...], "highlight": true/false }
+    { 
+      "name": "Series Name", 
+      "data": [val1, val2, ...], 
+      "type": "bar|line",
+      "stack": "total" (for stacked-bar only),
+      "itemStyle": { "color": "#hex" } (for stacked-bar),
+      "label": { "show": true, "position": "inside" } (for stacked-bar),
+      "highlight": true/false 
+    }
   ],
   "pieData": [{"name": "Category", "value": 123}],
   "metrics": {

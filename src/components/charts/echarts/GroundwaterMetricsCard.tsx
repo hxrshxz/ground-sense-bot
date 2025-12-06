@@ -1,7 +1,16 @@
 import React, { useState } from "react";
 import ReactECharts from "echarts-for-react";
 import * as echarts from "echarts";
-import { ChevronDown, ChevronUp, Droplets, CloudRain, Gauge, Activity, AlertTriangle, CheckCircle2 } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Droplets,
+  CloudRain,
+  Gauge,
+  Activity,
+  AlertTriangle,
+  CheckCircle2,
+} from "lucide-react";
 
 // ============================================
 // GROUNDWATER METRICS CARD COMPONENT
@@ -40,17 +49,47 @@ interface GroundwaterMetricsCardProps {
 const getCategoryStyle = (category: string) => {
   switch (category?.toLowerCase().replace(/[_-]/g, " ")) {
     case "safe":
-      return { color: "#10B981", bg: "rgba(16, 185, 129, 0.15)", icon: CheckCircle2, label: "Safe" };
+      return {
+        color: "#10B981",
+        bg: "rgba(16, 185, 129, 0.15)",
+        icon: CheckCircle2,
+        label: "Safe",
+      };
     case "semi critical":
-      return { color: "#F59E0B", bg: "rgba(245, 158, 11, 0.15)", icon: AlertTriangle, label: "Semi-Critical" };
+      return {
+        color: "#F59E0B",
+        bg: "rgba(245, 158, 11, 0.15)",
+        icon: AlertTriangle,
+        label: "Semi-Critical",
+      };
     case "critical":
-      return { color: "#F97316", bg: "rgba(249, 115, 22, 0.15)", icon: AlertTriangle, label: "Critical" };
+      return {
+        color: "#F97316",
+        bg: "rgba(249, 115, 22, 0.15)",
+        icon: AlertTriangle,
+        label: "Critical",
+      };
     case "over exploited":
-      return { color: "#EF4444", bg: "rgba(239, 68, 68, 0.15)", icon: AlertTriangle, label: "Over-Exploited" };
+      return {
+        color: "#EF4444",
+        bg: "rgba(239, 68, 68, 0.15)",
+        icon: AlertTriangle,
+        label: "Over-Exploited",
+      };
     case "salinity":
-      return { color: "#8B5CF6", bg: "rgba(139, 92, 246, 0.15)", icon: Droplets, label: "Salinity" };
+      return {
+        color: "#8B5CF6",
+        bg: "rgba(139, 92, 246, 0.15)",
+        icon: Droplets,
+        label: "Salinity",
+      };
     default:
-      return { color: "#6B7280", bg: "rgba(107, 114, 128, 0.15)", icon: Gauge, label: category || "Unknown" };
+      return {
+        color: "#6B7280",
+        bg: "rgba(107, 114, 128, 0.15)",
+        icon: Gauge,
+        label: category || "Unknown",
+      };
   }
 };
 
@@ -69,13 +108,23 @@ const MetricRow: React.FC<{
   icon?: React.ReactNode;
   expandable?: boolean;
   breakdownData?: Array<{ source: string; value: number }>;
-}> = ({ label, value, unit, color, icon, expandable = false, breakdownData }) => {
+}> = ({
+  label,
+  value,
+  unit,
+  color,
+  icon,
+  expandable = false,
+  breakdownData,
+}) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
     <div className="border-b border-white/10 last:border-b-0">
       <div
-        className={`flex items-center justify-between py-3 px-4 ${expandable ? "cursor-pointer hover:bg-white/5" : ""}`}
+        className={`flex items-center justify-between py-3 px-4 ${
+          expandable ? "cursor-pointer hover:bg-white/5" : ""
+        }`}
         onClick={() => expandable && setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center gap-3">
@@ -99,7 +148,9 @@ const MetricRow: React.FC<{
           {breakdownData.map((item, idx) => (
             <div key={idx} className="flex justify-between py-1.5 text-sm">
               <span className="text-slate-400 pl-8">{item.source}</span>
-              <span className="text-slate-300">{formatNumber(item.value)} MCM</span>
+              <span className="text-slate-300">
+                {formatNumber(item.value)} MCM
+              </span>
             </div>
           ))}
         </div>
@@ -133,9 +184,9 @@ const StageGauge: React.FC<{ stage: number }> = ({ stage }) => {
             width: 12,
             color: [
               [0.47, "#10B981"], // Safe: 0-70%
-              [0.6, "#F59E0B"],  // Semi-critical: 70-90%
+              [0.6, "#F59E0B"], // Semi-critical: 70-90%
               [0.67, "#F97316"], // Critical: 90-100%
-              [1, "#EF4444"],    // Over-exploited: >100%
+              [1, "#EF4444"], // Over-exploited: >100%
             ],
           },
         },
@@ -219,9 +270,21 @@ const BlockDistributionChart: React.FC<{
         },
         data: [
           { value: safe, name: "Safe", itemStyle: { color: "#10B981" } },
-          { value: semiCritical, name: "Semi-Critical", itemStyle: { color: "#F59E0B" } },
-          { value: critical, name: "Critical", itemStyle: { color: "#F97316" } },
-          { value: overExploited, name: "Over-Exploited", itemStyle: { color: "#EF4444" } },
+          {
+            value: semiCritical,
+            name: "Semi-Critical",
+            itemStyle: { color: "#F59E0B" },
+          },
+          {
+            value: critical,
+            name: "Critical",
+            itemStyle: { color: "#F97316" },
+          },
+          {
+            value: overExploited,
+            name: "Over-Exploited",
+            itemStyle: { color: "#EF4444" },
+          },
         ].filter((d) => d.value > 0),
       },
     ],
@@ -250,7 +313,9 @@ const WaterBalanceChart: React.FC<{
       textStyle: { color: "#e2e8f0" },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       formatter: (params: { seriesName: string; value: number }[]) => {
-        return params.map((p) => `${p.seriesName}: ${p.value.toFixed(2)} BCM`).join("<br/>");
+        return params
+          .map((p) => `${p.seriesName}: ${p.value.toFixed(2)} BCM`)
+          .join("<br/>");
       },
     },
     grid: {
@@ -262,7 +327,11 @@ const WaterBalanceChart: React.FC<{
     },
     xAxis: {
       type: "category",
-      data: ["Ground Water\nRecharge", "Extractable\nResources", "Ground Water\nExtraction"],
+      data: [
+        "Ground Water\nRecharge",
+        "Extractable\nResources",
+        "Ground Water\nExtraction",
+      ],
       axisLabel: {
         color: "rgba(255,255,255,0.7)",
         fontSize: 10,
@@ -325,18 +394,23 @@ const WaterBalanceChart: React.FC<{
 };
 
 // Main component
-const GroundwaterMetricsCard: React.FC<GroundwaterMetricsCardProps> = ({ data }) => {
+const GroundwaterMetricsCard: React.FC<GroundwaterMetricsCardProps> = ({
+  data,
+}) => {
   const categoryStyle = getCategoryStyle(data.category);
   const CategoryIcon = categoryStyle.icon;
-  const isAggregated = data.locationType === "district" || data.locationType === "state";
+  const isAggregated =
+    data.locationType === "district" || data.locationType === "state";
   const hasBlockDistribution = isAggregated && (data.totalBlocks ?? 0) > 0;
 
   return (
     <div
       className="w-full rounded-2xl overflow-hidden"
       style={{
-        background: "linear-gradient(145deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.92) 100%)",
-        boxShadow: "0 20px 40px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08)",
+        background:
+          "linear-gradient(145deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.92) 100%)",
+        boxShadow:
+          "0 20px 40px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08)",
         backdropFilter: "blur(16px)",
       }}
     >
@@ -344,7 +418,9 @@ const GroundwaterMetricsCard: React.FC<GroundwaterMetricsCardProps> = ({ data })
       <div className="px-6 py-4 border-b border-white/10">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-white text-lg font-semibold">{data.locationName}</h2>
+            <h2 className="text-white text-lg font-semibold">
+              {data.locationName}
+            </h2>
             <p className="text-slate-400 text-sm capitalize">
               {data.locationType} • {data.year}
             </p>
@@ -354,7 +430,10 @@ const GroundwaterMetricsCard: React.FC<GroundwaterMetricsCardProps> = ({ data })
             style={{ backgroundColor: categoryStyle.bg }}
           >
             <CategoryIcon size={16} style={{ color: categoryStyle.color }} />
-            <span style={{ color: categoryStyle.color }} className="text-sm font-medium">
+            <span
+              style={{ color: categoryStyle.color }}
+              className="text-sm font-medium"
+            >
               {categoryStyle.label}
             </span>
           </div>
@@ -366,9 +445,11 @@ const GroundwaterMetricsCard: React.FC<GroundwaterMetricsCardProps> = ({ data })
         {/* Left column - Primary metrics */}
         <div className="bg-slate-900/40">
           <div className="px-4 py-3 border-b border-white/10">
-            <h3 className="text-slate-400 text-xs uppercase tracking-wider">Key Metrics</h3>
+            <h3 className="text-slate-400 text-xs uppercase tracking-wider">
+              Key Metrics
+            </h3>
           </div>
-          
+
           <MetricRow
             label="Annual Extractable Ground Water Resources (BCM)"
             value={formatNumber(data.totalExtractable)}
@@ -376,7 +457,7 @@ const GroundwaterMetricsCard: React.FC<GroundwaterMetricsCardProps> = ({ data })
             color="#00DDFF"
             icon={<Droplets size={18} />}
           />
-          
+
           <MetricRow
             label="Ground Water Extraction for all uses (BCM)"
             value={formatNumber(data.totalExtraction)}
@@ -384,7 +465,7 @@ const GroundwaterMetricsCard: React.FC<GroundwaterMetricsCardProps> = ({ data })
             color="#FF6B6B"
             icon={<Activity size={18} />}
           />
-          
+
           <MetricRow
             label="Rainfall (mm)"
             value={formatNumber(data.rainfall)}
@@ -393,7 +474,7 @@ const GroundwaterMetricsCard: React.FC<GroundwaterMetricsCardProps> = ({ data })
             icon={<CloudRain size={18} />}
             expandable={false}
           />
-          
+
           <MetricRow
             label="Ground Water Recharge (BCM)"
             value={formatNumber(data.totalRecharge)}
@@ -403,7 +484,7 @@ const GroundwaterMetricsCard: React.FC<GroundwaterMetricsCardProps> = ({ data })
             expandable={!!data.rechargeBreakdown?.length}
             breakdownData={data.rechargeBreakdown}
           />
-          
+
           <MetricRow
             label="Natural Discharges (BCM)"
             value={formatNumber(data.naturalDischarge)}
@@ -411,7 +492,7 @@ const GroundwaterMetricsCard: React.FC<GroundwaterMetricsCardProps> = ({ data })
             color="#FFBF00"
             icon={<Activity size={18} />}
           />
-          
+
           <MetricRow
             label="Ground Water Extraction (BCM)"
             value={formatNumber(data.totalExtraction)}
@@ -427,7 +508,9 @@ const GroundwaterMetricsCard: React.FC<GroundwaterMetricsCardProps> = ({ data })
         <div className="bg-slate-900/40">
           {/* Stage gauge */}
           <div className="px-4 py-3 border-b border-white/10">
-            <h3 className="text-slate-400 text-xs uppercase tracking-wider">Stage of Extraction</h3>
+            <h3 className="text-slate-400 text-xs uppercase tracking-wider">
+              Stage of Extraction
+            </h3>
           </div>
           <div className="px-4">
             <StageGauge stage={data.stage || 0} />
@@ -460,7 +543,9 @@ const GroundwaterMetricsCard: React.FC<GroundwaterMetricsCardProps> = ({ data })
           ) : (
             <>
               <div className="px-4 py-3 border-t border-white/10">
-                <h3 className="text-slate-400 text-xs uppercase tracking-wider">Water Balance</h3>
+                <h3 className="text-slate-400 text-xs uppercase tracking-wider">
+                  Water Balance
+                </h3>
               </div>
               <div className="px-4 pb-4">
                 <WaterBalanceChart
@@ -481,10 +566,18 @@ const GroundwaterMetricsCard: React.FC<GroundwaterMetricsCardProps> = ({ data })
           <div>
             <p className="text-slate-300 text-sm">
               {data.stage > 100
-                ? `This ${data.locationType} is extracting ${(data.stage - 100).toFixed(1)}% more groundwater than the natural recharge rate. Immediate conservation measures are recommended.`
+                ? `This ${data.locationType} is extracting ${(
+                    data.stage - 100
+                  ).toFixed(
+                    1
+                  )}% more groundwater than the natural recharge rate. Immediate conservation measures are recommended.`
                 : data.stage > 70
-                ? `Groundwater extraction is at ${data.stage.toFixed(1)}% of recharge capacity. Consider monitoring closely and implementing water-saving practices.`
-                : `Groundwater situation is sustainable with extraction at ${data.stage.toFixed(1)}% of recharge. Continue current practices to maintain this balance.`}
+                ? `Groundwater extraction is at ${data.stage.toFixed(
+                    1
+                  )}% of recharge capacity. Consider monitoring closely and implementing water-saving practices.`
+                : `Groundwater situation is sustainable with extraction at ${data.stage.toFixed(
+                    1
+                  )}% of recharge. Continue current practices to maintain this balance.`}
             </p>
           </div>
         </div>

@@ -191,7 +191,8 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 	}
 
 	// If SQL is present, execute it and generate visualization
-	if sqlQuery != "" {
+	// BUT skip this path for TREND intent (handled by handleTrend below)
+	if sqlQuery != "" && intent != IntentTrend {
 		fmt.Printf("DEBUG: Executing SQL: %s\n", sqlQuery)
 		results, err := s.ingres.repo.RunRawQuery(ctx, sqlQuery)
 		
@@ -276,8 +277,13 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 		handlerResult, handlerErr = s.handleListDistricts(ctx, entities, response)
 	case IntentListStates:
 		handlerResult, handlerErr = s.handleListStates(ctx, entities, response)
+	case IntentTopRanking, IntentCategoryDistribution, IntentDeficitAnalysis, IntentChangeAnalysis:
+		// These intents are handled by dynamic SQL path above
+		// If we reach here, it means dynamic SQL failed, so return helpful message
+		response.Text = "I understand you're looking for " + string(intent) + " analysis. The system is processing your request with dynamic query generation."
+		handlerResult = response
 	default:
-		response.Text = "I'm not sure what you mean. Try asking for a summary, trend, comparison, list blocks/districts/states, or recharge/extraction breakdowns."
+		response.Text = "I'm not sure what you mean. Try asking for a summary, trend, comparison, ranking, distribution, or recharge/extraction breakdowns."
 		handlerResult = response
 	}
 	

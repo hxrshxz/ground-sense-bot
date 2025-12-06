@@ -1,11 +1,12 @@
-import React from "react";
+import React, { useMemo } from "react";
 import ReactECharts from "echarts-for-react";
 import * as echarts from "echarts";
-import { TrendingUp, TrendingDown, Minus, Calendar, MapPin, Droplets, Activity } from "lucide-react";
+import { Calendar, MapPin } from "lucide-react";
 
 // ============================================
 // TREND ANALYSIS CARD COMPONENT
-// Displays groundwater trends over multiple years
+// Interactive timeline-based visualization matching ECharts timeline example
+// Uses baseOption + options array structure with autoplay
 // ============================================
 
 export interface TrendDataPoint {
@@ -23,8 +24,7 @@ export interface TrendData {
   startYear: string;
   endYear: string;
   dataPoints: TrendDataPoint[];
-  // Calculated insights
-  rechargeChange: number; // Percentage change from first to last year
+  rechargeChange: number;
   extractionChange: number;
   stageChange: number;
   overallTrend: "improving" | "stable" | "declining";
@@ -34,443 +34,579 @@ interface TrendAnalysisCardProps {
   data: TrendData;
 }
 
-// Helper to get trend icon and color
-const getTrendStyle = (change: number, isStage: boolean = false) => {
-  // For stage, higher is worse, so reverse the logic
-  const effectiveChange = isStage ? -change : change;
-  
-  if (effectiveChange > 5) {
-    return { icon: TrendingUp, color: "#10B981", label: "Improving" };
-  } else if (effectiveChange < -5) {
-    return { icon: TrendingDown, color: "#EF4444", label: "Declining" };
-  }
-  return { icon: Minus, color: "#6B7280", label: "Stable" };
-};
-
-// Format number with appropriate precision
-const formatNumber = (num: number | undefined | null): string => {
-  if (num === undefined || num === null || isNaN(num)) return "N/A";
-  if (Math.abs(num) >= 1000) return (num / 1000).toFixed(1) + "K";
-  return num.toFixed(1);
-};
-
-// Format percentage change
-const formatChange = (change: number): string => {
-  if (isNaN(change)) return "N/A";
-  const sign = change >= 0 ? "+" : "";
-  return `${sign}${change.toFixed(1)}%`;
-};
-
-// Get category color
-const getCategoryColor = (category: string): string => {
-  switch (category?.toLowerCase().replace(/[_-]/g, " ")) {
-    case "safe": return "#10B981";
-    case "semi critical": return "#F59E0B";
-    case "critical": return "#F97316";
-    case "over exploited": return "#EF4444";
-    default: return "#6B7280";
-  }
-};
-
-// Stat card component
-const StatCard: React.FC<{
-  label: string;
-  value: string;
-  change: number;
-  unit: string;
-  isStage?: boolean;
-  icon: React.ReactNode;
-}> = ({ label, value, change, unit, isStage = false, icon }) => {
-  const trend = getTrendStyle(change, isStage);
-  const TrendIcon = trend.icon;
-  
-  return (
-    <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-      <div className="flex items-center gap-2 text-gray-400 text-sm mb-2">
-        {icon}
-        <span>{label}</span>
-      </div>
-      <div className="text-2xl font-bold text-white mb-1">
-        {value} <span className="text-sm font-normal text-gray-400">{unit}</span>
-      </div>
-      <div className="flex items-center gap-1" style={{ color: trend.color }}>
-        <TrendIcon className="w-4 h-4" />
-        <span className="text-sm">{formatChange(change)}</span>
-        <span className="text-xs text-gray-500 ml-1">{trend.label}</span>
-      </div>
-    </div>
-  );
-};
-
 const TrendAnalysisCard: React.FC<TrendAnalysisCardProps> = ({ data }) => {
-  const { locationName, locationType, startYear, endYear, dataPoints, rechargeChange, extractionChange, stageChange, overallTrend } = data;
-  
-  // Prepare chart data
-  const years = dataPoints.map(d => d.year);
-  const rechargeData = dataPoints.map(d => d.recharge);
-  const extractionData = dataPoints.map(d => d.extraction);
-  const stageData = dataPoints.map(d => d.stage);
-  const rainfallData = dataPoints.map(d => d.rainfall);
-  
-  // Get latest values
-  const latestData = dataPoints[dataPoints.length - 1] || { recharge: 0, extraction: 0, stage: 0, rainfall: 0 };
+  // Build ECharts timeline option matching the example structure
+  const timelineOption: echarts.EChartsOption = useMemo(() => {
+    const years = data.dataPoints.map((d) => d.year);
 
-  // Main trend chart options
-  const mainChartOption: echarts.EChartsOption = {
-    backgroundColor: "transparent",
-    tooltip: {
-      trigger: "axis",
-      backgroundColor: "rgba(17, 24, 39, 0.95)",
-      borderColor: "rgba(255, 255, 255, 0.1)",
-      textStyle: { color: "#fff" },
-      axisPointer: {
-        type: "cross",
-        lineStyle: { color: "rgba(255, 255, 255, 0.2)" }
-      },
-      formatter: (params: unknown) => {
-        const data = params as Array<{
-          axisValue: string;
-          marker: string;
-          seriesName: string;
-          value: number;
-        }>;
-        if (!Array.isArray(data) || data.length === 0) return "";
-        
-        let result = `<div style="font-weight: 600; margin-bottom: 8px;">${data[0].axisValue}</div>`;
-        data.forEach(item => {
-          const unit = item.seriesName.includes("Stage") ? "%" : " MCM";
-          result += `<div style="display: flex; justify-content: space-between; gap: 16px;">
-            ${item.marker}
-            <span style="color: #9CA3AF;">${item.seriesName}</span>
-            <span style="font-weight: 600;">${item.value?.toFixed(2)}${unit}</span>
-          </div>`;
-        });
-        return result;
-      }
-    },
-    legend: {
-      data: ["Recharge", "Extraction", "Stage of Extraction"],
-      top: 10,
-      textStyle: { color: "#9CA3AF" },
-      itemGap: 20
-    },
-    grid: {
-      left: "3%",
-      right: "4%",
-      bottom: "3%",
-      top: 60,
-      containLabel: true
-    },
-    xAxis: {
-      type: "category",
-      data: years,
-      axisLine: { lineStyle: { color: "rgba(255, 255, 255, 0.2)" } },
-      axisLabel: { color: "#9CA3AF" },
-      axisTick: { show: false }
-    },
-    yAxis: [
-      {
-        type: "value",
-        name: "Volume (MCM)",
-        nameTextStyle: { color: "#9CA3AF" },
-        axisLine: { show: false },
-        axisLabel: { color: "#9CA3AF" },
-        splitLine: { lineStyle: { color: "rgba(255, 255, 255, 0.1)" } }
-      },
-      {
-        type: "value",
-        name: "Stage (%)",
-        nameTextStyle: { color: "#9CA3AF" },
-        axisLine: { show: false },
-        axisLabel: { color: "#9CA3AF" },
-        splitLine: { show: false },
-        max: 200
-      }
-    ],
-    series: [
-      {
-        name: "Recharge",
-        type: "line",
-        smooth: true,
-        symbol: "circle",
-        symbolSize: 8,
-        lineStyle: { width: 3, color: "#10B981" },
-        itemStyle: { color: "#10B981" },
-        areaStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: "rgba(16, 185, 129, 0.3)" },
-            { offset: 1, color: "rgba(16, 185, 129, 0)" }
-          ])
-        },
-        data: rechargeData
-      },
-      {
-        name: "Extraction",
-        type: "line",
-        smooth: true,
-        symbol: "circle",
-        symbolSize: 8,
-        lineStyle: { width: 3, color: "#F59E0B" },
-        itemStyle: { color: "#F59E0B" },
-        areaStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: "rgba(245, 158, 11, 0.3)" },
-            { offset: 1, color: "rgba(245, 158, 11, 0)" }
-          ])
-        },
-        data: extractionData
-      },
-      {
-        name: "Stage of Extraction",
-        type: "line",
-        yAxisIndex: 1,
-        smooth: true,
-        symbol: "diamond",
-        symbolSize: 10,
-        lineStyle: { width: 2, color: "#EF4444", type: "dashed" },
-        itemStyle: { color: "#EF4444" },
-        data: stageData
-      }
-    ]
-  };
+    // Category color mapping
+    const getCategoryColor = (cat: string) => {
+      const colors: Record<string, string> = {
+        safe: "#10b981",
+        semicritical: "#3b82f6",
+        critical: "#f59e0b",
+        overcritical: "#ef4444",
+        saline: "#8b5cf6",
+        aggregated: "#64748b",
+      };
+      return colors[cat.toLowerCase().replace(/[_\s-]/g, "")] || "#6b7280";
+    };
 
-  // Rainfall chart options
-  const rainfallChartOption: echarts.EChartsOption = {
-    backgroundColor: "transparent",
-    tooltip: {
-      trigger: "axis",
-      backgroundColor: "rgba(17, 24, 39, 0.95)",
-      borderColor: "rgba(255, 255, 255, 0.1)",
-      textStyle: { color: "#fff" },
-      formatter: (params: unknown) => {
-        const data = params as Array<{ axisValue: string; value: number }>;
-        if (!Array.isArray(data) || data.length === 0) return "";
-        return `<div style="font-weight: 600;">${data[0].axisValue}</div>
-                <div>Rainfall: <span style="font-weight: 600;">${data[0].value?.toFixed(1)} mm</span></div>`;
-      }
-    },
-    grid: {
-      left: "3%",
-      right: "4%",
-      bottom: "3%",
-      top: 30,
-      containLabel: true
-    },
-    xAxis: {
-      type: "category",
-      data: years,
-      axisLine: { lineStyle: { color: "rgba(255, 255, 255, 0.2)" } },
-      axisLabel: { color: "#9CA3AF", fontSize: 10 },
-      axisTick: { show: false }
-    },
-    yAxis: {
-      type: "value",
-      axisLine: { show: false },
-      axisLabel: { color: "#9CA3AF", fontSize: 10 },
-      splitLine: { lineStyle: { color: "rgba(255, 255, 255, 0.1)" } }
-    },
-    series: [
-      {
-        type: "bar",
-        data: rainfallData,
-        itemStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: "#3B82F6" },
-            { offset: 1, color: "#1D4ED8" }
-          ]),
-          borderRadius: [4, 4, 0, 0]
-        },
-        barWidth: "60%"
-      }
-    ]
-  };
+    // Get category label for display
+    const getCategoryLabel = (cat: string) => {
+      const labels: Record<string, string> = {
+        safe: "Safe",
+        semicritical: "Semi-Critical",
+        critical: "Critical",
+        overcritical: "Over-Critical",
+        saline: "Saline",
+        aggregated: "Multiple Categories",
+      };
+      return labels[cat.toLowerCase().replace(/[_\s-]/g, "")] || cat;
+    };
 
-  // Category timeline
-  const categoryTimelineOption: echarts.EChartsOption = {
-    backgroundColor: "transparent",
-    tooltip: {
-      trigger: "item",
-      backgroundColor: "rgba(17, 24, 39, 0.95)",
-      borderColor: "rgba(255, 255, 255, 0.1)",
-      textStyle: { color: "#fff" }
-    },
-    grid: {
-      left: "3%",
-      right: "4%",
-      bottom: "3%",
-      top: 10,
-      containLabel: true
-    },
-    xAxis: {
-      type: "category",
-      data: years,
-      axisLine: { lineStyle: { color: "rgba(255, 255, 255, 0.2)" } },
-      axisLabel: { color: "#9CA3AF", fontSize: 10 },
-      axisTick: { show: false }
-    },
-    yAxis: {
-      type: "value",
-      max: 1,
-      min: 0,
-      show: false
-    },
-    series: [
-      {
-        type: "scatter",
-        symbolSize: 24,
-        data: dataPoints.map((d, idx) => ({
-          value: [idx, 0.5],
-          itemStyle: { color: getCategoryColor(d.category) },
-          name: d.category
-        })),
-        label: {
-          show: true,
-          formatter: (params: unknown) => {
-            const p = params as { data: { name: string } };
-            const cat = p.data?.name?.toLowerCase().replace(/[_-]/g, " ");
-            if (cat === "safe") return "✓";
-            if (cat === "semi critical") return "!";
-            if (cat === "critical") return "!!";
-            if (cat === "over exploited") return "✗";
-            return "?";
+    // Build options array - one per year
+    const options = data.dataPoints.map((point) => ({
+      title: [
+        {
+          text: `${data.locationName} Groundwater Status (${point.year})`,
+          left: "center",
+          top: 20,
+          textStyle: {
+            color: "#fff",
+            fontSize: 20,
+            fontWeight: "bold",
           },
-          fontSize: 12,
-          color: "#fff"
-        }
-      }
-    ]
-  };
+        },
+        {
+          text: `Recharge: ${point.recharge.toFixed(
+            1
+          )} MCM  |  Extraction: ${point.extraction.toFixed(
+            1
+          )} MCM  |  Stage: ${point.stage.toFixed(
+            1
+          )}%  |  Rainfall: ${point.rainfall.toFixed(0)}mm`,
+          left: "center",
+          top: 50,
+          textStyle: {
+            color: "#94a3b8",
+            fontSize: 13,
+            fontWeight: "normal",
+          },
+        },
+      ],
+      series: [
+        // Bar series for Recharge
+        {
+          name: "Recharge",
+          type: "bar",
+          data: [point.recharge],
+          itemStyle: {
+            color: "#3b82f6",
+          },
+          label: {
+            show: true,
+            position: "top",
+            color: "#fff",
+            formatter: (params: any) => params.value.toFixed(1),
+          },
+        },
+        // Bar series for Extraction
+        {
+          name: "Extraction",
+          type: "bar",
+          data: [point.extraction],
+          itemStyle: {
+            color: "#f59e0b",
+          },
+          label: {
+            show: true,
+            position: "top",
+            color: "#fff",
+            formatter: (params: any) => params.value.toFixed(1),
+          },
+        },
+        // Bar series for Stage
+        {
+          name: "Stage",
+          type: "bar",
+          data: [point.stage],
+          itemStyle: {
+            color: "#8b5cf6",
+          },
+          label: {
+            show: true,
+            position: "top",
+            color: "#fff",
+            formatter: (params: any) => params.value.toFixed(1) + "%",
+          },
+        },
+        // Bar series for Rainfall
+        {
+          name: "Rainfall",
+          type: "bar",
+          data: [point.rainfall],
+          itemStyle: {
+            color: "#22c55e",
+          },
+          label: {
+            show: true,
+            position: "top",
+            color: "#fff",
+            formatter: (params: any) => params.value.toFixed(0) + "mm",
+          },
+        },
+        // Pie chart for category status
+        {
+          data: [
+            {
+              name: getCategoryLabel(point.category),
+              value: 1,
+              itemStyle: {
+                color: getCategoryColor(point.category),
+              },
+            },
+          ],
+        },
+      ],
+    }));
 
-  // Overall trend badge
-  const overallTrendStyle = {
-    improving: { color: "#10B981", bg: "rgba(16, 185, 129, 0.15)", icon: TrendingUp },
-    stable: { color: "#6B7280", bg: "rgba(107, 114, 128, 0.15)", icon: Minus },
-    declining: { color: "#EF4444", bg: "rgba(239, 68, 68, 0.15)", icon: TrendingDown }
-  }[overallTrend] || { color: "#6B7280", bg: "rgba(107, 114, 128, 0.15)", icon: Minus };
+    // baseOption - defines the static structure
+    return {
+      baseOption: {
+        backgroundColor: "transparent",
+        timeline: {
+          axisType: "category",
+          autoPlay: true,
+          playInterval: 2000,
+          data: years,
+          bottom: 20,
+          label: {
+            color: "#94a3b8",
+            fontSize: 13,
+            fontWeight: "normal",
+          },
+          lineStyle: {
+            color: "#475569",
+          },
+          itemStyle: {
+            color: "#3b82f6",
+            borderColor: "#1e40af",
+          },
+          checkpointStyle: {
+            color: "#22c55e",
+            borderColor: "#16a34a",
+            borderWidth: 2,
+          },
+          controlStyle: {
+            showNextBtn: true,
+            showPrevBtn: true,
+            color: "#94a3b8",
+            borderColor: "#475569",
+          },
+        },
+        tooltip: {
+          trigger: "axis",
+          backgroundColor: "rgba(17, 24, 39, 0.95)",
+          borderColor: "rgba(255, 255, 255, 0.1)",
+          textStyle: {
+            color: "#fff",
+          },
+          axisPointer: {
+            type: "shadow",
+          },
+        },
+        legend: {
+          left: "right",
+          top: 70,
+          textStyle: {
+            color: "#94a3b8",
+          },
+          data: ["Recharge", "Extraction", "Stage", "Rainfall"],
+        },
+        grid: {
+          top: 140,
+          left: 80,
+          right: "30%",
+          bottom: 100,
+        },
+        xAxis: [
+          {
+            type: "category",
+            data: ["Metrics"],
+            axisLabel: {
+              color: "#94a3b8",
+            },
+            axisLine: {
+              lineStyle: {
+                color: "#475569",
+              },
+            },
+            splitLine: {
+              show: false,
+            },
+          },
+        ],
+        yAxis: [
+          {
+            type: "value",
+            name: "Value (MCM / mm / %)",
+            nameTextStyle: {
+              color: "#94a3b8",
+            },
+            axisLabel: {
+              color: "#94a3b8",
+            },
+            axisLine: {
+              lineStyle: {
+                color: "#475569",
+              },
+            },
+            splitLine: {
+              lineStyle: {
+                color: "#334155",
+              },
+            },
+          },
+        ],
+        series: [
+          {
+            name: "Recharge",
+            type: "bar",
+            itemStyle: {
+              color: "#3b82f6",
+            },
+            label: {
+              show: true,
+              position: "top",
+              color: "#fff",
+              formatter: (params: any) => params.value.toFixed(1),
+            },
+          },
+          {
+            name: "Extraction",
+            type: "bar",
+            itemStyle: {
+              color: "#f59e0b",
+            },
+            label: {
+              show: true,
+              position: "top",
+              color: "#fff",
+              formatter: (params: any) => params.value.toFixed(1),
+            },
+          },
+          {
+            name: "Stage",
+            type: "bar",
+            itemStyle: {
+              color: "#8b5cf6",
+            },
+            label: {
+              show: true,
+              position: "top",
+              color: "#fff",
+              formatter: (params: any) => params.value.toFixed(1) + "%",
+            },
+          },
+          {
+            name: "Rainfall",
+            type: "bar",
+            itemStyle: {
+              color: "#22c55e",
+            },
+            label: {
+              show: true,
+              position: "top",
+              color: "#fff",
+              formatter: (params: any) => params.value.toFixed(0) + "mm",
+            },
+          },
+          {
+            name: "Category Status",
+            type: "pie",
+            center: ["80%", "30%"],
+            radius: ["15%", "25%"],
+            z: 100,
+            label: {
+              show: true,
+              color: "#fff",
+              formatter: "{b}\n{d}%",
+            },
+            itemStyle: {
+              color: (params: any) => {
+                const categoryColors: Record<string, string> = {
+                  safe: "#10b981",
+                  semicritical: "#3b82f6",
+                  critical: "#f59e0b",
+                  overcritical: "#ef4444",
+                  saline: "#8b5cf6",
+                };
+                const cat = params.name.toLowerCase().replace(/[_\s-]/g, "");
+                return categoryColors[cat] || "#6b7280";
+              },
+            },
+          },
+        ],
+      },
+      options,
+    };
+  }, [data]);
 
-  const OverallIcon = overallTrendStyle.icon;
+  const years = data.dataPoints.map((d) => d.year);
+  const firstYear = years[0];
+  const lastYear = years[years.length - 1];
 
   return (
-    <div className="w-full bg-gradient-to-br from-gray-900/95 via-gray-800/95 to-gray-900/95 rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
+    <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-6 shadow-2xl border border-white/10">
       {/* Header */}
-      <div className="px-6 py-5 border-b border-white/10 bg-gradient-to-r from-blue-500/10 to-purple-500/10">
-        <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <MapPin className="w-6 h-6 text-blue-400" />
           <div>
-            <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
-              <MapPin className="w-4 h-4" />
-              <span className="capitalize">{locationType}</span>
-            </div>
-            <h2 className="text-2xl font-bold text-white">{locationName}</h2>
-            <div className="flex items-center gap-2 text-gray-400 text-sm mt-1">
-              <Calendar className="w-4 h-4" />
-              <span>Trend Analysis: {startYear} → {endYear}</span>
-            </div>
+            <h3 className="text-xl font-bold text-white">
+              {data.locationName}
+            </h3>
+            <p className="text-sm text-gray-400 capitalize">
+              {data.locationType} • {data.startYear} - {data.endYear}
+            </p>
           </div>
-          <div 
-            className="px-4 py-2 rounded-xl flex items-center gap-2"
-            style={{ backgroundColor: overallTrendStyle.bg }}
+        </div>
+        <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/10">
+          <Calendar className="w-4 h-4 text-blue-400" />
+          <span className="text-sm text-gray-300">{years.length} Years</span>
+        </div>
+      </div>
+
+      {/* Summary Stats */}
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+          <div className="text-sm text-gray-400 mb-1">Recharge Change</div>
+          <div
+            className={`text-2xl font-bold ${
+              data.rechargeChange > 0 ? "text-green-400" : "text-red-400"
+            }`}
           >
-            <OverallIcon className="w-5 h-5" style={{ color: overallTrendStyle.color }} />
-            <span className="font-semibold capitalize" style={{ color: overallTrendStyle.color }}>
-              {overallTrend}
-            </span>
+            {data.rechargeChange > 0 ? "+" : ""}
+            {data.rechargeChange.toFixed(1)}%
+          </div>
+        </div>
+        <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+          <div className="text-sm text-gray-400 mb-1">Extraction Change</div>
+          <div
+            className={`text-2xl font-bold ${
+              data.extractionChange > 0 ? "text-red-400" : "text-green-400"
+            }`}
+          >
+            {data.extractionChange > 0 ? "+" : ""}
+            {data.extractionChange.toFixed(1)}%
+          </div>
+        </div>
+        <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+          <div className="text-sm text-gray-400 mb-1">Overall Trend</div>
+          <div
+            className={`text-2xl font-bold capitalize ${
+              data.overallTrend === "improving"
+                ? "text-green-400"
+                : data.overallTrend === "declining"
+                ? "text-red-400"
+                : "text-yellow-400"
+            }`}
+          >
+            {data.overallTrend}
           </div>
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 border-b border-white/10">
-        <StatCard
-          label="Total Recharge"
-          value={formatNumber(latestData.recharge)}
-          change={rechargeChange}
-          unit="MCM"
-          icon={<Droplets className="w-4 h-4" />}
-        />
-        <StatCard
-          label="Total Extraction"
-          value={formatNumber(latestData.extraction)}
-          change={extractionChange}
-          unit="MCM"
-          icon={<Activity className="w-4 h-4" />}
-        />
-        <StatCard
-          label="Stage of Extraction"
-          value={formatNumber(latestData.stage)}
-          change={stageChange}
-          unit="%"
-          isStage={true}
-          icon={<TrendingUp className="w-4 h-4" />}
-        />
-        <StatCard
-          label="Avg. Rainfall"
-          value={formatNumber(latestData.rainfall)}
-          change={0}
-          unit="mm"
-          icon={<Calendar className="w-4 h-4" />}
-        />
-      </div>
-
-      {/* Main Trend Chart */}
-      <div className="p-6 border-b border-white/10">
-        <h3 className="text-lg font-semibold text-white mb-4">📈 Recharge vs Extraction Trends</h3>
+      {/* Interactive Timeline Chart */}
+      <div className="bg-white/5 rounded-xl p-4 border border-white/10">
         <ReactECharts
-          option={mainChartOption}
-          style={{ height: "320px", width: "100%" }}
+          option={timelineOption}
+          style={{ height: "500px", width: "100%" }}
           opts={{ renderer: "canvas" }}
         />
       </div>
 
-      {/* Secondary Charts Row */}
-      <div className="grid md:grid-cols-2 gap-6 p-6">
-        {/* Rainfall Chart */}
-        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-          <h4 className="text-sm font-semibold text-white mb-3">🌧️ Annual Rainfall</h4>
-          <ReactECharts
-            option={rainfallChartOption}
-            style={{ height: "180px", width: "100%" }}
-            opts={{ renderer: "canvas" }}
-          />
+      {/* AI Insights Section */}
+      <div className="bg-white/5 rounded-xl p-6 border border-white/10 mt-6">
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-2xl">💡</span>
+          <h3 className="text-lg font-semibold text-white">Key Insights</h3>
         </div>
 
-        {/* Category Timeline */}
-        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-          <h4 className="text-sm font-semibold text-white mb-3">📊 Category Evolution</h4>
-          <ReactECharts
-            option={categoryTimelineOption}
-            style={{ height: "100px", width: "100%" }}
-            opts={{ renderer: "canvas" }}
-          />
-          <div className="flex flex-wrap gap-3 mt-3 justify-center">
-            {[
-              { label: "Safe", color: "#10B981" },
-              { label: "Semi-Critical", color: "#F59E0B" },
-              { label: "Critical", color: "#F97316" },
-              { label: "Over-Exploited", color: "#EF4444" }
-            ].map(item => (
-              <div key={item.label} className="flex items-center gap-1 text-xs">
-                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                <span className="text-gray-400">{item.label}</span>
-              </div>
-            ))}
+        <div className="space-y-4">
+          {/* Recharge Analysis */}
+          <div>
+            <h4 className="text-sm font-semibold text-blue-400 mb-2">
+              Groundwater Recharge Trend
+            </h4>
+            <p className="text-sm text-gray-300">
+              {data.rechargeChange > 10 ? (
+                <>
+                  Recharge levels have shown a{" "}
+                  <span className="text-green-400 font-semibold">
+                    significant improvement of {data.rechargeChange.toFixed(1)}%
+                  </span>{" "}
+                  from {firstYear} to {lastYear}. This positive trend indicates
+                  effective water conservation measures and favorable monsoon
+                  conditions contributing to aquifer replenishment.
+                </>
+              ) : data.rechargeChange > 0 ? (
+                <>
+                  Recharge levels have increased by{" "}
+                  <span className="text-green-400 font-semibold">
+                    {data.rechargeChange.toFixed(1)}%
+                  </span>{" "}
+                  over the {years.length}-year period. While this shows
+                  improvement, continued monitoring and enhanced conservation
+                  efforts will help maintain sustainable groundwater levels.
+                </>
+              ) : data.rechargeChange > -10 ? (
+                <>
+                  Recharge levels have declined by{" "}
+                  <span className="text-yellow-400 font-semibold">
+                    {Math.abs(data.rechargeChange).toFixed(1)}%
+                  </span>{" "}
+                  from {firstYear} to {lastYear}. This moderate decline warrants
+                  attention through improved rainwater harvesting and watershed
+                  management initiatives.
+                </>
+              ) : (
+                <>
+                  Recharge levels have experienced a{" "}
+                  <span className="text-red-400 font-semibold">
+                    concerning decline of{" "}
+                    {Math.abs(data.rechargeChange).toFixed(1)}%
+                  </span>{" "}
+                  over the analysis period. Immediate intervention through
+                  artificial recharge structures and stricter water conservation
+                  policies is essential to prevent further depletion.
+                </>
+              )}
+            </p>
           </div>
+
+          {/* Extraction Analysis */}
+          <div>
+            <h4 className="text-sm font-semibold text-amber-400 mb-2">
+              Groundwater Extraction Pattern
+            </h4>
+            <p className="text-sm text-gray-300">
+              {data.extractionChange > 10 ? (
+                <>
+                  Extraction rates have surged by{" "}
+                  <span className="text-red-400 font-semibold">
+                    {data.extractionChange.toFixed(1)}%
+                  </span>{" "}
+                  since {firstYear}, signaling{" "}
+                  <span className="text-red-400 font-semibold">
+                    urgent concern
+                  </span>
+                  . This increased demand from agriculture, industry, and urban
+                  consumption is outpacing natural recharge rates and requires
+                  immediate regulatory measures and demand management
+                  strategies.
+                </>
+              ) : data.extractionChange > 0 ? (
+                <>
+                  Extraction has increased by{" "}
+                  <span className="text-yellow-400 font-semibold">
+                    {data.extractionChange.toFixed(1)}%
+                  </span>{" "}
+                  over {years.length} years. While extraction growth is
+                  moderate, it's crucial to balance consumption with recharge
+                  through efficient irrigation techniques and industrial water
+                  recycling programs.
+                </>
+              ) : data.extractionChange > -10 ? (
+                <>
+                  Extraction levels have decreased slightly by{" "}
+                  <span className="text-green-400 font-semibold">
+                    {Math.abs(data.extractionChange).toFixed(1)}%
+                  </span>
+                  , reflecting controlled water usage. Continuing these
+                  conservation practices while monitoring seasonal variations
+                  will help maintain this positive trajectory.
+                </>
+              ) : (
+                <>
+                  Extraction has reduced by{" "}
+                  <span className="text-green-400 font-semibold">
+                    {Math.abs(data.extractionChange).toFixed(1)}%
+                  </span>{" "}
+                  from {firstYear} to {lastYear}, demonstrating excellent
+                  progress in sustainable water management. This reduction
+                  through efficiency measures and alternative water sources
+                  should be maintained and expanded.
+                </>
+              )}
+            </p>
+          </div>
+
+          {/* Overall Assessment */}
+          <div>
+            <h4 className="text-sm font-semibold text-purple-400 mb-2">
+              Overall Water Security Assessment
+            </h4>
+            <p className="text-sm text-gray-300">
+              {data.overallTrend === "improving" ? (
+                <>
+                  The region shows an{" "}
+                  <span className="text-green-400 font-semibold">
+                    improving groundwater situation
+                  </span>{" "}
+                  with positive recharge trends or controlled extraction rates.
+                  Continue implementing best practices including
+                  micro-irrigation, rainwater harvesting, and aquifer recharge
+                  projects. Regular monitoring through water budgeting and
+                  community engagement will ensure long-term sustainability.
+                </>
+              ) : data.overallTrend === "declining" ? (
+                <>
+                  Analysis indicates a{" "}
+                  <span className="text-red-400 font-semibold">
+                    declining groundwater trend
+                  </span>{" "}
+                  requiring immediate attention. Priority actions should
+                  include: enforcing extraction limits, promoting drip
+                  irrigation and sprinkler systems, constructing check dams and
+                  percolation tanks, incentivizing crop diversification to less
+                  water-intensive varieties, and strengthening groundwater
+                  monitoring networks.
+                </>
+              ) : (
+                <>
+                  The groundwater situation shows a{" "}
+                  <span className="text-yellow-400 font-semibold">
+                    stable but cautious outlook
+                  </span>
+                  . While current levels are manageable, proactive measures are
+                  recommended: enhance recharge infrastructure during monsoons,
+                  optimize agricultural water use through precision irrigation,
+                  develop alternative water sources where feasible, and
+                  establish community-based water management committees to
+                  ensure equitable distribution and sustainable practices.
+                </>
+              )}
+            </p>
+          </div>
+        </div>
+
+        {/* Data Source Note */}
+        <div className="mt-6 pt-4 border-t border-white/10">
+          <p className="text-xs text-gray-500 italic">
+            Analysis based on {years.length} years of groundwater assessment
+            data spanning {firstYear}-{lastYear}. Trends calculated using
+            comparative analysis of recharge rates, extraction patterns, stage
+            of development, and rainfall correlations.
+          </p>
         </div>
       </div>
 
-      {/* Insights Footer */}
-      <div className="px-6 py-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-t border-white/10">
-        <p className="text-sm text-gray-400">
-          <span className="text-white font-medium">💡 Insight:</span>{" "}
-          {overallTrend === "improving" && (
-            <>Groundwater conditions have improved with recharge rates increasing by {Math.abs(rechargeChange).toFixed(1)}%. Continue sustainable practices.</>
-          )}
-          {overallTrend === "declining" && (
-            <>Groundwater stress is increasing. Extraction has changed by {Math.abs(extractionChange).toFixed(1)}%. Immediate intervention recommended.</>
-          )}
-          {overallTrend === "stable" && (
-            <>Groundwater levels are relatively stable. Monitor seasonal variations and maintain current management practices.</>
-          )}
-        </p>
+      {/* Instructions */}
+      <div className="mt-4 text-sm text-gray-400 text-center">
+        Use timeline controls to navigate through years • Click play to animate
+        transitions
       </div>
     </div>
   );

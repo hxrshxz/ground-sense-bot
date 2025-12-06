@@ -32,6 +32,11 @@ const (
 	IntentListBlocks          Intent = "LIST_BLOCKS"
 	IntentListDistricts       Intent = "LIST_DISTRICTS"
 	IntentListStates          Intent = "LIST_STATES"
+	// New enhanced query patterns
+	IntentTopRanking          Intent = "TOP_RANKING"
+	IntentCategoryDistribution Intent = "CATEGORY_DISTRIBUTION"
+	IntentDeficitAnalysis     Intent = "DEFICIT_ANALYSIS"
+	IntentChangeAnalysis      Intent = "CHANGE_ANALYSIS"
 	IntentUnknown             Intent = "UNKNOWN"
 )
 
@@ -168,8 +173,27 @@ func (s *NLPService) generateDynamicSQL(message string, intent Intent, entities 
 ║                    INDIA GROUNDWATER DATABASE - ACTUAL SCHEMA                ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║  Database: PostgreSQL | Schema: public | Data: INGRES Groundwater System     ║
-║  TOTAL BLOCKS: 5,796 | ONLY YEAR: 2024-2025                                  ║
+║  TOTAL BLOCKS: 5,796 | YEARS AVAILABLE: 2012-2025 (7 assessment periods)    ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
+
+⚠️⚠️⚠️ CRITICAL DATA AVAILABILITY BY YEAR ⚠️⚠️⚠️
+┌─────────────┬──────────────┬─────────┬──────────────────────────────────────┐
+│ Year        │ Block Count  │ States  │ Data Quality                         │
+├─────────────┼──────────────┼─────────┼──────────────────────────────────────┤
+│ 2024-2025   │ 5,796 blocks │ 26      │ ✅ COMPLETE - Most comprehensive    │
+│ 2023-2024   │ 5,734 blocks │ 25      │ ✅ EXCELLENT - Near complete         │
+│ 2021-2022   │ 4,824 blocks │ 16      │ ✅ GOOD - Wide coverage              │
+│ 2019-2020   │ 2,811 blocks │ 13      │ ⚠️ MODERATE - Limited coverage       │
+│ 2022-2023   │ 2,619 blocks │ 12      │ ⚠️ MODERATE - Limited coverage       │
+│ 2016-2017   │ 2,738 blocks │ 12      │ ⚠️ MODERATE - Limited coverage       │
+│ 2012-2013   │   160 blocks │  1      │ ⚠️ MINIMAL - Only West Bengal        │
+└─────────────┴──────────────┴─────────┴──────────────────────────────────────┘
+
+📊 TREND ANALYSIS CAPABILITY:
+- Recent years (2021-2025): Best for trend analysis across most states
+- Earlier years (2012-2020): Limited to specific states only
+- For comprehensive trends: Use 2021-2025 period (4 years, 16+ states)
+- For maximum data: Default to 2024-2025 unless user specifies otherwise
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 TABLE 1: states
@@ -354,7 +378,7 @@ WHERE LOWER(b.block_name) ILIKE '%jaisinagar%'
   AND a.year = '2024-2025'
 
 🎯 EXAMPLE 2: TREND - "Show me groundwater trend for Ludhiana"
--- NOTE: Only 2024-2025 data exists! Trend queries will return single year.
+-- Multi-year data available! This will show actual trends over time.
 SELECT 
     a.year,
     b.block_name,
@@ -566,7 +590,7 @@ GROUP BY d.district_name
 ORDER BY avg_stage DESC
 
 🎯 EXAMPLE 16: STATE TREND - "Show groundwater trend for Punjab over years"
--- NOTE: Only 2024-2025 data exists!
+-- Multi-year data available! Punjab has data from 2021-2025.
 SELECT 
     a.year,
     s.state_name,
@@ -582,13 +606,95 @@ WHERE UPPER(s.state_name) = UPPER('punjab')
 GROUP BY a.year, s.state_name
 ORDER BY a.year ASC
 
+🎯 EXAMPLE 17: TOP_RANKING - "Top 10 over-exploited blocks in India"
+-- Returns multiple metrics for rich stacked bar visualization
+SELECT 
+    CONCAT(b.block_name, ', ', d.district_name) as location,
+    s.state_name,
+    ROUND(a.stage::numeric, 2) as stage_percent,
+    ROUND(a.total_extraction::numeric, 2) as extraction_mcm,
+    ROUND(a.total_recharge::numeric, 2) as recharge_mcm,
+    ROUND((a.total_extraction - a.total_recharge)::numeric, 2) as deficit_mcm,
+    ROUND(a.rainfall::numeric, 2) as rainfall_mm
+FROM assessments_summary a
+JOIN blocks b ON a.block_uuid = b.block_uuid
+JOIN districts d ON b.district_uuid = d.district_uuid
+JOIN states s ON d.state_uuid = s.state_uuid
+WHERE LOWER(a.category) = 'over_exploited'
+AND a.year = '2024-2025'
+AND a.stage > 0
+ORDER BY a.stage DESC
+LIMIT 10
+
+🎯 EXAMPLE 18: CATEGORY_DISTRIBUTION - "Show me category distribution for Punjab"
+SELECT 
+    a.category,
+    COUNT(*) as block_count,
+    ROUND(AVG(CASE WHEN a.stage > 0 THEN a.stage END)::numeric, 2) as avg_stage,
+    ROUND((COUNT(*) * 100.0 / SUM(COUNT(*)) OVER())::numeric, 2) as percentage
+FROM assessments_summary a
+JOIN blocks b ON a.block_uuid = b.block_uuid
+JOIN districts d ON b.district_uuid = d.district_uuid
+JOIN states s ON d.state_uuid = s.state_uuid
+WHERE UPPER(s.state_name) = 'PUNJAB'
+AND a.year = '2024-2025'
+AND a.category != 'none'
+GROUP BY a.category
+ORDER BY block_count DESC
+
+🎯 EXAMPLE 19: DEFICIT_ANALYSIS - "Which blocks have the highest water deficit?"
+SELECT 
+    b.block_name,
+    d.district_name,
+    s.state_name,
+    a.total_extraction,
+    a.total_recharge,
+    (a.total_extraction - a.total_recharge) as deficit,
+    a.stage,
+    a.category
+FROM assessments_summary a
+JOIN blocks b ON a.block_uuid = b.block_uuid
+JOIN districts d ON b.district_uuid = d.district_uuid
+JOIN states s ON d.state_uuid = s.state_uuid
+WHERE a.year = '2024-2025'
+AND a.total_extraction > a.total_recharge
+AND a.stage > 0
+ORDER BY (a.total_extraction - a.total_recharge) DESC
+LIMIT 20
+
+🎯 EXAMPLE 20: CHANGE_ANALYSIS - "How has Punjab changed over 4 years?"
+WITH yearly_data AS (
+    SELECT 
+        a.year,
+        ROUND(AVG(CASE WHEN a.stage > 0 THEN a.stage END)::numeric, 2) as avg_stage,
+        ROUND(AVG(a.rainfall)::numeric, 2) as avg_rainfall,
+        COUNT(*) as total_blocks
+    FROM assessments_summary a
+    JOIN blocks b ON a.block_uuid = b.block_uuid
+    JOIN districts d ON b.district_uuid = d.district_uuid
+    JOIN states s ON d.state_uuid = s.state_uuid
+    WHERE UPPER(s.state_name) = 'PUNJAB'
+    GROUP BY a.year
+)
+SELECT 
+    year,
+    avg_stage,
+    avg_rainfall,
+    total_blocks,
+    (avg_stage - LAG(avg_stage) OVER (ORDER BY year)) as stage_change
+FROM yearly_data
+ORDER BY year
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CRITICAL RULES (MUST FOLLOW):
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 1. ALWAYS use proper JOINs to get human-readable block/district/state names
 2. For STATE name matching: Use UPPER(s.state_name) = UPPER('...')
 3. For BLOCK/DISTRICT name matching: Use LOWER(b.block_name) ILIKE '%...%'
-4. ALWAYS include: AND a.year = '2024-2025' (only year with data!)
+4. Year filtering:
+   - Single block/summary: AND a.year = '2024-2025' (most complete)
+   - Trend queries: NO year filter OR filter to specific range like a.year >= '2021-2022'
+   - User specified year: Use their year (validate it exists first)
 5. For LIST queries: Add LIMIT 50 to prevent overload
 
 ⚠️⚠️⚠️ CATEGORY VALUES (CRITICAL - USE EXACT VALUES):
@@ -648,7 +754,7 @@ func (s *NLPService) analyzeQueryWithAI(message string) (*IntentAnalysis, error)
 DATABASE SCHEMA CONTEXT:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 HIERARCHY: State → District → Block
-TOTAL BLOCKS: 5,796 | ONLY AVAILABLE YEAR: 2024-2025
+BLOCKS IN 2024-2025: 5,796 | DATA AVAILABILITY: 7 years (2012-2025)
 
 1. STATES TABLE:
    - state_name (VARCHAR): ALL UPPERCASE like "PUNJAB", "HARYANA", "RAJASTHAN"
@@ -660,12 +766,19 @@ TOTAL BLOCKS: 5,796 | ONLY AVAILABLE YEAR: 2024-2025
    - block_name (VARCHAR): Mixed case (some UPPERCASE, some Title Case)
 
 4. ASSESSMENTS_SUMMARY TABLE (Main groundwater data):
-   - year (VARCHAR): ONLY '2024-2025' has block-level data!
+   - year (VARCHAR): 7 years available: '2012-2013', '2016-2017', '2019-2020', 
+                     '2021-2022', '2022-2023', '2023-2024', '2024-2025'
+   - Block coverage varies by year (see table above)
    - rainfall (FLOAT): Rainfall in mm (range: 0-3000)
    - total_recharge (FLOAT): Total groundwater recharge in MCM
    - total_extraction (FLOAT): Total groundwater extraction in MCM
    - stage (FLOAT): Stage percentage (can be negative -100000 for salinity)
    - availability (FLOAT): Available groundwater in MCM
+   
+   DEFAULT YEAR LOGIC:
+   - Single block query: Use '2024-2025' (most complete)
+   - Trend query: Use 2021-2025 period (4 years, best coverage)
+   - Specific location: Check all available years for that location in MCM
    
 ⚠️⚠️⚠️ CRITICAL - ACTUAL CATEGORY VALUES IN DATABASE (USE EXACTLY AS SHOWN):
    - 'safe' (lowercase)
@@ -712,7 +825,7 @@ INTENT CLASSIFICATION RULES:
 4. TREND
    → When: User asks for HISTORICAL data, trends OVER TIME
    → Keywords: "trend", "over time", "historical", "over years"
-   → NOTE: Only 2024-2025 data exists, trends will show single year
+   → NOTE: 7 years of data available! Best coverage: 2021-2025 (4 years)
    → Examples:
       "Show me trend for Ludhiana" → TREND
 
@@ -745,6 +858,34 @@ INTENT CLASSIFICATION RULES:
    → Examples:
       "Map all safe blocks" → MAP_CATEGORY
 
+10. TOP_RANKING
+   → When: User wants TOP N or WORST/BEST performers
+   → Keywords: "top", "worst", "best", "ranking", "highest", "lowest", "most", "least"
+   → Examples:
+      "Top 10 over-exploited blocks" → TOP_RANKING
+      "Which states have worst groundwater?" → TOP_RANKING
+
+11. CATEGORY_DISTRIBUTION
+   → When: User asks for DISTRIBUTION or COUNT by CATEGORY
+   → Keywords: "distribution", "how many", "breakdown by category", "count"
+   → Examples:
+      "Show me category distribution for Punjab" → CATEGORY_DISTRIBUTION
+      "How many blocks are over-exploited?" → CATEGORY_DISTRIBUTION
+
+12. DEFICIT_ANALYSIS
+   → When: User asks about WATER DEFICIT, GAP, or BALANCE
+   → Keywords: "deficit", "gap", "imbalance", "shortage", "water balance"
+   → Examples:
+      "Which blocks have highest water deficit?" → DEFICIT_ANALYSIS
+      "Show extraction vs recharge gap" → DEFICIT_ANALYSIS
+
+13. CHANGE_ANALYSIS
+   → When: User asks about CHANGE OVER TIME, IMPROVEMENT, or DECLINE
+   → Keywords: "change", "improved", "worsened", "decline", "growth", "over years"
+   → Examples:
+      "How has Punjab changed over 4 years?" → CHANGE_ANALYSIS
+      "Show me year-over-year improvement" → CHANGE_ANALYSIS
+
 ENTITY EXTRACTION RULES:
 ═══════════════════════════════════════════════════════════
 
@@ -757,7 +898,9 @@ LOCATIONS:
 
 YEAR:
 - Format: "YYYY-YYYY" (e.g., "2024-2025")
-- Default: "2024-2025" (ONLY year with data!)
+- Available: 2012-2013, 2016-2017, 2019-2020, 2021-2022, 2022-2023, 2023-2024, 2024-2025
+- Default for single query: "2024-2025" (most complete data)
+- Default for trend query: 2021-2025 period (best multi-year coverage)
 
 CATEGORY (USE EXACT DATABASE VALUES):
 - User says "safe" → category: "safe"
@@ -778,7 +921,7 @@ THRESHOLD & OPERATOR:
 OUTPUT FORMAT:
 Return ONLY valid JSON (no markdown, no code blocks):
 {
-  "intent": "SUMMARY|TREND|COMPARE|RECHARGE_BREAKDOWN|EXTRACTION_BREAKDOWN|LIST_BLOCKS|LIST_DISTRICTS|LIST_STATES|MAP_CATEGORY",
+  "intent": "SUMMARY|TREND|COMPARE|RECHARGE_BREAKDOWN|EXTRACTION_BREAKDOWN|LIST_BLOCKS|LIST_DISTRICTS|LIST_STATES|MAP_CATEGORY|TOP_RANKING|CATEGORY_DISTRIBUTION|DEFICIT_ANALYSIS|CHANGE_ANALYSIS",
   "locations": ["location names"],
   "year": "2024-2025",
   "category": "safe|semi_critical|critical|over_exploited or empty",
@@ -939,6 +1082,14 @@ func (s *NLPService) mapIntent(aiIntent string) Intent {
 		return IntentListStates
 	case "MAP_CATEGORY":
 		return IntentMapCategory
+	case "TOP_RANKING", "TOP_N_RANKING":
+		return IntentTopRanking
+	case "CATEGORY_DISTRIBUTION":
+		return IntentCategoryDistribution
+	case "DEFICIT_ANALYSIS":
+		return IntentDeficitAnalysis
+	case "CHANGE_ANALYSIS":
+		return IntentChangeAnalysis
 	default:
 		return IntentUnknown
 	}
@@ -962,6 +1113,18 @@ func (s *NLPService) determineIntent(msg string) Intent {
 	}
 	if strings.Contains(msg, "discharge") && (strings.Contains(msg, "breakdown") || strings.Contains(msg, "source")) {
 		return IntentDischargeBreakdown
+	}
+	if (strings.Contains(msg, "top") || strings.Contains(msg, "worst") || strings.Contains(msg, "best") || strings.Contains(msg, "ranking")) && (strings.Contains(msg, "blocks") || strings.Contains(msg, "districts") || strings.Contains(msg, "states")) {
+		return IntentTopRanking
+	}
+	if strings.Contains(msg, "distribution") || (strings.Contains(msg, "how many") && strings.Contains(msg, "category")) || strings.Contains(msg, "breakdown") && !strings.Contains(msg, "recharge") && !strings.Contains(msg, "extraction") {
+		return IntentCategoryDistribution
+	}
+	if strings.Contains(msg, "deficit") || strings.Contains(msg, "gap") || (strings.Contains(msg, "extraction") && strings.Contains(msg, "recharge") && (strings.Contains(msg, "vs") || strings.Contains(msg, "balance"))) {
+		return IntentDeficitAnalysis
+	}
+	if (strings.Contains(msg, "change") || strings.Contains(msg, "improved") || strings.Contains(msg, "worsened")) && (strings.Contains(msg, "over") || strings.Contains(msg, "years") || strings.Contains(msg, "year")) {
+		return IntentChangeAnalysis
 	}
 	if strings.Contains(msg, "status") || strings.Contains(msg, "summary") || strings.Contains(msg, "about") || strings.Contains(msg, "what is") {
 		return IntentSummary

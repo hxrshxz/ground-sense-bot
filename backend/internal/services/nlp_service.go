@@ -147,6 +147,12 @@ func (s *NLPService) shouldGenerateDynamicSQL(intent Intent, entities Entities, 
 		return true
 	}
 
+	// Enable for new query pattern intents
+	if intent == IntentTopRanking || intent == IntentCategoryDistribution || 
+	   intent == IntentDeficitAnalysis || intent == IntentChangeAnalysis {
+		return true
+	}
+
 	return false
 }
 

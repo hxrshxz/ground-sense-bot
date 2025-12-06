@@ -23,6 +23,7 @@ type ChartPayload struct {
 	EChartsOption interface{}          `json:"echarts_option,omitempty"` // Ignored by frontend renderer but kept for compatibility
 	MetricsData *MetricsData           `json:"metricsData,omitempty"` // For metrics-card type
 	TrendData   *TrendData             `json:"trendData,omitempty"`   // For trend-card type
+	ComparisonData *ComparisonData     `json:"comparisonData,omitempty"` // For comparison-card type
 }
 
 // MetricsData holds groundwater metrics for visualization
@@ -76,6 +77,25 @@ type TrendData struct {
 	ExtractionChange  float64          `json:"extractionChange"`
 	StageChange       float64          `json:"stageChange"`
 	OverallTrend      string           `json:"overallTrend"` // "improving", "stable", "declining"
+}
+
+// ComparisonDataPoint represents a single location's data in comparison
+type ComparisonDataPoint struct {
+	Name           string  `json:"name"`           // Location name (frontend expects "name" not "locationName")
+	Recharge       float64 `json:"recharge"`
+	Extraction     float64 `json:"extraction"`
+	Stage          float64 `json:"stage"`
+	Rainfall       float64 `json:"rainfall"`
+	Category       string  `json:"category"`
+	SafeBlocks     int     `json:"safeBlocks,omitempty"`
+	CriticalBlocks int     `json:"criticalBlocks,omitempty"`
+}
+
+// ComparisonData holds comparison data for multiple locations
+type ComparisonData struct {
+	Year           string                 `json:"year"`
+	Locations      []ComparisonDataPoint  `json:"locations"`
+	ComparisonType string                 `json:"comparisonType"` // "state", "district", "block"
 }
 
 type ChartSeries struct {

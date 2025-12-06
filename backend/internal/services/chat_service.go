@@ -1071,14 +1071,36 @@ func (s *ChatService) compareStates(ctx context.Context, states []*models.State,
 		year, strings.Join(names, " vs "),
 		names[bestIdx], stages[bestIdx],
 		names[worstIdx], stages[worstIdx])
+	
+	// Build comparison data
+	comparisonPoints := make([]models.ComparisonDataPoint, 0, len(states))
+	for i, state := range states {
+		if i >= len(names) { // Safety check
+			break
+		}
+		summary, _ := s.ingres.GetStateSummary(ctx, state.StateUUID, year)
+		if summary == nil {
+			continue
+		}
+		comparisonPoints = append(comparisonPoints, models.ComparisonDataPoint{
+			Name:           names[i],
+			Recharge:       recharges[i],
+			Extraction:     extractions[i],
+			Stage:          stages[i],
+			Rainfall:       summary.AvgRainfall,
+			Category:       summary.DominantCategory,
+			SafeBlocks:     summary.SafeBlocks,
+			CriticalBlocks: summary.CriticalBlocks + summary.OverExploitedBlocks,
+		})
+	}
+	
 	r.Chart = &models.ChartPayload{
-		Type:  "brush-bar",
-		Title: fmt.Sprintf("🔍 State Comparison (%s)", year),
-		XAxis: names,
-		Series: []models.ChartSeries{
-			{Name: "Avg Stage (%)", Data: stages},
-			{Name: "Recharge (MCM)", Data: recharges},
-			{Name: "Extraction (MCM)", Data: extractions},
+		Type:  "comparison-card",
+		Title: fmt.Sprintf("State Comparison - %s", year),
+		ComparisonData: &models.ComparisonData{
+			Year:           year,
+			Locations:      comparisonPoints,
+			ComparisonType: "state",
 		},
 	}
 
@@ -1127,14 +1149,36 @@ func (s *ChatService) compareDistricts(ctx context.Context, districts []*models.
 		year, strings.Join(names, " vs "),
 		names[bestIdx], stages[bestIdx],
 		names[worstIdx], stages[worstIdx])
+	
+	// Build comparison data
+	comparisonPoints := make([]models.ComparisonDataPoint, 0, len(districts))
+	for i, district := range districts {
+		if i >= len(names) {
+			break
+		}
+		summary, _ := s.ingres.GetDistrictSummary(ctx, district.DistrictUUID, year)
+		if summary == nil {
+			continue
+		}
+		comparisonPoints = append(comparisonPoints, models.ComparisonDataPoint{
+			Name:           names[i],
+			Recharge:       recharges[i],
+			Extraction:     extractions[i],
+			Stage:          stages[i],
+			Rainfall:       summary.AvgRainfall,
+			Category:       summary.DominantCategory,
+			SafeBlocks:     summary.SafeBlocks,
+			CriticalBlocks: summary.CriticalBlocks + summary.OverExploitedBlocks,
+		})
+	}
+	
 	r.Chart = &models.ChartPayload{
-		Type:  "brush-bar",
-		Title: fmt.Sprintf("🔍 District Comparison (%s)", year),
-		XAxis: names,
-		Series: []models.ChartSeries{
-			{Name: "Avg Stage (%)", Data: stages},
-			{Name: "Recharge (MCM)", Data: recharges},
-			{Name: "Extraction (MCM)", Data: extractions},
+		Type:  "comparison-card",
+		Title: fmt.Sprintf("District Comparison - %s", year),
+		ComparisonData: &models.ComparisonData{
+			Year:           year,
+			Locations:      comparisonPoints,
+			ComparisonType: "district",
 		},
 	}
 
@@ -1203,14 +1247,30 @@ func (s *ChatService) compareBlocks(ctx context.Context, blocks []models.Block, 
 		year, strings.Join(names, " vs "),
 		names[bestIdx], stages[bestIdx],
 		names[worstIdx], stages[worstIdx])
+	
+	// Build comparison data
+	comparisonPoints := make([]models.ComparisonDataPoint, 0, len(comparisons))
+	for i, c := range comparisons {
+		if i >= len(names) {
+			break
+		}
+		comparisonPoints = append(comparisonPoints, models.ComparisonDataPoint{
+			Name:       names[i],
+			Recharge:   recharges[i],
+			Extraction: extractions[i],
+			Stage:      stages[i],
+			Rainfall:   c.Rainfall,
+			Category:   c.Category,
+		})
+	}
+	
 	r.Chart = &models.ChartPayload{
-		Type:  "brush-bar",
-		Title: fmt.Sprintf("🔍 Block Comparison (%s)", year),
-		XAxis: names,
-		Series: []models.ChartSeries{
-			{Name: "Stage (%)", Data: stages},
-			{Name: "Recharge (MCM)", Data: recharges},
-			{Name: "Extraction (MCM)", Data: extractions},
+		Type:  "comparison-card",
+		Title: fmt.Sprintf("Block Comparison - %s", year),
+		ComparisonData: &models.ComparisonData{
+			Year:           year,
+			Locations:      comparisonPoints,
+			ComparisonType: "block",
 		},
 	}
 

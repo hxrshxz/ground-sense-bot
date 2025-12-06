@@ -2,6 +2,37 @@
 
 An intelligent AI-powered chatbot for India's groundwater data analytics, featuring real-time insights, interactive visualizations, and comprehensive data analysis capabilities.
 
+## 📊 Data Availability (InGRES API)
+
+### Critical Data Limitation
+
+The InGRES (India-Water Resources Information System) API has **limited historical block-level data**:
+
+| Assessment Year | State-Level Data | Block-Level Data            | Status                       |
+| --------------- | ---------------- | --------------------------- | ---------------------------- |
+| 2024-2025       | ✅ Available     | ✅ Complete (5,950 blocks)  | **Current Year - Full Data** |
+| 2023-2024       | ✅ Available     | ⚠️ Partial (58 blocks only) | Limited                      |
+| 2022-2023       | ✅ Available     | ❌ None (API returns empty) | State aggregates only        |
+| 2021-2022       | ✅ Available     | ❌ None (API returns empty) | State aggregates only        |
+| 2019-2020       | ✅ Available     | ❌ None (API returns empty) | State aggregates only        |
+| 2016-2017       | ✅ Available     | ❌ None (API returns empty) | State aggregates only        |
+| 2012-2013       | ✅ Available     | ❌ None (API returns empty) | State aggregates only        |
+
+**Important Notes:**
+
+- ⚠️ **Historical years (before 2024-2025) only have state-level aggregate data**
+- ⚠️ **Block-level granular data is ONLY available for 2024-2025**
+- ⚠️ **This is an API limitation, not a bug in our system**
+- ✅ **Queries for historical data should focus on state/district-level analysis**
+- ✅ **Block-specific queries work best with 2024-2025 data**
+
+### Query Recommendations
+
+- ✅ **Good:** "Show Punjab state groundwater trends 2012-2024"
+- ✅ **Good:** "Compare state-level data across years"
+- ✅ **Good:** "Block details for 2024-2025"
+- ❌ **Limited:** "Show block trends from 2020-2024" (only 2024-2025 has block data)
+
 ## ✨ Features
 
 - 🤖 **AI-Powered Analysis** - Advanced groundwater data insights using Google Gemini AI

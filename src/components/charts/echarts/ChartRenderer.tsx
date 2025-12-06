@@ -3,6 +3,10 @@ import ReactECharts from "echarts-for-react";
 import * as echarts from "echarts";
 import GroundwaterMetricsCard, { MetricsData } from "./GroundwaterMetricsCard";
 import TrendAnalysisCard, { TrendData } from "./TrendAnalysisCard";
+import ComparisonCard, { ComparisonData } from "./ComparisonCard";
+import ComparisonChart, {
+  ComparisonData as ComparisonChartData,
+} from "./ComparisonChart";
 
 // ============================================
 // CHART DATA INTERFACES
@@ -31,7 +35,9 @@ export interface ChartData {
     | "area"
     | "pie"
     | "metrics-card"
-    | "trend-card"; // New type for trend analysis visualization
+    | "trend-card"
+    | "comparison-card"
+    | "stacked-bar"; // Horizontal stacked bar for rankings
   title: string;
   subtitle?: string;
   xAxis?: string[] | { data: string[]; name?: string };
@@ -51,6 +57,8 @@ export interface ChartData {
   metricsData?: MetricsData;
   // New trend data for the trend-card type
   trendData?: TrendData;
+  // New comparison data for the comparison-card type
+  comparisonData?: ComparisonData;
 }
 
 interface ChartRendererProps {
@@ -103,6 +111,18 @@ const ChartRenderer: React.FC<ChartRendererProps> = ({
     return <TrendAnalysisCard data={chart.trendData} />;
   }
 
+  // Handle comparison-card type separately (new comparison chart)
+  if (chart.type === "comparison-card" && chart.comparisonData) {
+    // Check if it's the new ComparisonChart format (has locations array)
+    if ("locations" in chart.comparisonData) {
+      return (
+        <ComparisonChart data={chart.comparisonData as ComparisonChartData} />
+      );
+    }
+    // Otherwise use the old ComparisonCard
+    return <ComparisonCard data={chart.comparisonData} />;
+  }
+
   const getOption = useCallback(() => {
     // We intentionally ignore `chart.echarts_option` to keep visuals hardcoded
     // to the approved templates. Only data (xAxis/series/pieData/timeline) stays dynamic.
@@ -123,6 +143,9 @@ const ChartRenderer: React.FC<ChartRendererProps> = ({
 
     // Smart chart type selection
     switch (type) {
+      case "stacked-bar":
+        return createStackedBarChart(title, series, xAxis);
+
       case "stacked-area":
       case "area":
         return createStackedAreaChart(title, series, xAxis);
@@ -757,5 +780,178 @@ const createLargeAreaChart = (
     data: s.data,
   })),
 });
+
+// ============================================
+// 🎯 HORIZONTAL STACKED BAR CHART (For Rankings)
+// ============================================
+
+const createStackedBarChart = (
+  title: string,
+  series: SeriesData[],
+  xAxis: { data: string[]; name?: string }
+) => {
+  // Professional color palette from ECharts example - highly distinct colors
+  const colorPalette = [
+    "#007BFF", // Vivid Blue
+    "#FFA500", // Standard Orange
+    "#4F5868", // Dark Slate Gray
+    "#9ACD32", // Yellow Green
+    "#4169E1", // Royal Blue
+    "#FF6B6B", // Coral Red
+    "#20C997", // Teal
+    "#6F42C1", // Purple
+  ];
+
+  // Color mapping for groundwater metrics with distinct colors from the example
+  const getColor = (name: string, index: number) => {
+    const nameLower = name.toLowerCase();
+    if (nameLower.includes("stage")) {
+      return "#FF6B6B"; // Coral Red for stage (critical metric)
+    }
+    if (nameLower.includes("deficit")) {
+      return "#FFA500"; // Orange for deficit
+    }
+    if (nameLower.includes("extraction")) {
+      return "#007BFF"; // Vivid Blue for extraction
+    }
+    if (nameLower.includes("recharge")) {
+      return "#4169E1"; // Royal Blue for recharge
+    }
+    if (nameLower.includes("rainfall")) {
+      return "#9ACD32"; // Yellow Green for rainfall
+    }
+    return colorPalette[index % colorPalette.length];
+  };
+
+  return {
+    title: {
+      text: title,
+      left: "center",
+      top: 20,
+      textStyle: {
+        color: "#e2e8f0",
+        fontSize: 18,
+        fontWeight: "600",
+      },
+    },
+    tooltip: {
+      trigger: "axis",
+      axisPointer: {
+        type: "shadow",
+      },
+      backgroundColor: "rgba(15, 23, 42, 0.95)",
+      borderColor: "rgba(255, 255, 255, 0.1)",
+      borderWidth: 1,
+      textStyle: {
+        color: "#e2e8f0",
+      },
+      formatter: (params: AnyData) => {
+        if (!Array.isArray(params)) return "";
+        const locationName = params[0]?.name || "";
+        let tooltip = `<div style="font-weight: 600; margin-bottom: 8px;">${locationName}</div>`;
+        params.forEach((param: AnyData) => {
+          const marker = `<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background-color:${param.color};margin-right:6px;"></span>`;
+          tooltip += `<div>${marker}${
+            param.seriesName
+          }: <strong>${param.value.toFixed(2)}</strong></div>`;
+        });
+        return tooltip;
+      },
+    },
+    legend: {
+      data: series.map((s) => s.name),
+      top: 60,
+      textStyle: {
+        color: "#cbd5e1",
+        fontSize: 13,
+      },
+      itemWidth: 24,
+      itemHeight: 16,
+      itemGap: 16,
+    },
+    grid: {
+      left: "20%",
+      right: "10%",
+      top: 110,
+      bottom: 40,
+      containLabel: true,
+    },
+    xAxis: {
+      type: "value",
+      axisLine: {
+        show: true,
+        lineStyle: {
+          color: "rgba(148, 163, 184, 0.3)",
+        },
+      },
+      axisLabel: {
+        color: "#94a3b8",
+        fontSize: 12,
+      },
+      splitLine: {
+        lineStyle: {
+          color: "rgba(148, 163, 184, 0.15)",
+          type: "dashed",
+        },
+      },
+    },
+    yAxis: {
+      type: "category",
+      data: xAxis.data,
+      axisLine: {
+        show: true,
+        lineStyle: {
+          color: "rgba(148, 163, 184, 0.3)",
+        },
+      },
+      axisLabel: {
+        color: "#f1f5f9",
+        fontSize: 13,
+        fontWeight: "500",
+        width: 180,
+        overflow: "truncate",
+        ellipsis: "...",
+      },
+      splitLine: {
+        show: false,
+      },
+      axisTick: {
+        show: false,
+      },
+    },
+    series: series.map((s, idx) => ({
+      name: s.name,
+      type: "bar",
+      stack: "total",
+      data: s.data,
+      barMaxWidth: 35,
+      itemStyle: {
+        color: getColor(s.name, idx),
+        borderRadius: [0, 4, 4, 0],
+        borderWidth: 1,
+        borderColor: "rgba(255, 255, 255, 0.1)",
+      },
+      emphasis: {
+        focus: "series",
+        itemStyle: {
+          shadowBlur: 10,
+          shadowColor: "rgba(0, 0, 0, 0.5)",
+          borderColor: "rgba(255, 255, 255, 0.3)",
+        },
+      },
+      label: {
+        show: true,
+        position: "inside",
+        formatter: (params: AnyData) => {
+          const val = params.value as number;
+          return val > 30 ? val.toFixed(0) : ""; // Show label if value is large enough
+        },
+        color: "#fff",
+        fontSize: 11,
+        fontWeight: "600",
+      },
+    })),
+  };
+};
 
 export default ChartRenderer;

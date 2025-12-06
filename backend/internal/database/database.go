@@ -49,6 +49,11 @@ func NewService(cfg *config.Config, logger *logrus.Logger) (*Service, error) {
 		return nil, fmt.Errorf("failed to run migrations: %w", err)
 	}
 
+	// Run RAG-specific migrations
+	if err := service.runRAGMigrations(ctx); err != nil {
+		return nil, fmt.Errorf("failed to run RAG migrations: %w", err)
+	}
+
 	return service, nil
 }
 
@@ -325,6 +330,124 @@ func (s *Service) runMigrations(ctx context.Context) error {
 	}
 
 	s.logger.Info("Database migrations completed successfully")
+	return nil
+}
+
+// runRAGMigrations runs RAG-specific migrations (pgvector, embeddings, full-text search)
+func (s *Service) runRAGMigrations(ctx context.Context) error {
+	s.logger.Info("Running RAG migrations...")
+
+	ragMigrations := []string{
+		// Enable pgvector extension
+		`CREATE EXTENSION IF NOT EXISTS vector`,
+
+		// Add vector embedding columns (768 dimensions for Gemini text-embedding-004)
+		`ALTER TABLE assessments_summary ADD COLUMN IF NOT EXISTS embedding vector(768)`,
+		`ALTER TABLE assessments_summary ADD COLUMN IF NOT EXISTS text_representation TEXT`,
+		`ALTER TABLE blocks ADD COLUMN IF NOT EXISTS embedding vector(768)`,
+		`ALTER TABLE blocks ADD COLUMN IF NOT EXISTS description TEXT`,
+
+		// Add full-text search columns
+		`ALTER TABLE assessments_summary ADD COLUMN IF NOT EXISTS search_vector tsvector`,
+		`ALTER TABLE blocks ADD COLUMN IF NOT EXISTS search_vector tsvector`,
+
+		// Create GIN indexes for full-text search
+		`CREATE INDEX IF NOT EXISTS idx_assessments_search_vector ON assessments_summary USING GIN(search_vector)`,
+		`CREATE INDEX IF NOT EXISTS idx_blocks_search_vector ON blocks USING GIN(search_vector)`,
+
+		// Create HNSW indexes for vector similarity search
+		`CREATE INDEX IF NOT EXISTS idx_assessments_embedding ON assessments_summary USING hnsw (embedding vector_cosine_ops) WITH (m = 16, ef_construction = 64)`,
+		`CREATE INDEX IF NOT EXISTS idx_blocks_embedding ON blocks USING hnsw (embedding vector_cosine_ops) WITH (m = 16, ef_construction = 64)`,
+
+		// Create trigger function for assessments_summary
+		`CREATE OR REPLACE FUNCTION update_assessments_search_vector()
+		RETURNS TRIGGER AS $$
+		BEGIN
+			NEW.search_vector := to_tsvector('english',
+				COALESCE(NEW.year, '') || ' ' ||
+				COALESCE(NEW.category, '') || ' ' ||
+				COALESCE(NEW.text_representation, '')
+			);
+			RETURN NEW;
+		END;
+		$$ LANGUAGE plpgsql`,
+
+		// Create trigger function for blocks
+		`CREATE OR REPLACE FUNCTION update_blocks_search_vector()
+		RETURNS TRIGGER AS $$
+		BEGIN
+			NEW.search_vector := to_tsvector('english',
+				COALESCE(NEW.block_name, '') || ' ' ||
+				COALESCE(NEW.description, '')
+			);
+			RETURN NEW;
+		END;
+		$$ LANGUAGE plpgsql`,
+
+		// Create triggers
+		`DROP TRIGGER IF EXISTS trigger_update_assessments_search_vector ON assessments_summary`,
+		`CREATE TRIGGER trigger_update_assessments_search_vector
+			BEFORE INSERT OR UPDATE ON assessments_summary
+			FOR EACH ROW
+			EXECUTE FUNCTION update_assessments_search_vector()`,
+
+		`DROP TRIGGER IF EXISTS trigger_update_blocks_search_vector ON blocks`,
+		`CREATE TRIGGER trigger_update_blocks_search_vector
+			BEFORE INSERT OR UPDATE ON blocks
+			FOR EACH ROW
+			EXECUTE FUNCTION update_blocks_search_vector()`,
+
+		// Add additional indexes for common query patterns
+		`CREATE INDEX IF NOT EXISTS idx_assessments_year ON assessments_summary(year)`,
+		`CREATE INDEX IF NOT EXISTS idx_assessments_category ON assessments_summary(category)`,
+		`CREATE INDEX IF NOT EXISTS idx_assessments_stage ON assessments_summary(stage)`,
+		`CREATE INDEX IF NOT EXISTS idx_assessments_block_year ON assessments_summary(block_uuid, year)`,
+		`CREATE INDEX IF NOT EXISTS idx_blocks_state ON blocks(state_uuid)`,
+		`CREATE INDEX IF NOT EXISTS idx_blocks_district ON blocks(district_uuid)`,
+	}
+
+	for i, migration := range ragMigrations {
+		if _, err := s.DB.ExecContext(ctx, migration); err != nil {
+			s.logger.Warnf("RAG migration %d warning: %v", i+1, err)
+			// Don't fail hard on RAG migrations - some may already exist
+		}
+	}
+
+	// Create enriched view
+	viewSQL := `
+		CREATE OR REPLACE VIEW v_assessments_enriched AS
+		SELECT 
+			a.assessment_id,
+			a.block_uuid,
+			a.year,
+			a.rainfall,
+			a.total_recharge,
+			a.total_discharge,
+			a.total_extractable,
+			a.total_extraction,
+			a.category,
+			a.stage,
+			a.availability,
+			a.text_representation,
+			a.embedding,
+			a.search_vector,
+			b.block_name,
+			b.description as block_description,
+			d.district_name,
+			s.state_name,
+			a.raw as raw_data,
+			a.created_at
+		FROM assessments_summary a
+		JOIN blocks b ON a.block_uuid = b.block_uuid
+		JOIN districts d ON b.district_uuid = d.district_uuid
+		JOIN states s ON b.state_uuid = s.state_uuid
+	`
+
+	if _, err := s.DB.ExecContext(ctx, viewSQL); err != nil {
+		s.logger.Warnf("Failed to create enriched view: %v", err)
+	}
+
+	s.logger.Info("RAG migrations completed successfully")
 	return nil
 }
 

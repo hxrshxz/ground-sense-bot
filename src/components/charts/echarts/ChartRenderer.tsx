@@ -113,11 +113,18 @@ const ChartRenderer: React.FC<ChartRendererProps> = ({
 
   // Handle comparison-card type separately (new comparison chart)
   if (chart.type === "comparison-card" && chart.comparisonData) {
-    // Check if it's the new ComparisonChart format (has locations array)
-    if ("locations" in chart.comparisonData) {
-      return (
-        <ComparisonChart data={chart.comparisonData as ComparisonChartData} />
-      );
+    // Check if it's the new ComparisonChart format (has comparisonType field)
+    if (
+      "comparisonType" in chart.comparisonData &&
+      chart.comparisonData.locations.length > 0
+    ) {
+      // Check if locations have 'name' field (new format) vs 'locationName' (old format)
+      const firstLoc = chart.comparisonData.locations[0];
+      if ("name" in firstLoc) {
+        return (
+          <ComparisonChart data={chart.comparisonData as ComparisonChartData} />
+        );
+      }
     }
     // Otherwise use the old ComparisonCard
     return <ComparisonCard data={chart.comparisonData} />;
@@ -387,33 +394,101 @@ const createGradientAreaChart = (
 const createRosePieChart = (
   title: string,
   pieData: { name: string; value: number }[]
-) => ({
-  legend: {
-    top: "bottom",
-  },
-  toolbox: {
-    show: true,
-    feature: {
-      mark: { show: true },
-      dataView: { show: true, readOnly: false },
-      restore: { show: true },
-      saveAsImage: { show: true },
-    },
-  },
-  series: [
-    {
-      name: title || "Nightingale Chart",
-      type: "pie",
-      radius: [50, 250],
-      center: ["50%", "50%"],
-      roseType: "area",
-      itemStyle: {
-        borderRadius: 8,
+) => {
+  // Beautiful color palette from ECharts rose chart example
+  const roseColors = [
+    "#5470c6", // Blue (rose 1)
+    "#91cc75", // Lime Green (rose 2)
+    "#5d6d7e", // Dark Gray/Purple (rose 3)
+    "#ee9a49", // Orange (rose 4)
+    "#73c0de", // Cyan (rose 5)
+    "#fac858", // Yellow (rose 6)
+    "#ea7ccc", // Pink (rose 7)
+    "#9a60b4", // Purple (rose 8)
+  ];
+
+  return {
+    title: {
+      text: title,
+      left: "center",
+      top: 20,
+      textStyle: {
+        color: "#e2e8f0",
+        fontSize: 20,
+        fontWeight: "600",
       },
-      data: pieData,
     },
-  ],
-});
+    legend: {
+      top: "bottom",
+      textStyle: {
+        color: "#cbd5e1",
+        fontSize: 12,
+      },
+      itemWidth: 18,
+      itemHeight: 14,
+    },
+    tooltip: {
+      trigger: "item",
+      backgroundColor: "rgba(15, 23, 42, 0.95)",
+      borderColor: "rgba(255, 255, 255, 0.1)",
+      borderWidth: 1,
+      textStyle: {
+        color: "#e2e8f0",
+      },
+      formatter: (params: AnyData) => {
+        return `<div style="font-weight: 600; margin-bottom: 4px;">${
+          params.name
+        }</div>
+                <div><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background-color:${
+                  params.color
+                };margin-right:6px;"></span>
+                Value: <strong>${params.value.toFixed(2)}</strong> (${
+          params.percent
+        }%)</div>`;
+      },
+    },
+    series: [
+      {
+        name: title || "Nightingale Chart",
+        type: "pie",
+        radius: [60, 200],
+        center: ["50%", "50%"],
+        roseType: "area",
+        itemStyle: {
+          borderRadius: 8,
+          borderColor: "rgba(255, 255, 255, 0.1)",
+          borderWidth: 2,
+        },
+        label: {
+          show: true,
+          color: "#f1f5f9",
+          fontSize: 12,
+          fontWeight: "500",
+          formatter: (params: AnyData) => {
+            return `${params.name}\n${params.value.toFixed(1)}`;
+          },
+        },
+        emphasis: {
+          label: {
+            show: true,
+            fontSize: 14,
+            fontWeight: "bold",
+          },
+          itemStyle: {
+            shadowBlur: 20,
+            shadowColor: "rgba(0, 0, 0, 0.5)",
+          },
+        },
+        data: pieData.map((item, index) => ({
+          ...item,
+          itemStyle: {
+            color: roseColors[index % roseColors.length],
+          },
+        })),
+      },
+    ],
+  };
+};
 
 // ============================================
 // 4️⃣ TIMELINE BAR CHART (Finance Style - Simplified)

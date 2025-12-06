@@ -78,42 +78,36 @@ const ComparisonChart: React.FC<ComparisonChartProps> = ({ data }) => {
       },
     },
     legend: {
-      data: ["Recharge", "Extraction", "Stage", "Rainfall"],
+      data: [
+        "Rainfall (mm)",
+        "Safe Blocks",
+        "Critical Blocks",
+        "Recharge (100 MCM)",
+      ],
       top: 60,
       textStyle: {
         color: "#94a3b8",
+        fontSize: 13,
       },
       itemGap: 20,
     },
     grid: {
-      left: "3%",
-      right: "4%",
-      bottom: "3%",
+      left: "20%",
+      right: "10%",
+      bottom: "10%",
       top: 120,
       containLabel: true,
     },
     xAxis: {
-      type: "category",
-      data: data.locations.map((loc) => loc.name),
-      axisLabel: {
-        color: "#94a3b8",
-        interval: 0,
-        rotate: data.locations.length > 5 ? 45 : 0,
-      },
-      axisLine: {
-        lineStyle: {
-          color: "#475569",
-        },
-      },
-    },
-    yAxis: {
       type: "value",
       name: "Value",
       nameTextStyle: {
         color: "#94a3b8",
+        fontSize: 13,
       },
       axisLabel: {
         color: "#94a3b8",
+        fontSize: 12,
       },
       axisLine: {
         lineStyle: {
@@ -126,62 +120,95 @@ const ComparisonChart: React.FC<ComparisonChartProps> = ({ data }) => {
         },
       },
     },
+    yAxis: {
+      type: "category",
+      data: data.locations.map((loc) => loc.name),
+      axisLabel: {
+        color: "#ffffff",
+        fontSize: 16,
+        fontWeight: "bold",
+        margin: 12,
+      },
+      axisLine: {
+        lineStyle: {
+          color: "#ffffff",
+          width: 2,
+        },
+      },
+      axisTick: {
+        show: false,
+      },
+    },
     series: [
       {
-        name: "Recharge",
-        type: "bar",
-        data: data.locations.map((loc) => loc.recharge),
-        itemStyle: {
-          color: "#3b82f6",
-        },
-        label: {
-          show: true,
-          position: "top",
-          color: "#fff",
-          formatter: (params: any) => params.value.toFixed(1),
-        },
-      },
-      {
-        name: "Extraction",
-        type: "bar",
-        data: data.locations.map((loc) => loc.extraction),
-        itemStyle: {
-          color: "#f59e0b",
-        },
-        label: {
-          show: true,
-          position: "top",
-          color: "#fff",
-          formatter: (params: any) => params.value.toFixed(1),
-        },
-      },
-      {
-        name: "Stage",
-        type: "bar",
-        data: data.locations.map((loc) => loc.stage),
-        itemStyle: {
-          color: "#8b5cf6",
-        },
-        label: {
-          show: true,
-          position: "top",
-          color: "#fff",
-          formatter: (params: any) => params.value.toFixed(1) + "%",
-        },
-      },
-      {
-        name: "Rainfall",
+        name: "Rainfall (mm)",
         type: "bar",
         data: data.locations.map((loc) => loc.rainfall),
         itemStyle: {
-          color: "#22c55e",
+          color: "#007BFF",
+          borderRadius: [0, 4, 4, 0],
         },
         label: {
           show: true,
-          position: "top",
+          position: "right",
           color: "#fff",
-          formatter: (params: any) => params.value.toFixed(0) + "mm",
+          fontSize: 12,
+          fontWeight: "bold",
+          formatter: (params: any) => params.value.toFixed(0),
         },
+        barMaxWidth: 30,
+      },
+      {
+        name: "Safe Blocks",
+        type: "bar",
+        data: data.locations.map((loc) => loc.safeBlocks || 0),
+        itemStyle: {
+          color: "#FFA500",
+          borderRadius: [0, 4, 4, 0],
+        },
+        label: {
+          show: true,
+          position: "right",
+          color: "#fff",
+          fontSize: 12,
+          fontWeight: "bold",
+        },
+        barMaxWidth: 30,
+      },
+      {
+        name: "Critical Blocks",
+        type: "bar",
+        data: data.locations.map((loc) => loc.criticalBlocks || 0),
+        itemStyle: {
+          color: "#9ACD32",
+          borderRadius: [0, 4, 4, 0],
+        },
+        label: {
+          show: true,
+          position: "right",
+          color: "#fff",
+          fontSize: 12,
+          fontWeight: "bold",
+        },
+        barMaxWidth: 30,
+      },
+      {
+        name: "Recharge (100 MCM)",
+        type: "bar",
+        data: data.locations.map((loc) => (loc.recharge || 0) / 100),
+        itemStyle: {
+          color: "#4F5868",
+          borderRadius: [0, 4, 4, 0],
+        },
+        label: {
+          show: true,
+          position: "right",
+          color: "#fff",
+          fontSize: 12,
+          fontWeight: "bold",
+          formatter: (params: any) => params.value.toFixed(1),
+        },
+        barMaxWidth: 30,
       },
     ],
   };

@@ -277,10 +277,12 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 		handlerResult, handlerErr = s.handleListDistricts(ctx, entities, response)
 	case IntentListStates:
 		handlerResult, handlerErr = s.handleListStates(ctx, entities, response)
-	case IntentTopRanking, IntentCategoryDistribution, IntentDeficitAnalysis, IntentChangeAnalysis:
-		// These intents are handled by dynamic SQL path above
-		// If we reach here, it means dynamic SQL failed, so return helpful message
-		response.Text = "I understand you're looking for " + string(intent) + " analysis. The system is processing your request with dynamic query generation."
+	case IntentTopRanking:
+		handlerResult, handlerErr = s.handleTopRanking(ctx, entities, response)
+	case IntentCategoryDistribution, IntentDeficitAnalysis, IntentChangeAnalysis:
+		// These intents use dynamic SQL path above
+		// If we reach here, it means dynamic SQL failed
+		response.Text = "I understand you're looking for " + string(intent) + " analysis. Please try rephrasing your question."
 		handlerResult = response
 	default:
 		response.Text = "I'm not sure what you mean. Try asking for a summary, trend, comparison, ranking, distribution, or recharge/extraction breakdowns."
@@ -1082,13 +1084,22 @@ func (s *ChatService) compareStates(ctx context.Context, states []*models.State,
 		if summary == nil {
 			continue
 		}
+		// Determine dominant category
+		dominantCat := "Safe"
+		if summary.OverExploitedBlocks > summary.SafeBlocks {
+			dominantCat = "Over-exploited"
+		} else if summary.CriticalBlocks > summary.SafeBlocks {
+			dominantCat = "Critical"
+		} else if summary.SemiCriticalBlocks > summary.SafeBlocks {
+			dominantCat = "Semi-critical"
+		}
 		comparisonPoints = append(comparisonPoints, models.ComparisonDataPoint{
 			Name:           names[i],
 			Recharge:       recharges[i],
 			Extraction:     extractions[i],
 			Stage:          stages[i],
 			Rainfall:       summary.AvgRainfall,
-			Category:       summary.DominantCategory,
+			Category:       dominantCat,
 			SafeBlocks:     summary.SafeBlocks,
 			CriticalBlocks: summary.CriticalBlocks + summary.OverExploitedBlocks,
 		})
@@ -1160,13 +1171,22 @@ func (s *ChatService) compareDistricts(ctx context.Context, districts []*models.
 		if summary == nil {
 			continue
 		}
+		// Determine dominant category
+		dominantCat := "Safe"
+		if summary.OverExploitedBlocks > summary.SafeBlocks {
+			dominantCat = "Over-exploited"
+		} else if summary.CriticalBlocks > summary.SafeBlocks {
+			dominantCat = "Critical"
+		} else if summary.SemiCriticalBlocks > summary.SafeBlocks {
+			dominantCat = "Semi-critical"
+		}
 		comparisonPoints = append(comparisonPoints, models.ComparisonDataPoint{
 			Name:           names[i],
 			Recharge:       recharges[i],
 			Extraction:     extractions[i],
 			Stage:          stages[i],
 			Rainfall:       summary.AvgRainfall,
-			Category:       summary.DominantCategory,
+			Category:       dominantCat,
 			SafeBlocks:     summary.SafeBlocks,
 			CriticalBlocks: summary.CriticalBlocks + summary.OverExploitedBlocks,
 		})
@@ -1873,5 +1893,99 @@ func (s *ChatService) handleListStates(ctx context.Context, e Entities, r *model
 		strings.Join(stateNames, ", "))
 	r.Data = states
 	
+	return r, nil
+}
+
+func (s *ChatService) handleTopRanking(ctx context.Context, e Entities, r *models.ChatResponse) (*models.ChatResponse, error) {
+	// Get top blocks by category (default: over_exploited)
+	category := e.Category
+	if category == "" {
+		category = "over_exploited"
+	}
+	year := e.Year
+	if year == "" {
+		year = "2024-2025"
+	}
+
+	// Build SQL to get top blocks with the main ranking metric
+	sqlQuery := fmt.Sprintf(`
+		SELECT 
+			CONCAT(b.block_name, ', ', d.district_name) as location,
+			s.state_name,
+			a.stage as value,
+			a.total_extraction,
+			a.total_recharge,
+			a.category
+		FROM assessments_summary a
+		JOIN blocks b ON a.block_uuid = b.block_uuid
+		JOIN districts d ON b.district_uuid = d.district_uuid
+		JOIN states s ON d.state_uuid = s.state_uuid
+		WHERE LOWER(a.category) = LOWER('%s')
+		AND a.year = '%s'
+		AND a.stage > 0
+	`, category, year)
+
+	// Add location filter if specified
+	if len(e.Locations) > 0 {
+		location := strings.ToUpper(e.Locations[0])
+		sqlQuery += fmt.Sprintf(" AND (UPPER(s.state_name) = '%s' OR UPPER(d.district_name) = '%s')\n", location, location)
+	}
+
+	sqlQuery += "\t\tORDER BY a.stage DESC\n\t\tLIMIT 10"
+
+	fmt.Printf("DEBUG: Top Ranking SQL: %s\n", sqlQuery)
+
+	// Execute query
+	results, err := s.ingres.repo.RunRawQuery(ctx, sqlQuery)
+	if err != nil {
+		fmt.Printf("ERROR: Top ranking query failed: %v\n", err)
+		r.Text = "I encountered an error fetching the ranking data. Please try again."
+		return r, nil
+	}
+
+	if len(results) == 0 {
+		r.Text = fmt.Sprintf("No %s blocks found for %s.", category, year)
+		return r, nil
+	}
+
+	// Build response text
+	locationText := ""
+	if len(e.Locations) > 0 {
+		locationText = fmt.Sprintf(" in %s", e.Locations[0])
+	}
+	categoryDisplay := strings.Title(strings.ReplaceAll(category, "_", " "))
+	r.Text = fmt.Sprintf("Here are the top %d %s blocks%s for %s:", len(results), categoryDisplay, locationText, year)
+	r.Data = results
+
+	// Convert to pie data format for rose chart
+	var pieData []models.PieDatum
+	for _, result := range results {
+		name := ""
+		value := 0.0
+		
+		if loc, ok := result["location"].(string); ok {
+			name = loc
+		}
+		if val, ok := result["value"].(float64); ok {
+			value = val
+		}
+		
+		if name != "" && value > 0 {
+			pieData = append(pieData, models.PieDatum{
+				Name:  name,
+				Value: value,
+			})
+		}
+	}
+
+	// Create rose pie chart
+	if len(pieData) > 0 {
+		r.Chart = &models.ChartPayload{
+			Type:    "rose-pie",
+			Title:   fmt.Sprintf("Top %d Most %s Groundwater Blocks (%s)", len(pieData), categoryDisplay, year),
+			PieData: pieData,
+		}
+	}
+
 	return r, nil
 }

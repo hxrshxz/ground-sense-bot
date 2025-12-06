@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  # PostgreSQL with pgvector extension for RAG support
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: groundsense-postgres-rag
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: ground_sense_bot
+      POSTGRES_INITDB_ARGS: "-E UTF8"
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Automatically run initialization scripts
+      - ./migrations/001_add_rag_support.sql:/docker-entrypoint-initdb.d/001_add_rag_support.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d ground_sense_bot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - groundsense-network
+
+  # pgAdmin for database management (optional)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: groundsense-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@groundsense.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - groundsense-network
+    profiles:
+      - tools # Only start with: docker compose --profile tools up
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  groundsense-network:
+    driver: bridge

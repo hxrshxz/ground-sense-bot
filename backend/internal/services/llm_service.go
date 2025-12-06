@@ -280,24 +280,25 @@ Choose the BEST visualization for this data:
 | Multi-year temporal data | timeline-bar | Animated progression |
 | Large dataset (50+ points) | large-area | Optimized for scale |
 | Breakdown sources | brush-bar | Multi-series comparison |
-| Ranking/Top N with SINGLE metric | horizontal-bar | Clear ranking display |
-| Ranking/Top N with MULTIPLE metrics | stacked-bar | Shows composition + ranking |
+| Ranking/Top N (any metric) | rose-pie | Radial ranking visualization |
 
 ⚠️⚠️⚠️ CRITICAL RULE FOR RANKING QUERIES:
-When user asks for "Top N", "worst blocks", "best performers", "highest", "lowest" AND
-the data has MULTIPLE numeric columns (stage_percent, extraction_mcm, recharge_mcm, deficit_mcm):
+When user asks for "Top N", "worst blocks", "best performers", "highest", "lowest", "ranking":
 
-YOU MUST USE "stacked-bar" TYPE:
+YOU MUST USE "rose-pie" TYPE (Nightingale Chart):
 {
-  "type": "stacked-bar",
-  "xAxis": { "type": "value" },
-  "yAxis": { "type": "category", "data": ["Location 1", "Location 2", ...] },
-  "series": [
-    { "name": "Extraction (MCM)", "type": "bar", "stack": "total", "data": [450, 380], "itemStyle": { "color": "#f97316" } },
-    { "name": "Deficit (MCM)", "type": "bar", "stack": "total", "data": [120, 95], "itemStyle": { "color": "#ef4444" } },
-    { "name": "Stage (%)", "type": "bar", "stack": "total", "data": [180, 165], "itemStyle": { "color": "#dc2626" } }
+  "type": "rose-pie",
+  "title": "Top 10 Over-Exploited Blocks",
+  "explanation": "Clear ranking insight...",
+  "pieData": [
+    { "name": "Block Name, District", "value": 185.5 },
+    { "name": "Another Block, District", "value": 180.2 },
+    ...
   ]
 }
+
+NOTE: Use the MAIN RANKING METRIC as the value (e.g., stage percentage for over-exploited blocks).
+The rose chart visually shows ranking by petal size - larger petals = higher values.
 
 Color Guide: stage/deficit=#ef4444 (red), extraction=#f97316 (orange), recharge=#3b82f6 (blue)
 

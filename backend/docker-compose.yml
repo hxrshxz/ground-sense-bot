@@ -1,12 +1,13 @@
 services:
-  # PostgreSQL Database
+  # PostgreSQL Database with pgvector for RAG support
   postgres:
-    image: postgres:15-alpine
+    image: pgvector/pgvector:pg16
     container_name: ground-sense-postgres
     environment:
       POSTGRES_DB: ground_sense_bot
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
+      POSTGRES_INITDB_ARGS: "-E UTF8"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -14,7 +15,7 @@ services:
     networks:
       - ground-sense-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin"]
+      test: ["CMD-SHELL", "pg_isready -U admin -d ground_sense_bot"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -41,6 +42,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: ground-sense-app
+    env_file:
+      - .env
     environment:
       - SERVER_HOST=0.0.0.0
       - SERVER_PORT=8080
@@ -64,6 +67,35 @@ services:
     networks:
       - ground-sense-network
     restart: unless-stopped
+
+  # Data Ingestion Service (Run once to populate embeddings)
+  # Uncomment to run ingestion, then comment out again
+  # ingestion:
+  #   image: python:3.11-slim
+  #   container_name: ground-sense-ingestion
+  #   working_dir: /app
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     - DB_HOST=postgres
+  #     - DB_PORT=5432
+  #     - DB_NAME=ground_sense_bot
+  #     - DB_USER=admin
+  #     - DB_PASSWORD=admin
+  #   volumes:
+  #     - ../Data:/app
+  #   command: >
+  #     sh -c "
+  #       pip install -q google-generativeai psycopg2-binary tqdm python-dotenv &&
+  #       python ingest_rag_data.py --db-host postgres --db-port 5432
+  #     "
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   networks:
+  #     - ground-sense-network
+  #   profiles:
+  #     - ingestion
 
 volumes:
   postgres_data:

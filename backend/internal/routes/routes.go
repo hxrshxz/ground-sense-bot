@@ -27,6 +27,10 @@ func RegisterRoutes(mux *http.ServeMux, cfg *config.Config, db *database.Service
 	ingresService := services.NewIngresService(ingresRepo)
 	ingresController := controllers.NewIngresController(ingresService, logger)
 
+	// Initialize RAG components
+	ragService := services.NewRAGService(db, cfg, logger)
+	ragController := controllers.NewRAGController(ragService, logger)
+
 	// Initialize Chatbot components
 	llmService, err := services.NewLLMService(cfg)
 	if err != nil {
@@ -75,6 +79,10 @@ func RegisterRoutes(mux *http.ServeMux, cfg *config.Config, db *database.Service
 	mux.HandleFunc("/api/blocks", ingresController.GetBlocks)
 	mux.HandleFunc("/api/assessment", ingresController.GetBlockAssessment)
 	mux.HandleFunc("/api/search", ingresController.SearchBlocks)
+
+	// Register RAG routes
+	mux.HandleFunc("/api/v1/rag/search", ragController.HybridSearch)
+	mux.HandleFunc("/api/v1/rag/assessment", ragController.GetAssessment)
 
 	logger.Info("Routes registered successfully")
 }

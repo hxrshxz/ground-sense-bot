@@ -1,0 +1,1427 @@
+[
+  {
+    "locationName": "Saidabad",
+    "area": {
+      "non_recharge_worthy": {
+        "commandArea": 0.0,
+        "nonCommandArea": 0.0,
+        "poorQualityArea": 0.0,
+        "hillyArea": 0.0,
+        "forestArea": 0.0,
+        "totalArea": 0.0,
+        "pavedArea": 0.0,
+        "unpavedArea": 0.0
+      },
+      "total": {
+        "commandArea": 0.0,
+        "nonCommandArea": 1073.0,
+        "poorQualityArea": 0.0,
+        "hillyArea": 0.0,
+        "forestArea": 0.0,
+        "totalArea": 1073.0,
+        "pavedArea": 0.0,
+        "unpavedArea": 0.0
+      },
+      "recharge_worthy": {
+        "commandArea": 0.0,
+        "nonCommandArea": 1073.0,
+        "poorQualityArea": 0.0,
+        "hillyArea": 0.0,
+        "forestArea": 0.0,
+        "totalArea": 1073.0,
+        "pavedArea": 0.0,
+        "unpavedArea": 0.0
+      }
+    },
+    "loss": {
+      "total": 30.002817923055737,
+      "non_command": 30.002817923055737
+    },
+    "category": {
+      "total": "over_exploited",
+      "non_command": "over_exploited"
+    },
+    "reportSummary": {
+      "a1e79be2-6e62-4fd6-9fea-64db75b6435d": {
+        "WATERSHED": {
+          "over_exploited": 1
+        }
+      },
+      "total": {
+        "VILLAGE": {
+          "over_exploited": 1,
+          "semi_critical": 0,
+          "critical": 0,
+          "safe": 0
+        },
+        "WATERSHED": {
+          "over_exploited": 1
+        }
+      },
+      "5f0ef49c-e7d7-420f-ae0b-0d48bbc0558d": {
+        "VILLAGE": {
+          "over_exploited": 1,
+          "semi_critical": 0,
+          "critical": 0,
+          "safe": 0
+        }
+      }
+    },
+    "gwProjectedUtilAllocationDynamicAquifer": null,
+    "additionalRecharge": {},
+    "staticGWResource": {
+      "poor_quality": 0.0,
+      "total": 3507.279957304197,
+      "non_command": 3507.279957304197,
+      "command": 0.0
+    },
+    "totalGWAvailability": {
+      "poor_quality": 0.0,
+      "total": 3793.2362799559264,
+      "non_command": 3793.2362799559264,
+      "command": 0.0
+    },
+    "aquiferBusinessData": {
+      "SemiConfined_Aquifer_Piezo_Data": {
+        "total": {
+          "total": 0.0
+        },
+        "in_storage_gw": {
+          "in_storage_gw": 0.0
+        },
+        "dynamic_gw": {
+          "dynamic_gw": 0.0
+        }
+      },
+      "confined_aquifer": {
+        "total": {
+          "total": 0.0
+        },
+        "in_storage_gw": {
+          "in_storage_gw": 0.0
+        },
+        "dynamic_gw": {
+          "dynamic_gw": 0.0
+        }
+      }
+    },
+    "coastalBusinessData": null,
+    "waterDepletedZonesBusinessData": null,
+    "inOutFlow": {},
+    "baseFlow": {
+      "total": {}
+    },
+    "streamRecharge": null,
+    "additionalbaseflow": null,
+    "envFlows": null,
+    "subject": null,
+    "action": null,
+    "modifiable": null,
+    "isUrban": null,
+    "gwSpecificYield": null,
+    "geology": null,
+    "evaporation": {},
+    "qualityTagging": null,
+    "approvalLevel": 4,
+    "verificStatus": 1,
+    "message": null,
+    "timeStamp": null,
+    "locationUUID": "5f0ef49c-e7d7-420f-ae0b-0d48bbc0558d",
+    "rainfall": {
+      "total": 830.0894729593241,
+      "non_command": 830.0894729593241
+    },
+    "wtfonly": null,
+    "computationSummary": {
+      "annual": {
+        "envFlow": {
+          "envFlow": {}
+        },
+        "acquifer_info": {
+          "SemiConfined_Aquifer_Piezo_Data": {},
+          "confined_aquifer": {}
+        },
+        "availFutureUse": {
+          "poor_quality": 0.0,
+          "non_command": 89.44,
+          "command": 0.0
+        },
+        "alloc2025": {
+          "poor_quality": {
+            "domestic": {
+              "total": {
+                "postalloc": "0.0",
+                "prealloc": "0.0"
+              }
+            },
+            "common": {
+              "total": {
+                "pty": "0.0",
+                "ty": "2025",
+                "pry": "0.0",
+                "ry": "0"
+              }
+            },
+            "industry": {}
+          },
+          "non_command": {
+            "domestic": {
+              "total": {
+                "postalloc": "372.73",
+                "prealloc": "372.73"
+              },
+              "urban": {
+                "lpcd": "20.7",
+                "poprefyr": "362046",
+                "refyr": "2011",
+                "lg": "1.0",
+                "gr": "2.2",
+                "postalloc": "372.73"
+              },
+              "rural": {
+                "lpcd": "0.0",
+                "poprefyr": "0",
+                "refyr": "2011",
+                "lg": "1.0",
+                "gr": "0.0",
+                "postalloc": "0.0"
+              }
+            },
+            "common": {
+              "total": {
+                "pty": "490994.0",
+                "ty": "2025",
+                "pry": "362046.0",
+                "ry": "2011"
+              },
+              "urban": {
+                "d": "45.76",
+                "suarea": "1073.0",
+                "pty": "490994.0",
+                "pry": "362046",
+                "lpcd": "20.703860807559522",
+                "gr": "2.2"
+              },
+              "rural": {
+                "d": "0.0",
+                "suarea": "1073.0",
+                "pty": "0.0",
+                "pry": "0",
+                "lpcd": "0.0",
+                "gr": "0.0"
+              }
+            },
+            "industry": {}
+          },
+          "command": {
+            "domestic": {
+              "total": {
+                "postalloc": "0.0",
+                "prealloc": "0.0"
+              }
+            },
+            "common": {
+              "total": {
+                "pty": "0.0",
+                "ty": "2025",
+                "pry": "0.0",
+                "ry": "0"
+              }
+            },
+            "industry": {}
+          }
+        },
+        "stage": {
+          "total": {
+            "av": "285.96"
+          },
+          "non_command": {
+            "av": "285.96"
+          }
+        },
+        "alloc2025_dy": {
+          "poor_quality": {
+            "domestic": {},
+            "common": {}
+          },
+          "non_command": {
+            "domestic": {},
+            "common": {}
+          },
+          "command": {
+            "domestic": {},
+            "common": {}
+          }
+        }
+      },
+      "non_monsoon": {
+        "loss": {
+          "loss": {
+            "poor_quality": {
+              "p": "10.0",
+              "v": "0.0"
+            },
+            "non_command": {
+              "p": "10.0",
+              "v": "33.74"
+            },
+            "command": {
+              "p": "10.0",
+              "v": "0.0"
+            }
+          }
+        },
+        "rf": {
+          "a": 0.0,
+          "n": 0.0
+        },
+        "stage": {
+          "total": {
+            "av": "485.97"
+          },
+          "non_command": {
+            "av": "485.97"
+          }
+        },
+        "recharge": {
+          "rainfall": {
+            "poor_quality": {
+              "a": "0.0",
+              "nrf": "0.0",
+              "m1_unpaved": "0.0",
+              "m1": "0.0",
+              "sy": "0.0",
+              "rflows": "0.0",
+              "m1_paved": "0.0",
+              "an_rf": "0.0",
+              "unpaved": "0.0",
+              "gwsc": "null",
+              "td": "0.0",
+              "e_m2": "null",
+              "an_nrf": "0.0",
+              "rc": "0.0",
+              "gwc": "null",
+              "dv": "null",
+              "at": "poor_quality",
+              "th": "0.0",
+              "rf": "0.0",
+              "ros": "0.0",
+              "paved": "0.0",
+              "if": "0.0",
+              "rp": "true"
+            },
+            "non_command": {
+              "a": "1073.0",
+              "nrf": "218.7",
+              "m1_unpaved": "7.41",
+              "m1": "9.9",
+              "sy": "0.03",
+              "rflows": "0.0",
+              "m1_paved": "2.49",
+              "an_rf": "1007.4",
+              "unpaved": "506.1",
+              "gwsc": "null",
+              "td": "246.65",
+              "e_m2": "null",
+              "an_nrf": "855.4",
+              "rc": "9.9",
+              "gwc": "null",
+              "dv": "null",
+              "at": "non_command",
+              "th": "85.54",
+              "rf": "172.3",
+              "ros": "327.55",
+              "paved": "566.9",
+              "if": "0.11",
+              "rp": "true"
+            },
+            "command": {
+              "a": "0.0",
+              "nrf": "0.0",
+              "m1_unpaved": "0.0",
+              "m1": "0.0",
+              "sy": "0.0",
+              "rflows": "0.0",
+              "m1_paved": "0.0",
+              "an_rf": "0.0",
+              "unpaved": "0.0",
+              "gwsc": "null",
+              "td": "0.0",
+              "e_m2": "null",
+              "an_nrf": "0.0",
+              "rc": "0.0",
+              "gwc": "null",
+              "dv": "null",
+              "at": "command",
+              "th": "0.0",
+              "rf": "0.0",
+              "ros": "0.0",
+              "paved": "0.0",
+              "if": "0.0",
+              "rp": "true"
+            }
+          },
+          "water_body": {
+            "poor_quality": {},
+            "non_command": {
+              "rc": "2.5",
+              "wbi": {
+                "Tank": {
+                  "no": "1.0",
+                  "esa": "7.45",
+                  "r": "2.5",
+                  "d": "240",
+                  "if": "0.0014",
+                  "sa": "17.44"
+                }
+              }
+            },
+            "command": {}
+          },
+          "artificial_structure": {
+            "poor_quality": {},
+            "non_command": {
+              "rc": "0.47",
+              "wcsi": {
+                "RWHS": {
+                  "sc": "0.0",
+                  "r": "0.47",
+                  "c": "78",
+                  "eif": "0.25",
+                  "nos": "78.0",
+                  "fil": "40.0",
+                  "if": "0.25"
+                }
+              }
+            },
+            "command": {}
+          },
+          "pipeline": {
+            "non_command": [
+              {
+                "nod": "245",
+                "r": "321.56",
+                "lpcd": "129.3",
+                "ws": "8.75",
+                "l": "30.0"
+              }
+            ]
+          },
+          "agriculture": {},
+          "total": {
+            "poor_quality": 0.0,
+            "total": 337.45,
+            "non_command": 337.45,
+            "command": 0.0
+          },
+          "surface_irrigation": {
+            "poor_quality": {},
+            "non_command": {},
+            "command": {}
+          },
+          "common": {
+            "pa": "566.9",
+            "wif": "0.11",
+            "ifunpa": "0.0",
+            "upa": "506.1",
+            "ifpa": "0.0"
+          },
+          "gw_irrigation": {
+            "poor_quality": {
+              "r": "0.0",
+              "w_rff": "0.0",
+              "gwIrr": {
+                "gwrff": "0.0",
+                "gwIrrPer": "100"
+              },
+              "irr_dr": "0.0"
+            },
+            "non_command": {
+              "r": "0.0",
+              "w_rff": "0.0",
+              "gwIrr": {
+                "gwrff": "0.0",
+                "gwIrrPer": "100"
+              },
+              "irr_dr": "0.0"
+            },
+            "command": {
+              "r": "0.0",
+              "w_rff": "0.0",
+              "gwIrr": {
+                "gwrff": "0.0",
+                "gwIrrPer": "100"
+              },
+              "irr_dr": "0.0"
+            }
+          },
+          "drainage": {},
+          "canal": {
+            "poor_quality": {},
+            "non_command": {},
+            "command": {}
+          },
+          "streamRecharge": {
+            "poor_quality": {},
+            "non_command": {},
+            "command": {}
+          },
+          "sewage": {
+            "non_command": {
+              "r": "3.02055",
+              "sf": "0.3",
+              "d": "245.0",
+              "lpcd": "129.3",
+              "wp": "0.2",
+              "l": "75.0"
+            }
+          }
+        },
+        "draft": {
+          "agriculture": {
+            "decision": {
+              "non_command": {
+                "pc_dr": "0.0",
+                "dev1": "0.0",
+                "dev2": "0.0",
+                "dev": "0.0",
+                "e_dr": "0.0",
+                "u_dr": "0.0",
+                "cwr_dr": "0.0"
+              }
+            },
+            "crop_water_requirement": {
+              "non_command": {
+                "paddy": {
+                  "ca": "0.0",
+                  "dr": "0.0",
+                  "cwr": "0.0",
+                  "cropInfo": []
+                }
+              }
+            },
+            "unit_draft": {
+              "non_command": {
+                "a58c44": {
+                  "cy": "2023",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0"
+                },
+                "ndr": "0.0",
+                "dr": "0.0"
+              }
+            }
+          },
+          "domestic": {
+            "decision": {
+              "non_command": {
+                "dev": "100.0",
+                "cons_use": "231.35",
+                "e_dr": "231.35",
+                "u_dr": "0.0"
+              }
+            },
+            "consumptive_use_method": {
+              "non_command": {
+                "total": {
+                  "nod": "240",
+                  "ry": "2011",
+                  "ay": "2023",
+                  "pop_ay": "465591",
+                  "pop_ry": "362046",
+                  "dr": "231.35"
+                },
+                "urban": {
+                  "lpcd": "20.703860807559522",
+                  "pop_ay": "465591",
+                  "pop_ry": "362046",
+                  "lg": "1.0",
+                  "gr": "2.2",
+                  "dr": "231.35"
+                },
+                "rural": {
+                  "lpcd": "0.0",
+                  "pop_ay": "0",
+                  "pop_ry": "0",
+                  "lg": "1.0",
+                  "gr": "0.0",
+                  "dr": "0.0"
+                }
+              }
+            },
+            "unit_draft": {
+              "non_command": {
+                "21dded": {
+                  "cy": "2023",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0"
+                },
+                "ndr": "0.0",
+                "dr": "0.0"
+              }
+            }
+          },
+          "total": {
+            "total": 246.65,
+            "non_command": 246.65
+          },
+          "industry": {
+            "decision": {
+              "non_command": {
+                "dev": "-100.0",
+                "cons_use": "0.0",
+                "e_dr": "15.3",
+                "u_dr": "15.3"
+              }
+            },
+            "consumptive_use_pattern": {
+              "non_command": {
+                "fc2de7": {
+                  "nod": "0.0",
+                  "tdr": "0.0",
+                  "noi": "0",
+                  "lg": "0.0",
+                  "dr": "0.0"
+                }
+              }
+            },
+            "unit_draft": {
+              "non_command": {
+                "Bore well##All type of industries": {
+                  "cy": "2023",
+                  "y": "0.9",
+                  "noi": "0",
+                  "und": "0.9",
+                  "cyc": "17",
+                  "ryc": "17",
+                  "ndr": "15.3",
+                  "dr": "15.3",
+                  "ud": "0.9",
+                  "toi": "All type of industries"
+                },
+                "ndr": "15.3",
+                "dr": "15.3"
+              }
+            }
+          }
+        },
+        "availability": {
+          "poor_quality": {
+            "av": 0.0
+          },
+          "non_command": {
+            "av": 303.71
+          },
+          "command": {
+            "av": 0.0
+          }
+        },
+        "lateral_aquifer": {
+          "total": []
+        },
+        "vertcal_aquifer": {
+          "total": []
+        }
+      },
+      "monsoon": {
+        "loss": {
+          "loss": {
+            "poor_quality": {
+              "p": "10.0",
+              "v": "0.0"
+            },
+            "non_command": {
+              "p": "10.0",
+              "v": "20.25"
+            },
+            "command": {
+              "p": "10.0",
+              "v": "0.0"
+            }
+          }
+        },
+        "staticGWResource": {
+          "poor_quality": {
+            "pre": 0.0,
+            "b": 100.0,
+            "sy": 0.03
+          },
+          "non_command": {
+            "pre": 6.318,
+            "b": 100.0,
+            "sy": 0.03
+          },
+          "command": {
+            "pre": 0.0,
+            "b": 100.0,
+            "sy": 0.03
+          }
+        },
+        "rf": {
+          "a": 0.0,
+          "n": 0.0
+        },
+        "stage": {
+          "total": {
+            "av": "485.97"
+          },
+          "non_command": {
+            "av": "485.97"
+          }
+        },
+        "recharge": {
+          "rainfall": {
+            "poor_quality": {
+              "a": "0.0",
+              "nrf": "0.0",
+              "m1_unpaved": "0.0",
+              "m1": "0.0",
+              "sy": "0.0",
+              "rflows": "0.0",
+              "m1_paved": "0.0",
+              "an_rf": "0.0",
+              "unpaved": "0.0",
+              "gwsc": "0.0",
+              "td": "0.0",
+              "e_m2": "0.0",
+              "an_nrf": "0.0",
+              "rc": "0.0",
+              "gwc": "0.03",
+              "dv": "null",
+              "at": "poor_quality",
+              "th": "0.0",
+              "rf": "0.0",
+              "ros": "0.0",
+              "paved": "0.0",
+              "if": "0.0",
+              "rp": "true"
+            },
+            "non_command": {
+              "a": "1073.0",
+              "nrf": "636.7",
+              "m1_unpaved": "30.68",
+              "m1": "40.99",
+              "sy": "0.03",
+              "rflows": "0.0",
+              "m1_paved": "10.31",
+              "an_rf": "1007.4",
+              "unpaved": "506.1",
+              "gwsc": "0.97",
+              "td": "124.17",
+              "e_m2": "null",
+              "an_nrf": "855.4",
+              "rc": "40.99",
+              "gwc": "0.03",
+              "dv": "null",
+              "at": "non_command",
+              "th": "85.54",
+              "rf": "835.1",
+              "ros": "161.52",
+              "paved": "566.9",
+              "if": "0.11",
+              "rp": "true"
+            },
+            "command": {
+              "a": "0.0",
+              "nrf": "0.0",
+              "m1_unpaved": "0.0",
+              "m1": "0.0",
+              "sy": "0.0",
+              "rflows": "0.0",
+              "m1_paved": "0.0",
+              "an_rf": "0.0",
+              "unpaved": "0.0",
+              "gwsc": "null",
+              "td": "0.0",
+              "e_m2": "null",
+              "an_nrf": "0.0",
+              "rc": "0.0",
+              "gwc": "null",
+              "dv": "null",
+              "at": "command",
+              "th": "0.0",
+              "rf": "0.0",
+              "ros": "0.0",
+              "paved": "0.0",
+              "if": "0.0",
+              "rp": "true"
+            }
+          },
+          "water_body": {
+            "poor_quality": {},
+            "non_command": {
+              "rc": "2.07",
+              "wbi": {
+                "Tank": {
+                  "no": "1.0",
+                  "esa": "12.33",
+                  "r": "2.07",
+                  "d": "120",
+                  "if": "0.0014",
+                  "sa": "17.44"
+                }
+              }
+            },
+            "command": {}
+          },
+          "artificial_structure": {
+            "poor_quality": {},
+            "non_command": {
+              "rc": "0.47",
+              "wcsi": {
+                "RWHS": {
+                  "sc": "0.0",
+                  "r": "0.47",
+                  "c": "78",
+                  "eif": "0.25",
+                  "nos": "78.0",
+                  "fil": "40.0",
+                  "if": "0.25"
+                }
+              }
+            },
+            "command": {}
+          },
+          "pipeline": {
+            "non_command": [
+              {
+                "nod": "120",
+                "r": "157.5",
+                "lpcd": "129.3",
+                "ws": "8.75",
+                "l": "30.0"
+              }
+            ]
+          },
+          "agriculture": {},
+          "total": {
+            "poor_quality": 0.0,
+            "total": 202.51,
+            "non_command": 202.51,
+            "command": 0.0
+          },
+          "surface_irrigation": {
+            "poor_quality": {},
+            "non_command": {},
+            "command": {}
+          },
+          "common": {
+            "pa": "566.9",
+            "wif": "0.11",
+            "ifunpa": "0.0",
+            "upa": "506.1",
+            "ifpa": "0.0"
+          },
+          "gw_irrigation": {
+            "poor_quality": {
+              "r": "0.0",
+              "w_rff": "0.0",
+              "gwIrr": {
+                "gwrff": "0.0",
+                "gwIrrPer": "100"
+              },
+              "irr_dr": "0.0"
+            },
+            "non_command": {
+              "r": "0.0",
+              "w_rff": "0.0",
+              "gwIrr": {
+                "gwrff": "0.0",
+                "gwIrrPer": "100"
+              },
+              "irr_dr": "0.0"
+            },
+            "command": {
+              "r": "0.0",
+              "w_rff": "0.0",
+              "gwIrr": {
+                "gwrff": "0.0",
+                "gwIrrPer": "100"
+              },
+              "irr_dr": "0.0"
+            }
+          },
+          "drainage": {},
+          "canal": {
+            "poor_quality": {},
+            "non_command": {},
+            "command": {}
+          },
+          "streamRecharge": {
+            "poor_quality": {},
+            "non_command": {},
+            "command": {}
+          },
+          "sewage": {
+            "non_command": {
+              "r": "1.47945",
+              "sf": "0.3",
+              "d": "120.0",
+              "lpcd": "129.3",
+              "wp": "0.2",
+              "l": "75.0"
+            }
+          }
+        },
+        "draft": {
+          "agriculture": {
+            "decision": {
+              "non_command": {
+                "pc_dr": "0.0",
+                "dev1": "0.0",
+                "dev2": "0.0",
+                "dev": "0.0",
+                "e_dr": "0.0",
+                "u_dr": "0.0",
+                "cwr_dr": "0.0"
+              }
+            },
+            "crop_water_requirement": {
+              "non_command": {
+                "paddy": {
+                  "ca": "0.0",
+                  "dr": "0.0",
+                  "cwr": "0.0",
+                  "cropInfo": []
+                }
+              }
+            },
+            "unit_draft": {
+              "non_command": {
+                "a58c44": {
+                  "cy": "2023",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0"
+                },
+                "ndr": "0.0",
+                "dr": "0.0"
+              }
+            }
+          },
+          "domestic": {
+            "decision": {
+              "non_command": {
+                "dev": "100.0",
+                "cons_use": "115.67",
+                "e_dr": "115.67",
+                "u_dr": "0.0"
+              }
+            },
+            "consumptive_use_method": {
+              "non_command": {
+                "total": {
+                  "nod": "120",
+                  "ry": "2011",
+                  "ay": "2023",
+                  "pop_ay": "465591",
+                  "pop_ry": "362046",
+                  "dr": "115.67"
+                },
+                "urban": {
+                  "lpcd": "20.703860807559522",
+                  "pop_ay": "465591",
+                  "pop_ry": "362046",
+                  "lg": "1.0",
+                  "gr": "2.2",
+                  "dr": "115.67"
+                },
+                "rural": {
+                  "lpcd": "0.0",
+                  "pop_ay": "0",
+                  "pop_ry": "0",
+                  "lg": "1.0",
+                  "gr": "0.0",
+                  "dr": "0.0"
+                }
+              }
+            },
+            "unit_draft": {
+              "non_command": {
+                "21dded": {
+                  "cy": "2023",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0"
+                },
+                "ndr": "0.0",
+                "dr": "0.0"
+              }
+            }
+          },
+          "total": {
+            "total": 124.17,
+            "non_command": 124.17
+          },
+          "industry": {
+            "decision": {
+              "non_command": {
+                "dev": "-100.0",
+                "cons_use": "0.0",
+                "e_dr": "8.5",
+                "u_dr": "8.5"
+              }
+            },
+            "consumptive_use_pattern": {
+              "non_command": {
+                "fc2de7": {
+                  "nod": "0.0",
+                  "tdr": "0.0",
+                  "noi": "0",
+                  "lg": "0.0",
+                  "dr": "0.0"
+                }
+              }
+            },
+            "unit_draft": {
+              "non_command": {
+                "Bore well##All type of industries": {
+                  "cy": "2023",
+                  "y": "0.5",
+                  "noi": "0",
+                  "und": "0.5",
+                  "cyc": "17",
+                  "ryc": "17",
+                  "ndr": "8.5",
+                  "dr": "8.5",
+                  "ud": "0.5",
+                  "toi": "All type of industries"
+                },
+                "ndr": "8.5",
+                "dr": "8.5"
+              }
+            }
+          }
+        },
+        "availability": {
+          "poor_quality": {
+            "av": 0.0
+          },
+          "non_command": {
+            "av": 182.26
+          },
+          "command": {
+            "av": 0.0
+          }
+        },
+        "lateral_aquifer": {
+          "total": []
+        },
+        "vertcal_aquifer": {
+          "total": []
+        }
+      }
+    },
+    "draftData": {
+      "agriculture": {
+        "total": 0.0,
+        "non_command": 0.0
+      },
+      "domestic": {
+        "total": 347.023125261088,
+        "non_command": 347.023125261088
+      },
+      "total": {
+        "total": 370.82,
+        "non_command": 370.82
+      },
+      "industry": {
+        "total": 23.8,
+        "non_command": 23.8
+      }
+    },
+    "rechargeData": {
+      "pipeline": {
+        "total": 213.25431652281702,
+        "non_command": 213.25431652281702
+      },
+      "agriculture": {
+        "total": 0.0,
+        "non_command": 0.0
+      },
+      "total": {
+        "total": 315.95914057478655,
+        "non_command": 315.95914057478655
+      },
+      "rainfall": {
+        "total": 66.83860940225874,
+        "non_command": 66.83860940225874
+      },
+      "gw_irrigation": {
+        "total": 0.0,
+        "non_command": 0.0
+      },
+      "water_body": {
+        "total": 21.471329997245434,
+        "non_command": 21.471329997245434
+      },
+      "sewage": {
+        "total": 13.898950968689743,
+        "non_command": 13.898950968689743
+      },
+      "artificial_structure": {
+        "total": 0.49595831420438896,
+        "non_command": 0.49595831420438896
+      }
+    },
+    "currentAvailabilityForAllPurposes": {
+      "poor_quality": 0.0,
+      "total": 285.96,
+      "non_command": 285.96,
+      "command": 0.0
+    },
+    "availabilityForFutureUse": {
+      "total": 42.48699706179414,
+      "non_command": 42.48699706179414
+    },
+    "gwallocation": {
+      "domestic": {
+        "total": 293.7104742447893,
+        "non_command": 293.7104742447893
+      },
+      "total": {
+        "total": 293.7104742447893,
+        "non_command": 293.7104742447893
+      },
+      "industry": {}
+    },
+    "stageOfExtraction": {
+      "total": 129.67547908798434,
+      "non_command": 129.67547908798434
+    },
+    "gwlevelData": {
+      "poor_quality": {},
+      "total": {},
+      "non_command": {
+        "pre": [
+          [
+            2016.0,
+            5.65
+          ],
+          [
+            2017.0,
+            4.1
+          ],
+          [
+            2018.0,
+            6.03
+          ],
+          [
+            2019.0,
+            7.64
+          ],
+          [
+            2020.0,
+            8.11
+          ],
+          [
+            2021.0,
+            6.35
+          ],
+          [
+            2022.0,
+            5.01
+          ],
+          [
+            2023.0,
+            4.48
+          ],
+          [
+            2014.0,
+            6.85
+          ],
+          [
+            2015.0,
+            7.4
+          ]
+        ],
+        "post": [
+          [
+            2016.0,
+            2.7
+          ],
+          [
+            2017.0,
+            2.3
+          ],
+          [
+            2018.0,
+            4.43
+          ],
+          [
+            2019.0,
+            3.86
+          ],
+          [
+            2020.0,
+            2.06
+          ],
+          [
+            2021.0,
+            2.24
+          ],
+          [
+            2022.0,
+            2.64
+          ],
+          [
+            2023.0,
+            4.45
+          ],
+          [
+            2014.0,
+            6.1
+          ],
+          [
+            2015.0,
+            4.3
+          ]
+        ]
+      },
+      "command": {}
+    },
+    "gwanalysisSeason": null,
+    "gwtrendSlope": null,
+    "waterTableRiseFall": {
+      "poor_quality": {},
+      "total": {},
+      "non_command": {
+        "pre": "Rising",
+        "post": "Rising"
+      },
+      "command": {}
+    },
+    "gwtrendAttention": null,
+    "waterTableCategory": null
+  },
+  {
+    "locationName": "total",
+    "area": {
+      "non_recharge_worthy": {
+        "commandArea": 0.0,
+        "nonCommandArea": 0.0,
+        "poorQualityArea": 0.0,
+        "hillyArea": 0.0,
+        "forestArea": 0.0,
+        "totalArea": 0.0,
+        "pavedArea": 0.0,
+        "unpavedArea": 0.0
+      },
+      "total": {
+        "commandArea": 0.0,
+        "nonCommandArea": 1073.0,
+        "poorQualityArea": 0.0,
+        "hillyArea": 0.0,
+        "forestArea": 0.0,
+        "totalArea": 1073.0,
+        "pavedArea": 0.0,
+        "unpavedArea": 0.0
+      },
+      "recharge_worthy": {
+        "commandArea": 0.0,
+        "nonCommandArea": 1073.0,
+        "poorQualityArea": 0.0,
+        "hillyArea": 0.0,
+        "forestArea": 0.0,
+        "totalArea": 1073.0,
+        "pavedArea": 0.0,
+        "unpavedArea": 0.0
+      }
+    },
+    "loss": {
+      "total": 30.002817923055737,
+      "non_command": 30.002817923055737
+    },
+    "category": null,
+    "reportSummary": {
+      "total": {
+        "VILLAGE": {
+          "over_exploited": 1,
+          "semi_critical": 0,
+          "critical": 0,
+          "safe": 0
+        },
+        "BLOCK": {
+          "over_exploited": 1
+        },
+        "WATERSHED": {
+          "over_exploited": 1
+        }
+      },
+      "5f0ef49c-e7d7-420f-ae0b-0d48bbc0558d": {
+        "VILLAGE": {
+          "over_exploited": 1,
+          "semi_critical": 0,
+          "critical": 0,
+          "safe": 0
+        },
+        "WATERSHED": {
+          "over_exploited": 1
+        }
+      }
+    },
+    "gwProjectedUtilAllocationDynamicAquifer": {},
+    "additionalRecharge": {},
+    "staticGWResource": {
+      "poor_quality": 0.0,
+      "total": 3507.279957304197,
+      "non_command": 3507.279957304197,
+      "command": 0.0
+    },
+    "totalGWAvailability": {
+      "poor_quality": 0.0,
+      "total": 3793.2362799559264,
+      "non_command": 3793.2362799559264,
+      "command": 0.0
+    },
+    "aquiferBusinessData": {
+      "SemiConfined Aquifer Piezo Data": null,
+      "confined_aquifer": {
+        "total": {
+          "total": 0.0
+        },
+        "in_storage_gw": {
+          "in_storage_gw": 0.0
+        },
+        "dynamic_gw": {
+          "dynamic_gw": 0.0
+        }
+      }
+    },
+    "coastalBusinessData": null,
+    "waterDepletedZonesBusinessData": null,
+    "inOutFlow": {},
+    "baseFlow": {
+      "total": {}
+    },
+    "streamRecharge": null,
+    "additionalbaseflow": null,
+    "envFlows": null,
+    "subject": null,
+    "action": null,
+    "modifiable": null,
+    "isUrban": null,
+    "gwSpecificYield": null,
+    "geology": null,
+    "evaporation": {},
+    "qualityTagging": null,
+    "approvalLevel": null,
+    "verificStatus": null,
+    "message": null,
+    "timeStamp": null,
+    "locationUUID": null,
+    "rainfall": {
+      "total": 830.0894729593241,
+      "non_command": 830.0894729593241
+    },
+    "wtfonly": null,
+    "computationSummary": null,
+    "draftData": {
+      "agriculture": {
+        "total": 0.0,
+        "non_command": 0.0
+      },
+      "domestic": {
+        "total": 347.023125261088,
+        "non_command": 347.023125261088
+      },
+      "total": {
+        "total": 370.82,
+        "non_command": 370.82
+      },
+      "industry": {
+        "total": 23.8,
+        "non_command": 23.8
+      }
+    },
+    "rechargeData": {
+      "pipeline": {
+        "total": 213.25431652281702,
+        "non_command": 213.25431652281702
+      },
+      "agriculture": {
+        "total": 0.0,
+        "non_command": 0.0
+      },
+      "total": {
+        "total": 315.95914057478655,
+        "non_command": 315.95914057478655
+      },
+      "rainfall": {
+        "total": 66.83860940225874,
+        "non_command": 66.83860940225874
+      },
+      "gw_irrigation": {
+        "total": 0.0,
+        "non_command": 0.0
+      },
+      "water_body": {
+        "total": 21.471329997245434,
+        "non_command": 21.471329997245434
+      },
+      "sewage": {
+        "total": 13.898950968689743,
+        "non_command": 13.898950968689743
+      },
+      "artificial_structure": {
+        "total": 0.49595831420438896,
+        "non_command": 0.49595831420438896
+      }
+    },
+    "currentAvailabilityForAllPurposes": {
+      "poor_quality": 0.0,
+      "total": 285.96,
+      "non_command": 285.96,
+      "command": 0.0
+    },
+    "availabilityForFutureUse": {
+      "total": 42.48699706179414,
+      "non_command": 42.48699706179414
+    },
+    "gwallocation": {
+      "domestic": {
+        "total": 293.7104742447893,
+        "non_command": 293.7104742447893
+      },
+      "total": {
+        "total": 293.7104742447893,
+        "non_command": 293.7104742447893
+      },
+      "industry": {}
+    },
+    "stageOfExtraction": {
+      "poor_quality": 0.0,
+      "total": 129.67547908798434,
+      "non_command": 129.67547908798434,
+      "command": 0.0
+    },
+    "gwlevelData": null,
+    "gwanalysisSeason": null,
+    "gwtrendSlope": null,
+    "waterTableRiseFall": null,
+    "gwtrendAttention": null,
+    "waterTableCategory": null
+  }
+]

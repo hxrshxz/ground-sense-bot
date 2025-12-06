@@ -11,10 +11,21 @@ interface GeminiApiError {
 }
 
 /**
+ * Task-specific configuration for optimal AI responses
+ */
+interface TaskConfig {
+  temperature: number;
+  maxOutputTokens: number;
+  topK: number;
+  topP: number;
+}
+
+/**
  * Centralized Gemini API service with:
  * - Configurable model (via VITE_GEMINI_MODEL)
  * - Automatic fallback models if a 404/model-not-found occurs
- * - Lazy model list fetch (ListModels) for future enhancements
+ * - Task-specific temperature and token settings
+ * - Domain knowledge for groundwater analysis
  * - Consistent error normalization
  */
 export class GeminiApiService {
@@ -30,6 +41,25 @@ export class GeminiApiService {
     "gemini-pro",
   ];
   private triedModels = new Set<string>();
+
+  // Task-specific configurations for optimal responses
+  private taskConfigs: Record<string, TaskConfig> = {
+    general: { temperature: 0.4, maxOutputTokens: 4096, topK: 40, topP: 0.95 },
+    analysis: { temperature: 0.3, maxOutputTokens: 8192, topK: 40, topP: 0.9 },
+    visualization: {
+      temperature: 0.5,
+      maxOutputTokens: 4096,
+      topK: 50,
+      topP: 0.95,
+    },
+    sql: { temperature: 0.1, maxOutputTokens: 2048, topK: 20, topP: 0.8 },
+    explanation: {
+      temperature: 0.4,
+      maxOutputTokens: 4096,
+      topK: 40,
+      topP: 0.9,
+    },
+  };
 
   constructor(apiKey: string) {
     this.apiKey = apiKey;
@@ -52,37 +82,167 @@ export class GeminiApiService {
       .filter(Boolean);
   }
 
-  private buildSystemPrompt(userPrompt: string) {
-    return `You are INGRES AI Assistant, a specialized AI for analyzing India's groundwater data. You help users understand groundwater levels, recharge rates, extraction data, and provide insights about water resource management in India.
+  // Domain knowledge for groundwater analysis
+  private readonly DOMAIN_KNOWLEDGE = `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DOMAIN KNOWLEDGE FOR GROUNDWATER ANALYSIS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Key context:
-- You work with groundwater assessment units across India
-- Categories: Safe, Semi-Critical, Critical, Over-Exploited
-- You can analyze specific blocks, districts, and states
-- You provide data-driven insights and recommendations
-- You understand both English and Hindi queries
+CRITICAL THRESHOLDS:
+- Stage of Extraction > 100%: Over-Exploited (RED ALERT)
+- Stage 90-100%: Critical (HIGH RISK)  
+- Stage 70-90%: Semi-Critical (MODERATE RISK)
+- Stage < 70%: Safe (LOW RISK)
 
-Response guidelines:
-- Be concise and technical when appropriate
-- Provide specific numbers when available (use realistic Indian groundwater data)
-- Offer actionable insights for water management
-- If asked about specific blocks like Delhi, provide detailed analysis
-- For general queries, guide users to be more specific
+INDIA GROUNDWATER STATISTICS (2024-2025):
+- Total Assessment Units: 5,796 blocks
+- Over-Exploited: ~17% of blocks
+- Critical: ~5% of blocks
+- Semi-Critical: ~10% of blocks
+- Safe: ~65% of blocks
+- Total Recharge: ~430 BCM/year
+- Total Extraction: ~250 BCM/year
+- Net Availability: ~398 BCM/year
 
-User Query: ${userPrompt}`;
+STATE-LEVEL INSIGHTS:
+- Punjab: Highest extraction, 79% over-exploited blocks, 650mm avg rainfall
+- Rajasthan: Water-scarce, 450mm rainfall, high salinity issues
+- Haryana: High agricultural demand, 60% critical+over-exploited
+- Delhi: Urban stress, limited recharge, 90%+ over-exploited
+- Tamil Nadu: Coastal salinity, monsoon dependent
+- Gujarat: Mixed status, western areas critical
+
+TYPICAL EXTRACTION BREAKDOWN:
+- Agriculture: 85-92% (dominant in rural areas)
+- Domestic: 5-10%
+- Industrial: 2-5%
+
+RECHARGE SOURCES IMPORTANCE:
+1. Rainfall Recharge: 60-70% of total
+2. Canal Recharge: 15-25%
+3. Irrigation Return Flow: 10-15%
+4. Water Conservation: 5-10%
+
+RED FLAGS TO DETECT:
+- Extraction > Recharge by 30%+ (unsustainable)
+- Rainfall < 400mm with high extraction
+- Rapid decline > 0.5m/year
+- Stage > 150% (severe over-exploitation)
+`;
+
+  // Conversation history for context retention
+  private conversationHistory: Array<{ role: string; content: string }> = [];
+  private readonly MAX_HISTORY_LENGTH = 5;
+
+  // Add message to conversation history
+  public addToHistory(role: "user" | "assistant", content: string) {
+    this.conversationHistory.push({ role, content });
+    // Keep only last N messages
+    if (this.conversationHistory.length > this.MAX_HISTORY_LENGTH * 2) {
+      this.conversationHistory = this.conversationHistory.slice(
+        -this.MAX_HISTORY_LENGTH * 2
+      );
+    }
   }
 
-  private async postGenerate(model: string, prompt: string) {
+  // Clear conversation history
+  public clearHistory() {
+    this.conversationHistory = [];
+  }
+
+  // Build context string from history
+  private buildContextFromHistory(): string {
+    if (this.conversationHistory.length === 0) return "";
+
+    const historyStr = this.conversationHistory
+      .map(
+        (msg) =>
+          `${msg.role.toUpperCase()}: ${msg.content.substring(0, 500)}${
+            msg.content.length > 500 ? "..." : ""
+          }`
+      )
+      .join("\n");
+
+    return `\n\nCONVERSATION HISTORY (for context):\n${historyStr}\n`;
+  }
+
+  private buildSystemPrompt(
+    userPrompt: string,
+    task: "general" | "analysis" | "explanation" = "general"
+  ) {
+    const historyContext = this.buildContextFromHistory();
+
+    const basePrompt = `You are INGRES AI Assistant, an expert AI for analyzing India's groundwater data from the CGWB (Central Ground Water Board) INGRES portal.
+
+${this.DOMAIN_KNOWLEDGE}
+${historyContext}
+
+Key capabilities:
+- Analyze 5,796 groundwater assessment blocks across India
+- Categories: safe, semi_critical, critical, over_exploited, salinity
+- Provide data-driven insights with specific numbers
+- Understand both English and Hindi queries
+- Support multi-turn conversations with context retention
+
+Response guidelines:
+- Be concise but comprehensive
+- Always cite specific data when available
+- Provide actionable recommendations
+- Use bullet points for clarity
+- For ambiguous queries, ask clarifying questions
+- Reference conversation history when relevant
+
+User Query: ${userPrompt}`;
+
+    // Task-specific additions
+    if (task === "analysis") {
+      return (
+        basePrompt +
+        `\n\nProvide a detailed technical analysis with:\n1. Key metrics and their implications\n2. Comparison with thresholds\n3. Risk assessment\n4. Specific recommendations`
+      );
+    } else if (task === "explanation") {
+      return (
+        basePrompt +
+        `\n\nExplain in a clear, educational manner suitable for spoken delivery. Use simple language and natural speech patterns.`
+      );
+    }
+
+    return basePrompt;
+  }
+
+  private async postGenerate(
+    model: string,
+    prompt: string,
+    task:
+      | "general"
+      | "analysis"
+      | "explanation"
+      | "visualization"
+      | "sql" = "general"
+  ) {
+    const config = this.taskConfigs[task] || this.taskConfigs.general;
+
     const response = await fetch(`${this.buildUrl(model)}?key=${this.apiKey}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: this.buildSystemPrompt(prompt) }] }],
+        contents: [
+          {
+            parts: [
+              {
+                text: this.buildSystemPrompt(
+                  prompt,
+                  task === "visualization" || task === "sql" ? "general" : task
+                ),
+              },
+            ],
+          },
+        ],
         generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 1024,
+          temperature: config.temperature,
+          topK: config.topK,
+          topP: config.topP,
+          maxOutputTokens: config.maxOutputTokens,
         },
         safetySettings: [
           {
@@ -129,9 +289,15 @@ User Query: ${userPrompt}`;
     return /NOT_FOUND|not found|404/i.test(msg);
   }
 
-  async generateResponse(prompt: string): Promise<GeminiResponse> {
+  async generateResponse(
+    prompt: string,
+    task: "general" | "analysis" | "explanation" = "general"
+  ): Promise<GeminiResponse> {
     if (!this.apiKey || this.apiKey.trim() === "")
       throw new Error("Gemini API key is required");
+
+    // Add user message to history
+    this.addToHistory("user", prompt);
 
     const modelsToTry = [this.primaryModel, ...this.fallbackModels].filter(
       (m) => !this.triedModels.has(m)
@@ -140,10 +306,14 @@ User Query: ${userPrompt}`;
     for (const model of modelsToTry) {
       try {
         this.triedModels.add(model);
-        const data = await this.postGenerate(model, prompt);
+        const data = await this.postGenerate(model, prompt, task);
         const text =
           data?.candidates?.[0]?.content?.parts?.[0]?.text ||
           "No response text returned.";
+
+        // Add assistant response to history
+        this.addToHistory("assistant", text);
+
         return { text };
       } catch (err) {
         lastError = err;
@@ -170,7 +340,8 @@ User Query: ${userPrompt}`;
 
     // Use the comprehensive map analysis prompt or a simple fallback
     const analysisPrompt = useMapAnalysisPrompt
-      ? MAP_ANALYSIS_PROMPT + "\n\nPlease analyze this INGRES groundwater map image and provide the comprehensive analysis in the specified JSON format."
+      ? MAP_ANALYSIS_PROMPT +
+        "\n\nPlease analyze this INGRES groundwater map image and provide the comprehensive analysis in the specified JSON format."
       : "Analyze this groundwater map image and provide insights about the water levels, extraction rates, and regional conditions.";
 
     // Extract base64 data from data URL

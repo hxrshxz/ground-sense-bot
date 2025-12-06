@@ -73,9 +73,10 @@ func (s *NLPService) ParseMessage(message string) (Intent, Entities, string) {
 	
 	// Process locations - split if they contain spaces and are not compound names
 	processedLocations := s.processLocations(analysis.Locations)
+	normalizedLocations := normalizeLocations(processedLocations)
 	
 	entities := Entities{
-		Locations: processedLocations,
+		Locations: normalizedLocations,
 		Year:      analysis.Year,
 		Category:  analysis.Category,
 		Metric:    analysis.Metric,
@@ -114,234 +115,200 @@ func (s *NLPService) shouldGenerateDynamicSQL(intent Intent, entities Entities, 
 	
 	msgLower := strings.ToLower(message)
 	
-	// Check for filter keywords
-	hasFilter := strings.Contains(msgLower, "less than") ||
+	// Check for filter keywords - but exclude category-only filters
+	// Category queries need handler's pattern matching since DB uses 'over_exploited' not 'Over-Exploited'  
+	hasCategoryFilter := strings.Contains(msgLower, "over-exploited") ||
+		strings.Contains(msgLower, "over exploited") ||
+		strings.Contains(msgLower, "critical") ||
+		strings.Contains(msgLower, "semi-critical") ||
+		strings.Contains(msgLower, "safe")
+	
+	hasNumericFilter := strings.Contains(msgLower, "less than") ||
 		strings.Contains(msgLower, "greater than") ||
 		strings.Contains(msgLower, "more than") ||
 		strings.Contains(msgLower, "above") ||
 		strings.Contains(msgLower, "below") ||
-		strings.Contains(msgLower, "over-exploited") ||
-		strings.Contains(msgLower, "critical") ||
-		strings.Contains(msgLower, "safe") ||
 		entities.Threshold > 0 ||
 		entities.Operator != ""
 	
-	// Enable dynamic SQL for list queries with filters or specific intents
-	if intent == IntentListBlocks && hasFilter {
+	// Only use dynamic SQL for numeric filters, NOT category filters
+	// Category queries should use the handler with proper pattern matching
+	if intent == IntentListBlocks && hasNumericFilter && !hasCategoryFilter {
 		return true
 	}
-	
-	// Also enable for trends and comparisons where we want full data
-	// if intent == IntentTrend || intent == IntentCompare {
-	// 	return true
-	// }
-	
+
+	// Enable for trend and compare so time series / comparisons go through SQL
+	if intent == IntentTrend || intent == IntentCompare {
+		return true
+	}
+
 	return false
+}
+
+// normalizeLocations uppercases and trims locations for better ILIKE matching
+func normalizeLocations(locs []string) []string {
+	res := make([]string, 0, len(locs))
+	for _, l := range locs {
+		trimmed := strings.TrimSpace(l)
+		if trimmed == "" {
+			continue
+		}
+		res = append(res, strings.ToUpper(trimmed))
+	}
+	return res
 }
 
 // generateDynamicSQL creates a SQL query using AI based on user intent
 func (s *NLPService) generateDynamicSQL(message string, intent Intent, entities Entities) (string, error) {
 	ctx := context.Background()
 	
-	// Build comprehensive database schema context with sample data
+	// Build comprehensive database schema context with ACTUAL data from the database
 	schema := `
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║                    INDIA GROUNDWATER DATABASE - FULL SCHEMA                  ║
+║                    INDIA GROUNDWATER DATABASE - ACTUAL SCHEMA                ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
-║  Database: PostgreSQL 15 | Schema: public | Data: INGRES Groundwater System  ║
+║  Database: PostgreSQL | Schema: public | Data: INGRES Groundwater System     ║
+║  TOTAL BLOCKS: 5,796 | ONLY YEAR: 2024-2025                                  ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 TABLE 1: states
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CREATE TABLE states (
-    state_uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    state_name VARCHAR(100) NOT NULL UNIQUE
+    state_uuid UUID PRIMARY KEY,
+    state_name VARCHAR(100) NOT NULL UNIQUE  -- ALWAYS UPPERCASE
 );
 
-SAMPLE DATA (state_name values are UPPERCASE):
-| state_uuid                           | state_name          |
-|--------------------------------------|---------------------|
-| 550e8400-e29b-41d4-a716-446655440001 | PUNJAB              |
-| 550e8400-e29b-41d4-a716-446655440002 | HARYANA             |
-| 550e8400-e29b-41d4-a716-446655440003 | RAJASTHAN           |
-| 550e8400-e29b-41d4-a716-446655440004 | GUJARAT             |
-| 550e8400-e29b-41d4-a716-446655440005 | MAHARASHTRA         |
-| 550e8400-e29b-41d4-a716-446655440006 | UTTAR PRADESH       |
-| 550e8400-e29b-41d4-a716-446655440007 | MADHYA PRADESH      |
-| 550e8400-e29b-41d4-a716-446655440008 | JHARKHAND           |
-| 550e8400-e29b-41d4-a716-446655440009 | TAMIL NADU          |
-| 550e8400-e29b-41d4-a716-446655440010 | KARNATAKA           |
+⚠️ ACTUAL STATE NAMES (ALL UPPERCASE - use UPPER() for matching):
+ANDAMAN AND NICOBAR ISLANDS, ANDHRA PRADESH, ARUNACHAL PRADESH, ASSAM, 
+BIHAR, CHANDIGARH, CHHATTISGARH, DADRA AND NAGAR HAVELI, DAMAN AND DIU, 
+DELHI, GOA, GUJARAT, HARYANA, HIMACHAL PRADESH, JAMMU AND KASHMIR, 
+JHARKHAND, KARNATAKA, KERALA, LADAKH, LAKSHDWEEP, MADHYA PRADESH, 
+MAHARASHTRA, MANIPUR, MEGHALAYA, MIZORAM, NAGALAND, ODISHA, PUDUCHERRY, 
+PUNJAB, RAJASTHAN, SIKKIM, TAMIL NADU, TELANGANA, TRIPURA, UTTAR PRADESH, 
+UTTARAKHAND, WEST BENGAL
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 TABLE 2: districts
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CREATE TABLE districts (
-    district_uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    district_name VARCHAR(100) NOT NULL,
-    state_uuid UUID NOT NULL REFERENCES states(state_uuid)
+    district_uuid UUID PRIMARY KEY,
+    district_name VARCHAR(100) NOT NULL,  -- Mixed case
+    state_uuid UUID REFERENCES states(state_uuid)
 );
 
-SAMPLE DATA (district_name values are UPPERCASE):
-| district_uuid                        | district_name | state_name (via JOIN)  |
-|--------------------------------------|---------------|------------------------|
-| 660e8400-e29b-41d4-a716-446655440001 | LUDHIANA      | PUNJAB                 |
-| 660e8400-e29b-41d4-a716-446655440002 | BATHINDA      | PUNJAB                 |
-| 660e8400-e29b-41d4-a716-446655440003 | AMRITSAR      | PUNJAB                 |
-| 660e8400-e29b-41d4-a716-446655440004 | JALANDHAR     | PUNJAB                 |
-| 660e8400-e29b-41d4-a716-446655440005 | PATIALA       | PUNJAB                 |
-| 660e8400-e29b-41d4-a716-446655440006 | CHANDIGARH    | CHANDIGARH (UT)        |
-| 660e8400-e29b-41d4-a716-446655440007 | JAIPUR        | RAJASTHAN              |
-| 660e8400-e29b-41d4-a716-446655440008 | JODHPUR       | RAJASTHAN              |
-| 660e8400-e29b-41d4-a716-446655440009 | GURGAON       | HARYANA                |
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-TABLE 3: blocks (SMALLEST administrative unit - this is where groundwater data is stored)
+TABLE 3: blocks (5,796 total blocks)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CREATE TABLE blocks (
-    block_uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    block_name VARCHAR(100) NOT NULL,
-    district_uuid UUID NOT NULL REFERENCES districts(district_uuid),
-    state_uuid UUID NOT NULL REFERENCES states(state_uuid),
-    geometry GEOMETRY(MultiPolygon, 4326) -- PostGIS geometry, can be NULL
+    block_uuid UUID PRIMARY KEY,
+    block_name VARCHAR(100) NOT NULL,  -- Mixed case (some UPPERCASE, some Title Case)
+    district_uuid UUID REFERENCES districts(district_uuid),
+    state_uuid UUID REFERENCES states(state_uuid),
+    geometry JSONB
 );
 
-SAMPLE DATA (block_name values are UPPERCASE, ~7000+ blocks in India):
-| block_uuid                           | block_name    | district_name | state_name |
-|--------------------------------------|---------------|---------------|------------|
-| 770e8400-e29b-41d4-a716-446655440001 | JAISINAGAR    | LUDHIANA      | PUNJAB     |
-| 770e8400-e29b-41d4-a716-446655440002 | LUDHIANA      | LUDHIANA      | PUNJAB     |
-| 770e8400-e29b-41d4-a716-446655440003 | MACHHIWARA    | LUDHIANA      | PUNJAB     |
-| 770e8400-e29b-41d4-a716-446655440004 | BATHINDA      | BATHINDA      | PUNJAB     |
-| 770e8400-e29b-41d4-a716-446655440005 | SANGAT        | BATHINDA      | PUNJAB     |
-| 770e8400-e29b-41d4-a716-446655440006 | CHANDIL       | SERAIKELA     | JHARKHAND  |
-| 770e8400-e29b-41d4-a716-446655440007 | RAJPURA       | PATIALA       | PUNJAB     |
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-TABLE 4: assessments_summary (MAIN GROUNDWATER DATA TABLE)
+TABLE 4: assessments_summary (MAIN DATA TABLE)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CREATE TABLE assessments_summary (
     assessment_id SERIAL PRIMARY KEY,
-    block_uuid UUID NOT NULL REFERENCES blocks(block_uuid),
-    year VARCHAR(10) NOT NULL,  -- Format: "2024-2025", "2023-2024"
-    rainfall FLOAT,             -- Annual rainfall in mm (range: 50-3000)
-    total_recharge FLOAT,       -- Groundwater recharge in MCM (million cubic meters)
-    total_discharge FLOAT,      -- Natural discharge in MCM
-    total_extractable FLOAT,    -- Extractable groundwater in MCM
-    total_extraction FLOAT,     -- Actual extraction in MCM
-    category VARCHAR(20),       -- "Safe", "Semi-Critical", "Critical", "Over-Exploited"
-    stage FLOAT,                -- Extraction/Recharge ratio as percentage (0-300%)
-    availability FLOAT,         -- Available groundwater for future use in MCM
-    raw JSONB,                  -- Raw assessment data
-    created_at TIMESTAMP DEFAULT NOW()
+    block_uuid UUID REFERENCES blocks(block_uuid),
+    year VARCHAR(10) NOT NULL,       -- ONLY '2024-2025' exists!
+    rainfall DOUBLE PRECISION,       -- mm (range: 0-3000+)
+    total_recharge DOUBLE PRECISION, -- MCM (million cubic meters)
+    total_discharge DOUBLE PRECISION,-- MCM
+    total_extractable DOUBLE PRECISION, -- MCM
+    total_extraction DOUBLE PRECISION,  -- MCM
+    category VARCHAR(20),            -- see exact values below
+    stage DOUBLE PRECISION,          -- percentage (can be negative for special cases)
+    availability DOUBLE PRECISION,   -- MCM
+    raw JSONB,
+    created_at TIMESTAMP
 );
 
-YEAR VALUES (available years):
-'2012-2013', '2016-2017', '2019-2020', '2021-2022', '2022-2023', '2023-2024', '2024-2025'
+⚠️⚠️⚠️ CRITICAL - ONLY ONE YEAR EXISTS: '2024-2025' ⚠️⚠️⚠️
+ALWAYS use: WHERE a.year = '2024-2025' or just omit year filter!
 
-NOTE: Data exists ONLY for these 7 years! Years 2013-2015, 2017-2018, 2020-2021 DO NOT EXIST!
+⚠️⚠️⚠️ ACTUAL CATEGORY VALUES (lowercase, underscore format) ⚠️⚠️⚠️
+┌─────────────────┬──────────────────────────────────────────────────────────┐
+│ DB Value        │ Meaning / User might say                                 │
+├─────────────────┼──────────────────────────────────────────────────────────┤
+│ 'safe'          │ Safe blocks, stage < 70%                                 │
+│ 'semi_critical' │ Semi-critical, stage 70-90%                              │
+│ 'critical'      │ Critical, stage 90-100%                                  │
+│ 'over_exploited'│ Over-exploited, stage > 100%                             │
+│ 'salinity'      │ Affected by salinity (stage = -100000)                   │
+│ 'Hilly Area'    │ Hilly area, not assessed                                 │
+│ 'none'          │ No category assigned                                     │
+└─────────────────┴──────────────────────────────────────────────────────────┘
 
-CATEGORY VALUES (exactly these 4 values):
-'Safe'           -- Stage < 70%
-'Semi-Critical'  -- Stage 70-90%
-'Critical'       -- Stage 90-100%
-'Over-Exploited' -- Stage > 100%
+⚠️ CATEGORY MATCHING RULES:
+- User says "safe" → WHERE LOWER(a.category) = 'safe'
+- User says "over-exploited"/"overexploited"/"over exploited" → WHERE LOWER(a.category) = 'over_exploited'
+- User says "semi-critical"/"semi critical" → WHERE LOWER(a.category) = 'semi_critical'
+- User says "critical" → WHERE LOWER(a.category) = 'critical'
 
-SAMPLE DATA:
-| assessment_id | block_name | year      | rainfall | total_recharge | total_extraction | category       | stage  |
-|---------------|------------|-----------|----------|----------------|------------------|----------------|--------|
-| 1             | JAISINAGAR | 2024-2025 | 485.3    | 12.45          | 15.67            | Over-Exploited | 125.8  |
-| 2             | JAISINAGAR | 2023-2024 | 512.1    | 13.21          | 14.89            | Over-Exploited | 112.7  |
-| 3             | LUDHIANA   | 2024-2025 | 623.7    | 18.92          | 22.34            | Over-Exploited | 118.1  |
-| 4             | BATHINDA   | 2024-2025 | 342.5    | 8.76           | 6.12             | Safe           | 69.9   |
-| 5             | CHANDIL    | 2024-2025 | 1245.2   | 45.67          | 23.45            | Safe           | 51.3   |
-
-VALUE RANGES:
-- rainfall: 50-3000 mm (low in Rajasthan ~200, high in Jharkhand ~1500)
-- total_recharge: 0.5-100 MCM
-- total_extraction: 0.5-150 MCM
-- stage: 10-300% (>100% means over-exploited)
+SAMPLE ACTUAL DATA:
+| block_name    | category       | stage                |
+|---------------|----------------|----------------------|
+| POLBA-DADPUR  | safe           | 53.66                |
+| Authapuram    | critical       | 99.06                |
+| Dharampur     | safe           | 69.41                |
+| KANNAUJ       | critical       | 98.81                |
+| Allipuram     | semi_critical  | 72.08                |
+| KOLAGHAT      | salinity       | -100000 (special)    |
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-TABLE 5: assessments_recharge_breakdown (Breakdown of recharge sources)
+TABLE 5: assessments_recharge_breakdown
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CREATE TABLE assessments_recharge_breakdown (
     id SERIAL PRIMARY KEY,
-    assessment_id INT NOT NULL REFERENCES assessments_summary(assessment_id),
-    source VARCHAR(50) NOT NULL,  -- "Rainfall Recharge", "Canal Seepage", "Return Flow", "Total"
-    command FLOAT,                -- Command area value in MCM
-    non_command FLOAT,            -- Non-command area value in MCM
-    total FLOAT                   -- Total value in MCM
+    assessment_id INT REFERENCES assessments_summary(assessment_id),
+    source VARCHAR(50) NOT NULL,
+    command DOUBLE PRECISION,
+    non_command DOUBLE PRECISION,
+    total DOUBLE PRECISION
 );
 
-SOURCE VALUES:
-'Rainfall Recharge'        -- Recharge from rainfall infiltration
-'Canal Seepage'            -- Recharge from canal water seepage
-'Return Flow from Irrigation' -- Recharge from irrigation return flow
-'Recharge from Tanks'      -- Recharge from tanks/ponds
-'Recharge from Water Bodies' -- Recharge from rivers/lakes
-'Total'                    -- Sum of all sources
+⚠️ ACTUAL SOURCE VALUES (lowercase):
+'rainfall', 'canal', 'gw_irrigation', 'surface_irrigation', 'water_body',
+'artificial_structure', 'sewage', 'pipeline', 'streamRecharge', 'agriculture', 'Total'
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-TABLE 6: assessments_extraction_breakdown (Breakdown of extraction by sector)
+TABLE 6: assessments_extraction_breakdown
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CREATE TABLE assessments_extraction_breakdown (
     id SERIAL PRIMARY KEY,
-    assessment_id INT NOT NULL REFERENCES assessments_summary(assessment_id),
-    source VARCHAR(50) NOT NULL,  -- "Agriculture", "Domestic", "Industry", "Total"
-    command FLOAT,
-    non_command FLOAT,
-    total FLOAT
-);
-
-SOURCE VALUES:
-'Irrigation'     -- Agricultural/irrigation extraction
-'Domestic'       -- Domestic/household extraction
-'Industrial'     -- Industrial extraction
-'Total'          -- Sum of all extraction sources
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-TABLE 7: assessments_discharge_breakdown (Natural discharge breakdown)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-CREATE TABLE assessments_discharge_breakdown (
-    id SERIAL PRIMARY KEY,
-    assessment_id INT NOT NULL REFERENCES assessments_summary(assessment_id),
+    assessment_id INT REFERENCES assessments_summary(assessment_id),
     source VARCHAR(50) NOT NULL,
-    command FLOAT,
-    non_command FLOAT,
-    total FLOAT
+    command DOUBLE PRECISION,
+    non_command DOUBLE PRECISION,
+    total DOUBLE PRECISION
 );
 
-SOURCE VALUES:
-'Base Flow'                -- Natural discharge to rivers
-'Evapotranspiration'       -- Loss through evaporation/transpiration
-'Total'                    -- Sum of all discharge
+⚠️ ACTUAL SOURCE VALUES: 'agriculture', 'domestic', 'industry', 'Total'
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-IMPORTANT JOIN PATTERNS (Use these exact patterns!)
+TABLE 7: assessments_discharge_breakdown (EMPTY - no data)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
--- Get block data with location names:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+REQUIRED JOIN PATTERNS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+-- ALWAYS join to get location names:
 SELECT b.block_name, d.district_name, s.state_name, a.*
 FROM assessments_summary a
 JOIN blocks b ON a.block_uuid = b.block_uuid
 JOIN districts d ON b.district_uuid = d.district_uuid
 JOIN states s ON b.state_uuid = s.state_uuid
+WHERE a.year = '2024-2025'
 
--- Filter by block name (case-insensitive):
-WHERE LOWER(b.block_name) = LOWER('jaisinagar')
-
--- Filter by district name:
-WHERE LOWER(d.district_name) = LOWER('ludhiana')
-
--- Filter by state name:
-WHERE LOWER(s.state_name) = LOWER('punjab')
-
--- Get recharge breakdown with block name:
-SELECT b.block_name, arb.*
-FROM assessments_recharge_breakdown arb
-JOIN assessments_summary a ON arb.assessment_id = a.assessment_id
-JOIN blocks b ON a.block_uuid = b.block_uuid
+-- Case-insensitive matching (USE UPPER for states, LOWER for blocks/districts):
+WHERE UPPER(s.state_name) = UPPER('punjab')
+WHERE LOWER(b.block_name) ILIKE '%ludhiana%'
+WHERE LOWER(d.district_name) ILIKE '%bathinda%'
 
 `
 
@@ -383,10 +350,11 @@ FROM assessments_summary a
 JOIN blocks b ON a.block_uuid = b.block_uuid
 JOIN districts d ON b.district_uuid = d.district_uuid
 JOIN states s ON b.state_uuid = s.state_uuid
-WHERE LOWER(b.block_name) = LOWER('jaisinagar')
+WHERE LOWER(b.block_name) ILIKE '%jaisinagar%'
   AND a.year = '2024-2025'
 
-🎯 EXAMPLE 2: TREND - "Show me groundwater trend for Ludhiana from 2017 to 2024"
+🎯 EXAMPLE 2: TREND - "Show me groundwater trend for Ludhiana"
+-- NOTE: Only 2024-2025 data exists! Trend queries will return single year.
 SELECT 
     a.year,
     b.block_name,
@@ -397,7 +365,7 @@ SELECT
     a.category
 FROM assessments_summary a
 JOIN blocks b ON a.block_uuid = b.block_uuid
-WHERE LOWER(b.block_name) = LOWER('ludhiana')
+WHERE LOWER(b.block_name) ILIKE '%ludhiana%'
 ORDER BY a.year ASC
 
 🎯 EXAMPLE 3: COMPARE - "Compare Ludhiana and Bathinda"
@@ -412,7 +380,7 @@ SELECT
     a.availability
 FROM assessments_summary a
 JOIN blocks b ON a.block_uuid = b.block_uuid
-WHERE (LOWER(b.block_name) = LOWER('ludhiana') OR LOWER(b.block_name) = LOWER('bathinda'))
+WHERE (LOWER(b.block_name) ILIKE '%ludhiana%' OR LOWER(b.block_name) ILIKE '%bathinda%')
   AND a.year = '2024-2025'
 ORDER BY b.block_name
 
@@ -426,7 +394,7 @@ SELECT
 FROM assessments_recharge_breakdown arb
 JOIN assessments_summary a ON arb.assessment_id = a.assessment_id
 JOIN blocks b ON a.block_uuid = b.block_uuid
-WHERE LOWER(b.block_name) = LOWER('chandil')
+WHERE LOWER(b.block_name) ILIKE '%chandil%'
   AND a.year = '2024-2025'
 
 🎯 EXAMPLE 5: EXTRACTION_BREAKDOWN - "What are the sources of extraction in Chandigarh?"
@@ -439,7 +407,7 @@ SELECT
 FROM assessments_extraction_breakdown aeb
 JOIN assessments_summary a ON aeb.assessment_id = a.assessment_id
 JOIN blocks b ON a.block_uuid = b.block_uuid
-WHERE LOWER(b.block_name) = LOWER('chandigarh')
+WHERE LOWER(b.block_name) ILIKE '%chandigarh%'
   AND a.year = '2024-2025'
 
 🎯 EXAMPLE 6: LIST_BLOCKS with rainfall filter - "List all blocks where rainfall is less than 500 mm"
@@ -447,7 +415,6 @@ SELECT
     b.block_name,
     d.district_name,
     s.state_name,
-    a.year,
     a.rainfall,
     a.stage,
     a.category
@@ -457,15 +424,16 @@ JOIN districts d ON b.district_uuid = d.district_uuid
 JOIN states s ON b.state_uuid = s.state_uuid
 WHERE a.rainfall < 500
   AND a.year = '2024-2025'
+  AND a.category NOT IN ('salinity', 'Hilly Area', 'none')
 ORDER BY a.rainfall ASC
 LIMIT 50
 
-🎯 EXAMPLE 7: LIST_BLOCKS with stage filter - "Show me over-exploited blocks"
+🎯 EXAMPLE 7: LIST_BLOCKS by category - "Show me over-exploited blocks"
+-- CRITICAL: Use 'over_exploited' (lowercase with underscore)
 SELECT 
     b.block_name,
     d.district_name,
     s.state_name,
-    a.year,
     a.rainfall,
     a.stage,
     a.category
@@ -473,16 +441,16 @@ FROM assessments_summary a
 JOIN blocks b ON a.block_uuid = b.block_uuid
 JOIN districts d ON b.district_uuid = d.district_uuid
 JOIN states s ON b.state_uuid = s.state_uuid
-WHERE a.category = 'Over-Exploited'
+WHERE LOWER(a.category) = 'over_exploited'
   AND a.year = '2024-2025'
 ORDER BY a.stage DESC
 LIMIT 50
 
 🎯 EXAMPLE 8: LIST_BLOCKS with state filter - "Show safe blocks in Punjab"
+-- CRITICAL: Use 'safe' (lowercase) and UPPER() for state matching
 SELECT 
     b.block_name,
     d.district_name,
-    a.year,
     a.rainfall,
     a.stage,
     a.category
@@ -490,8 +458,8 @@ FROM assessments_summary a
 JOIN blocks b ON a.block_uuid = b.block_uuid
 JOIN districts d ON b.district_uuid = d.district_uuid
 JOIN states s ON b.state_uuid = s.state_uuid
-WHERE LOWER(s.state_name) = LOWER('punjab')
-  AND a.category = 'Safe'
+WHERE UPPER(s.state_name) = UPPER('punjab')
+  AND LOWER(a.category) = 'safe'
   AND a.year = '2024-2025'
 ORDER BY b.block_name
 LIMIT 50
@@ -502,7 +470,7 @@ SELECT DISTINCT
     s.state_name
 FROM districts d
 JOIN states s ON d.state_uuid = s.state_uuid
-WHERE LOWER(s.state_name) = LOWER('punjab')
+WHERE UPPER(s.state_name) = UPPER('punjab')
 ORDER BY d.district_name
 
 🎯 EXAMPLE 10: LIST_STATES - "List all states"
@@ -514,7 +482,6 @@ ORDER BY state_name
 SELECT 
     b.block_name,
     d.district_name,
-    a.year,
     a.rainfall,
     a.stage,
     a.category
@@ -522,7 +489,7 @@ FROM assessments_summary a
 JOIN blocks b ON a.block_uuid = b.block_uuid
 JOIN districts d ON b.district_uuid = d.district_uuid
 JOIN states s ON b.state_uuid = s.state_uuid
-WHERE LOWER(s.state_name) = LOWER('rajasthan')
+WHERE UPPER(s.state_name) = UPPER('rajasthan')
   AND a.stage > 90
   AND a.year = '2024-2025'
 ORDER BY a.stage DESC
@@ -533,17 +500,17 @@ SELECT
     s.state_name,
     COUNT(*) as total_blocks,
     ROUND(AVG(a.rainfall)::numeric, 2) as avg_rainfall_mm,
-    ROUND(AVG(a.stage)::numeric, 2) as avg_stage_percent,
+    ROUND(AVG(CASE WHEN a.stage > 0 THEN a.stage ELSE NULL END)::numeric, 2) as avg_stage_percent,
     ROUND(SUM(a.total_recharge)::numeric, 2) as total_recharge_mcm,
     ROUND(SUM(a.total_extraction)::numeric, 2) as total_extraction_mcm,
     SUM(CASE WHEN LOWER(a.category) = 'safe' THEN 1 ELSE 0 END) as safe_blocks,
-    SUM(CASE WHEN LOWER(a.category) = 'semi-critical' THEN 1 ELSE 0 END) as semicritical_blocks,
+    SUM(CASE WHEN LOWER(a.category) = 'semi_critical' THEN 1 ELSE 0 END) as semicritical_blocks,
     SUM(CASE WHEN LOWER(a.category) = 'critical' THEN 1 ELSE 0 END) as critical_blocks,
-    SUM(CASE WHEN LOWER(a.category) LIKE '%over%' THEN 1 ELSE 0 END) as overexploited_blocks
+    SUM(CASE WHEN LOWER(a.category) = 'over_exploited' THEN 1 ELSE 0 END) as overexploited_blocks
 FROM assessments_summary a
 JOIN blocks b ON a.block_uuid = b.block_uuid
 JOIN states s ON b.state_uuid = s.state_uuid
-WHERE LOWER(s.state_name) = LOWER('punjab')
+WHERE UPPER(s.state_name) = UPPER('punjab')
   AND a.year = '2024-2025'
 GROUP BY s.state_name
 
@@ -553,16 +520,16 @@ SELECT
     s.state_name,
     COUNT(*) as total_blocks,
     ROUND(AVG(a.rainfall)::numeric, 2) as avg_rainfall_mm,
-    ROUND(AVG(a.stage)::numeric, 2) as avg_stage_percent,
+    ROUND(AVG(CASE WHEN a.stage > 0 THEN a.stage ELSE NULL END)::numeric, 2) as avg_stage_percent,
     ROUND(SUM(a.total_recharge)::numeric, 2) as total_recharge_mcm,
     ROUND(SUM(a.total_extraction)::numeric, 2) as total_extraction_mcm,
     SUM(CASE WHEN LOWER(a.category) = 'safe' THEN 1 ELSE 0 END) as safe_blocks,
-    SUM(CASE WHEN LOWER(a.category) LIKE '%over%' THEN 1 ELSE 0 END) as overexploited_blocks
+    SUM(CASE WHEN LOWER(a.category) = 'over_exploited' THEN 1 ELSE 0 END) as overexploited_blocks
 FROM assessments_summary a
 JOIN blocks b ON a.block_uuid = b.block_uuid
 JOIN districts d ON b.district_uuid = d.district_uuid
 JOIN states s ON b.state_uuid = s.state_uuid
-WHERE LOWER(d.district_name) = LOWER('ludhiana')
+WHERE LOWER(d.district_name) ILIKE '%ludhiana%'
   AND a.year = '2024-2025'
 GROUP BY d.district_name, s.state_name
 
@@ -571,9 +538,9 @@ SELECT
     s.state_name,
     COUNT(*) as total_blocks,
     ROUND(AVG(a.rainfall)::numeric, 2) as avg_rainfall,
-    ROUND(AVG(a.stage)::numeric, 2) as avg_stage,
+    ROUND(AVG(CASE WHEN a.stage > 0 THEN a.stage ELSE NULL END)::numeric, 2) as avg_stage,
     SUM(CASE WHEN LOWER(a.category) = 'safe' THEN 1 ELSE 0 END) as safe,
-    SUM(CASE WHEN LOWER(a.category) LIKE '%over%' THEN 1 ELSE 0 END) as overexploited
+    SUM(CASE WHEN LOWER(a.category) = 'over_exploited' THEN 1 ELSE 0 END) as overexploited
 FROM assessments_summary a
 JOIN blocks b ON a.block_uuid = b.block_uuid
 JOIN states s ON b.state_uuid = s.state_uuid
@@ -586,44 +553,58 @@ SELECT
     d.district_name,
     COUNT(*) as total_blocks,
     ROUND(AVG(a.rainfall)::numeric, 2) as avg_rainfall,
-    ROUND(AVG(a.stage)::numeric, 2) as avg_stage,
+    ROUND(AVG(CASE WHEN a.stage > 0 THEN a.stage ELSE NULL END)::numeric, 2) as avg_stage,
     SUM(CASE WHEN LOWER(a.category) = 'safe' THEN 1 ELSE 0 END) as safe_blocks,
-    SUM(CASE WHEN LOWER(a.category) LIKE '%over%' THEN 1 ELSE 0 END) as overexploited
+    SUM(CASE WHEN LOWER(a.category) = 'over_exploited' THEN 1 ELSE 0 END) as overexploited
 FROM assessments_summary a
 JOIN blocks b ON a.block_uuid = b.block_uuid
 JOIN districts d ON b.district_uuid = d.district_uuid
 JOIN states s ON b.state_uuid = s.state_uuid
-WHERE LOWER(s.state_name) = LOWER('rajasthan')
+WHERE UPPER(s.state_name) = UPPER('rajasthan')
   AND a.year = '2024-2025'
 GROUP BY d.district_name
 ORDER BY avg_stage DESC
 
 🎯 EXAMPLE 16: STATE TREND - "Show groundwater trend for Punjab over years"
+-- NOTE: Only 2024-2025 data exists!
 SELECT 
     a.year,
     s.state_name,
     COUNT(*) as total_blocks,
     ROUND(AVG(a.rainfall)::numeric, 2) as avg_rainfall,
-    ROUND(AVG(a.stage)::numeric, 2) as avg_stage,
+    ROUND(AVG(CASE WHEN a.stage > 0 THEN a.stage ELSE NULL END)::numeric, 2) as avg_stage,
     ROUND(SUM(a.total_recharge)::numeric, 2) as total_recharge,
     ROUND(SUM(a.total_extraction)::numeric, 2) as total_extraction
 FROM assessments_summary a
 JOIN blocks b ON a.block_uuid = b.block_uuid
 JOIN states s ON b.state_uuid = s.state_uuid
-WHERE LOWER(s.state_name) = LOWER('punjab')
+WHERE UPPER(s.state_name) = UPPER('punjab')
 GROUP BY a.year, s.state_name
 ORDER BY a.year ASC
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-CRITICAL RULES:
+CRITICAL RULES (MUST FOLLOW):
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 1. ALWAYS use proper JOINs to get human-readable block/district/state names
-2. ALWAYS use LOWER() for case-insensitive string matching
-3. ALWAYS include year filter (default: '2024-2025') unless asking for trends
-4. For TRENDS: ORDER BY a.year ASC and don't filter by specific year
+2. For STATE name matching: Use UPPER(s.state_name) = UPPER('...')
+3. For BLOCK/DISTRICT name matching: Use LOWER(b.block_name) ILIKE '%...%'
+4. ALWAYS include: AND a.year = '2024-2025' (only year with data!)
 5. For LIST queries: Add LIMIT 50 to prevent overload
-6. For category filters: Use LOWER() - 'safe', 'semi-critical', 'critical', or LIKE '%over%'
-7. Return ONLY valid PostgreSQL - no markdown, no explanations, no comments
+
+⚠️⚠️⚠️ CATEGORY VALUES (CRITICAL - USE EXACT VALUES):
+- 'safe' (not 'Safe')
+- 'semi_critical' (not 'Semi-Critical', underscore not hyphen)
+- 'critical' (not 'Critical')
+- 'over_exploited' (not 'Over-Exploited', underscore not hyphen)
+- 'salinity' (special case, stage = -100000)
+- 'Hilly Area' (special case)
+
+Example category filter:
+WHERE LOWER(a.category) = 'over_exploited'  ✅ CORRECT
+WHERE a.category = 'Over-Exploited'         ❌ WRONG
+
+6. For stage averages: Use AVG(CASE WHEN a.stage > 0 THEN a.stage ELSE NULL END) to exclude salinity blocks
+7. Return ONLY valid PostgreSQL SQL - no markdown, no explanations, no comments
 8. The SQL must be executable as-is
 9. For STATE/DISTRICT level queries: USE GROUP BY and aggregate functions (COUNT, AVG, SUM)
 10. Use ROUND(value::numeric, 2) for decimal formatting
@@ -667,41 +648,41 @@ func (s *NLPService) analyzeQueryWithAI(message string) (*IntentAnalysis, error)
 DATABASE SCHEMA CONTEXT:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 HIERARCHY: State → District → Block
+TOTAL BLOCKS: 5,796 | ONLY AVAILABLE YEAR: 2024-2025
 
 1. STATES TABLE:
-   - state_name (VARCHAR): State names like "PUNJAB", "HARYANA", "RAJASTHAN"
-   - state_uuid (UUID): Unique identifier
+   - state_name (VARCHAR): ALL UPPERCASE like "PUNJAB", "HARYANA", "RAJASTHAN"
 
 2. DISTRICTS TABLE:
-   - district_name (VARCHAR): District names like "LUDHIANA", "BATHINDA", "CHANDIGARH"
-   - district_uuid (UUID)
-   - state_uuid (FOREIGN KEY to states)
+   - district_name (VARCHAR): Mixed case
 
 3. BLOCKS TABLE:
-   - block_name (VARCHAR): Block names like "JAISINAGAR", "LUDHIANA", "BATHINDA"
-   - block_uuid (UUID)
-   - district_uuid, state_uuid (FOREIGN KEYS)
+   - block_name (VARCHAR): Mixed case (some UPPERCASE, some Title Case)
 
 4. ASSESSMENTS_SUMMARY TABLE (Main groundwater data):
-   - year (VARCHAR): Format "2024-2025", "2023-2024", etc.
-   - AVAILABLE YEARS (ONLY THESE 7): '2012-2013', '2016-2017', '2019-2020', '2021-2022', '2022-2023', '2023-2024', '2024-2025'
-   - MISSING YEARS: 2013-2015, 2017-2018, 2020-2021 DO NOT EXIST!
+   - year (VARCHAR): ONLY '2024-2025' has block-level data!
    - rainfall (FLOAT): Rainfall in mm (range: 0-3000)
-   - total_recharge (FLOAT): Total groundwater recharge
-   - total_extraction (FLOAT): Total groundwater extraction
-   - category (VARCHAR): "Safe", "Semi-Critical", "Critical", "Over-Exploited"
-   - stage (FLOAT): Stage of extraction percentage (0-200+, >100 = over-exploited)
-   - availability (FLOAT): Available groundwater
+   - total_recharge (FLOAT): Total groundwater recharge in MCM
+   - total_extraction (FLOAT): Total groundwater extraction in MCM
+   - stage (FLOAT): Stage percentage (can be negative -100000 for salinity)
+   - availability (FLOAT): Available groundwater in MCM
+   
+⚠️⚠️⚠️ CRITICAL - ACTUAL CATEGORY VALUES IN DATABASE (USE EXACTLY AS SHOWN):
+   - 'safe' (lowercase)
+   - 'semi_critical' (lowercase, underscore NOT hyphen)
+   - 'critical' (lowercase)
+   - 'over_exploited' (lowercase, underscore NOT hyphen)
+   - 'salinity' (special case, stage = -100000)
+   - 'Hilly Area' (mixed case, special)
+   - 'none' (no category)
 
 5. RECHARGE_BREAKDOWN TABLE:
-   - source (VARCHAR): "Rainfall", "Canal", "Total", etc.
-   - command (FLOAT): Command area recharge
-   - non_command (FLOAT): Non-command area recharge
+   - source values: 'rainfall', 'canal', 'gw_irrigation', 'surface_irrigation', 
+                    'water_body', 'artificial_structure', 'sewage', 'pipeline', 
+                    'streamRecharge', 'agriculture', 'Total'
 
 6. EXTRACTION_BREAKDOWN TABLE:
-   - source (VARCHAR): "Agriculture", "Domestic", "Industry"
-   - command (FLOAT): Command area extraction
-   - non_command (FLOAT): Non-command area extraction
+   - source values: 'agriculture', 'domestic', 'industry', 'Total'
 
 USER QUERY: "%s"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -715,135 +696,92 @@ INTENT CLASSIFICATION RULES:
    → Examples:
       "What is the status of Ludhiana?" → SUMMARY
       "Show me groundwater data for Chandigarh" → SUMMARY
-      "Tell me about Jaisinagar" → SUMMARY
 
 2. RECHARGE_BREAKDOWN
    → When: User asks about SOURCES/COMPONENTS of RECHARGE
-   → Keywords: "recharge breakdown", "recharge distribution", "recharge sources", "recharge components", "how is recharged"
-   → NOT: Just asking "show recharge" (that's SUMMARY)
+   → Keywords: "recharge breakdown", "recharge sources", "recharge components"
    → Examples:
       "Show me the recharge breakdown for Jaisinagar" → RECHARGE_BREAKDOWN
-      "What are the recharge sources in Bathinda?" → RECHARGE_BREAKDOWN
-      "Give me recharge distribution for Ludhiana" → RECHARGE_BREAKDOWN
-      "How is groundwater being recharged?" → RECHARGE_BREAKDOWN
 
 3. EXTRACTION_BREAKDOWN
    → When: User asks about SOURCES/COMPONENTS of EXTRACTION
-   → Keywords: "extraction breakdown", "extraction sources", "sources of extraction", "extraction distribution", "usage breakdown"
+   → Keywords: "extraction breakdown", "sources of extraction", "extraction distribution"
    → Examples:
       "What are the sources of extraction in Chandil?" → EXTRACTION_BREAKDOWN
-      "Show me extraction breakdown for Ludhiana" → EXTRACTION_BREAKDOWN
-      "How much water is extracted?" → EXTRACTION_BREAKDOWN
 
 4. TREND
-   → When: User asks for HISTORICAL data, trends OVER TIME, multi-year analysis
-   → Keywords: "trend", "over time", "from X to Y", "last 5 years", "historical", "history", "over years"
+   → When: User asks for HISTORICAL data, trends OVER TIME
+   → Keywords: "trend", "over time", "historical", "over years"
+   → NOTE: Only 2024-2025 data exists, trends will show single year
    → Examples:
-      "Show me trend for Ludhiana from 2017 to 2024" → TREND
-      "What is the groundwater trend over 5 years?" → TREND
-      "Historical data for Bathinda" → TREND
+      "Show me trend for Ludhiana" → TREND
 
 5. COMPARE
    → When: User wants to COMPARE TWO OR MORE specific locations
-   → Keywords: "compare", "vs", "versus", "between", "difference"
+   → Keywords: "compare", "vs", "versus", "between"
    → Examples:
       "Compare Ludhiana and Bathinda" → COMPARE
-      "Show me comparison between Chandigarh and Patiala" → COMPARE
 
 6. LIST_BLOCKS
-   → When: User wants to FILTER/LIST blocks by CRITERIA (rainfall, stage, category)
-   → Keywords: "list", "show blocks", "which blocks", "find blocks", "blocks where", "less than", "greater than"
-   → Can include location filter AND criteria filter
+   → When: User wants to FILTER/LIST blocks by CRITERIA
+   → Keywords: "list", "show blocks", "which blocks", "blocks where"
    → Examples:
       "List all blocks where rainfall is less than 500 mm" → LIST_BLOCKS
       "Show me over-exploited blocks" → LIST_BLOCKS
-      "Which blocks in Punjab have stage > 90?" → LIST_BLOCKS
-      "Safe blocks in Ludhiana" → LIST_BLOCKS
 
 7. LIST_DISTRICTS
-   → When: User explicitly asks for DISTRICTS (not blocks)
-   → Keywords: "show districts", "list districts", "all districts", "which districts", "districts in"
+   → When: User explicitly asks for DISTRICTS
    → Examples:
       "Show me all districts in Punjab" → LIST_DISTRICTS
-      "List districts in Haryana" → LIST_DISTRICTS
-      "Which districts are in Rajasthan?" → LIST_DISTRICTS
 
 8. LIST_STATES
    → When: User explicitly asks for STATES list
-   → Keywords: "show states", "list states", "all states", "which states"
    → Examples:
       "Show me all states" → LIST_STATES
-      "List all states in India" → LIST_STATES
 
 9. MAP_CATEGORY
    → When: User explicitly wants MAP visualization
-   → Keywords: "map", "show on map", "display map"
+   → Keywords: "map", "show on map"
    → Examples:
       "Map all safe blocks" → MAP_CATEGORY
-      "Show me blocks on map" → MAP_CATEGORY
 
 ENTITY EXTRACTION RULES:
 ═══════════════════════════════════════════════════════════
 
-LOCATIONS (CRITICAL - READ CAREFULLY):
-- Extract ONLY proper nouns that are GEOGRAPHIC location names (blocks/districts/states)
-- Each location MUST be a SINGLE proper noun, NOT a phrase or sentence fragment
-- IGNORE ALL: verbs, adjectives, prepositions, question words, metric names, numbers, units
-- Common blocks: JAISINAGAR, LUDHIANA, BATHINDA, AMRITSAR, CHANDIGARH, PATIALA, CHANDIL, JAIPUR
-- Common districts: Ludhiana, Bathinda, Chandigarh, Jalandhar, Patiala, Jaipur
-- Common states: Punjab, Haryana, Rajasthan, Gujarat, Delhi, Uttar Pradesh, Maharashtra
-- Compound names: Use exact format like "Himachal Pradesh", "Uttar Pradesh", "Madhya Pradesh"
-- Case-insensitive matching
-
-STRICT VALIDATION RULES:
-✅ VALID: Single word proper nouns OR known compound state names
-✅ VALID: "Chandigarh", "Punjab", "Ludhiana", "Himachal Pradesh", "Uttar Pradesh"
-❌ INVALID: Phrases like "are sources chandigarh", "where rainfall less than 500 mm"
-❌ INVALID: Common words like "sources", "rainfall", "extraction", "recharge"
-❌ INVALID: Numbers, units (mm, mcm), operators (<, >)
-
-EXTRACTION EXAMPLES:
-✓ "What are the sources of extraction in Chandigarh?" → ["Chandigarh"]
-✓ "chandigarh" → ["Chandigarh"]
-✓ "List all blocks where rainfall is less than 500 mm" → [] (no specific location)
-✓ "Show safe blocks in Ludhiana" → ["Ludhiana"]
-✓ "Show me all districts in Punjab" → ["Punjab"]
-✓ "Compare Bathinda and Amritsar" → ["Bathinda", "Amritsar"]
-✓ "Water situation in northern India" → [] (no specific location, too vague)
-✗ "are sources chandigarh" → WRONG - extract only "Chandigarh"
-✗ "where rainfall less than 500 mm" → WRONG - extract [] (empty)
-
-IF UNSURE, return empty array [] rather than extracting invalid phrases.
+LOCATIONS:
+- Extract ONLY proper nouns that are GEOGRAPHIC location names
+- Common blocks: JAISINAGAR, LUDHIANA, BATHINDA, CHANDIGARH, CHANDIL
+- Common states: Punjab, Haryana, Rajasthan, Gujarat, Delhi, Maharashtra
+- Compound names: "Himachal Pradesh", "Uttar Pradesh", "Madhya Pradesh"
+- IGNORE: verbs, adjectives, metric names, numbers, units
 
 YEAR:
 - Format: "YYYY-YYYY" (e.g., "2024-2025")
-- Default: "2024-2025" if not specified
-- For trends: extract start and end years
+- Default: "2024-2025" (ONLY year with data!)
 
-CATEGORY:
-- Valid: "Safe", "Semi-Critical", "Critical", "Over-Exploited"
-- Aliases: "over exploited" → "Over-Exploited", "semi critical" → "Semi-Critical"
+CATEGORY (USE EXACT DATABASE VALUES):
+- User says "safe" → category: "safe"
+- User says "over-exploited"/"overexploited" → category: "over_exploited"
+- User says "semi-critical"/"semi critical" → category: "semi_critical"
+- User says "critical" → category: "critical"
 
-METRIC (for LIST_BLOCKS only):
-- "rainfall" → rainfall column
-- "stage" → stage column
+METRIC:
+- "rainfall" → rainfall
+- "stage" → stage
 - "extraction" → total_extraction
 - "recharge" → total_recharge
 
-THRESHOLD & OPERATOR (for LIST_BLOCKS):
-- Extract numeric value and comparison operator
+THRESHOLD & OPERATOR:
 - "less than 500" → threshold: 500, operator: "<"
 - "greater than 90" → threshold: 90, operator: ">"
-- "above 100" → threshold: 100, operator: ">"
-- "below 600" → threshold: 600, operator: "<"
 
 OUTPUT FORMAT:
 Return ONLY valid JSON (no markdown, no code blocks):
 {
-  "intent": "SUMMARY|TREND|COMPARE|RECHARGE_BREAKDOWN|EXTRACTION_BREAKDOWN|DISCHARGE_BREAKDOWN|LIST_BLOCKS|LIST_DISTRICTS|LIST_STATES|MAP_CATEGORY",
-  "locations": ["block/district/state names"],
-  "year": "YYYY-YYYY or empty",
-  "category": "Safe|Semi-Critical|Critical|Over-Exploited or empty",
+  "intent": "SUMMARY|TREND|COMPARE|RECHARGE_BREAKDOWN|EXTRACTION_BREAKDOWN|LIST_BLOCKS|LIST_DISTRICTS|LIST_STATES|MAP_CATEGORY",
+  "locations": ["location names"],
+  "year": "2024-2025",
+  "category": "safe|semi_critical|critical|over_exploited or empty",
   "metric": "rainfall|stage|extraction|recharge or empty",
   "threshold": 0.0,
   "operator": ">|<|= or empty",
@@ -1059,15 +997,15 @@ func (s *NLPService) extractEntities(msg string) Entities {
 		e.EndYear = "2024-2025"
 	}
 
-	// Extract Category
-	if strings.Contains(msg, "over-exploited") || strings.Contains(msg, "over exploited") {
-		e.Category = "Over-Exploited"
-	} else if strings.Contains(msg, "critical") {
-		e.Category = "Critical"
-	} else if strings.Contains(msg, "semi-critical") {
-		e.Category = "Semi-Critical"
+	// Extract Category - USE DATABASE VALUES (lowercase with underscores)
+	if strings.Contains(msg, "over-exploited") || strings.Contains(msg, "over exploited") || strings.Contains(msg, "overexploited") {
+		e.Category = "over_exploited"
+	} else if strings.Contains(msg, "semi-critical") || strings.Contains(msg, "semi critical") || strings.Contains(msg, "semicritical") {
+		e.Category = "semi_critical"
+	} else if strings.Contains(msg, "critical") && !strings.Contains(msg, "semi") {
+		e.Category = "critical"
 	} else if strings.Contains(msg, "safe") {
-		e.Category = "Safe"
+		e.Category = "safe"
 	}
 
 	// Extract Locations (Simple heuristic: words starting with capital letters in original message, 

@@ -1,0 +1,3835 @@
+[
+  {
+    "locationName": "SIMGA",
+    "area": {
+      "non_recharge_worthy": {
+        "commandArea": 0.0,
+        "nonCommandArea": 0.0,
+        "poorQualityArea": 0.0,
+        "hillyArea": 0.0,
+        "forestArea": 0.0,
+        "totalArea": 0.0,
+        "pavedArea": 0.0,
+        "unpavedArea": 0.0
+      },
+      "total": {
+        "commandArea": 40239.0,
+        "nonCommandArea": 21267.0,
+        "poorQualityArea": 0.0,
+        "hillyArea": 0.0,
+        "forestArea": 0.0,
+        "totalArea": 61506.0,
+        "pavedArea": 0.0,
+        "unpavedArea": 0.0
+      },
+      "recharge_worthy": {
+        "commandArea": 40239.0,
+        "nonCommandArea": 21267.0,
+        "poorQualityArea": 0.0,
+        "hillyArea": 0.0,
+        "forestArea": 0.0,
+        "totalArea": 61506.0,
+        "pavedArea": 0.0,
+        "unpavedArea": 0.0
+      }
+    },
+    "loss": {
+      "poor_quality": 0.0,
+      "total": 1221.38,
+      "non_command": 469.23,
+      "command": 752.15
+    },
+    "category": {
+      "total": "safe",
+      "non_command": "semi_critical",
+      "command": "safe"
+    },
+    "reportSummary": {
+      "total": {
+        "BLOCK": {
+          "safe": 1
+        }
+      }
+    },
+    "gwProjectedUtilAllocationDynamicAquifer": {
+      "domestic": {
+        "total": 0.0
+      },
+      "total": {
+        "total": 0.0
+      }
+    },
+    "additionalRecharge": {},
+    "staticGWResource": {
+      "poor_quality": 0.0,
+      "total": 11655.06,
+      "non_command": 4018.02,
+      "command": 7637.04
+    },
+    "totalGWAvailability": {
+      "poor_quality": 0.0,
+      "total": 22647.48,
+      "non_command": 8241.07,
+      "command": 14406.41
+    },
+    "aquiferBusinessData": {
+      "SemiConfined_Aquifer_Piezo_Data": {
+        "total": {
+          "total": 0.0
+        },
+        "in_storage_gw": {
+          "in_storage_gw": 0.0
+        },
+        "dynamic_gw": {
+          "dynamic_gw": 0.0
+        }
+      },
+      "confined_aquifer": {
+        "total": {
+          "total": 0.0
+        },
+        "in_storage_gw": {
+          "in_storage_gw": 0.0
+        },
+        "dynamic_gw": {
+          "dynamic_gw": 0.0
+        }
+      }
+    },
+    "coastalBusinessData": null,
+    "waterDepletedZonesBusinessData": null,
+    "inOutFlow": {
+      "total": 0.0
+    },
+    "baseFlow": {
+      "total": {
+        "lateral_aquifer": 0.0,
+        "vertcal_aquifer": 0.0
+      }
+    },
+    "streamRecharge": {},
+    "additionalbaseflow": null,
+    "envFlows": null,
+    "subject": null,
+    "action": null,
+    "modifiable": null,
+    "isUrban": false,
+    "gwSpecificYield": null,
+    "geology": null,
+    "evaporation": null,
+    "qualityTagging": {
+      "poor_quality": {
+        "majorParameter": null,
+        "otherParameters": []
+      },
+      "non_command": {
+        "majorParameter": null,
+        "otherParameters": [
+          "Fe"
+        ]
+      },
+      "command": {
+        "majorParameter": null,
+        "otherParameters": [
+          "Fe"
+        ]
+      }
+    },
+    "approvalLevel": 4,
+    "verificStatus": 1,
+    "message": null,
+    "timeStamp": null,
+    "locationUUID": "12853e0c-216a-42da-a6d6-7d56f3bac3df",
+    "rainfall": {
+      "poor_quality": 0.0,
+      "total": 1337.0,
+      "non_command": 1337.0,
+      "command": 1337.0
+    },
+    "wtfonly": null,
+    "computationSummary": {
+      "annual": {
+        "envFlow": {
+          "envFlow": {}
+        },
+        "acquifer_info": {
+          "SemiConfined_Aquifer_Piezo_Data": {},
+          "confined_aquifer": {}
+        },
+        "availFutureUse": {
+          "poor_quality": 0.0,
+          "non_command": 965.59,
+          "command": 2336.28
+        },
+        "qt": {
+          "qt": {
+            "poor_quality": {
+              "otherParameters": []
+            },
+            "non_command": {
+              "otherParameters": [
+                "Fe"
+              ]
+            },
+            "command": {
+              "otherParameters": [
+                "Fe"
+              ]
+            }
+          }
+        },
+        "alloc2025": {
+          "poor_quality": {
+            "domestic": {
+              "total": {
+                "postalloc": "0.0",
+                "prealloc": "0.0"
+              }
+            },
+            "common": {
+              "total": {
+                "pty": "0.0",
+                "ty": "2025",
+                "pry": "0.0",
+                "ry": "0"
+              }
+            },
+            "industry": {}
+          },
+          "non_command": {
+            "domestic": {
+              "total": {
+                "postalloc": "541.33",
+                "prealloc": "541.33"
+              },
+              "urban": {
+                "lpcd": "100.0",
+                "poprefyr": "21166",
+                "refyr": "2011.0",
+                "lg": "0.7",
+                "gr": "5.07",
+                "postalloc": "108.51"
+              },
+              "rural": {
+                "lpcd": "60.0",
+                "poprefyr": "98494",
+                "refyr": "2011.0",
+                "lg": "1.0",
+                "gr": "5.07",
+                "postalloc": "432.82"
+              }
+            },
+            "common": {
+              "total": {
+                "pty": "239013.0",
+                "ty": "2025",
+                "pry": "119660.0",
+                "ry": "2011"
+              },
+              "urban": {
+                "d": "0.2",
+                "suarea": "21267.0",
+                "pty": "42278.0",
+                "pry": "21166",
+                "lpcd": "100.0",
+                "gr": "5.07"
+              },
+              "rural": {
+                "d": "0.93",
+                "suarea": "21267.0",
+                "pty": "196735.0",
+                "pry": "98494",
+                "lpcd": "60.0",
+                "gr": "5.07"
+              }
+            },
+            "industry": {}
+          },
+          "command": {
+            "domestic": {
+              "total": {
+                "postalloc": "818.93",
+                "prealloc": "818.93"
+              },
+              "urban": {
+                "lpcd": "100.0",
+                "poprefyr": "0",
+                "refyr": "2011.0",
+                "lg": "0.7",
+                "gr": "5.07",
+                "postalloc": "0.0"
+              },
+              "rural": {
+                "lpcd": "60.0",
+                "poprefyr": "186360",
+                "refyr": "2011.0",
+                "lg": "1.0",
+                "gr": "5.07",
+                "postalloc": "818.93"
+              }
+            },
+            "common": {
+              "total": {
+                "pty": "372240.0",
+                "ty": "2025",
+                "pry": "186360.0",
+                "ry": "2011"
+              },
+              "urban": {
+                "d": "0.0",
+                "suarea": "40239.0",
+                "pty": "0.0",
+                "pry": "0",
+                "lpcd": "100.0",
+                "gr": "5.07"
+              },
+              "rural": {
+                "d": "0.93",
+                "suarea": "40239.0",
+                "pty": "372240.0",
+                "pry": "186360",
+                "lpcd": "60.0",
+                "gr": "5.07"
+              }
+            },
+            "industry": {}
+          }
+        },
+        "stage": {
+          "total": {
+            "av": "10992.42"
+          },
+          "non_command": {
+            "av": "4223.05"
+          },
+          "command": {
+            "av": "6769.37"
+          }
+        },
+        "alloc2025_dy": {
+          "poor_quality": {
+            "domestic": {},
+            "common": {}
+          },
+          "non_command": {
+            "domestic": {},
+            "common": {}
+          },
+          "command": {
+            "domestic": {},
+            "common": {}
+          }
+        }
+      },
+      "non_monsoon": {
+        "loss": {
+          "loss": {
+            "poor_quality": {
+              "p": "5.0",
+              "v": "0.0"
+            },
+            "non_command": {
+              "p": "10.0",
+              "v": "80.68"
+            },
+            "command": {
+              "p": "10.0",
+              "v": "175.37"
+            }
+          }
+        },
+        "rf": {
+          "a": 0.0,
+          "n": 0.0
+        },
+        "stage": {
+          "total": {
+            "av": "10992.42"
+          },
+          "non_command": {
+            "av": "4223.05"
+          },
+          "command": {
+            "av": "6769.37"
+          }
+        },
+        "recharge": {
+          "agriculture": {},
+          "rainfall": {
+            "poor_quality": {
+              "S3": "0.0",
+              "lastNYr": "{\"2021-2022\":{\"postGW\":0.0,\"changeGW\":-99.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":-99.0},\"2018-2019\":{\"postGW\":0.0,\"changeGW\":-99.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":-99.0},\"2020-2021\":{\"postGW\":0.0,\"changeGW\":-99.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":-99.0},\"2017-2018\":{\"postGW\":0.0,\"changeGW\":-99.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":-99.0},\"2019-2020\":{\"postGW\":0.0,\"changeGW\":-99.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":-99.0}}",
+              "S4": "0.0",
+              "rflows": "0.0",
+              "an_rf": "0.0",
+              "N": "5.0",
+              "e_m2": "0.0",
+              "an_nrf": "0.0",
+              "dv": "null",
+              "ros": "0.0",
+              "if": "0.074",
+              "fac_a": "null",
+              "fac_b": "null",
+              "a": "0.0",
+              "nrf": "0.0",
+              "m1": "0.0",
+              "sy": "0.019",
+              "gwsc": "0.0",
+              "td": "0.0",
+              "rc": "0.0",
+              "gwc": "null",
+              "at": "poor_quality",
+              "th": "0.0",
+              "rf": "0.0",
+              "S1": "0.0",
+              "rp": "true",
+              "S2": "0.0"
+            },
+            "non_command": {
+              "S3": "0.101",
+              "lastNYr": "{\"2021-2022\":{\"postGW\":0.0,\"changeGW\":2.82,\"rf\":0.142,\"recGW\":2942.23,\"preGW\":2.82},\"2018-2019\":{\"postGW\":4.95,\"changeGW\":-1.54,\"rf\":0.142,\"recGW\":1194.38,\"preGW\":3.41},\"2020-2021\":{\"postGW\":4.04,\"changeGW\":-1.89,\"rf\":0.142,\"recGW\":1054.071,\"preGW\":2.15},\"2017-2018\":{\"postGW\":6.7,\"changeGW\":-1.1,\"rf\":0.142,\"recGW\":1370.769,\"preGW\":5.6},\"2019-2020\":{\"postGW\":4.13,\"changeGW\":-1.2,\"rf\":0.142,\"recGW\":1330.68,\"preGW\":2.93}}",
+              "S4": "1120.683",
+              "rflows": "0.0",
+              "an_rf": "939.0",
+              "N": "5.0",
+              "e_m2": "1578.426",
+              "an_nrf": "1337.0",
+              "dv": "null",
+              "ros": "793.79",
+              "if": "0.074",
+              "fac_a": "2.211",
+              "fac_b": "1578.112",
+              "a": "21267.0",
+              "nrf": "142.0",
+              "m1": "12.99",
+              "sy": "0.019",
+              "gwsc": "1130.49",
+              "td": "2605.53",
+              "rc": "12.99",
+              "gwc": "null",
+              "at": "non_command",
+              "th": "133.7",
+              "rf": "0.0",
+              "S1": "0.71",
+              "rp": "true",
+              "S2": "7892.131"
+            },
+            "command": {
+              "S3": "0.101",
+              "lastNYr": "{\"2021-2022\":{\"postGW\":0.0,\"changeGW\":2.42,\"rf\":0.142,\"recGW\":3785.822,\"preGW\":2.42},\"2018-2019\":{\"postGW\":4.5,\"changeGW\":-1.54,\"rf\":0.142,\"recGW\":782.142,\"preGW\":2.96},\"2020-2021\":{\"postGW\":3.64,\"changeGW\":-1.89,\"rf\":0.142,\"recGW\":516.665,\"preGW\":1.75},\"2017-2018\":{\"postGW\":6.25,\"changeGW\":-1.1,\"rf\":0.142,\"recGW\":1115.884,\"preGW\":5.15},\"2019-2020\":{\"postGW\":3.73,\"changeGW\":-1.25,\"rf\":0.142,\"recGW\":1002.109,\"preGW\":2.48}}",
+              "S4": "1022.772",
+              "rflows": "0.0",
+              "an_rf": "939.0",
+              "N": "5.0",
+              "e_m2": "1440.524",
+              "an_nrf": "1337.0",
+              "dv": "null",
+              "ros": "1729.11",
+              "if": "0.074",
+              "fac_a": "-2.589",
+              "fac_b": "1440.892",
+              "a": "40239.0",
+              "nrf": "142.0",
+              "m1": "24.58",
+              "sy": "0.019",
+              "gwsc": "1835.58",
+              "td": "3679.35",
+              "rc": "24.58",
+              "gwc": "null",
+              "at": "command",
+              "th": "133.7",
+              "rf": "0.0",
+              "S1": "0.71",
+              "rp": "true",
+              "S2": "7202.623"
+            }
+          },
+          "total": {
+            "poor_quality": 0.0,
+            "total": 2560.47,
+            "non_command": 806.78,
+            "command": 1753.69
+          },
+          "surface_irrigation": {
+            "poor_quality": {
+              "total": "0.0",
+              "can_rel": [
+                {
+                  "rec": "0.0",
+                  "ddc": "1.44",
+                  "ad": "0.86",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0},\"weightedFlowFactor\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "7) Binaika Disty. 07 No.",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "11.48",
+                  "ad": "6.89",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0},\"weightedFlowFactor\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "10) Neodha Disty.",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "56.01",
+                  "ad": "33.61",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0},\"weightedFlowFactor\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "8) Simga Disty. 194 No.",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "36.22",
+                  "ad": "21.73",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0},\"weightedFlowFactor\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "9) Marrakoni Disty.",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "125.75",
+                  "ad": "75.45",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0},\"weightedFlowFactor\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "0utlet 79",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "3.06",
+                  "ad": "1.84",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0},\"weightedFlowFactor\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "5) Jhiriya Disty.",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "74.16",
+                  "ad": "44.5",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0},\"weightedFlowFactor\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "6) Chakrawahi Disty.",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "rel": "0.0"
+                }
+              ],
+              "crop_w_req": [
+                {
+                  "cs": "0.0",
+                  "rff": "0.5",
+                  "name": "paddy",
+                  "wr": "0.0",
+                  "type": "paddy",
+                  "ca": "0.0",
+                  "cr": "0.0",
+                  "paddy": "{\"cropName\":\"paddy\",\"cropArea\":{},\"waterRequired\":{},\"returnFlowFactor\":{},\"continousWS\":{}}"
+                },
+                {
+                  "paddy_rec": "0.0",
+                  "paddy_wr": "0.0"
+                }
+              ],
+              "rff_calc": {
+                "nonPaddy_area": "0",
+                "pre": "0",
+                "paddy_area": "0.0",
+                "post": "0",
+                "nonPaddy_rff": "0",
+                "paddy_rff": "0.5",
+                "wrff": "0.0",
+                "gwl": "0"
+              }
+            },
+            "non_command": {
+              "total": "0.0",
+              "can_rel": [
+                {
+                  "rec": "0.0",
+                  "ddc": "1.44",
+                  "ad": "0.86",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":48.0},\"weightedFlowFactor\":{\"non_command_non_monsoon\":0.26,\"non_command_monsoon\":0.45}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "7) Binaika Disty. 07 No.",
+                  "days": "0",
+                  "wRff": "0.26",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "11.48",
+                  "ad": "6.89",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":40.0},\"weightedFlowFactor\":{\"non_command_non_monsoon\":0.26,\"non_command_monsoon\":0.45}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "10) Neodha Disty.",
+                  "days": "0",
+                  "wRff": "0.26",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "56.01",
+                  "ad": "33.61",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":50.0},\"weightedFlowFactor\":{\"non_command_non_monsoon\":0.26,\"non_command_monsoon\":0.45}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "8) Simga Disty. 194 No.",
+                  "days": "0",
+                  "wRff": "0.26",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "36.22",
+                  "ad": "21.73",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":20.0},\"weightedFlowFactor\":{\"non_command_non_monsoon\":0.26,\"non_command_monsoon\":0.45}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "9) Marrakoni Disty.",
+                  "days": "0",
+                  "wRff": "0.26",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "125.75",
+                  "ad": "75.45",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":0.0},\"weightedFlowFactor\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "0utlet 79",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{},\"continousWS\":{\"non_command\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "3.06",
+                  "ad": "1.84",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":46.0},\"weightedFlowFactor\":{\"non_command_non_monsoon\":0.26,\"non_command_monsoon\":0.45}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "5) Jhiriya Disty.",
+                  "days": "0",
+                  "wRff": "0.26",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "74.16",
+                  "ad": "44.5",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":48.0},\"weightedFlowFactor\":{\"non_command_non_monsoon\":0.26,\"non_command_monsoon\":0.45}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "6) Chakrawahi Disty.",
+                  "days": "0",
+                  "wRff": "0.26",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "rel": "0.0"
+                }
+              ],
+              "crop_w_req": [
+                {
+                  "cs": "0.0",
+                  "rff": "0.5",
+                  "name": "paddy",
+                  "wr": "0.0",
+                  "type": "paddy",
+                  "ca": "0.0",
+                  "cr": "0.0",
+                  "paddy": "{\"cropName\":\"paddy\",\"cropArea\":{},\"waterRequired\":{},\"returnFlowFactor\":{},\"continousWS\":{}}"
+                },
+                {
+                  "paddy_rec": "0.0",
+                  "paddy_wr": "0.0"
+                }
+              ],
+              "rff_calc": {
+                "nonPaddy_area": "0",
+                "pre": "0",
+                "paddy_area": "0.0",
+                "post": "0",
+                "nonPaddy_rff": "0",
+                "paddy_rff": "0.5",
+                "wrff": "0.0",
+                "gwl": "0"
+              }
+            },
+            "command": {
+              "total": "0.0",
+              "can_rel": [
+                {
+                  "rec": "0.0",
+                  "ddc": "1.44",
+                  "ad": "0.86",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"command_non_monsoon\":0.0,\"command_monsoon\":0.0},\"weightedFlowFactor\":{\"command_non_monsoon\":0.0,\"command_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "7) Binaika Disty. 07 No.",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "11.48",
+                  "ad": "6.89",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"command_non_monsoon\":0.0,\"command_monsoon\":0.0},\"weightedFlowFactor\":{\"command_non_monsoon\":0.0,\"command_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "10) Neodha Disty.",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "56.01",
+                  "ad": "33.61",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"command_non_monsoon\":0.0,\"command_monsoon\":0.0},\"weightedFlowFactor\":{\"command_non_monsoon\":0.0,\"command_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "8) Simga Disty. 194 No.",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "36.22",
+                  "ad": "21.73",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"command_non_monsoon\":0.0,\"command_monsoon\":0.0},\"weightedFlowFactor\":{\"command_non_monsoon\":0.0,\"command_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "9) Marrakoni Disty.",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "196.17",
+                  "ddc": "125.75",
+                  "ad": "75.45",
+                  "nonPaddy": "{\"Crop \":{\"name\":\"Crop \",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"command\":0.0},\"dischargeDays\":{\"command_non_monsoon\":10.0,\"command_monsoon\":70.0},\"weightedFlowFactor\":{\"command_non_monsoon\":0.26,\"command_monsoon\":0.45}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "754.5",
+                  "dist": "0utlet 79",
+                  "days": "10",
+                  "wRff": "0.26",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"command\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "3.06",
+                  "ad": "1.84",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"command_non_monsoon\":0.0,\"command_monsoon\":0.0},\"weightedFlowFactor\":{\"command_non_monsoon\":0.0,\"command_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "5) Jhiriya Disty.",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "74.16",
+                  "ad": "44.5",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"command_non_monsoon\":0.0,\"command_monsoon\":0.0},\"weightedFlowFactor\":{\"command_non_monsoon\":0.0,\"command_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "6) Chakrawahi Disty.",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "196.17",
+                  "rel": "754.5"
+                }
+              ],
+              "crop_w_req": [
+                {
+                  "cs": "0.0",
+                  "rff": "0.5",
+                  "name": "paddy",
+                  "wr": "0.0",
+                  "type": "paddy",
+                  "ca": "0.0",
+                  "cr": "0.0",
+                  "paddy": "{\"cropName\":\"paddy\",\"cropArea\":{},\"waterRequired\":{},\"returnFlowFactor\":{},\"continousWS\":{\"command\":0.0}}"
+                },
+                {
+                  "paddy_rec": "0.0",
+                  "paddy_wr": "0.0"
+                }
+              ],
+              "rff_calc": {
+                "nonPaddy_area": "0",
+                "pre": "0",
+                "paddy_area": "0.0",
+                "post": "0",
+                "nonPaddy_rff": "0",
+                "paddy_rff": "0.5",
+                "wrff": "0.0",
+                "gwl": "0"
+              }
+            }
+          },
+          "water_body": {
+            "poor_quality": {},
+            "non_command": {
+              "rc": "20.41",
+              "wbi": {
+                "Tank 1050": {
+                  "no": "315.0",
+                  "esa": "0.5",
+                  "r": "20.41",
+                  "d": "90",
+                  "if": "0.00144",
+                  "sa": "0.0"
+                }
+              }
+            },
+            "command": {
+              "rc": "4.35",
+              "wbi": {
+                "Tank 338": {
+                  "no": "1.0",
+                  "esa": "33.54",
+                  "r": "4.35",
+                  "d": "90",
+                  "if": "0.00144",
+                  "sa": "59.84"
+                }
+              }
+            }
+          },
+          "gw_irrigation": {
+            "poor_quality": {
+              "r": "0.0",
+              "w_rff": "0.0",
+              "nonPaddy": [],
+              "gwIrr": {
+                "gwrff": "0.0",
+                "gwIrrPer": "100"
+              },
+              "irr_dr": "0.0"
+            },
+            "non_command": {
+              "r": "773.38",
+              "w_rff": "0.45",
+              "nonPaddy": [
+                {
+                  "cs": "0.0",
+                  "area": "0.0",
+                  "rff": "0.0",
+                  "name": "crop"
+                }
+              ],
+              "gwIrr": {
+                "gwrff": "0.45",
+                "gwIrrPer": "100"
+              },
+              "irr_dr": "1718.61",
+              "paddy": [
+                {
+                  "cs": "0.0",
+                  "area": "0.0",
+                  "rff": "0.0",
+                  "name": "paddy"
+                }
+              ]
+            },
+            "command": {
+              "r": "1463.73",
+              "w_rff": "0.45",
+              "nonPaddy": [
+                {
+                  "cs": "0.0",
+                  "area": "0.0",
+                  "rff": "0.0",
+                  "name": "crop"
+                }
+              ],
+              "gwIrr": {
+                "gwrff": "0.45",
+                "gwIrrPer": "100"
+              },
+              "irr_dr": "3252.74",
+              "paddy": [
+                {
+                  "cs": "0.0",
+                  "area": "0.0",
+                  "rff": "0.0",
+                  "name": "paddy"
+                }
+              ]
+            }
+          },
+          "drainage": {},
+          "canal": {
+            "poor_quality": {},
+            "non_command": {},
+            "command": {
+              "rc": "4.76",
+              "ci": {
+                "Neodha ": {
+                  "ss": "0.0",
+                  "bt": "Lining Under Progress",
+                  "adf": "0.51",
+                  "r": "0.0",
+                  "sf": "3.5",
+                  "t": "Distributary ",
+                  "d": "10",
+                  "bw": "0.0",
+                  "ddf": "0.85",
+                  "wp": "0.0",
+                  "wa": "0.0",
+                  "l": "6100.0"
+                },
+                "Outlet 1": {
+                  "ss": "0.0",
+                  "bt": "Unlined",
+                  "adf": "0.0",
+                  "r": "4.76",
+                  "sf": "3.5",
+                  "t": "Minor",
+                  "d": "10",
+                  "bw": "0.0",
+                  "ddf": "0.0",
+                  "wp": "2.42",
+                  "wa": "0.13588",
+                  "l": "56150.0"
+                },
+                "Marrakoni ": {
+                  "ss": "0.0",
+                  "bt": "Lining Under Progress",
+                  "adf": "0.83",
+                  "r": "0.0",
+                  "sf": "3.5",
+                  "t": "Distributary ",
+                  "d": "10",
+                  "bw": "0.0",
+                  "ddf": "1.38",
+                  "wp": "0.0",
+                  "wa": "0.0",
+                  "l": "17470.0"
+                }
+              }
+            }
+          },
+          "streamRecharge": {
+            "poor_quality": {},
+            "non_command": {},
+            "command": {}
+          },
+          "artificial_structure": {
+            "poor_quality": {
+              "rc": "0.0",
+              "wcsi": {
+                "Structure 3": {
+                  "sc": "0.0",
+                  "r": "0.0",
+                  "c": "null",
+                  "eif": "0.2",
+                  "nos": "0.0",
+                  "fil": "0.0",
+                  "if": "0.2"
+                }
+              }
+            },
+            "non_command": {
+              "rc": "0.0",
+              "wcsi": {
+                "Structure 2": {
+                  "sc": "0.0",
+                  "r": "0.0",
+                  "c": "1",
+                  "eif": "0.2",
+                  "nos": "1.0",
+                  "fil": "0.0",
+                  "if": "0.2"
+                }
+              }
+            },
+            "command": {
+              "rc": "60.1",
+              "wcsi": {
+                "Structure 1": {
+                  "sc": "300.48",
+                  "r": "60.1",
+                  "c": "1",
+                  "eif": "0.2",
+                  "nos": "1.0",
+                  "fil": "1.0",
+                  "if": "0.2"
+                }
+              }
+            }
+          }
+        },
+        "draft": {
+          "agriculture": {
+            "decision": {
+              "non_command": {
+                "pc_dr": "0.0",
+                "dev1": "-100.0",
+                "dev2": "-100.0",
+                "dev": "-100.0",
+                "e_dr": "1718.614957503919",
+                "u_dr": "1718.61",
+                "cwr_dr": "0.0"
+              },
+              "command": {
+                "pc_dr": "0.0",
+                "dev1": "-100.0",
+                "dev2": "-100.0",
+                "dev": "-100.0",
+                "e_dr": "3252.739247371962",
+                "u_dr": "3252.74",
+                "cwr_dr": "0.0"
+              }
+            },
+            "power_consumption_requirement": {
+              "total": {
+                "irrDr": 0.0
+              },
+              "non_command": {
+                "consumed": 0.0,
+                "irrDr": 0.0,
+                "required": 0.0
+              },
+              "command": {
+                "consumed": 0.0,
+                "irrDr": 0.0,
+                "required": 0.0
+              }
+            },
+            "crop_water_requirement": {
+              "non_command": {
+                "paddy": {
+                  "ca": "0.0",
+                  "dr": "0.0",
+                  "cwr": "0.0",
+                  "cropInfo": []
+                }
+              },
+              "command": {
+                "paddy": {
+                  "ca": "0.0",
+                  "dr": "0.0",
+                  "cwr": "0.0",
+                  "cropInfo": []
+                }
+              }
+            },
+            "unit_draft": {
+              "non_command": {
+                "TW": {
+                  "cy": "2021",
+                  "y": "1.16397897562067",
+                  "noi": "0",
+                  "und": "1.16397897562067",
+                  "cyc": "1416",
+                  "ryc": "1416",
+                  "ndr": "1648.1942294788687",
+                  "dr": "1648.1942294788687",
+                  "ud": "1.16397897562067"
+                },
+                "DW": {
+                  "cy": "2021",
+                  "y": "0.581989487810333",
+                  "noi": "0",
+                  "und": "0.581989487810333",
+                  "cyc": "121",
+                  "ryc": "121",
+                  "ndr": "70.4207280250503",
+                  "dr": "70.4207280250503",
+                  "ud": "0.581989487810333"
+                },
+                "ndr": "1718.614957503919",
+                "dr": "1718.614957503919"
+              },
+              "command": {
+                "TW": {
+                  "cy": "2021",
+                  "y": "1.16397897562067",
+                  "noi": "0",
+                  "und": "1.16397897562067",
+                  "cyc": "2680",
+                  "ryc": "2680",
+                  "ndr": "3119.4636546633956",
+                  "dr": "3119.4636546633956",
+                  "ud": "1.16397897562067"
+                },
+                "DW": {
+                  "cy": "2021",
+                  "y": "0.581989487810333",
+                  "noi": "0",
+                  "und": "0.581989487810333",
+                  "cyc": "229",
+                  "ryc": "229",
+                  "ndr": "133.27559270856625",
+                  "dr": "133.27559270856625",
+                  "ud": "0.581989487810333"
+                },
+                "ndr": "3252.739247371962",
+                "dr": "3252.739247371962"
+              }
+            }
+          },
+          "domestic": {
+            "decision": {
+              "non_command": {
+                "dev": "100.0",
+                "cons_use": "282.0",
+                "e_dr": "282.0",
+                "u_dr": "0.0"
+              },
+              "command": {
+                "dev": "100.0",
+                "cons_use": "426.61",
+                "e_dr": "426.61",
+                "u_dr": "0.0"
+              }
+            },
+            "consumptive_use_method": {
+              "non_command": {
+                "total": {
+                  "nod": "245",
+                  "ry": "2011",
+                  "ay": "2021",
+                  "pop_ay": "186342",
+                  "pop_ry": "119660",
+                  "dr": "282.0"
+                },
+                "urban": {
+                  "lpcd": "100.0",
+                  "pop_ay": "32961",
+                  "pop_ry": "21166",
+                  "lg": "0.7",
+                  "gr": "5.066",
+                  "dr": "56.53"
+                },
+                "rural": {
+                  "lpcd": "60.0",
+                  "pop_ay": "153381",
+                  "pop_ry": "98494",
+                  "lg": "1.0",
+                  "gr": "5.066",
+                  "dr": "225.47"
+                }
+              },
+              "command": {
+                "total": {
+                  "nod": "245",
+                  "ry": "2011",
+                  "ay": "2021",
+                  "pop_ay": "290211",
+                  "pop_ry": "186360",
+                  "dr": "426.61"
+                },
+                "urban": {
+                  "lpcd": "100.0",
+                  "pop_ay": "0",
+                  "pop_ry": "0",
+                  "lg": "0.7",
+                  "gr": "5.066",
+                  "dr": "0.0"
+                },
+                "rural": {
+                  "lpcd": "60.0",
+                  "pop_ay": "290211",
+                  "pop_ry": "186360",
+                  "lg": "1.0",
+                  "gr": "5.066",
+                  "dr": "426.61"
+                }
+              }
+            },
+            "unit_draft": {
+              "non_command": {
+                "Structure 1": {
+                  "cy": "2021",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0"
+                },
+                "ndr": "0.0",
+                "dr": "0.0"
+              },
+              "command": {
+                "Structure 1": {
+                  "cy": "2021",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0"
+                },
+                "ndr": "0.0",
+                "dr": "0.0"
+              }
+            }
+          },
+          "total": {
+            "total": 6284.88,
+            "non_command": 2605.53,
+            "command": 3679.35
+          },
+          "industry": {
+            "decision": {
+              "non_command": {
+                "dev": "-100.0",
+                "cons_use": "0.0",
+                "e_dr": "604.92",
+                "u_dr": "604.92"
+              },
+              "command": {
+                "dev": "0.0",
+                "cons_use": "0.0",
+                "e_dr": "0.0",
+                "u_dr": "0.0"
+              }
+            },
+            "consumptive_use_pattern": {
+              "non_command": {
+                "b1820d": {
+                  "nod": "0.0",
+                  "tdr": "0.0",
+                  "noi": "0",
+                  "lg": "0.0",
+                  "dr": "0.0"
+                }
+              },
+              "command": {
+                "278546": {
+                  "nod": "0.0",
+                  "tdr": "0.0",
+                  "noi": "0",
+                  "lg": "0.0",
+                  "dr": "0.0"
+                }
+              }
+            },
+            "unit_draft": {
+              "non_command": {
+                "Bore Well##SUHELA LIMESTONE MINE OF SUDHA AGRAWAL": {
+                  "cy": "2021",
+                  "y": "0.2025",
+                  "noi": "0",
+                  "und": "0.2025",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.2025",
+                  "dr": "0.2025",
+                  "ud": "0.2025",
+                  "toi": "SUHELA LIMESTONE MINE OF SUDHA AGRAWAL"
+                },
+                "Bore Well##M/S ARIHANT MINERALS": {
+                  "cy": "2021",
+                  "y": "0.0225",
+                  "noi": "0",
+                  "und": "0.0225",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.0225",
+                  "dr": "0.0225",
+                  "ud": "0.0225",
+                  "toi": "M/S ARIHANT MINERALS"
+                },
+                "Bore Well##BITKULI LIMESTONE MINE": {
+                  "cy": "2021",
+                  "y": "0.027374999999999997",
+                  "noi": "0",
+                  "und": "0.027374999999999997",
+                  "cyc": "2",
+                  "ryc": "2",
+                  "ndr": "0.05474999999999999",
+                  "dr": "0.05474999999999999",
+                  "ud": "0.027374999999999997",
+                  "toi": "BITKULI LIMESTONE MINE"
+                },
+                "Bore Well##APL APOLLO BUILDING PRODUCTS PVT. LTD.": {
+                  "cy": "2021",
+                  "y": "40.724999999999994",
+                  "noi": "0",
+                  "und": "40.724999999999994",
+                  "cyc": "10",
+                  "ryc": "10",
+                  "ndr": "407.24999999999994",
+                  "dr": "407.24999999999994",
+                  "ud": "40.724999999999994",
+                  "toi": "APL APOLLO BUILDING PRODUCTS PVT. LTD."
+                },
+                "Bore Well##SUHELA LIMESTONE MINE OF DILIP JAIN": {
+                  "cy": "2021",
+                  "y": "0.09",
+                  "noi": "0",
+                  "und": "0.09",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.09",
+                  "dr": "0.09",
+                  "ud": "0.09",
+                  "toi": "SUHELA LIMESTONE MINE OF DILIP JAIN"
+                },
+                "dr": "604.9177875",
+                "Bore Well##RANIJAROUD LIMESTONE MINE OF DILIP JAIN": {
+                  "cy": "2021",
+                  "y": "0.09",
+                  "noi": "0",
+                  "und": "0.09",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.09",
+                  "dr": "0.09",
+                  "ud": "0.09",
+                  "toi": "RANIJAROUD LIMESTONE MINE OF DILIP JAIN"
+                },
+                "Bore Well##M/S SUDHA AGRAWAL (PARTNER OF LAXMIKRIPA MINES)": {
+                  "cy": "2021",
+                  "y": "0.01125",
+                  "noi": "0",
+                  "und": "0.01125",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.01125",
+                  "dr": "0.01125",
+                  "ud": "0.01125",
+                  "toi": "M/S SUDHA AGRAWAL (PARTNER OF LAXMIKRIPA MINES)"
+                },
+                "Bore Well##SMT. SEEMA PAL": {
+                  "cy": "2021",
+                  "y": "0.22499999999999998",
+                  "noi": "0",
+                  "und": "0.22499999999999998",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.22499999999999998",
+                  "dr": "0.22499999999999998",
+                  "ud": "0.22499999999999998",
+                  "toi": "SMT. SEEMA PAL"
+                },
+                "Bore Well##M/S RAJ LAXMI STONE": {
+                  "cy": "2021",
+                  "y": "0.0225",
+                  "noi": "0",
+                  "und": "0.0225",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.0225",
+                  "dr": "0.0225",
+                  "ud": "0.0225",
+                  "toi": "M/S RAJ LAXMI STONE"
+                },
+                "Bore Well##M/S SANJAY STONE CRUSHER (UNIT II)": {
+                  "cy": "2021",
+                  "y": "0.07500000000000001",
+                  "noi": "0",
+                  "und": "0.07500000000000001",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.07500000000000001",
+                  "dr": "0.07500000000000001",
+                  "ud": "0.07500000000000001",
+                  "toi": "M/S SANJAY STONE CRUSHER (UNIT II)"
+                },
+                "Bore Well##M/S ULTRA TECH CEMENT LTD.": {
+                  "cy": "2021",
+                  "y": "30.015",
+                  "noi": "0",
+                  "und": "30.015",
+                  "cyc": "3",
+                  "ryc": "3",
+                  "ndr": "90.045",
+                  "dr": "90.045",
+                  "ud": "30.015",
+                  "toi": "M/S ULTRA TECH CEMENT LTD."
+                },
+                "Bore Well##M/S SHRI BALAJI STONE CRUSHER": {
+                  "cy": "2021",
+                  "y": "0.045",
+                  "noi": "0",
+                  "und": "0.045",
+                  "cyc": "2",
+                  "ryc": "2",
+                  "ndr": "0.09",
+                  "dr": "0.09",
+                  "ud": "0.045",
+                  "toi": "M/S SHRI BALAJI STONE CRUSHER"
+                },
+                "Bore Well##SHREE CEMENT LTD (KARHI CHANDI LIMESTONE MINE)": {
+                  "cy": "2021",
+                  "y": "6.192247500000001",
+                  "noi": "0",
+                  "und": "6.192247500000001",
+                  "cyc": "5",
+                  "ryc": "5",
+                  "ndr": "30.961237500000003",
+                  "dr": "30.961237500000003",
+                  "ud": "6.192247500000001",
+                  "toi": "SHREE CEMENT LTD (KARHI CHANDI LIMESTONE MINE)"
+                },
+                "Bore Well##SANJAY MAKKAD LOW GRADE LIMESTONE QUARRY": {
+                  "cy": "2021",
+                  "y": "0.05399999999999999",
+                  "noi": "0",
+                  "und": "0.05399999999999999",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.05399999999999999",
+                  "dr": "0.05399999999999999",
+                  "ud": "0.05399999999999999",
+                  "toi": "SANJAY MAKKAD LOW GRADE LIMESTONE QUARRY"
+                },
+                "Bore Well##TEKARI LIMESTONE MINE": {
+                  "cy": "2021",
+                  "y": "0.10125",
+                  "noi": "0",
+                  "und": "0.10125",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.10125",
+                  "dr": "0.10125",
+                  "ud": "0.10125",
+                  "toi": "TEKARI LIMESTONE MINE"
+                },
+                "Bore Well##ASHOK SINGH THAKUR": {
+                  "cy": "2021",
+                  "y": "0.013499999999999998",
+                  "noi": "0",
+                  "und": "0.013499999999999998",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.013499999999999998",
+                  "dr": "0.013499999999999998",
+                  "ud": "0.013499999999999998",
+                  "toi": "ASHOK SINGH THAKUR"
+                },
+                "Bore Well##M/S MANDAL AQUATECH PRIVATE LIMITED": {
+                  "cy": "2021",
+                  "y": "0.1575",
+                  "noi": "0",
+                  "und": "0.1575",
+                  "cyc": "6",
+                  "ryc": "6",
+                  "ndr": "0.9450000000000001",
+                  "dr": "0.9450000000000001",
+                  "ud": "0.1575",
+                  "toi": "M/S MANDAL AQUATECH PRIVATE LIMITED"
+                },
+                "Bore Well##PHARHADA LIMESTONE MINE": {
+                  "cy": "2021",
+                  "y": "0.06562499999999999",
+                  "noi": "0",
+                  "und": "0.06562499999999999",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.06562499999999999",
+                  "dr": "0.06562499999999999",
+                  "ud": "0.06562499999999999",
+                  "toi": "PHARHADA LIMESTONE MINE"
+                },
+                "Bore Well##SANJAY MAKKAD": {
+                  "cy": "2021",
+                  "y": "0.07500000000000001",
+                  "noi": "0",
+                  "und": "0.07500000000000001",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.07500000000000001",
+                  "dr": "0.07500000000000001",
+                  "ud": "0.07500000000000001",
+                  "toi": "SANJAY MAKKAD"
+                },
+                "Bore Well##PRATIBHA THAKUR": {
+                  "cy": "2021",
+                  "y": "0.01125",
+                  "noi": "0",
+                  "und": "0.01125",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.01125",
+                  "dr": "0.01125",
+                  "ud": "0.01125",
+                  "toi": "PRATIBHA THAKUR"
+                },
+                "Bore Well##SHREE SHYAM SPONGE AND POWER LIMITED": {
+                  "cy": "2021",
+                  "y": "0.72",
+                  "noi": "0",
+                  "und": "0.72",
+                  "cyc": "3",
+                  "ryc": "3",
+                  "ndr": "2.16",
+                  "dr": "2.16",
+                  "ud": "0.72",
+                  "toi": "SHREE SHYAM SPONGE AND POWER LIMITED"
+                },
+                "Bore Well##M/S ARUN KUMAR SINGH": {
+                  "cy": "2021",
+                  "y": "0.0027375",
+                  "noi": "0",
+                  "und": "0.0027375",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.0027375",
+                  "dr": "0.0027375",
+                  "ud": "0.0027375",
+                  "toi": "M/S ARUN KUMAR SINGH"
+                },
+                "Bore Well##M/S SMT. KUNTI BAI VERMA": {
+                  "cy": "2021",
+                  "y": "0.0082125",
+                  "noi": "0",
+                  "und": "0.0082125",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.0082125",
+                  "dr": "0.0082125",
+                  "ud": "0.0082125",
+                  "toi": "M/S SMT. KUNTI BAI VERMA"
+                },
+                "Bore Well##M/S AVINASH ENERGY PRIVATE LIMITED": {
+                  "cy": "2021",
+                  "y": "7.199999999999999",
+                  "noi": "0",
+                  "und": "7.199999999999999",
+                  "cyc": "10",
+                  "ryc": "10",
+                  "ndr": "72.0",
+                  "dr": "72.0",
+                  "ud": "7.199999999999999",
+                  "toi": "M/S AVINASH ENERGY PRIVATE LIMITED"
+                },
+                "Bore Well##BHATBHERA LIMESTONE MINE": {
+                  "cy": "2021",
+                  "y": "0.056249999999999994",
+                  "noi": "0",
+                  "und": "0.056249999999999994",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.056249999999999994",
+                  "dr": "0.056249999999999994",
+                  "ud": "0.056249999999999994",
+                  "toi": "BHATBHERA LIMESTONE MINE"
+                },
+                "Bore Well##M/S INDRA DEV VERMA": {
+                  "cy": "2021",
+                  "y": "0.01125",
+                  "noi": "0",
+                  "und": "0.01125",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.01125",
+                  "dr": "0.01125",
+                  "ud": "0.01125",
+                  "toi": "M/S INDRA DEV VERMA"
+                },
+                "Bore Well##NITIN BHUSANIA LOW GRADE LIMESTONE QUARRY": {
+                  "cy": "2021",
+                  "y": "0.063",
+                  "noi": "0",
+                  "und": "0.063",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.063",
+                  "dr": "0.063",
+                  "ud": "0.063",
+                  "toi": "NITIN BHUSANIA LOW GRADE LIMESTONE QUARRY"
+                },
+                "Bore Well##M/S BUDHELAL VERMA": {
+                  "cy": "2021",
+                  "y": "0.005475",
+                  "noi": "0",
+                  "und": "0.005475",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.005475",
+                  "dr": "0.005475",
+                  "ud": "0.005475",
+                  "toi": "M/S BUDHELAL VERMA"
+                },
+                "Bore Well##M/S SANJAY STONE CRUSHER": {
+                  "cy": "2021",
+                  "y": "0.07500000000000001",
+                  "noi": "0",
+                  "und": "0.07500000000000001",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.07500000000000001",
+                  "dr": "0.07500000000000001",
+                  "ud": "0.07500000000000001",
+                  "toi": "M/S SANJAY STONE CRUSHER"
+                },
+                "Bore Well##TEKARI STONE QUARRY MINE OF M/S SADGURU SAINATH MINES AND MINERALS PVT. LTD.": {
+                  "cy": "2021",
+                  "y": "0.11249999999999999",
+                  "noi": "0",
+                  "und": "0.11249999999999999",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.11249999999999999",
+                  "dr": "0.11249999999999999",
+                  "ud": "0.11249999999999999",
+                  "toi": "TEKARI STONE QUARRY MINE OF M/S SADGURU SAINATH MINES AND MINERALS PVT. LTD."
+                },
+                "Bore Well##SHRI RIPUSUDAN VERMA": {
+                  "cy": "2021",
+                  "y": "0.018000000000000002",
+                  "noi": "0",
+                  "und": "0.018000000000000002",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.018000000000000002",
+                  "dr": "0.018000000000000002",
+                  "ud": "0.018000000000000002",
+                  "toi": "SHRI RIPUSUDAN VERMA"
+                },
+                "ndr": "604.9177875"
+              },
+              "command": {
+                "Structure 1##Industry 1": {
+                  "cy": "2021",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0",
+                  "toi": "Industry 1"
+                },
+                "ndr": "0.0",
+                "dr": "0.0"
+              }
+            }
+          }
+        },
+        "availability": {
+          "poor_quality": {
+            "av": 0.0
+          },
+          "non_command": {
+            "av": 726.1
+          },
+          "command": {
+            "av": 1578.32
+          }
+        },
+        "lateral_aquifer": {
+          "total": []
+        },
+        "vertcal_aquifer": {
+          "total": []
+        }
+      },
+      "monsoon": {
+        "loss": {
+          "loss": {
+            "poor_quality": {
+              "p": "5.0",
+              "v": "0.0"
+            },
+            "non_command": {
+              "p": "10.0",
+              "v": "388.55"
+            },
+            "command": {
+              "p": "10.0",
+              "v": "576.78"
+            }
+          }
+        },
+        "staticGWResource": {
+          "poor_quality": {
+            "pre": 0.0,
+            "b": 100.0,
+            "sy": 0.002
+          },
+          "non_command": {
+            "pre": 5.534,
+            "b": 100.0,
+            "sy": 0.002
+          },
+          "command": {
+            "pre": 5.104,
+            "b": 100.0,
+            "sy": 0.002
+          }
+        },
+        "rf": {
+          "a": 0.0,
+          "n": 0.0
+        },
+        "stage": {
+          "total": {
+            "av": "10992.42"
+          },
+          "non_command": {
+            "av": "4223.05"
+          },
+          "command": {
+            "av": "6769.37"
+          }
+        },
+        "recharge": {
+          "agriculture": {},
+          "rainfall": {
+            "poor_quality": {
+              "S3": "0.0",
+              "lastNYr": "{\"2021-2022\":{\"postGW\":-99.0,\"changeGW\":99.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":0.0},\"2018-2019\":{\"postGW\":-99.0,\"changeGW\":99.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":0.0},\"2020-2021\":{\"postGW\":-99.0,\"changeGW\":99.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":0.0},\"2017-2018\":{\"postGW\":-99.0,\"changeGW\":99.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":0.0},\"2019-2020\":{\"postGW\":-99.0,\"changeGW\":99.0,\"rf\":0.0,\"recGW\":0.0,\"preGW\":0.0}}",
+              "S4": "0.0",
+              "rflows": "0.0",
+              "an_rf": "0.0",
+              "N": "5.0",
+              "e_m2": "0.0",
+              "an_nrf": "0.0",
+              "dv": "0.0",
+              "ros": "0.0",
+              "if": "0.074",
+              "fac_a": "null",
+              "fac_b": "null",
+              "a": "0.0",
+              "nrf": "0.0",
+              "m1": "0.0",
+              "m2": "0.0",
+              "sy": "0.019",
+              "m2n": "0.0",
+              "gwsc": "0.0",
+              "td": "0.0",
+              "rc": "0.0",
+              "gwc": "99.0",
+              "at": "poor_quality",
+              "th": "0.0",
+              "rf": "0.0",
+              "S1": "0.0",
+              "rp": "true",
+              "S2": "0.0"
+            },
+            "non_command": {
+              "S3": "null",
+              "lastNYr": "{\"2021-2022\":{\"postGW\":2.82,\"changeGW\":1.22,\"rf\":0.939,\"recGW\":-1204.503,\"preGW\":4.04},\"2018-2019\":{\"postGW\":3.41,\"changeGW\":3.29,\"rf\":1.279,\"recGW\":-374.675,\"preGW\":6.7},\"2020-2021\":{\"postGW\":2.15,\"changeGW\":1.98,\"rf\":0.961,\"recGW\":-899.832,\"preGW\":4.13},\"2017-2018\":{\"postGW\":5.6,\"changeGW\":2.25,\"rf\":0.808,\"recGW\":-791.593,\"preGW\":7.85},\"2019-2020\":{\"postGW\":2.93,\"changeGW\":2.02,\"rf\":1.194,\"recGW\":-883.796,\"preGW\":4.95}}",
+              "S4": "null",
+              "rflows": "0.0",
+              "an_rf": "939.0",
+              "N": "null",
+              "e_m2": "0.0",
+              "an_nrf": "1337.0",
+              "dv": "null",
+              "ros": "2224.3",
+              "if": "0.074",
+              "fac_a": "null",
+              "fac_b": "null",
+              "a": "21267.0",
+              "nrf": "1195.0",
+              "m1": "1661.2",
+              "sy": "0.019",
+              "gwsc": "489.08",
+              "td": "530.72",
+              "rc": "1661.2",
+              "gwc": "1.22",
+              "at": "non_command",
+              "th": "133.7",
+              "rf": "939.0",
+              "S1": "null",
+              "rp": "true",
+              "S2": "null"
+            },
+            "command": {
+              "S3": "1.636",
+              "lastNYr": "{\"2021-2022\":{\"postGW\":2.42,\"changeGW\":1.22,\"rf\":0.939,\"recGW\":-1128.944,\"preGW\":3.64},\"2018-2019\":{\"postGW\":2.96,\"changeGW\":3.29,\"rf\":1.279,\"recGW\":441.162,\"preGW\":6.25},\"2020-2021\":{\"postGW\":1.75,\"changeGW\":1.98,\"rf\":0.961,\"recGW\":-552.48,\"preGW\":3.73},\"2017-2018\":{\"postGW\":5.15,\"changeGW\":2.25,\"rf\":0.808,\"recGW\":-347.683,\"preGW\":7.4},\"2019-2020\":{\"postGW\":2.48,\"changeGW\":2.02,\"rf\":1.194,\"recGW\":-522.14,\"preGW\":4.5}}",
+              "S4": "564.334",
+              "rflows": "0.0",
+              "an_rf": "939.0",
+              "N": "1.0",
+              "e_m2": "394.776",
+              "an_nrf": "1337.0",
+              "dv": "null",
+              "ros": "2624.69",
+              "if": "0.074",
+              "fac_a": "552.214",
+              "fac_b": "-265.12",
+              "a": "40239.0",
+              "nrf": "1195.0",
+              "m1": "3143.14",
+              "sy": "0.019",
+              "gwsc": "925.38",
+              "td": "570.37",
+              "rc": "3143.14",
+              "gwc": "1.22",
+              "at": "command",
+              "th": "133.7",
+              "rf": "939.0",
+              "S1": "1.279",
+              "rp": "true",
+              "S2": "441.162"
+            }
+          },
+          "total": {
+            "poor_quality": 0.0,
+            "total": 9653.33,
+            "non_command": 3885.5,
+            "command": 5767.83
+          },
+          "surface_irrigation": {
+            "poor_quality": {
+              "total": "0.0",
+              "can_rel": [
+                {
+                  "rec": "0.0",
+                  "ddc": "1.44",
+                  "ad": "0.86",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0},\"weightedFlowFactor\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "7) Binaika Disty. 07 No.",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "11.48",
+                  "ad": "6.89",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0},\"weightedFlowFactor\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "10) Neodha Disty.",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "56.01",
+                  "ad": "33.61",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0},\"weightedFlowFactor\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "8) Simga Disty. 194 No.",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "36.22",
+                  "ad": "21.73",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0},\"weightedFlowFactor\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "9) Marrakoni Disty.",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "125.75",
+                  "ad": "75.45",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0},\"weightedFlowFactor\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "0utlet 79",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "3.06",
+                  "ad": "1.84",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0},\"weightedFlowFactor\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "5) Jhiriya Disty.",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "74.16",
+                  "ad": "44.5",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0},\"weightedFlowFactor\":{\"poor_quality_non_monsoon\":0.0,\"poor_quality_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "6) Chakrawahi Disty.",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "rel": "0.0"
+                }
+              ],
+              "crop_w_req": [
+                {
+                  "cs": "0.0",
+                  "rff": "0.5",
+                  "name": "paddy",
+                  "wr": "0.0",
+                  "type": "paddy",
+                  "ca": "0.0",
+                  "cr": "0.0",
+                  "paddy": "{\"cropName\":\"paddy\",\"cropArea\":{},\"waterRequired\":{},\"returnFlowFactor\":{},\"continousWS\":{}}"
+                },
+                {
+                  "paddy_rec": "0.0",
+                  "paddy_wr": "0.0"
+                }
+              ],
+              "rff_calc": {
+                "nonPaddy_area": "0",
+                "pre": "0",
+                "paddy_area": "0.0",
+                "post": "-99",
+                "nonPaddy_rff": "0",
+                "paddy_rff": "0.5",
+                "wrff": "0.0",
+                "gwl": "-49"
+              }
+            },
+            "non_command": {
+              "total": "0.0",
+              "can_rel": [
+                {
+                  "rec": "18.66",
+                  "ddc": "1.44",
+                  "ad": "0.86",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":48.0},\"weightedFlowFactor\":{\"non_command_non_monsoon\":0.26,\"non_command_monsoon\":0.45}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "41.472",
+                  "dist": "7) Binaika Disty. 07 No.",
+                  "days": "48",
+                  "wRff": "0.45",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "123.98",
+                  "ddc": "11.48",
+                  "ad": "6.89",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":40.0},\"weightedFlowFactor\":{\"non_command_non_monsoon\":0.26,\"non_command_monsoon\":0.45}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "275.52",
+                  "dist": "10) Neodha Disty.",
+                  "days": "40",
+                  "wRff": "0.45",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "756.13",
+                  "ddc": "56.01",
+                  "ad": "33.61",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":50.0},\"weightedFlowFactor\":{\"non_command_non_monsoon\":0.26,\"non_command_monsoon\":0.45}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "1680.2999999999997",
+                  "dist": "8) Simga Disty. 194 No.",
+                  "days": "50",
+                  "wRff": "0.45",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "195.59",
+                  "ddc": "36.22",
+                  "ad": "21.73",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":20.0},\"weightedFlowFactor\":{\"non_command_non_monsoon\":0.26,\"non_command_monsoon\":0.45}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "434.64",
+                  "dist": "9) Marrakoni Disty.",
+                  "days": "20",
+                  "wRff": "0.45",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "125.75",
+                  "ad": "75.45",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":0.0},\"weightedFlowFactor\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "0utlet 79",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{},\"continousWS\":{\"non_command\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "38.01",
+                  "ddc": "3.06",
+                  "ad": "1.84",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":46.0},\"weightedFlowFactor\":{\"non_command_non_monsoon\":0.26,\"non_command_monsoon\":0.45}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "84.45599999999999",
+                  "dist": "5) Jhiriya Disty.",
+                  "days": "46",
+                  "wRff": "0.45",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "961.11",
+                  "ddc": "74.16",
+                  "ad": "44.5",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"non_command_non_monsoon\":0.0,\"non_command_monsoon\":48.0},\"weightedFlowFactor\":{\"non_command_non_monsoon\":0.26,\"non_command_monsoon\":0.45}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "2135.808",
+                  "dist": "6) Chakrawahi Disty.",
+                  "days": "48",
+                  "wRff": "0.45",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "2093.49",
+                  "rel": "4652.2"
+                }
+              ],
+              "crop_w_req": [
+                {
+                  "cs": "0.0",
+                  "rff": "0.5",
+                  "name": "paddy",
+                  "wr": "0.0",
+                  "type": "paddy",
+                  "ca": "0.0",
+                  "cr": "0.0",
+                  "paddy": "{\"cropName\":\"paddy\",\"cropArea\":{},\"waterRequired\":{},\"returnFlowFactor\":{},\"continousWS\":{}}"
+                },
+                {
+                  "paddy_rec": "0.0",
+                  "paddy_wr": "0.0"
+                }
+              ],
+              "rff_calc": {
+                "nonPaddy_area": "0",
+                "pre": "4",
+                "paddy_area": "0.0",
+                "post": "2",
+                "nonPaddy_rff": "0",
+                "paddy_rff": "0.5",
+                "wrff": "0.0",
+                "gwl": "3"
+              }
+            },
+            "command": {
+              "total": "0.0",
+              "can_rel": [
+                {
+                  "rec": "0.0",
+                  "ddc": "1.44",
+                  "ad": "0.86",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"command_non_monsoon\":0.0,\"command_monsoon\":0.0},\"weightedFlowFactor\":{\"command_non_monsoon\":0.0,\"command_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "7) Binaika Disty. 07 No.",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "11.48",
+                  "ad": "6.89",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"command_non_monsoon\":0.0,\"command_monsoon\":0.0},\"weightedFlowFactor\":{\"command_non_monsoon\":0.0,\"command_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "10) Neodha Disty.",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "56.01",
+                  "ad": "33.61",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"command_non_monsoon\":0.0,\"command_monsoon\":0.0},\"weightedFlowFactor\":{\"command_non_monsoon\":0.0,\"command_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "8) Simga Disty. 194 No.",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "36.22",
+                  "ad": "21.73",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"command_non_monsoon\":0.0,\"command_monsoon\":0.0},\"weightedFlowFactor\":{\"command_non_monsoon\":0.0,\"command_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "9) Marrakoni Disty.",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "2376.68",
+                  "ddc": "125.75",
+                  "ad": "75.45",
+                  "nonPaddy": "{\"Crop \":{\"name\":\"Crop \",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"command\":0.0},\"dischargeDays\":{\"command_non_monsoon\":10.0,\"command_monsoon\":70.0},\"weightedFlowFactor\":{\"command_non_monsoon\":0.26,\"command_monsoon\":0.45}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "5281.5",
+                  "dist": "0utlet 79",
+                  "days": "70",
+                  "wRff": "0.45",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"returnFlowFactor\":{\"monsoon\":0.0,\"non_monsoon\":0.0},\"continousWS\":{\"command\":0.0},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "3.06",
+                  "ad": "1.84",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"command_non_monsoon\":0.0,\"command_monsoon\":0.0},\"weightedFlowFactor\":{\"command_non_monsoon\":0.0,\"command_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "5) Jhiriya Disty.",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "0.0",
+                  "ddc": "74.16",
+                  "ad": "44.5",
+                  "nonPaddy": "{\"\":{\"name\":\"\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{\"command_non_monsoon\":0.0,\"command_monsoon\":0.0},\"weightedFlowFactor\":{\"command_non_monsoon\":0.0,\"command_monsoon\":0.0}}}",
+                  "out_name": "Canal Outlet",
+                  "rel": "0.0",
+                  "dist": "6) Chakrawahi Disty.",
+                  "days": "0",
+                  "wRff": "0.0",
+                  "outlet": "Canal Outlet",
+                  "paddy": "{\"paddy\":{\"name\":\"paddy\",\"cropArea\":{},\"returnFlowFactor\":{},\"continousWS\":{},\"dischargeDays\":{},\"weightedFlowFactor\":{}}}"
+                },
+                {
+                  "rec": "2376.68",
+                  "rel": "5281.5"
+                }
+              ],
+              "crop_w_req": [
+                {
+                  "cs": "0.0",
+                  "rff": "0.5",
+                  "name": "paddy",
+                  "wr": "0.0",
+                  "type": "paddy",
+                  "ca": "0.0",
+                  "cr": "0.0",
+                  "paddy": "{\"cropName\":\"paddy\",\"cropArea\":{},\"waterRequired\":{},\"returnFlowFactor\":{},\"continousWS\":{\"command\":0.0}}"
+                },
+                {
+                  "paddy_rec": "0.0",
+                  "paddy_wr": "0.0"
+                }
+              ],
+              "rff_calc": {
+                "nonPaddy_area": "0",
+                "pre": "3",
+                "paddy_area": "0.0",
+                "post": "2",
+                "nonPaddy_rff": "0",
+                "paddy_rff": "0.5",
+                "wrff": "0.0",
+                "gwl": "2"
+              }
+            }
+          },
+          "water_body": {
+            "poor_quality": {},
+            "non_command": {
+              "rc": "54.43",
+              "wbi": {
+                "Tank 1050": {
+                  "no": "315.0",
+                  "esa": "1.0",
+                  "r": "54.43",
+                  "d": "120",
+                  "if": "0.00144",
+                  "sa": "0.0"
+                }
+              }
+            },
+            "command": {
+              "rc": "10.05",
+              "wbi": {
+                "Tank 338": {
+                  "no": "1.0",
+                  "esa": "58.15",
+                  "r": "10.05",
+                  "d": "120",
+                  "if": "0.00144",
+                  "sa": "59.84"
+                }
+              }
+            }
+          },
+          "gw_irrigation": {
+            "poor_quality": {
+              "r": "0.0",
+              "w_rff": "0.0",
+              "nonPaddy": [],
+              "gwIrr": {
+                "gwrff": "0.0",
+                "gwIrrPer": "100"
+              },
+              "irr_dr": "0.0"
+            },
+            "non_command": {
+              "r": "76.38",
+              "w_rff": "0.4",
+              "nonPaddy": [
+                {
+                  "cs": "0.0",
+                  "area": "0.0",
+                  "rff": "0.0",
+                  "name": "crop"
+                }
+              ],
+              "gwIrr": {
+                "gwrff": "0.4",
+                "gwIrrPer": "100"
+              },
+              "irr_dr": "190.96",
+              "paddy": [
+                {
+                  "cs": "0.0",
+                  "area": "0.0",
+                  "rff": "0.0",
+                  "name": "paddy"
+                }
+              ]
+            },
+            "command": {
+              "r": "144.57",
+              "w_rff": "0.4",
+              "nonPaddy": [
+                {
+                  "cs": "0.0",
+                  "area": "0.0",
+                  "rff": "0.0",
+                  "name": "crop"
+                }
+              ],
+              "gwIrr": {
+                "gwrff": "0.4",
+                "gwIrrPer": "100"
+              },
+              "irr_dr": "361.42",
+              "paddy": [
+                {
+                  "cs": "0.0",
+                  "area": "0.0",
+                  "rff": "0.0",
+                  "name": "paddy"
+                }
+              ]
+            }
+          },
+          "drainage": {},
+          "canal": {
+            "poor_quality": {
+              "rc": "0.0",
+              "ci": {
+                "177.0": {
+                  "ss": "0.0",
+                  "bt": "",
+                  "adf": "0.0",
+                  "r": "0.0",
+                  "sf": "3.5",
+                  "t": "",
+                  "d": "60",
+                  "bw": "0.0",
+                  "ddf": "0.0",
+                  "wp": "0.0",
+                  "wa": "0.0",
+                  "l": "0.0"
+                }
+              }
+            },
+            "non_command": {},
+            "command": {
+              "rc": "33.29",
+              "ci": {
+                "Akaltara Mr.": {
+                  "ss": "0.0",
+                  "bt": "unlined ",
+                  "adf": "0.53",
+                  "r": "0.0",
+                  "sf": "3.5",
+                  "t": "Minor",
+                  "d": "60",
+                  "bw": "0.0",
+                  "ddf": "0.88",
+                  "wp": "0.0",
+                  "wa": "0.0",
+                  "l": "11760.0"
+                },
+                "Binaika ": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.18",
+                  "r": "0.0",
+                  "sf": "3.5",
+                  "t": "Distributary ",
+                  "d": "45",
+                  "bw": "0.0",
+                  "ddf": "0.3",
+                  "wp": "0.0",
+                  "wa": "0.0",
+                  "l": "5610.0"
+                },
+                "Musuwadih ": {
+                  "ss": "0.0",
+                  "bt": "unlined ",
+                  "adf": "0.27",
+                  "r": "0.0",
+                  "sf": "3.5",
+                  "t": "Minor",
+                  "d": "60",
+                  "bw": "0.0",
+                  "ddf": "0.45",
+                  "wp": "0.0",
+                  "wa": "0.0",
+                  "l": "3690.0"
+                },
+                " Jhiriya ": {
+                  "ss": "0.0",
+                  "bt": "Lined",
+                  "adf": "0.33",
+                  "r": "0.0",
+                  "sf": "3.5",
+                  "t": "Distributary ",
+                  "d": "60",
+                  "bw": "0.0",
+                  "ddf": "0.55",
+                  "wp": "0.0",
+                  "wa": "0.0",
+                  "l": "3060.0"
+                },
+                "Nawagaon Mr.": {
+                  "ss": "0.0",
+                  "bt": "unlined ",
+                  "adf": "0.18",
+                  "r": "0.0",
+                  "sf": "3.5",
+                  "t": "Minor",
+                  "d": "60",
+                  "bw": "0.0",
+                  "ddf": "0.3",
+                  "wp": "0.0",
+                  "wa": "0.0",
+                  "l": "2220.0"
+                },
+                "Motiyaridih ": {
+                  "ss": "0.0",
+                  "bt": "unlined ",
+                  "adf": "0.24",
+                  "r": "0.0",
+                  "sf": "3.5",
+                  "t": "Sub Minor",
+                  "d": "60",
+                  "bw": "0.0",
+                  "ddf": "0.4",
+                  "wp": "0.0",
+                  "wa": "0.0",
+                  "l": "2760.0"
+                },
+                "Darchura ": {
+                  "ss": "0.0",
+                  "bt": "unlined ",
+                  "adf": "0.45",
+                  "r": "0.0",
+                  "sf": "3.5",
+                  "t": "Minor",
+                  "d": "60",
+                  "bw": "0.0",
+                  "ddf": "0.75",
+                  "wp": "0.0",
+                  "wa": "0.0",
+                  "l": "1500.0"
+                },
+                "Neodha ": {
+                  "ss": "0.0",
+                  "bt": "Lining Under Progress",
+                  "adf": "0.51",
+                  "r": "0.0",
+                  "sf": "3.5",
+                  "t": "Distributary ",
+                  "d": "25",
+                  "bw": "0.0",
+                  "ddf": "0.85",
+                  "wp": "0.0",
+                  "wa": "0.0",
+                  "l": "6100.0"
+                },
+                "Chanderi ": {
+                  "ss": "0.0",
+                  "bt": "unlined ",
+                  "adf": "0.39",
+                  "r": "0.0",
+                  "sf": "3.5",
+                  "t": "Minor",
+                  "d": "60",
+                  "bw": "0.0",
+                  "ddf": "0.65",
+                  "wp": "0.0",
+                  "wa": "0.0",
+                  "l": "3900.0"
+                },
+                "Chakrawahi ": {
+                  "ss": "0.0",
+                  "bt": "Partially Lined ",
+                  "adf": "0.99",
+                  "r": "0.0",
+                  "sf": "3.5",
+                  "t": "Distributary ",
+                  "d": "60",
+                  "bw": "0.0",
+                  "ddf": "1.65",
+                  "wp": "0.0",
+                  "wa": "0.0",
+                  "l": "14790.0"
+                },
+                "Outlet 1": {
+                  "ss": "0.0",
+                  "bt": "Unlined",
+                  "adf": "0.0",
+                  "r": "33.29",
+                  "sf": "3.5",
+                  "t": "Minor",
+                  "d": "70",
+                  "bw": "0.0",
+                  "ddf": "0.0",
+                  "wp": "2.42",
+                  "wa": "0.13588",
+                  "l": "56150.0"
+                },
+                "Bhothidih": {
+                  "ss": "0.0",
+                  "bt": "unlined ",
+                  "adf": "0.18",
+                  "r": "0.0",
+                  "sf": "3.5",
+                  "t": "Minor",
+                  "d": "60",
+                  "bw": "0.0",
+                  "ddf": "0.3",
+                  "wp": "0.0",
+                  "wa": "0.0",
+                  "l": "1710.0"
+                },
+                "Simga5": {
+                  "ss": "0.0",
+                  "bt": "unlined ",
+                  "adf": "0.27",
+                  "r": "0.0",
+                  "sf": "3.5",
+                  "t": "Minor No. 04 (Cancled due to overlap of Ghugwa Tank) ",
+                  "d": "45",
+                  "bw": "0.0",
+                  "ddf": "0.45",
+                  "wp": "0.0",
+                  "wa": "0.0",
+                  "l": "2400.0"
+                },
+                "Chourenga ": {
+                  "ss": "0.0",
+                  "bt": "unlined ",
+                  "adf": "0.27",
+                  "r": "0.0",
+                  "sf": "3.5",
+                  "t": "Minor",
+                  "d": "60",
+                  "bw": "0.0",
+                  "ddf": "0.45",
+                  "wp": "0.0",
+                  "wa": "0.0",
+                  "l": "1440.0"
+                },
+                "Marrakoni ": {
+                  "ss": "0.0",
+                  "bt": "Lining Under Progress",
+                  "adf": "0.83",
+                  "r": "0.0",
+                  "sf": "3.5",
+                  "t": "Distributary ",
+                  "d": "25",
+                  "bw": "0.0",
+                  "ddf": "1.38",
+                  "wp": "0.0",
+                  "wa": "0.0",
+                  "l": "17470.0"
+                },
+                "Simga1": {
+                  "ss": "0.0",
+                  "bt": "0 to 6800 Lined & Balance unlined",
+                  "adf": "0.81",
+                  "r": "0.0",
+                  "sf": "3.5",
+                  "t": "Distributary  R.B.C.",
+                  "d": "45",
+                  "bw": "0.0",
+                  "ddf": "1.35",
+                  "wp": "0.0",
+                  "wa": "0.0",
+                  "l": "15680.0"
+                },
+                "Simga2": {
+                  "ss": "0.0",
+                  "bt": "0 to 7200 Lined",
+                  "adf": "0.39",
+                  "r": "0.0",
+                  "sf": "3.5",
+                  "t": "Minor No. 01",
+                  "d": "45",
+                  "bw": "0.0",
+                  "ddf": "0.65",
+                  "wp": "0.0",
+                  "wa": "0.0",
+                  "l": "8490.0"
+                },
+                "Simga3": {
+                  "ss": "0.0",
+                  "bt": "unlined ",
+                  "adf": "0.39",
+                  "r": "0.0",
+                  "sf": "3.5",
+                  "t": "Minor No. 02",
+                  "d": "45",
+                  "bw": "0.0",
+                  "ddf": "0.65",
+                  "wp": "0.0",
+                  "wa": "0.0",
+                  "l": "6990.0"
+                },
+                "Simga4": {
+                  "ss": "0.0",
+                  "bt": "unlined ",
+                  "adf": "0.18",
+                  "r": "0.0",
+                  "sf": "3.5",
+                  "t": "Minor No. 03",
+                  "d": "45",
+                  "bw": "0.0",
+                  "ddf": "0.3",
+                  "wp": "0.0",
+                  "wa": "0.0",
+                  "l": "570.0"
+                }
+              }
+            }
+          },
+          "streamRecharge": {
+            "poor_quality": {},
+            "non_command": {},
+            "command": {}
+          },
+          "artificial_structure": {
+            "poor_quality": {
+              "rc": "0.0",
+              "wcsi": {
+                "Structure 3": {
+                  "sc": "0.0",
+                  "r": "0.0",
+                  "c": "null",
+                  "eif": "0.2",
+                  "nos": "0.0",
+                  "fil": "0.0",
+                  "if": "0.2"
+                }
+              }
+            },
+            "non_command": {
+              "rc": "0.0",
+              "wcsi": {
+                "Structure 2": {
+                  "sc": "0.0",
+                  "r": "0.0",
+                  "c": "1",
+                  "eif": "0.2",
+                  "nos": "1.0",
+                  "fil": "0.0",
+                  "if": "0.2"
+                }
+              }
+            },
+            "command": {
+              "rc": "60.1",
+              "wcsi": {
+                "Structure 1": {
+                  "sc": "300.48",
+                  "r": "60.1",
+                  "c": "1",
+                  "eif": "0.2",
+                  "nos": "1.0",
+                  "fil": "1.0",
+                  "if": "0.2"
+                }
+              }
+            }
+          }
+        },
+        "draft": {
+          "agriculture": {
+            "decision": {
+              "non_command": {
+                "pc_dr": "0.0",
+                "dev1": "-100.0",
+                "dev2": "-100.0",
+                "dev": "-100.0",
+                "e_dr": "190.95721750043464",
+                "u_dr": "190.96",
+                "cwr_dr": "0.0"
+              },
+              "command": {
+                "pc_dr": "0.0",
+                "dev1": "-100.0",
+                "dev2": "-100.0",
+                "dev": "-100.0",
+                "e_dr": "361.4154719302165",
+                "u_dr": "361.42",
+                "cwr_dr": "0.0"
+              }
+            },
+            "power_consumption_requirement": {
+              "total": {
+                "irrDr": 0.0
+              },
+              "non_command": {
+                "consumed": 0.0,
+                "irrDr": 0.0,
+                "required": 0.0
+              },
+              "command": {
+                "consumed": 0.0,
+                "irrDr": 0.0,
+                "required": 0.0
+              }
+            },
+            "crop_water_requirement": {
+              "non_command": {
+                "paddy": {
+                  "ca": "0.0",
+                  "dr": "0.0",
+                  "cwr": "0.0",
+                  "cropInfo": []
+                }
+              },
+              "command": {
+                "paddy": {
+                  "ca": "0.0",
+                  "dr": "0.0",
+                  "cwr": "0.0",
+                  "cropInfo": []
+                }
+              }
+            },
+            "unit_draft": {
+              "non_command": {
+                "TW": {
+                  "cy": "2021",
+                  "y": "0.129330997291185",
+                  "noi": "0",
+                  "und": "0.129330997291185",
+                  "cyc": "1416",
+                  "ryc": "1416",
+                  "ndr": "183.13269216431794",
+                  "dr": "183.13269216431794",
+                  "ud": "0.129330997291185"
+                },
+                "DW": {
+                  "cy": "2021",
+                  "y": "0.0646654986455926",
+                  "noi": "0",
+                  "und": "0.0646654986455926",
+                  "cyc": "121",
+                  "ryc": "121",
+                  "ndr": "7.824525336116704",
+                  "dr": "7.824525336116704",
+                  "ud": "0.0646654986455926"
+                },
+                "ndr": "190.95721750043464",
+                "dr": "190.95721750043464"
+              },
+              "command": {
+                "TW": {
+                  "cy": "2021",
+                  "y": "0.129330997291185",
+                  "noi": "0",
+                  "und": "0.129330997291185",
+                  "cyc": "2680",
+                  "ryc": "2680",
+                  "ndr": "346.60707274037577",
+                  "dr": "346.60707274037577",
+                  "ud": "0.129330997291185"
+                },
+                "DW": {
+                  "cy": "2021",
+                  "y": "0.0646654986455926",
+                  "noi": "0",
+                  "und": "0.0646654986455926",
+                  "cyc": "229",
+                  "ryc": "229",
+                  "ndr": "14.808399189840705",
+                  "dr": "14.808399189840705",
+                  "ud": "0.0646654986455926"
+                },
+                "ndr": "361.4154719302165",
+                "dr": "361.4154719302165"
+              }
+            }
+          },
+          "domestic": {
+            "decision": {
+              "non_command": {
+                "dev": "100.0",
+                "cons_use": "138.12",
+                "e_dr": "138.12",
+                "u_dr": "0.0"
+              },
+              "command": {
+                "dev": "100.0",
+                "cons_use": "208.95",
+                "e_dr": "208.95",
+                "u_dr": "0.0"
+              }
+            },
+            "consumptive_use_method": {
+              "non_command": {
+                "total": {
+                  "nod": "120",
+                  "ry": "2011",
+                  "ay": "2021",
+                  "pop_ay": "186342",
+                  "pop_ry": "119660",
+                  "dr": "138.12"
+                },
+                "urban": {
+                  "lpcd": "100.0",
+                  "pop_ay": "32961",
+                  "pop_ry": "21166",
+                  "lg": "0.7",
+                  "gr": "5.066",
+                  "dr": "27.69"
+                },
+                "rural": {
+                  "lpcd": "60.0",
+                  "pop_ay": "153381",
+                  "pop_ry": "98494",
+                  "lg": "1.0",
+                  "gr": "5.066",
+                  "dr": "110.43"
+                }
+              },
+              "command": {
+                "total": {
+                  "nod": "120",
+                  "ry": "2011",
+                  "ay": "2021",
+                  "pop_ay": "290211",
+                  "pop_ry": "186360",
+                  "dr": "208.95"
+                },
+                "urban": {
+                  "lpcd": "100.0",
+                  "pop_ay": "0",
+                  "pop_ry": "0",
+                  "lg": "0.7",
+                  "gr": "5.066",
+                  "dr": "0.0"
+                },
+                "rural": {
+                  "lpcd": "60.0",
+                  "pop_ay": "290211",
+                  "pop_ry": "186360",
+                  "lg": "1.0",
+                  "gr": "5.066",
+                  "dr": "208.95"
+                }
+              }
+            },
+            "unit_draft": {
+              "non_command": {
+                "Structure 1": {
+                  "cy": "2021",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0"
+                },
+                "ndr": "0.0",
+                "dr": "0.0"
+              },
+              "command": {
+                "Structure 1": {
+                  "cy": "2021",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0"
+                },
+                "ndr": "0.0",
+                "dr": "0.0"
+              }
+            }
+          },
+          "total": {
+            "total": 1101.09,
+            "non_command": 530.72,
+            "command": 570.37
+          },
+          "industry": {
+            "decision": {
+              "non_command": {
+                "dev": "-100.0",
+                "cons_use": "0.0",
+                "e_dr": "201.64",
+                "u_dr": "201.64"
+              },
+              "command": {
+                "dev": "0.0",
+                "cons_use": "0.0",
+                "e_dr": "0.0",
+                "u_dr": "0.0"
+              }
+            },
+            "consumptive_use_pattern": {
+              "non_command": {
+                "b1820d": {
+                  "nod": "0.0",
+                  "tdr": "0.0",
+                  "noi": "0",
+                  "lg": "0.0",
+                  "dr": "0.0"
+                }
+              },
+              "command": {
+                "278546": {
+                  "nod": "0.0",
+                  "tdr": "0.0",
+                  "noi": "0",
+                  "lg": "0.0",
+                  "dr": "0.0"
+                }
+              }
+            },
+            "unit_draft": {
+              "non_command": {
+                "Bore Well##SUHELA LIMESTONE MINE OF SUDHA AGRAWAL": {
+                  "cy": "2021",
+                  "y": "0.0675",
+                  "noi": "0",
+                  "und": "0.0675",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.0675",
+                  "dr": "0.0675",
+                  "ud": "0.0675",
+                  "toi": "SUHELA LIMESTONE MINE OF SUDHA AGRAWAL"
+                },
+                "Bore Well##M/S ARIHANT MINERALS": {
+                  "cy": "2021",
+                  "y": "0.0075",
+                  "noi": "0",
+                  "und": "0.0075",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.0075",
+                  "dr": "0.0075",
+                  "ud": "0.0075",
+                  "toi": "M/S ARIHANT MINERALS"
+                },
+                "Bore Well##BITKULI LIMESTONE MINE": {
+                  "cy": "2021",
+                  "y": "0.009125",
+                  "noi": "0",
+                  "und": "0.009125",
+                  "cyc": "2",
+                  "ryc": "2",
+                  "ndr": "0.01825",
+                  "dr": "0.01825",
+                  "ud": "0.009125",
+                  "toi": "BITKULI LIMESTONE MINE"
+                },
+                "Bore Well##APL APOLLO BUILDING PRODUCTS PVT. LTD.": {
+                  "cy": "2021",
+                  "y": "13.575",
+                  "noi": "0",
+                  "und": "13.575",
+                  "cyc": "10",
+                  "ryc": "10",
+                  "ndr": "135.75",
+                  "dr": "135.75",
+                  "ud": "13.575",
+                  "toi": "APL APOLLO BUILDING PRODUCTS PVT. LTD."
+                },
+                "Bore Well##SUHELA LIMESTONE MINE OF DILIP JAIN": {
+                  "cy": "2021",
+                  "y": "0.03",
+                  "noi": "0",
+                  "und": "0.03",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.03",
+                  "dr": "0.03",
+                  "ud": "0.03",
+                  "toi": "SUHELA LIMESTONE MINE OF DILIP JAIN"
+                },
+                "dr": "201.63926249999997",
+                "Bore Well##RANIJAROUD LIMESTONE MINE OF DILIP JAIN": {
+                  "cy": "2021",
+                  "y": "0.03",
+                  "noi": "0",
+                  "und": "0.03",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.03",
+                  "dr": "0.03",
+                  "ud": "0.03",
+                  "toi": "RANIJAROUD LIMESTONE MINE OF DILIP JAIN"
+                },
+                "Bore Well##M/S SUDHA AGRAWAL (PARTNER OF LAXMIKRIPA MINES)": {
+                  "cy": "2021",
+                  "y": "0.00375",
+                  "noi": "0",
+                  "und": "0.00375",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.00375",
+                  "dr": "0.00375",
+                  "ud": "0.00375",
+                  "toi": "M/S SUDHA AGRAWAL (PARTNER OF LAXMIKRIPA MINES)"
+                },
+                "Bore Well##SMT. SEEMA PAL": {
+                  "cy": "2021",
+                  "y": "0.075",
+                  "noi": "0",
+                  "und": "0.075",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.075",
+                  "dr": "0.075",
+                  "ud": "0.075",
+                  "toi": "SMT. SEEMA PAL"
+                },
+                "Bore Well##M/S RAJ LAXMI STONE": {
+                  "cy": "2021",
+                  "y": "0.0075",
+                  "noi": "0",
+                  "und": "0.0075",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.0075",
+                  "dr": "0.0075",
+                  "ud": "0.0075",
+                  "toi": "M/S RAJ LAXMI STONE"
+                },
+                "Bore Well##M/S SANJAY STONE CRUSHER (UNIT II)": {
+                  "cy": "2021",
+                  "y": "0.025",
+                  "noi": "0",
+                  "und": "0.025",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.025",
+                  "dr": "0.025",
+                  "ud": "0.025",
+                  "toi": "M/S SANJAY STONE CRUSHER (UNIT II)"
+                },
+                "Bore Well##M/S ULTRA TECH CEMENT LTD.": {
+                  "cy": "2021",
+                  "y": "10.005",
+                  "noi": "0",
+                  "und": "10.005",
+                  "cyc": "3",
+                  "ryc": "3",
+                  "ndr": "30.015",
+                  "dr": "30.015",
+                  "ud": "10.005",
+                  "toi": "M/S ULTRA TECH CEMENT LTD."
+                },
+                "Bore Well##M/S SHRI BALAJI STONE CRUSHER": {
+                  "cy": "2021",
+                  "y": "0.015",
+                  "noi": "0",
+                  "und": "0.015",
+                  "cyc": "2",
+                  "ryc": "2",
+                  "ndr": "0.03",
+                  "dr": "0.03",
+                  "ud": "0.015",
+                  "toi": "M/S SHRI BALAJI STONE CRUSHER"
+                },
+                "Bore Well##SHREE CEMENT LTD (KARHI CHANDI LIMESTONE MINE)": {
+                  "cy": "2021",
+                  "y": "2.0640825",
+                  "noi": "0",
+                  "und": "2.0640825",
+                  "cyc": "5",
+                  "ryc": "5",
+                  "ndr": "10.3204125",
+                  "dr": "10.3204125",
+                  "ud": "2.0640825",
+                  "toi": "SHREE CEMENT LTD (KARHI CHANDI LIMESTONE MINE)"
+                },
+                "Bore Well##SANJAY MAKKAD LOW GRADE LIMESTONE QUARRY": {
+                  "cy": "2021",
+                  "y": "0.018",
+                  "noi": "0",
+                  "und": "0.018",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.018",
+                  "dr": "0.018",
+                  "ud": "0.018",
+                  "toi": "SANJAY MAKKAD LOW GRADE LIMESTONE QUARRY"
+                },
+                "Bore Well##TEKARI LIMESTONE MINE": {
+                  "cy": "2021",
+                  "y": "0.03375",
+                  "noi": "0",
+                  "und": "0.03375",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.03375",
+                  "dr": "0.03375",
+                  "ud": "0.03375",
+                  "toi": "TEKARI LIMESTONE MINE"
+                },
+                "Bore Well##ASHOK SINGH THAKUR": {
+                  "cy": "2021",
+                  "y": "0.0045",
+                  "noi": "0",
+                  "und": "0.0045",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.0045",
+                  "dr": "0.0045",
+                  "ud": "0.0045",
+                  "toi": "ASHOK SINGH THAKUR"
+                },
+                "Bore Well##M/S MANDAL AQUATECH PRIVATE LIMITED": {
+                  "cy": "2021",
+                  "y": "0.0525",
+                  "noi": "0",
+                  "und": "0.0525",
+                  "cyc": "6",
+                  "ryc": "6",
+                  "ndr": "0.315",
+                  "dr": "0.315",
+                  "ud": "0.0525",
+                  "toi": "M/S MANDAL AQUATECH PRIVATE LIMITED"
+                },
+                "Bore Well##PHARHADA LIMESTONE MINE": {
+                  "cy": "2021",
+                  "y": "0.021875",
+                  "noi": "0",
+                  "und": "0.021875",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.021875",
+                  "dr": "0.021875",
+                  "ud": "0.021875",
+                  "toi": "PHARHADA LIMESTONE MINE"
+                },
+                "Bore Well##SANJAY MAKKAD": {
+                  "cy": "2021",
+                  "y": "0.025",
+                  "noi": "0",
+                  "und": "0.025",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.025",
+                  "dr": "0.025",
+                  "ud": "0.025",
+                  "toi": "SANJAY MAKKAD"
+                },
+                "Bore Well##PRATIBHA THAKUR": {
+                  "cy": "2021",
+                  "y": "0.00375",
+                  "noi": "0",
+                  "und": "0.00375",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.00375",
+                  "dr": "0.00375",
+                  "ud": "0.00375",
+                  "toi": "PRATIBHA THAKUR"
+                },
+                "Bore Well##SHREE SHYAM SPONGE AND POWER LIMITED": {
+                  "cy": "2021",
+                  "y": "0.24",
+                  "noi": "0",
+                  "und": "0.24",
+                  "cyc": "3",
+                  "ryc": "3",
+                  "ndr": "0.72",
+                  "dr": "0.72",
+                  "ud": "0.24",
+                  "toi": "SHREE SHYAM SPONGE AND POWER LIMITED"
+                },
+                "Bore Well##M/S ARUN KUMAR SINGH": {
+                  "cy": "2021",
+                  "y": "9.125E-4",
+                  "noi": "0",
+                  "und": "9.125E-4",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "9.125E-4",
+                  "dr": "9.125E-4",
+                  "ud": "9.125E-4",
+                  "toi": "M/S ARUN KUMAR SINGH"
+                },
+                "Bore Well##M/S SMT. KUNTI BAI VERMA": {
+                  "cy": "2021",
+                  "y": "0.0027375",
+                  "noi": "0",
+                  "und": "0.0027375",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.0027375",
+                  "dr": "0.0027375",
+                  "ud": "0.0027375",
+                  "toi": "M/S SMT. KUNTI BAI VERMA"
+                },
+                "Bore Well##M/S AVINASH ENERGY PRIVATE LIMITED": {
+                  "cy": "2021",
+                  "y": "2.4",
+                  "noi": "0",
+                  "und": "2.4",
+                  "cyc": "10",
+                  "ryc": "10",
+                  "ndr": "24.0",
+                  "dr": "24.0",
+                  "ud": "2.4",
+                  "toi": "M/S AVINASH ENERGY PRIVATE LIMITED"
+                },
+                "Bore Well##BHATBHERA LIMESTONE MINE": {
+                  "cy": "2021",
+                  "y": "0.01875",
+                  "noi": "0",
+                  "und": "0.01875",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.01875",
+                  "dr": "0.01875",
+                  "ud": "0.01875",
+                  "toi": "BHATBHERA LIMESTONE MINE"
+                },
+                "Bore Well##M/S INDRA DEV VERMA": {
+                  "cy": "2021",
+                  "y": "0.00375",
+                  "noi": "0",
+                  "und": "0.00375",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.00375",
+                  "dr": "0.00375",
+                  "ud": "0.00375",
+                  "toi": "M/S INDRA DEV VERMA"
+                },
+                "Bore Well##NITIN BHUSANIA LOW GRADE LIMESTONE QUARRY": {
+                  "cy": "2021",
+                  "y": "0.021",
+                  "noi": "0",
+                  "und": "0.021",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.021",
+                  "dr": "0.021",
+                  "ud": "0.021",
+                  "toi": "NITIN BHUSANIA LOW GRADE LIMESTONE QUARRY"
+                },
+                "Bore Well##M/S BUDHELAL VERMA": {
+                  "cy": "2021",
+                  "y": "0.001825",
+                  "noi": "0",
+                  "und": "0.001825",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.001825",
+                  "dr": "0.001825",
+                  "ud": "0.001825",
+                  "toi": "M/S BUDHELAL VERMA"
+                },
+                "Bore Well##M/S SANJAY STONE CRUSHER": {
+                  "cy": "2021",
+                  "y": "0.025",
+                  "noi": "0",
+                  "und": "0.025",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.025",
+                  "dr": "0.025",
+                  "ud": "0.025",
+                  "toi": "M/S SANJAY STONE CRUSHER"
+                },
+                "Bore Well##TEKARI STONE QUARRY MINE OF M/S SADGURU SAINATH MINES AND MINERALS PVT. LTD.": {
+                  "cy": "2021",
+                  "y": "0.0375",
+                  "noi": "0",
+                  "und": "0.0375",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.0375",
+                  "dr": "0.0375",
+                  "ud": "0.0375",
+                  "toi": "TEKARI STONE QUARRY MINE OF M/S SADGURU SAINATH MINES AND MINERALS PVT. LTD."
+                },
+                "Bore Well##SHRI RIPUSUDAN VERMA": {
+                  "cy": "2021",
+                  "y": "0.006",
+                  "noi": "0",
+                  "und": "0.006",
+                  "cyc": "1",
+                  "ryc": "1",
+                  "ndr": "0.006",
+                  "dr": "0.006",
+                  "ud": "0.006",
+                  "toi": "SHRI RIPUSUDAN VERMA"
+                },
+                "ndr": "201.63926249999997"
+              },
+              "command": {
+                "Structure 1##Industry 1": {
+                  "cy": "2021",
+                  "y": "0.0",
+                  "noi": "0",
+                  "und": "0.0",
+                  "cyc": "0",
+                  "ryc": "0",
+                  "ndr": "0.0",
+                  "dr": "0.0",
+                  "ud": "0.0",
+                  "toi": "Industry 1"
+                },
+                "ndr": "0.0",
+                "dr": "0.0"
+              }
+            }
+          }
+        },
+        "availability": {
+          "poor_quality": {
+            "av": 0.0
+          },
+          "non_command": {
+            "av": 3496.95
+          },
+          "command": {
+            "av": 5191.05
+          }
+        },
+        "lateral_aquifer": {
+          "total": []
+        },
+        "vertcal_aquifer": {
+          "total": []
+        }
+      }
+    },
+    "draftData": {
+      "agriculture": {
+        "total": 5523.726894306532,
+        "non_command": 1909.5721750043535,
+        "command": 3614.1547193021784
+      },
+      "domestic": {
+        "total": 1055.6818349999999,
+        "non_command": 420.11974499999997,
+        "command": 635.56209
+      },
+      "total": {
+        "total": 7385.97,
+        "non_command": 3136.25,
+        "command": 4249.72
+      },
+      "industry": {
+        "total": 806.55705,
+        "non_command": 806.55705,
+        "command": 0.0
+      }
+    },
+    "rechargeData": {
+      "agriculture": {
+        "poor_quality": 0.0,
+        "total": 7124.4,
+        "non_command": 2943.25,
+        "command": 4181.15
+      },
+      "rainfall": {
+        "poor_quality": 0.0,
+        "total": 4841.91,
+        "non_command": 1674.19,
+        "command": 3167.72
+      },
+      "total": {
+        "poor_quality": 0.0,
+        "total": 12213.8,
+        "non_command": 4692.28,
+        "command": 7521.52
+      },
+      "surface_irrigation": {
+        "poor_quality": 0.0,
+        "total": 4666.34,
+        "non_command": 2093.4882,
+        "command": 2572.8450000000003
+      },
+      "gw_irrigation": {
+        "poor_quality": 0.0,
+        "total": 2458.06,
+        "non_command": 849.76,
+        "command": 1608.3
+      },
+      "water_body": {
+        "total": 89.24000000000001,
+        "non_command": 74.84,
+        "command": 14.4
+      },
+      "canal": {
+        "poor_quality": 0.0,
+        "total": 38.05,
+        "command": 38.05
+      },
+      "artificial_structure": {
+        "poor_quality": 0.0,
+        "total": 120.192,
+        "non_command": 0.0,
+        "command": 120.192
+      }
+    },
+    "currentAvailabilityForAllPurposes": {
+      "poor_quality": 0.0,
+      "total": 10992.42,
+      "non_command": 4223.05,
+      "command": 6769.37
+    },
+    "availabilityForFutureUse": {
+      "poor_quality": 0.0,
+      "total": 3301.87,
+      "non_command": 965.59,
+      "command": 2336.28
+    },
+    "gwallocation": {
+      "domestic": {
+        "poor_quality": 0.0,
+        "total": 1360.26,
+        "non_command": 541.33,
+        "command": 818.93
+      },
+      "total": {
+        "poor_quality": 0.0,
+        "total": 1360.26,
+        "non_command": 541.33,
+        "command": 818.93
+      },
+      "industry": {
+        "poor_quality": 0.0,
+        "total": 0.0
+      }
+    },
+    "stageOfExtraction": {
+      "total": 67.19148285818774,
+      "non_command": 74.2650454055718,
+      "command": 62.77866330249344
+    },
+    "gwlevelData": {
+      "poor_quality": {
+        "pre": [
+          [
+            2017.0,
+            0.0
+          ],
+          [
+            2018.0,
+            0.0
+          ],
+          [
+            2019.0,
+            0.0
+          ],
+          [
+            2020.0,
+            0.0
+          ],
+          [
+            2021.0,
+            0.0
+          ]
+        ],
+        "post": [
+          [
+            2017.0,
+            -99.0
+          ],
+          [
+            2018.0,
+            -99.0
+          ],
+          [
+            2019.0,
+            -99.0
+          ],
+          [
+            2020.0,
+            -99.0
+          ],
+          [
+            2021.0,
+            -99.0
+          ]
+        ]
+      },
+      "total": {},
+      "non_command": {
+        "pre": [
+          [
+            2017.0,
+            7.85
+          ],
+          [
+            2018.0,
+            6.7
+          ],
+          [
+            2019.0,
+            4.95
+          ],
+          [
+            2020.0,
+            4.13
+          ],
+          [
+            2021.0,
+            4.04
+          ]
+        ],
+        "post": [
+          [
+            2017.0,
+            5.6
+          ],
+          [
+            2018.0,
+            3.41
+          ],
+          [
+            2019.0,
+            2.93
+          ],
+          [
+            2020.0,
+            2.15
+          ],
+          [
+            2021.0,
+            2.82
+          ]
+        ]
+      },
+      "command": {
+        "pre": [
+          [
+            2017.0,
+            7.4
+          ],
+          [
+            2018.0,
+            6.25
+          ],
+          [
+            2019.0,
+            4.5
+          ],
+          [
+            2020.0,
+            3.73
+          ],
+          [
+            2021.0,
+            3.64
+          ]
+        ],
+        "post": [
+          [
+            2017.0,
+            5.15
+          ],
+          [
+            2018.0,
+            2.96
+          ],
+          [
+            2019.0,
+            2.48
+          ],
+          [
+            2020.0,
+            1.75
+          ],
+          [
+            2021.0,
+            2.42
+          ]
+        ]
+      }
+    },
+    "gwanalysisSeason": "monsoon",
+    "gwtrendSlope": {
+      "poor_quality": {},
+      "total": {},
+      "non_command": {
+        "pre": 101.89999999999999,
+        "post": 68.19999999999999
+      },
+      "command": {
+        "pre": 100.4,
+        "post": 66.7
+      }
+    },
+    "waterTableRiseFall": {
+      "poor_quality": {},
+      "total": {},
+      "non_command": {
+        "pre": "Rising",
+        "post": "Rising"
+      },
+      "command": {
+        "pre": "Rising",
+        "post": "Rising"
+      }
+    },
+    "gwtrendAttention": {},
+    "waterTableCategory": {
+      "non_command": "critical/semi_critical",
+      "command": "safe"
+    }
+  },
+  {
+    "locationName": "total",
+    "area": {
+      "non_recharge_worthy": {
+        "commandArea": 0.0,
+        "nonCommandArea": 0.0,
+        "poorQualityArea": 0.0,
+        "hillyArea": 0.0,
+        "forestArea": 0.0,
+        "totalArea": 0.0,
+        "pavedArea": 0.0,
+        "unpavedArea": 0.0
+      },
+      "total": {
+        "commandArea": 40239.0,
+        "nonCommandArea": 21267.0,
+        "poorQualityArea": 0.0,
+        "hillyArea": 0.0,
+        "forestArea": 0.0,
+        "totalArea": 61506.0,
+        "pavedArea": 0.0,
+        "unpavedArea": 0.0
+      },
+      "recharge_worthy": {
+        "commandArea": 40239.0,
+        "nonCommandArea": 21267.0,
+        "poorQualityArea": 0.0,
+        "hillyArea": 0.0,
+        "forestArea": 0.0,
+        "totalArea": 61506.0,
+        "pavedArea": 0.0,
+        "unpavedArea": 0.0
+      }
+    },
+    "loss": {
+      "poor_quality": 0.0,
+      "total": 1221.38,
+      "non_command": 469.23,
+      "command": 752.15
+    },
+    "category": null,
+    "reportSummary": {
+      "12853e0c-216a-42da-a6d6-7d56f3bac3df": {
+        "BLOCK": {
+          "safe": 1
+        }
+      },
+      "total": {
+        "BLOCK": {
+          "safe": 1
+        }
+      }
+    },
+    "gwProjectedUtilAllocationDynamicAquifer": {
+      "domestic": {
+        "total": 0.0
+      },
+      "total": {
+        "total": 0.0
+      }
+    },
+    "additionalRecharge": {},
+    "staticGWResource": {
+      "poor_quality": 0.0,
+      "total": 11655.06,
+      "non_command": 4018.02,
+      "command": 7637.04
+    },
+    "totalGWAvailability": {
+      "poor_quality": 0.0,
+      "total": 22647.48,
+      "non_command": 8241.07,
+      "command": 14406.41
+    },
+    "aquiferBusinessData": {
+      "SemiConfined Aquifer Piezo Data": null,
+      "confined_aquifer": {
+        "total": {
+          "total": 0.0
+        },
+        "in_storage_gw": {
+          "in_storage_gw": 0.0
+        },
+        "dynamic_gw": {
+          "dynamic_gw": 0.0
+        }
+      }
+    },
+    "coastalBusinessData": null,
+    "waterDepletedZonesBusinessData": null,
+    "inOutFlow": {
+      "total": 0.0
+    },
+    "baseFlow": {
+      "total": {
+        "lateral_aquifer": 0.0,
+        "vertcal_aquifer": 0.0
+      }
+    },
+    "streamRecharge": null,
+    "additionalbaseflow": null,
+    "envFlows": null,
+    "subject": null,
+    "action": null,
+    "modifiable": null,
+    "isUrban": null,
+    "gwSpecificYield": null,
+    "geology": null,
+    "evaporation": {},
+    "qualityTagging": null,
+    "approvalLevel": null,
+    "verificStatus": null,
+    "message": null,
+    "timeStamp": null,
+    "locationUUID": null,
+    "rainfall": {
+      "poor_quality": 0.0,
+      "total": 1337.0,
+      "non_command": 1337.0,
+      "command": 1337.0
+    },
+    "wtfonly": null,
+    "computationSummary": null,
+    "draftData": {
+      "agriculture": {
+        "total": 5523.726894306532,
+        "non_command": 1909.5721750043535,
+        "command": 3614.1547193021784
+      },
+      "domestic": {
+        "total": 1055.6818349999999,
+        "non_command": 420.11974499999997,
+        "command": 635.56209
+      },
+      "total": {
+        "total": 7385.97,
+        "non_command": 3136.25,
+        "command": 4249.72
+      },
+      "industry": {
+        "total": 806.55705,
+        "non_command": 806.55705,
+        "command": 0.0
+      }
+    },
+    "rechargeData": {
+      "agriculture": {
+        "poor_quality": 0.0,
+        "total": 7124.4,
+        "non_command": 2943.25,
+        "command": 4181.15
+      },
+      "rainfall": {
+        "poor_quality": 0.0,
+        "total": 4841.91,
+        "non_command": 1674.19,
+        "command": 3167.72
+      },
+      "total": {
+        "poor_quality": 0.0,
+        "total": 12213.8,
+        "non_command": 4692.28,
+        "command": 7521.52
+      },
+      "surface_irrigation": {
+        "poor_quality": 0.0,
+        "total": 4666.34,
+        "non_command": 2093.4882,
+        "command": 2572.8450000000003
+      },
+      "gw_irrigation": {
+        "poor_quality": 0.0,
+        "total": 2458.06,
+        "non_command": 849.76,
+        "command": 1608.3
+      },
+      "water_body": {
+        "total": 89.24000000000001,
+        "non_command": 74.84,
+        "command": 14.4
+      },
+      "canal": {
+        "poor_quality": 0.0,
+        "total": 38.05,
+        "command": 38.05
+      },
+      "artificial_structure": {
+        "poor_quality": 0.0,
+        "total": 120.192,
+        "non_command": 0.0,
+        "command": 120.192
+      }
+    },
+    "currentAvailabilityForAllPurposes": {
+      "poor_quality": 0.0,
+      "total": 10992.42,
+      "non_command": 4223.05,
+      "command": 6769.37
+    },
+    "availabilityForFutureUse": {
+      "poor_quality": 0.0,
+      "total": 3301.87,
+      "non_command": 965.59,
+      "command": 2336.28
+    },
+    "gwallocation": {
+      "domestic": {
+        "poor_quality": 0.0,
+        "total": 1360.26,
+        "non_command": 541.33,
+        "command": 818.93
+      },
+      "total": {
+        "poor_quality": 0.0,
+        "total": 1360.26,
+        "non_command": 541.33,
+        "command": 818.93
+      },
+      "industry": {
+        "poor_quality": 0.0,
+        "total": 0.0
+      }
+    },
+    "stageOfExtraction": {
+      "poor_quality": 0.0,
+      "total": 67.19148285818774,
+      "non_command": 74.2650454055718,
+      "command": 62.77866330249344
+    },
+    "gwlevelData": null,
+    "gwanalysisSeason": null,
+    "gwtrendSlope": null,
+    "waterTableRiseFall": null,
+    "gwtrendAttention": null,
+    "waterTableCategory": null
+  }
+]

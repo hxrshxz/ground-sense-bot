@@ -84,6 +84,14 @@ func (h *Hub) Run() {
 						return
 					}
 					
+					// Debug: Log if chart is included
+					if response.Chart != nil {
+						log.Printf("DEBUG: Chart included in response - Type: %s, Title: %s, Series count: %d", 
+							response.Chart.Type, response.Chart.Title, len(response.Chart.Series))
+					} else {
+						log.Printf("DEBUG: No chart in response")
+					}
+					
 					// Wrap response in Message
 					botMsg := models.Message{
 						Username: "Bot",

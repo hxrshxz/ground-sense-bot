@@ -4,19 +4,80 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
-	"sync" // Added sync import
+	"sync"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/hxrshxz/ground-sense-bot/backend/internal/models"
 	// Added repositories import
 )
 
+// ConversationEntry stores a single exchange in conversation history
+type ConversationEntry struct {
+	Timestamp time.Time `json:"timestamp"`
+	UserQuery string    `json:"user_query"`
+	BotResponse string  `json:"bot_response"`
+	Intent    string    `json:"intent"`
+	Locations []string  `json:"locations"`
+}
+
 // UserSession stores context for a user's ongoing conversation
 type UserSession struct {
-	LastEntities Entities
-	LastIntent   string
-	LastQuery    string
+	LastEntities        Entities
+	LastIntent          string
+	LastQuery           string
+	ConversationHistory []ConversationEntry
+	MaxHistoryLength    int
+}
+
+// AddToHistory adds a conversation entry to the session
+func (s *UserSession) AddToHistory(userQuery, botResponse, intent string, locations []string) {
+	if s.MaxHistoryLength == 0 {
+		s.MaxHistoryLength = 10
+	}
+	
+	entry := ConversationEntry{
+		Timestamp:   time.Now(),
+		UserQuery:   userQuery,
+		BotResponse: botResponse,
+		Intent:      intent,
+		Locations:   locations,
+	}
+	
+	s.ConversationHistory = append(s.ConversationHistory, entry)
+	
+	// Keep only last N entries
+	if len(s.ConversationHistory) > s.MaxHistoryLength {
+		s.ConversationHistory = s.ConversationHistory[len(s.ConversationHistory)-s.MaxHistoryLength:]
+	}
+}
+
+// GetRecentContext returns formatted recent conversation context
+func (s *UserSession) GetRecentContext(limit int) string {
+	if len(s.ConversationHistory) == 0 {
+		return ""
+	}
+	
+	start := 0
+	if len(s.ConversationHistory) > limit {
+		start = len(s.ConversationHistory) - limit
+	}
+	
+	var builder strings.Builder
+	builder.WriteString("Recent conversation context:\n")
+	
+	for _, entry := range s.ConversationHistory[start:] {
+		builder.WriteString(fmt.Sprintf("USER: %s\n", entry.UserQuery))
+		if len(entry.BotResponse) > 200 {
+			builder.WriteString(fmt.Sprintf("BOT: %s...\n", entry.BotResponse[:200]))
+		} else {
+			builder.WriteString(fmt.Sprintf("BOT: %s\n", entry.BotResponse))
+		}
+	}
+	
+	return builder.String()
 }
 
 type ChatService struct {
@@ -32,6 +93,33 @@ func NewChatService(nlp *NLPService, ingres *IngresService) *ChatService {
 		ingres:   ingres,
 		sessions: make(map[string]*UserSession),
 	}
+}
+
+// Helper struct to parse LLM visualization JSON
+type visualizationPayload struct {
+	Type        string `json:"type"`
+	Title       string `json:"title"`
+	Explanation string `json:"explanation"`
+	XAxis       interface{} `json:"xAxis"`
+	Series      []struct {
+		Name string        `json:"name"`
+		Data []interface{} `json:"data"`
+	} `json:"series"`
+	PieData []struct {
+		Name  string  `json:"name"`
+		Value float64 `json:"value"`
+	} `json:"pieData"`
+	Timeline *struct {
+		Data         []string `json:"data"`
+		AutoPlay     bool     `json:"autoPlay"`
+		PlayInterval int      `json:"playInterval"`
+	} `json:"timeline"`
+	TimelineOptions []struct {
+		Title  string `json:"title"`
+		Series []struct {
+			Data []interface{} `json:"data"`
+		} `json:"series"`
+	} `json:"timelineOptions"`
 }
 
 func (s *ChatService) ProcessMessage(ctx context.Context, message string, username string) (*models.ChatResponse, error) {
@@ -58,30 +146,32 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 	}
 	session, exists := s.sessions[username]
 	if !exists {
-		session = &UserSession{}
+		session = &UserSession{
+			MaxHistoryLength: 10,
+			ConversationHistory: make([]ConversationEntry, 0),
+		}
 		s.sessions[username] = session
 	}
 	s.mu.Unlock()
+
+	// Add user message to LLM conversation history for context
+	if s.nlp.llm != nil {
+		s.nlp.llm.AddToHistory("user", message)
+	}
 
 	intent, entities, sqlQuery := s.nlp.ParseMessage(message)
 	
 	// Context Merging Logic
 	// If new entities are missing locations but we have them in session, and the user implies context
 	// (e.g., "what about...", "list blocks there", "trend for it")
-	// For now, we'll be aggressive: if no location is found, try to use the last one.
+	contextUsed := false
 	if len(entities.Locations) == 0 && len(session.LastEntities.Locations) > 0 {
 		// Check for context clues or just default to previous location if it makes sense
 		// Simple heuristic: If intent requires location (Trend, Compare, ListBlocks) and we have none, use previous.
 		if intent == IntentTrend || intent == IntentCompare || intent == IntentListBlocks || intent == IntentSummary {
 			fmt.Printf("DEBUG: Using context location: %v\n", session.LastEntities.Locations)
 			entities.Locations = session.LastEntities.Locations
-			
-			// Re-generate SQL if needed (since SQL generation in ParseMessage might have failed due to missing location)
-			// Actually, ParseMessage generates SQL based on the prompt. If we inject location, we might need to re-run it?
-			// Or just rely on the fallback handlers which use `entities`.
-			// Let's rely on fallback handlers for now, as re-running LLM is expensive.
-			// BUT, if ParseMessage failed to generate SQL because of missing location, we are stuck.
-			// Ideally, we should pass context TO ParseMessage.
+			contextUsed = true
 		}
 	}
 	
@@ -94,7 +184,7 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 	session.LastQuery = message
 	s.mu.Unlock()
 
-	fmt.Printf("DEBUG: Intent=%s, Entities=%+v, SQL=%s\n", intent, entities, sqlQuery)
+	fmt.Printf("DEBUG: Intent=%s, Entities=%+v, SQL=%s, ContextUsed=%v\n", intent, entities, sqlQuery, contextUsed)
 	
 	response := &models.ChatResponse{
 		Intent: string(intent),
@@ -109,81 +199,318 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 		if err != nil {
 			fmt.Printf("ERROR: SQL execution failed: %v\n", err)
 			response.Text = "I encountered an error executing your query. Please try rephrasing your question."
+			
+			// Track in history
+			s.mu.Lock()
+			session.AddToHistory(message, response.Text, string(intent), entities.Locations)
+			s.mu.Unlock()
+			
 			return response, nil
 		}
 		
 		// Handle empty results
 		if len(results) == 0 {
 			response.Text = "No data found matching your criteria. Please try different parameters or check the location name."
+			
+			// Track in history
+			s.mu.Lock()
+			session.AddToHistory(message, response.Text, string(intent), entities.Locations)
+			s.mu.Unlock()
+			
 			return response, nil
 		}
 		
-		// Generate Visualization
-		vizJSON, explanation, err := s.nlp.llm.GenerateVisualization(results, sqlQuery, message)
-		if err != nil {
-			fmt.Printf("DEBUG: GenerateVisualization Error in ChatService: %v\n", err)
-		}
+		// Use LLM to pick chart shape but keep visuals hardcoded on frontend
+		response.Text = fmt.Sprintf("Here is the data you requested (%d results).", len(results))
+		response.Data = results
 
-		if err == nil {
-			var llmResp map[string]interface{}
-			if err := json.Unmarshal([]byte(vizJSON), &llmResp); err == nil {
-				// Set Explanation
-				if val, ok := llmResp["explanation"].(string); ok && val != "" {
-					response.Text = val
-				} else if explanation != "" {
-					response.Text = explanation
-				} else {
-					response.Text = "Here is the data you requested."
-				}
-
-				// Set Chart if applicable
-				if typeVal, ok := llmResp["type"].(string); ok && typeVal != "table" && typeVal != "text" {
-					if opts, ok := llmResp["echarts_option"]; ok {
-						title, _ := llmResp["title"].(string)
-						response.Chart = &models.ChartPayload{
-							Type:          typeVal,
-							Title:         title,
-							EChartsOption: opts,
-						}
-					}
-				}
-				
-				response.Data = results
-				return response, nil
+		chartPayload, vizText := s.buildChartWithLLM(results, sqlQuery, message)
+		if chartPayload != nil {
+			response.Chart = chartPayload
+			if vizText != "" {
+				response.Text = vizText
+			}
+		} else {
+			// Fallback to simple bar if LLM mapping fails
+			fallbackChart := buildSimpleChart(results)
+			if fallbackChart != nil {
+				response.Chart = fallbackChart
 			}
 		}
+
+		// Track in conversation history
+		s.mu.Lock()
+		session.AddToHistory(message, response.Text, string(intent), entities.Locations)
+		s.mu.Unlock()
 		
-		// Fallback if visualization generation fails
-		response.Text = "I found some data but couldn't generate a visualization. Here's what I found:"
-		response.Data = results
+		// Add bot response to LLM history
+		if s.nlp.llm != nil {
+			s.nlp.llm.AddToHistory("assistant", response.Text)
+		}
+
 		return response, nil
 	}
 	
+	// Process with intent handlers
+	var handlerResult *models.ChatResponse
+	var handlerErr error
+	
 	switch intent {
 	case IntentSummary:
-		return s.handleSummary(ctx, entities, response)
+		handlerResult, handlerErr = s.handleSummary(ctx, entities, response)
 	case IntentTrend:
-		return s.handleTrend(ctx, entities, response)
+		handlerResult, handlerErr = s.handleTrend(ctx, entities, response)
 	case IntentCompare:
-		return s.handleCompare(ctx, entities, response)
+		handlerResult, handlerErr = s.handleCompare(ctx, entities, response)
 	case IntentRechargeBreakdown:
-		return s.handleRechargeBreakdown(ctx, entities, response)
+		handlerResult, handlerErr = s.handleRechargeBreakdown(ctx, entities, response)
 	case IntentExtractionBreakdown:
-		return s.handleExtractionBreakdown(ctx, entities, response)
+		handlerResult, handlerErr = s.handleExtractionBreakdown(ctx, entities, response)
 	case IntentDischargeBreakdown:
-		return s.handleDischargeBreakdown(ctx, entities, response)
+		handlerResult, handlerErr = s.handleDischargeBreakdown(ctx, entities, response)
 	case IntentMapCategory:
-		return s.handleMapCategory(ctx, entities, response)
+		handlerResult, handlerErr = s.handleMapCategory(ctx, entities, response)
 	case IntentListBlocks:
-		return s.handleListBlocks(ctx, entities, response)
+		handlerResult, handlerErr = s.handleListBlocks(ctx, entities, response)
 	case IntentListDistricts:
-		return s.handleListDistricts(ctx, entities, response)
+		handlerResult, handlerErr = s.handleListDistricts(ctx, entities, response)
 	case IntentListStates:
-		return s.handleListStates(ctx, entities, response)
+		handlerResult, handlerErr = s.handleListStates(ctx, entities, response)
 	default:
 		response.Text = "I'm not sure what you mean. Try asking for a summary, trend, comparison, list blocks/districts/states, or recharge/extraction breakdowns."
-		return response, nil
+		handlerResult = response
 	}
+	
+	// Track in conversation history
+	if handlerResult != nil {
+		s.mu.Lock()
+		session.AddToHistory(message, handlerResult.Text, string(intent), entities.Locations)
+		s.mu.Unlock()
+		
+		// Add bot response to LLM history
+		if s.nlp.llm != nil && handlerResult.Text != "" {
+			s.nlp.llm.AddToHistory("assistant", handlerResult.Text)
+		}
+	}
+	
+	return handlerResult, handlerErr
+}
+
+// buildChartWithLLM calls the LLM visualization generator and maps it into ChartPayload
+func (s *ChatService) buildChartWithLLM(results []map[string]interface{}, sqlQuery string, userMessage string) (*models.ChartPayload, string) {
+	// Call LLM
+	vizJSON, _, err := s.nlp.llm.GenerateVisualization(results, sqlQuery, userMessage)
+	if err != nil {
+		fmt.Printf("ERROR: LLM visualization failed: %v\n", err)
+		return nil, ""
+	}
+
+	var payload visualizationPayload
+	if err := json.Unmarshal([]byte(vizJSON), &payload); err != nil {
+		fmt.Printf("ERROR: Visualization JSON unmarshal failed: %v | json=%s\n", err, vizJSON)
+		return nil, ""
+	}
+
+	chart := &models.ChartPayload{
+		Type:        payload.Type,
+		Title:       payload.Title,
+		Explanation: payload.Explanation,
+		XAxis:       convertXAxis(payload.XAxis),
+	}
+
+	// Map series -> []ChartSeries
+	for _, srs := range payload.Series {
+		chart.Series = append(chart.Series, models.ChartSeries{
+			Name: srs.Name,
+			Data: convertNumberSlice(srs.Data),
+		})
+	}
+
+	// Pie data
+	for _, p := range payload.PieData {
+		chart.PieData = append(chart.PieData, models.PieDatum{Name: p.Name, Value: p.Value})
+	}
+
+	// Timeline
+	if payload.Timeline != nil {
+		chart.Timeline = &models.TimelinePayload{
+			Data:         payload.Timeline.Data,
+			AutoPlay:     payload.Timeline.AutoPlay,
+			PlayInterval: payload.Timeline.PlayInterval,
+		}
+	}
+	if len(payload.TimelineOptions) > 0 {
+		for _, opt := range payload.TimelineOptions {
+			series := make([]models.ChartSeries, 0, len(opt.Series))
+			for _, srs := range opt.Series {
+				series = append(series, models.ChartSeries{
+					Name: "",
+					Data: convertNumberSlice(srs.Data),
+				})
+			}
+			chart.TimelineOptions = append(chart.TimelineOptions, models.TimelineOption{
+				Title:  opt.Title,
+				Series: series,
+			})
+		}
+	}
+
+	// If everything empty, fail back
+	if chart.Type == "" || len(chart.Series) == 0 {
+		return nil, ""
+	}
+
+	return chart, buildVizText(chart)
+}
+
+// buildSimpleChart is a fallback bar chart if LLM mapping fails
+func buildSimpleChart(results []map[string]interface{}) *models.ChartPayload {
+	if len(results) == 0 {
+		return nil
+	}
+
+	var labels []string
+	var values []float64
+
+	for i, row := range results {
+		if i >= 10 { // Limit to 10 items for readability
+			break
+		}
+		label := ""
+		if v, ok := row["block_name"].(string); ok {
+			label = v
+		} else if v, ok := row["district_name"].(string); ok {
+			label = v
+		} else if v, ok := row["state_name"].(string); ok {
+			label = v
+		} else if v, ok := row["year"].(string); ok {
+			label = v
+		} else {
+			label = fmt.Sprintf("Item %d", i+1)
+		}
+		labels = append(labels, label)
+
+		val := 0.0
+		if v, ok := row["total_extraction"].(float64); ok {
+			val = v
+		} else if v, ok := row["total_recharge"].(float64); ok {
+			val = v
+		} else if v, ok := row["stage"].(float64); ok {
+			val = v
+		} else if v, ok := row["rainfall"].(float64); ok {
+			val = v
+		}
+		values = append(values, val)
+	}
+
+	if len(labels) == 0 || len(values) == 0 {
+		return nil
+	}
+
+	return &models.ChartPayload{
+		Type:  "brush-bar",
+		Title: "📊 Query Results",
+		XAxis: labels,
+		Series: []models.ChartSeries{
+			{
+				Name: "Value",
+				Data: values,
+			},
+		},
+	}
+}
+
+// convertXAxis supports either []string or { data: []string }
+func convertXAxis(x interface{}) interface{} {
+	switch t := x.(type) {
+	case []interface{}:
+		return toStringSlice(t)
+	case []string:
+		return t
+	case map[string]interface{}:
+		if data, ok := t["data"].([]interface{}); ok {
+			return map[string]interface{}{ "data": toStringSlice(data) }
+		}
+		if data, ok := t["data"].([]string); ok {
+			return map[string]interface{}{ "data": data }
+		}
+	}
+	return nil
+}
+
+// convertNumberSlice converts []interface{} to []float64 safely
+func convertNumberSlice(arr []interface{}) []float64 {
+	out := make([]float64, 0, len(arr))
+	for _, v := range arr {
+		switch n := v.(type) {
+		case float64:
+			out = append(out, n)
+		case float32:
+			out = append(out, float64(n))
+		case int:
+			out = append(out, float64(n))
+		case int64:
+			out = append(out, float64(n))
+		case json.Number:
+			f, _ := n.Float64()
+			out = append(out, f)
+		case string:
+			if f, err := strconv.ParseFloat(n, 64); err == nil {
+				out = append(out, f)
+			}
+		}
+	}
+	return out
+}
+
+// toStringSlice converts []interface{} -> []string
+func toStringSlice(arr []interface{}) []string {
+	out := make([]string, 0, len(arr))
+	for _, v := range arr {
+		switch s := v.(type) {
+		case string:
+			out = append(out, s)
+		case fmt.Stringer:
+			out = append(out, s.String())
+		default:
+			out = append(out, fmt.Sprintf("%v", v))
+		}
+	}
+	return out
+}
+
+// getCategoryFromCounts determines the overall category based on block distribution
+func getCategoryFromCounts(safe, semiCritical, critical, overExploited int) string {
+	total := safe + semiCritical + critical + overExploited
+	if total == 0 {
+		return "Unknown"
+	}
+	
+	// Calculate percentages
+	overExploitedPct := float64(overExploited) / float64(total) * 100
+	criticalPct := float64(critical) / float64(total) * 100
+	semiCriticalPct := float64(semiCritical) / float64(total) * 100
+	
+	// Determine overall category based on predominant status
+	if overExploitedPct > 30 {
+		return "over_exploited"
+	} else if criticalPct+overExploitedPct > 40 {
+		return "critical"
+	} else if semiCriticalPct+criticalPct+overExploitedPct > 50 {
+		return "semi_critical"
+	}
+	return "safe"
+}
+
+// buildVizText returns a concise text if explanation exists
+func buildVizText(c *models.ChartPayload) string {
+	if c == nil {
+		return ""
+	}
+	if c.Explanation != "" {
+		return c.Explanation
+	}
+	return "Here is the chart based on the data."
 }
 
 func (s *ChatService) handleSummary(ctx context.Context, e Entities, r *models.ChatResponse) (*models.ChatResponse, error) {
@@ -204,47 +531,40 @@ func (s *ChatService) handleSummary(ctx context.Context, e Entities, r *models.C
 				// Get aggregated district summary
 				districtSummary, err := s.ingres.repo.GetDistrictSummary(ctx, district.DistrictUUID, e.Year)
 				if err == nil && districtSummary != nil {
-					r.Text = fmt.Sprintf("📊 **%s District Assessment Summary (%s)**\n\n"+
-						"📍 **State**: %s\n"+
-						"🏘️ **Total Blocks**: %d\n"+
-						"🌧️ **Average Rainfall**: %.2f mm\n"+
-						"📈 **Average Stage**: %.2f%%\n"+
-						"💧 **Total Recharge**: %.2f mcm\n"+
-						"⚡ **Total Extraction**: %.2f mcm\n\n"+
-						"📊 **Block Categories**:\n"+
-						"   ✅ Safe: %d blocks\n"+
-						"   ⚠️ Semi-Critical: %d blocks\n"+
-						"   🔶 Critical: %d blocks\n"+
-						"   🔴 Over-Exploited: %d blocks",
-						districtSummary.DistrictName, e.Year,
-						districtSummary.StateName,
-						districtSummary.TotalBlocks,
-						districtSummary.AvgRainfall,
-						districtSummary.AvgStage,
-						districtSummary.TotalRecharge,
-						districtSummary.TotalExtraction,
-						districtSummary.SafeBlocks,
-						districtSummary.SemiCriticalBlocks,
-						districtSummary.CriticalBlocks,
-						districtSummary.OverExploitedBlocks,
-					)
+					// Build descriptive text
+					stageStatus := "sustainable"
+					if districtSummary.AvgStage > 100 {
+						stageStatus = "over-exploited on average"
+					} else if districtSummary.AvgStage > 70 {
+						stageStatus = "approaching critical levels"
+					}
+
+					r.Text = fmt.Sprintf("Here's the groundwater assessment for **%s District** in **%s**. "+
+						"With %d blocks, the average extraction stage is %.1f%%, which is %s.",
+						districtSummary.DistrictName, e.Year, districtSummary.TotalBlocks, 
+						districtSummary.AvgStage, stageStatus)
 					r.Data = districtSummary
 					
-					// Add chart data for district breakdown
+					// Add metrics-card for district
 					r.Chart = &models.ChartPayload{
-						Type:  "bar",
-						Title: fmt.Sprintf("Block Categories in %s District", districtSummary.DistrictName),
-						XAxis: []string{"Safe", "Semi-Critical", "Critical", "Over-Exploited"},
-						Series: []models.ChartSeries{
-							{
-								Name: "Number of Blocks",
-								Data: []float64{
-									float64(districtSummary.SafeBlocks),
-									float64(districtSummary.SemiCriticalBlocks),
-									float64(districtSummary.CriticalBlocks),
-									float64(districtSummary.OverExploitedBlocks),
-								},
-							},
+						Type:  "metrics-card",
+						Title: fmt.Sprintf("%s District Groundwater Assessment", districtSummary.DistrictName),
+						MetricsData: &models.MetricsData{
+							LocationName:        districtSummary.DistrictName,
+							LocationType:        "district",
+							Year:                e.Year,
+							Category:            getCategoryFromCounts(districtSummary.SafeBlocks, districtSummary.SemiCriticalBlocks, districtSummary.CriticalBlocks, districtSummary.OverExploitedBlocks),
+							Rainfall:            districtSummary.AvgRainfall,
+							TotalRecharge:       districtSummary.TotalRecharge,
+							TotalExtraction:     districtSummary.TotalExtraction,
+							TotalExtractable:    districtSummary.TotalRecharge * 0.9, // Approximation: ~90% of recharge
+							NaturalDischarge:    districtSummary.TotalRecharge * 0.1, // Approximation: ~10% of recharge
+							Stage:               districtSummary.AvgStage,
+							TotalBlocks:         districtSummary.TotalBlocks,
+							SafeBlocks:          districtSummary.SafeBlocks,
+							SemiCriticalBlocks:  districtSummary.SemiCriticalBlocks,
+							CriticalBlocks:      districtSummary.CriticalBlocks,
+							OverExploitedBlocks: districtSummary.OverExploitedBlocks,
 						},
 					}
 					return r, nil
@@ -265,7 +585,16 @@ func (s *ChatService) handleSummary(ctx context.Context, e Entities, r *models.C
 						district.DistrictName, len(blocksList), strings.Join(blockNames, ", "))
 					return r, nil
 				}
-				r.Text = fmt.Sprintf("I found the District '%s', but I couldn't find any blocks in it.", district.DistrictName)
+				
+				// No blocks found - suggest alternatives
+				r.Text = fmt.Sprintf("⚠️ **District Found: %s**\n\nUnfortunately, there are no blocks with groundwater data available for this district in our database.\n\n"+
+					"🔍 **Try these instead:**\n"+
+					"• \"Show me Punjab state status\"\n"+
+					"• \"What is the groundwater status of Prakasam district?\"\n"+
+					"• \"Show me Nalgonda district\"\n"+
+					"• \"List all districts in Andhra Pradesh\"\n\n"+
+					"💡 *Tip: Most block-level data is available for Andhra Pradesh, Telangana, and other major states.*", 
+					district.DistrictName)
 				return r, nil
 			}
 			
@@ -275,51 +604,46 @@ func (s *ChatService) handleSummary(ctx context.Context, e Entities, r *models.C
 				// Get aggregated state summary
 				stateSummary, err := s.ingres.repo.GetStateSummary(ctx, state.StateUUID, e.Year)
 				if err == nil && stateSummary != nil {
-					r.Text = fmt.Sprintf("📊 **%s State Assessment Summary (%s)**\n\n"+
-						"🏘️ **Total Blocks**: %d\n"+
-						"🌧️ **Average Rainfall**: %.2f mm\n"+
-						"📈 **Average Stage**: %.2f%%\n"+
-						"💧 **Total Recharge**: %.2f mcm\n"+
-						"⚡ **Total Extraction**: %.2f mcm\n\n"+
-						"📊 **Block Categories**:\n"+
-						"   ✅ Safe: %d blocks\n"+
-						"   ⚠️ Semi-Critical: %d blocks\n"+
-						"   🔶 Critical: %d blocks\n"+
-						"   🔴 Over-Exploited: %d blocks",
-						stateSummary.StateName, e.Year,
-						stateSummary.TotalBlocks,
-						stateSummary.AvgRainfall,
-						stateSummary.AvgStage,
-						stateSummary.TotalRecharge,
-						stateSummary.TotalExtraction,
-						stateSummary.SafeBlocks,
-						stateSummary.SemiCriticalBlocks,
-						stateSummary.CriticalBlocks,
-						stateSummary.OverExploitedBlocks,
-					)
+					// Build descriptive text
+					stageStatus := "sustainable"
+					if stateSummary.AvgStage > 100 {
+						stageStatus = "over-exploited on average"
+					} else if stateSummary.AvgStage > 70 {
+						stageStatus = "approaching critical levels"
+					}
+
+					r.Text = fmt.Sprintf("Here's the groundwater assessment for **%s** in **%s**. "+
+						"With %d blocks, the average extraction stage is %.1f%%, which is %s.",
+						stateSummary.StateName, e.Year, stateSummary.TotalBlocks, 
+						stateSummary.AvgStage, stageStatus)
 					r.Data = stateSummary
 					
-					// Add chart data for state breakdown
+					// Add metrics-card for state
 					r.Chart = &models.ChartPayload{
-						Type:  "bar",
-						Title: fmt.Sprintf("Block Categories in %s", stateSummary.StateName),
-						XAxis: []string{"Safe", "Semi-Critical", "Critical", "Over-Exploited"},
-						Series: []models.ChartSeries{
-							{
-								Name: "Number of Blocks",
-								Data: []float64{
-									float64(stateSummary.SafeBlocks),
-									float64(stateSummary.SemiCriticalBlocks),
-									float64(stateSummary.CriticalBlocks),
-									float64(stateSummary.OverExploitedBlocks),
-								},
-							},
+						Type:  "metrics-card",
+						Title: fmt.Sprintf("%s Groundwater Assessment", stateSummary.StateName),
+						MetricsData: &models.MetricsData{
+							LocationName:        stateSummary.StateName,
+							LocationType:        "state",
+							Year:                e.Year,
+							Category:            getCategoryFromCounts(stateSummary.SafeBlocks, stateSummary.SemiCriticalBlocks, stateSummary.CriticalBlocks, stateSummary.OverExploitedBlocks),
+							Rainfall:            stateSummary.AvgRainfall,
+							TotalRecharge:       stateSummary.TotalRecharge,
+							TotalExtraction:     stateSummary.TotalExtraction,
+							TotalExtractable:    stateSummary.TotalRecharge * 0.9, // Approximation: ~90% of recharge
+							NaturalDischarge:    stateSummary.TotalRecharge * 0.1, // Approximation: ~10% of recharge
+							Stage:               stateSummary.AvgStage,
+							TotalBlocks:         stateSummary.TotalBlocks,
+							SafeBlocks:          stateSummary.SafeBlocks,
+							SemiCriticalBlocks:  stateSummary.SemiCriticalBlocks,
+							CriticalBlocks:      stateSummary.CriticalBlocks,
+							OverExploitedBlocks: stateSummary.OverExploitedBlocks,
 						},
 					}
 					return r, nil
 				}
 				
-				// Fallback to listing districts if summary fails
+					// Fallback - no aggregated data available for this state
 				districts, err := s.ingres.GetDistricts(ctx, state.StateUUID)
 				if err == nil && len(districts) > 0 {
 					var districtNames []string
@@ -330,8 +654,11 @@ func (s *ChatService) handleSummary(ctx context.Context, e Entities, r *models.C
 						}
 						districtNames = append(districtNames, d.DistrictName)
 					}
-					r.Text = fmt.Sprintf("I found the State '%s'. It has %d districts. Here are some of them: %s. Please ask for a specific Block (or District) to get more info.", 
-						state.StateName, len(districts), strings.Join(districtNames, ", "))
+					r.Text = fmt.Sprintf("⚠️ **No groundwater assessment data available for %s (%s)**\n\n"+
+						"This state has %d districts but groundwater assessment data has not been loaded yet.\n\n"+
+						"**Available districts**: %s\n\n"+
+						"💡 **Try these states with data**: Punjab, Haryana, Uttar Pradesh, Bihar, Rajasthan, Madhya Pradesh, West Bengal, Odisha, Telangana, Andhra Pradesh", 
+						state.StateName, e.Year, len(districts), strings.Join(districtNames, ", "))
 					return r, nil
 				}
 				r.Text = fmt.Sprintf("I found the State '%s', but I couldn't find any districts in it.", state.StateName)
@@ -358,30 +685,36 @@ func (s *ChatService) handleSummary(ctx context.Context, e Entities, r *models.C
 		return r, nil
 	}
 
-	// Handle NULL/zero values gracefully
-	rainfallText := "N/A"
-	if summary.Rainfall > 0 {
-		rainfallText = fmt.Sprintf("%.2f mm", summary.Rainfall)
-	}
-	
-	stageText := "N/A"
-	if summary.Stage > 0 {
-		stageText = fmt.Sprintf("%.2f%%", summary.Stage)
+	// Build descriptive text
+	stageStatus := "sustainable"
+	if summary.Stage > 100 {
+		stageStatus = "over-exploited (extraction exceeds recharge)"
+	} else if summary.Stage > 70 {
+		stageStatus = "approaching critical levels"
 	}
 
-	r.Text = fmt.Sprintf("📊 **%s Assessment Summary (%s)**\n\n"+
-		"🏷️ **Category**: %s\n"+
-		"📈 **Stage of Extraction**: %s\n"+
-		"🌧️ **Rainfall**: %s\n"+
-		"💧 **Total Recharge**: %.2f mcm\n"+
-		"⚡ **Total Extraction**: %.2f mcm",
-		block.BlockName, e.Year,
-		summary.Category,
-		stageText,
-		rainfallText,
-		summary.TotalRecharge,
-		summary.TotalExtraction,
-	)
+	r.Text = fmt.Sprintf("Here's the groundwater assessment data for **%s** in **%s**. "+
+		"The extraction stage is at %.1f%%, which is %s.",
+		block.BlockName, e.Year, summary.Stage, stageStatus)
+	
+	// Add metrics-card visualization
+	r.Chart = &models.ChartPayload{
+		Type:  "metrics-card",
+		Title: fmt.Sprintf("%s Groundwater Assessment", block.BlockName),
+		MetricsData: &models.MetricsData{
+			LocationName:     block.BlockName,
+			LocationType:     "block",
+			Year:             e.Year,
+			Category:         summary.Category,
+			Rainfall:         summary.Rainfall,
+			TotalRecharge:    summary.TotalRecharge,
+			TotalExtraction:  summary.TotalExtraction,
+			TotalExtractable: summary.TotalExtractable,
+			NaturalDischarge: summary.TotalDischarge,
+			Stage:            summary.Stage,
+			Availability:     summary.Availability,
+		},
+	}
 	
 	r.Data = summary
 	return r, nil
@@ -404,6 +737,10 @@ func isValidYear(year string) bool {
 func (s *ChatService) handleTrend(ctx context.Context, e Entities, r *models.ChatResponse) (*models.ChatResponse, error) {
 	blocks, err := s.ingres.GetBlocksByNames(ctx, e.Locations)
 	
+	var trends []models.AssessmentSummary
+	var locationName string
+	var locationType string
+	
 	// Fallback: Try joining names if no blocks found
 	if len(blocks) == 0 && len(e.Locations) > 0 {
 		joinedName := strings.Join(e.Locations, " ")
@@ -414,32 +751,146 @@ func (s *ChatService) handleTrend(ctx context.Context, e Entities, r *models.Cha
 			// Try District
 			district, err := s.ingres.GetDistrictByName(ctx, joinedName)
 			if err == nil && district != nil {
-				r.Text = fmt.Sprintf("I found the District '%s'. Please ask for a specific Block within this district to get trend data.", district.DistrictName)
-				return r, nil
+				trends, err = s.ingres.GetDistrictTrends(ctx, district.DistrictUUID, e.StartYear, e.EndYear)
+				if err != nil {
+					return nil, err
+				}
+				locationName = district.DistrictName
+				locationType = "district"
+				
+				r.Text = fmt.Sprintf("📈 **Groundwater Trend Analysis: %s District**\n\n"+
+					"📅 **Period**: %s → %s\n"+
+					"📊 **Data Points**: %d years of historical data\n\n"+
+					"*Analyzing recharge vs extraction patterns over time...*",
+					locationName, e.StartYear, e.EndYear, len(trends))
+				
+				// Build trend-card chart and return
+				return s.buildTrendCard(trends, locationName, locationType, e.StartYear, e.EndYear, r), nil
 			}
 			// Try State
 			state, err := s.ingres.GetStateByName(ctx, joinedName)
 			if err == nil && state != nil {
-				r.Text = fmt.Sprintf("I found the State '%s'. Please ask for a specific Block within this state to get trend data.", state.StateName)
-				return r, nil
+				trends, err = s.ingres.GetStateTrends(ctx, state.StateUUID, e.StartYear, e.EndYear)
+				if err != nil {
+					return nil, err
+				}
+				locationName = state.StateName
+				locationType = "state"
+				
+				r.Text = fmt.Sprintf("📈 **Groundwater Trend Analysis: %s State**\n\n"+
+					"📅 **Period**: %s → %s\n"+
+					"📊 **Data Points**: %d years of state-level data\n\n"+
+					"*Analyzing statewide recharge vs extraction patterns...*",
+					locationName, e.StartYear, e.EndYear, len(trends))
+				
+				// Build trend-card chart and return
+				return s.buildTrendCard(trends, locationName, locationType, e.StartYear, e.EndYear, r), nil
 			}
 		}
 	}
 
 	if err != nil || len(blocks) == 0 {
-		r.Text = "Block not found."
+		r.Text = "Location not found. Please specify a valid block, district, or state name."
 		return r, nil
 	}
+	
 	block := blocks[0]
-
-	trends, err := s.ingres.GetAssessmentTrends(ctx, block.BlockUUID, e.StartYear, e.EndYear)
+	trends, err = s.ingres.GetAssessmentTrends(ctx, block.BlockUUID, e.StartYear, e.EndYear)
 	if err != nil {
 		return nil, err
 	}
+	locationName = block.BlockName
+	locationType = "block"
 
-	r.Text = fmt.Sprintf("Here is the trend for %s from %s to %s.", block.BlockName, e.StartYear, e.EndYear)
+	r.Text = fmt.Sprintf("📈 **Groundwater Trend Analysis: %s Block**\n\n"+
+		"📅 **Period**: %s → %s\n\n"+
+		"*Tracking recharge and extraction patterns over time...*",
+		locationName, e.StartYear, e.EndYear)
 	
-	// Build Chart
+	return s.buildTrendCard(trends, locationName, locationType, e.StartYear, e.EndYear, r), nil
+}
+
+// buildTrendCard builds a trend-card visualization for trend analysis
+func (s *ChatService) buildTrendCard(trends []models.AssessmentSummary, locationName, locationType, startYear, endYear string, r *models.ChatResponse) *models.ChatResponse {
+	// Check if we have any data
+	if len(trends) == 0 {
+		r.Text = fmt.Sprintf("⚠️ No trend data available for %s. Please try a different location or time period.", locationName)
+		return r
+	}
+	
+	// Build data points from trends
+	dataPoints := make([]models.TrendDataPoint, 0, len(trends))
+	for _, t := range trends {
+		dataPoints = append(dataPoints, models.TrendDataPoint{
+			Year:       t.Year,
+			Recharge:   t.TotalRecharge,
+			Extraction: t.TotalExtraction,
+			Stage:      t.Stage,
+			Rainfall:   t.Rainfall,
+			Category:   t.Category,
+		})
+	}
+	
+	// Calculate percentage changes (first year to last year)
+	var rechargeChange, extractionChange, stageChange float64
+	if len(dataPoints) >= 2 {
+		first := dataPoints[0]
+		last := dataPoints[len(dataPoints)-1]
+		
+		if first.Recharge > 0 {
+			rechargeChange = ((last.Recharge - first.Recharge) / first.Recharge) * 100
+		}
+		if first.Extraction > 0 {
+			extractionChange = ((last.Extraction - first.Extraction) / first.Extraction) * 100
+		}
+		if first.Stage > 0 {
+			stageChange = ((last.Stage - first.Stage) / first.Stage) * 100
+		}
+	}
+	
+	// Determine overall trend
+	overallTrend := "stable"
+	// If recharge increased and extraction decreased, improving
+	// If stage significantly decreased (good), improving
+	// If stage increased significantly (bad), declining
+	if stageChange < -10 || (rechargeChange > 10 && extractionChange < 0) {
+		overallTrend = "improving"
+	} else if stageChange > 10 || (rechargeChange < -10 && extractionChange > 10) {
+		overallTrend = "declining"
+	}
+	
+	// Update text with data count
+	if len(dataPoints) == 1 {
+		r.Text += fmt.Sprintf("\n\n📊 **Note:** Only data for %s is available.", dataPoints[0].Year)
+	}
+	
+	r.Chart = &models.ChartPayload{
+		Type:  "trend-card",
+		Title: fmt.Sprintf("Groundwater Trends - %s", locationName),
+		TrendData: &models.TrendData{
+			LocationName:     locationName,
+			LocationType:     locationType,
+			StartYear:        startYear,
+			EndYear:          endYear,
+			DataPoints:       dataPoints,
+			RechargeChange:   rechargeChange,
+			ExtractionChange: extractionChange,
+			StageChange:      stageChange,
+			OverallTrend:     overallTrend,
+		},
+	}
+	
+	return r
+}
+
+// buildTrendChart is a helper function to build trend charts (kept for backward compatibility)
+func (s *ChatService) buildTrendChart(trends []models.AssessmentSummary, locationName string, r *models.ChatResponse) *models.ChatResponse {
+	// Check if we have any data
+	if len(trends) == 0 {
+		r.Text = fmt.Sprintf("⚠️ No trend data available for %s. Note: Block-level data is only available for 2024-2025 due to InGRES API limitations. Historical years (2012-2023) only have state-level aggregates which require block data to exist first.", locationName)
+		return r
+	}
+	
 	var years []string
 	var recharge []float64
 	var extraction []float64
@@ -450,28 +901,27 @@ func (s *ChatService) handleTrend(ctx context.Context, e Entities, r *models.Cha
 		extraction = append(extraction, t.TotalExtraction)
 	}
 
+	// Add note if only one year of data
+	if len(years) == 1 {
+		r.Text += fmt.Sprintf("\n\n📊 **Note:** Only data for %s is available. Historical block-level data (2012-2023) is limited due to InGRES API constraints.", years[0])
+	}
+
 	r.Chart = &models.ChartPayload{
-		Type:  "line",
-		Title: "Groundwater Trends",
+		Type:  "gradient-area",
+		Title: fmt.Sprintf("Groundwater Trends - %s", locationName),
 		XAxis: years,
 		Series: []models.ChartSeries{
-			{Name: "Recharge", Data: recharge, Type: "line"},
-			{Name: "Extraction", Data: extraction, Type: "line"},
+			{Name: "Recharge (MCM)", Data: recharge, Type: "line"},
+			{Name: "Extraction (MCM)", Data: extraction, Type: "line"},
 		},
 	}
 	
-	return r, nil
+	return r
 }
 
 func (s *ChatService) handleCompare(ctx context.Context, e Entities, r *models.ChatResponse) (*models.ChatResponse, error) {
 	// Validate minimum locations for comparison
-	// If SQL query exists, it will be executed in ProcessMessage.
-	// If not, and we have < 2 locations, we can still try to generate a comparison if the LLM generated a valid SQL query for it.
-	// But if we are here, it means no SQL was generated or we are in the fallback handler.
-	
 	if len(e.Locations) < 2 {
-		// If we have 1 location, maybe compare with a default or ask for another?
-		// For now, let's just proceed and see if we can find data, or return a softer prompt.
 		if len(e.Locations) == 1 {
 			r.Text = fmt.Sprintf("I found %s. Please mention another location to compare it with.", e.Locations[0])
 			return r, nil
@@ -480,22 +930,213 @@ func (s *ChatService) handleCompare(ctx context.Context, e Entities, r *models.C
 		return r, nil
 	}
 
-	blocks, err := s.ingres.GetBlocksByNames(ctx, e.Locations)
-	if err != nil {
-		r.Text = "Error retrieving block data. Please try again."
+	if !isValidYear(e.Year) {
+		r.Text = "Invalid year format. Please use format like '2024-2025'."
 		return r, nil
 	}
 
-	if len(blocks) == 0 {
-		r.Text = fmt.Sprintf("I couldn't find any of these blocks: %s. Please check the spelling.", strings.Join(e.Locations, ", "))
+	// Try to find states first
+	var statesFound []*models.State
+	var districtsFound []*models.District
+	var blocksFound []models.Block
+	var notFoundLocations []string
+
+	for _, loc := range e.Locations {
+		// Try state first
+		state, err := s.ingres.GetStateByName(ctx, loc)
+		if err == nil && state != nil {
+			statesFound = append(statesFound, state)
+			continue
+		}
+
+		// Try district
+		district, err := s.ingres.GetDistrictByName(ctx, loc)
+		if err == nil && district != nil {
+			districtsFound = append(districtsFound, district)
+			continue
+		}
+
+		// Try block
+		blocks, err := s.ingres.GetBlocksByNames(ctx, []string{loc})
+		if err == nil && len(blocks) > 0 {
+			blocksFound = append(blocksFound, blocks[0])
+			continue
+		}
+
+		notFoundLocations = append(notFoundLocations, loc)
+	}
+
+	// If all locations not found
+	if len(statesFound) == 0 && len(districtsFound) == 0 && len(blocksFound) == 0 {
+		r.Text = fmt.Sprintf("I couldn't find any of these locations: %s. Please check the spelling.", strings.Join(e.Locations, ", "))
 		return r, nil
 	}
 
-	if len(blocks) < 2 {
-		r.Text = fmt.Sprintf("I found only one block (%s). Please provide at least two valid blocks to compare.", blocks[0].BlockName)
+	// Handle state comparison (if 2+ states found)
+	if len(statesFound) >= 2 {
+		return s.compareStates(ctx, statesFound, e.Year, r)
+	}
+
+	// Handle district comparison (if 2+ districts found)
+	if len(districtsFound) >= 2 {
+		return s.compareDistricts(ctx, districtsFound, e.Year, r)
+	}
+
+	// Handle block comparison (if 2+ blocks found)
+	if len(blocksFound) >= 2 {
+		return s.compareBlocks(ctx, blocksFound, e.Year, r)
+	}
+
+	// Mixed types - try to compare whatever we have
+	totalFound := len(statesFound) + len(districtsFound) + len(blocksFound)
+	if totalFound < 2 {
+		var foundNames []string
+		for _, s := range statesFound {
+			foundNames = append(foundNames, s.StateName+" (state)")
+		}
+		for _, d := range districtsFound {
+			foundNames = append(foundNames, d.DistrictName+" (district)")
+		}
+		for _, b := range blocksFound {
+			foundNames = append(foundNames, b.BlockName+" (block)")
+		}
+		r.Text = fmt.Sprintf("I found only: %s. Please provide at least two valid locations of the same type (states, districts, or blocks) to compare.", strings.Join(foundNames, ", "))
 		return r, nil
 	}
 
+	// If we have mixed types, compare whatever is most common
+	if len(statesFound) >= 2 {
+		return s.compareStates(ctx, statesFound, e.Year, r)
+	}
+	if len(districtsFound) >= 2 {
+		return s.compareDistricts(ctx, districtsFound, e.Year, r)
+	}
+	if len(blocksFound) >= 2 {
+		return s.compareBlocks(ctx, blocksFound, e.Year, r)
+	}
+
+	r.Text = "Please compare locations of the same type (e.g., two states, two districts, or two blocks)."
+	return r, nil
+}
+
+// compareStates compares multiple states
+func (s *ChatService) compareStates(ctx context.Context, states []*models.State, year string, r *models.ChatResponse) (*models.ChatResponse, error) {
+	var names []string
+	var stages []float64
+	var recharges []float64
+	var extractions []float64
+	var safeBlocks []float64
+	var criticalBlocks []float64
+
+	for _, state := range states {
+		summary, err := s.ingres.GetStateSummary(ctx, state.StateUUID, year)
+		if err != nil || summary == nil {
+			continue
+		}
+		names = append(names, state.StateName)
+		stages = append(stages, summary.AvgStage)
+		recharges = append(recharges, summary.TotalRecharge)
+		extractions = append(extractions, summary.TotalExtraction)
+		safeBlocks = append(safeBlocks, float64(summary.SafeBlocks))
+		criticalBlocks = append(criticalBlocks, float64(summary.CriticalBlocks+summary.OverExploitedBlocks))
+	}
+
+	if len(names) < 2 {
+		r.Text = fmt.Sprintf("Could not retrieve sufficient data for %s comparison.", year)
+		return r, nil
+	}
+
+	// Find best and worst performers
+	bestIdx, worstIdx := 0, 0
+	for i := range stages {
+		if stages[i] < stages[bestIdx] {
+			bestIdx = i
+		}
+		if stages[i] > stages[worstIdx] {
+			worstIdx = i
+		}
+	}
+
+	r.Text = fmt.Sprintf("🔍 **State Comparison Analysis (%s)**\n\n"+
+		"📊 **Comparing**: %s\n\n"+
+		"🏆 **Best Performer**: %s (%.1f%% stage)\n"+
+		"⚠️ **Needs Attention**: %s (%.1f%% stage)\n\n"+
+		"*Lower stage %% indicates more sustainable groundwater usage.*",
+		year, strings.Join(names, " vs "),
+		names[bestIdx], stages[bestIdx],
+		names[worstIdx], stages[worstIdx])
+	r.Chart = &models.ChartPayload{
+		Type:  "brush-bar",
+		Title: fmt.Sprintf("🔍 State Comparison (%s)", year),
+		XAxis: names,
+		Series: []models.ChartSeries{
+			{Name: "Avg Stage (%)", Data: stages},
+			{Name: "Recharge (MCM)", Data: recharges},
+			{Name: "Extraction (MCM)", Data: extractions},
+		},
+	}
+
+	return r, nil
+}
+
+// compareDistricts compares multiple districts
+func (s *ChatService) compareDistricts(ctx context.Context, districts []*models.District, year string, r *models.ChatResponse) (*models.ChatResponse, error) {
+	var names []string
+	var stages []float64
+	var recharges []float64
+	var extractions []float64
+
+	for _, district := range districts {
+		summary, err := s.ingres.GetDistrictSummary(ctx, district.DistrictUUID, year)
+		if err != nil || summary == nil {
+			continue
+		}
+		names = append(names, district.DistrictName)
+		stages = append(stages, summary.AvgStage)
+		recharges = append(recharges, summary.TotalRecharge)
+		extractions = append(extractions, summary.TotalExtraction)
+	}
+
+	if len(names) < 2 {
+		r.Text = fmt.Sprintf("Could not retrieve sufficient data for %s comparison.", year)
+		return r, nil
+	}
+
+	// Find best and worst performers
+	bestIdx, worstIdx := 0, 0
+	for i := range stages {
+		if stages[i] < stages[bestIdx] {
+			bestIdx = i
+		}
+		if stages[i] > stages[worstIdx] {
+			worstIdx = i
+		}
+	}
+
+	r.Text = fmt.Sprintf("🔍 **District Comparison Analysis (%s)**\n\n"+
+		"📊 **Comparing**: %s\n\n"+
+		"🏆 **Best Performer**: %s (%.1f%% stage)\n"+
+		"⚠️ **Needs Attention**: %s (%.1f%% stage)\n\n"+
+		"*Lower stage %% indicates more sustainable groundwater usage.*",
+		year, strings.Join(names, " vs "),
+		names[bestIdx], stages[bestIdx],
+		names[worstIdx], stages[worstIdx])
+	r.Chart = &models.ChartPayload{
+		Type:  "brush-bar",
+		Title: fmt.Sprintf("🔍 District Comparison (%s)", year),
+		XAxis: names,
+		Series: []models.ChartSeries{
+			{Name: "Avg Stage (%)", Data: stages},
+			{Name: "Recharge (MCM)", Data: recharges},
+			{Name: "Extraction (MCM)", Data: extractions},
+		},
+	}
+
+	return r, nil
+}
+
+// compareBlocks compares multiple blocks (original logic refactored)
+func (s *ChatService) compareBlocks(ctx context.Context, blocks []models.Block, year string, r *models.ChatResponse) (*models.ChatResponse, error) {
 	// Remove duplicates
 	uniqueBlocks := make(map[uuid.UUID]models.Block)
 	for _, b := range blocks {
@@ -509,20 +1150,14 @@ func (s *ChatService) handleCompare(ctx context.Context, e Entities, r *models.C
 		blockList = append(blockList, b)
 	}
 
-	// Validate year
-	if !isValidYear(e.Year) {
-		r.Text = "Invalid year format. Please use format like '2024-2025'."
-		return r, nil
-	}
-
-	comparisons, err := s.ingres.GetAssessmentComparison(ctx, uuids, e.Year)
+	comparisons, err := s.ingres.GetAssessmentComparison(ctx, uuids, year)
 	if err != nil {
 		r.Text = "Error retrieving comparison data. Please try again."
 		return r, nil
 	}
 
 	if len(comparisons) == 0 {
-		r.Text = fmt.Sprintf("No data found for the selected blocks in %s.", e.Year)
+		r.Text = fmt.Sprintf("No data found for the selected blocks in %s.", year)
 		return r, nil
 	}
 
@@ -532,7 +1167,6 @@ func (s *ChatService) handleCompare(ctx context.Context, e Entities, r *models.C
 	var extractions []float64
 
 	for _, c := range comparisons {
-		// Find block name
 		for _, b := range blockList {
 			if b.BlockUUID == c.BlockUUID {
 				names = append(names, b.BlockName)
@@ -544,17 +1178,33 @@ func (s *ChatService) handleCompare(ctx context.Context, e Entities, r *models.C
 		extractions = append(extractions, c.TotalExtraction)
 	}
 
-	r.Text = fmt.Sprintf("📊 **Comparison of %d blocks for %s**\n\nBlocks: %s", 
-		len(comparisons), e.Year, strings.Join(names, ", "))
+	// Find best and worst performers
+	bestIdx, worstIdx := 0, 0
+	for i := range stages {
+		if stages[i] < stages[bestIdx] {
+			bestIdx = i
+		}
+		if stages[i] > stages[worstIdx] {
+			worstIdx = i
+		}
+	}
 
+	r.Text = fmt.Sprintf("🔍 **Block Comparison Analysis (%s)**\n\n"+
+		"📊 **Comparing**: %s\n\n"+
+		"🏆 **Best Performer**: %s (%.1f%% stage)\n"+
+		"⚠️ **Needs Attention**: %s (%.1f%% stage)\n\n"+
+		"*Lower stage %% = Better groundwater sustainability*",
+		year, strings.Join(names, " vs "),
+		names[bestIdx], stages[bestIdx],
+		names[worstIdx], stages[worstIdx])
 	r.Chart = &models.ChartPayload{
-		Type:  "bar",
-		Title: fmt.Sprintf("Groundwater Comparison (%s)", e.Year),
+		Type:  "brush-bar",
+		Title: fmt.Sprintf("🔍 Block Comparison (%s)", year),
 		XAxis: names,
 		Series: []models.ChartSeries{
-			{Name: "Stage (%)", Data: stages, Type: "bar"},
-			{Name: "Recharge (mcm)", Data: recharges, Type: "bar"},
-			{Name: "Extraction (mcm)", Data: extractions, Type: "bar"},
+			{Name: "Stage (%)", Data: stages},
+			{Name: "Recharge (MCM)", Data: recharges},
+			{Name: "Extraction (MCM)", Data: extractions},
 		},
 	}
 
@@ -584,18 +1234,18 @@ func (s *ChatService) handleRechargeBreakdown(ctx context.Context, e Entities, r
 		return nil, err
 	}
 
-	r.Text = fmt.Sprintf("📊 **Recharge Breakdown for %s (%s)**", block.BlockName, e.Year)
+	r.Text = fmt.Sprintf("💧 **Recharge Breakdown for %s (%s)**\n\n🏗️ **Command Area**: %.2f MCM (irrigated zones)\n🌾 **Non-Command Area**: %.2f MCM (rain-fed zones)", block.BlockName, e.Year, breakdown[0].Command, breakdown[0].NonCommand)
 
-	// Show Command vs Non-Command as BAR chart (not pie!)
+	// Show Command vs Non-Command as brush-bar for interactive comparison
 	if len(breakdown) > 0 {
 		item := breakdown[0]
 		r.Chart = &models.ChartPayload{
-			Type:  "bar",
-			Title: fmt.Sprintf("Recharge Distribution - %s", block.BlockName),
+			Type:  "brush-bar",
+			Title: fmt.Sprintf("💧 Recharge Distribution - %s", block.BlockName),
 			XAxis: []string{"Command Area", "Non-Command Area"},
 			Series: []models.ChartSeries{
 				{
-					Name: "Recharge (mcm)",
+					Name: "Recharge (MCM)",
 					Data: []float64{item.Command, item.NonCommand},
 					Type: "bar",
 				},
@@ -618,6 +1268,81 @@ func (s *ChatService) handleExtractionBreakdown(ctx context.Context, e Entities,
 		}
 	}
 	
+	// If still no blocks, try district or state
+	if len(blocks) == 0 && len(e.Locations) > 0 {
+		locationName := strings.Join(e.Locations, " ")
+		
+		// Try District
+		district, err := s.ingres.GetDistrictByName(ctx, locationName)
+		if err == nil && district != nil {
+			// Get district summary with aggregated extraction data
+			summary, err := s.ingres.repo.GetDistrictSummary(ctx, district.DistrictUUID, e.Year)
+			if err == nil && summary != nil {
+				r.Text = fmt.Sprintf("⛏️ **Extraction Summary for %s District (%s)**\n\n"+
+					"📍 **State**: %s\n"+
+					"🏘️ **Total Blocks**: %d\n"+
+					"⚡ **Total Extraction**: %.2f MCM\n"+
+					"💧 **Total Recharge**: %.2f MCM\n"+
+					"📈 **Average Stage**: %.2f%%",
+					district.DistrictName, e.Year,
+					summary.StateName,
+					summary.TotalBlocks,
+					summary.TotalExtraction,
+					summary.TotalRecharge,
+					summary.AvgStage)
+				
+				r.Chart = &models.ChartPayload{
+					Type:  "bar",
+					Title: fmt.Sprintf("Extraction vs Recharge - %s District", district.DistrictName),
+					XAxis: []string{"Total Extraction", "Total Recharge"},
+					Series: []models.ChartSeries{
+						{
+							Name: "Volume (MCM)",
+							Data: []float64{summary.TotalExtraction, summary.TotalRecharge},
+							Type: "bar",
+						},
+					},
+				}
+				return r, nil
+			}
+		}
+		
+		// Try State
+		state, err := s.ingres.GetStateByName(ctx, locationName)
+		if err == nil && state != nil {
+			summary, err := s.ingres.repo.GetStateSummary(ctx, state.StateUUID, e.Year)
+			if err == nil && summary != nil {
+				r.Text = fmt.Sprintf("⛏️ **Extraction Summary for %s State (%s)**\n\n"+
+					"🏘️ **Total Blocks**: %d\n"+
+					"⚡ **Total Extraction**: %.2f MCM\n"+
+					"💧 **Total Recharge**: %.2f MCM\n"+
+					"📈 **Average Stage**: %.2f%%",
+					state.StateName, e.Year,
+					summary.TotalBlocks,
+					summary.TotalExtraction,
+					summary.TotalRecharge,
+					summary.AvgStage)
+				
+				r.Chart = &models.ChartPayload{
+					Type:  "bar",
+					Title: fmt.Sprintf("Extraction vs Recharge - %s", state.StateName),
+					XAxis: []string{"Total Extraction", "Total Recharge"},
+					Series: []models.ChartSeries{
+						{
+							Name: "Volume (MCM)",
+							Data: []float64{summary.TotalExtraction, summary.TotalRecharge},
+							Type: "bar",
+						},
+					},
+				}
+				return r, nil
+			}
+		}
+		
+		r.Text = fmt.Sprintf("I couldn't find extraction data for '%s'. Try a specific district or state name.", locationName)
+		return r, nil
+	}
+	
 	if err != nil || len(blocks) == 0 {
 		r.Text = "I couldn't find that block. Please check the spelling."
 		return r, nil
@@ -629,17 +1354,17 @@ func (s *ChatService) handleExtractionBreakdown(ctx context.Context, e Entities,
 		return nil, err
 	}
 
-	r.Text = fmt.Sprintf("📊 **Extraction Breakdown for %s (%s)**", block.BlockName, e.Year)
+	r.Text = fmt.Sprintf("⛏️ **Extraction Breakdown for %s (%s)**\n\n🏗️ **Command Area**: %.2f MCM\n🌾 **Non-Command Area**: %.2f MCM", block.BlockName, e.Year, breakdown[0].Command, breakdown[0].NonCommand)
 
 	if len(breakdown) > 0 {
 		item := breakdown[0]
 		r.Chart = &models.ChartPayload{
-			Type:  "bar",
-			Title: fmt.Sprintf("Extraction Distribution - %s", block.BlockName),
+			Type:  "brush-bar",
+			Title: fmt.Sprintf("⛏️ Extraction Distribution - %s", block.BlockName),
 			XAxis: []string{"Command Area", "Non-Command Area"},
 			Series: []models.ChartSeries{
 				{
-					Name: "Extraction (mcm)",
+					Name: "Extraction (MCM)",
 					Data: []float64{item.Command, item.NonCommand},
 					Type: "bar",
 				},
@@ -662,17 +1387,17 @@ func (s *ChatService) handleDischargeBreakdown(ctx context.Context, e Entities, 
 		return nil, err
 	}
 
-	r.Text = fmt.Sprintf("📊 **Discharge Breakdown for %s (%s)**", block.BlockName, e.Year)
+	r.Text = fmt.Sprintf("🌊 **Discharge Breakdown for %s (%s)**\n\n🏗️ **Command Area**: %.2f MCM\n🌾 **Non-Command Area**: %.2f MCM", block.BlockName, e.Year, breakdown[0].Command, breakdown[0].NonCommand)
 
 	if len(breakdown) > 0 {
 		item := breakdown[0]
 		r.Chart = &models.ChartPayload{
-			Type:  "bar",
-			Title: fmt.Sprintf("Discharge Distribution - %s", block.BlockName),
+			Type:  "brush-bar",
+			Title: fmt.Sprintf("🌊 Discharge Distribution - %s", block.BlockName),
 			XAxis: []string{"Command Area", "Non-Command Area"},
 			Series: []models.ChartSeries{
 				{
-					Name: "Discharge (mcm)",
+					Name: "Discharge (MCM)",
 					Data: []float64{item.Command, item.NonCommand},
 					Type: "bar",
 				},
@@ -688,44 +1413,74 @@ func (s *ChatService) handleMapCategory(ctx context.Context, e Entities, r *mode
 		return r, nil
 	}
 
-	blocks, err := s.ingres.GetBlocksByCategory(ctx, e.Category)
+	var blocks []models.Block
+	var err error
+	var locationName string
+
+	// Check if location is specified
+	if len(e.Locations) > 0 {
+		locationName = strings.Join(e.Locations, " ")
+		blocks, err = s.ingres.repo.GetBlocksByCategoryAndLocation(ctx, e.Category, locationName)
+	} else {
+		blocks, err = s.ingres.GetBlocksByCategory(ctx, e.Category)
+	}
+
 	if err != nil {
 		return nil, err
 	}
 
-	r.Text = fmt.Sprintf("Found %d blocks in %s category.", len(blocks), e.Category)
-
-	// Build GeoJSON FeatureCollection
-	features := []interface{}{}
-	for _, b := range blocks {
-		// Assuming b.GeomGeoJSON is raw JSON bytes
-		// We need to unmarshal it or just embed it.
-		// Since MapPayload.GeoJSON is interface{}, we can pass a struct or map.
-		// Let's construct a simple Feature.
-		var geom interface{}
-		if len(b.GeomGeoJSON) > 0 {
-			if err := json.Unmarshal(b.GeomGeoJSON, &geom); err != nil {
-				fmt.Printf("Error unmarshaling geometry for block %s: %v\n", b.BlockName, err)
-				continue
-			}
+	if len(blocks) == 0 {
+		if locationName != "" {
+			r.Text = fmt.Sprintf("No %s blocks found in %s.", e.Category, locationName)
+		} else {
+			r.Text = fmt.Sprintf("No %s blocks found.", e.Category)
 		}
-
-		feature := map[string]interface{}{
-			"type": "Feature",
-			"properties": map[string]interface{}{
-				"name": b.BlockName,
-				"uuid": b.BlockUUID,
-			},
-			"geometry": geom,
-		}
-		features = append(features, feature)
+		return r, nil
 	}
 
-	r.Map = &models.MapPayload{
-		Title: fmt.Sprintf("%s Blocks", e.Category),
-		GeoJSON: map[string]interface{}{
-			"type":     "FeatureCollection",
-			"features": features,
+	// Build response text with block names
+	var blockNames []string
+	limit := 15
+	for i, b := range blocks {
+		if i >= limit {
+			break
+		}
+		blockNames = append(blockNames, b.BlockName)
+	}
+
+	if locationName != "" {
+		r.Text = fmt.Sprintf("🔍 **%s Blocks in %s (%d total)**\n\n%s",
+			strings.Title(strings.ToLower(e.Category)),
+			strings.ToUpper(locationName),
+			len(blocks),
+			strings.Join(blockNames, ", "))
+	} else {
+		r.Text = fmt.Sprintf("🔍 **%s Blocks (%d total)**\n\n%s",
+			strings.Title(strings.ToLower(e.Category)),
+			len(blocks),
+			strings.Join(blockNames, ", "))
+	}
+
+	if len(blocks) > limit {
+		r.Text += fmt.Sprintf("\n\n... and %d more blocks", len(blocks)-limit)
+	}
+
+	// Add chart showing distribution
+	r.Chart = &models.ChartPayload{
+		Type:  "bar",
+		Title: fmt.Sprintf("%s Blocks - %s", strings.Title(strings.ToLower(e.Category)), locationName),
+		XAxis: blockNames,
+		Series: []models.ChartSeries{
+			{
+				Name: "Count",
+				Data: func() []float64 {
+					data := make([]float64, len(blockNames))
+					for i := range data {
+						data[i] = 1 // Just to show each block
+					}
+					return data
+				}(),
+			},
 		},
 	}
 
@@ -743,6 +1498,72 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 	var locationFilter string
 	if len(e.Locations) > 0 {
 		locationFilter = strings.ToLower(strings.Join(e.Locations, " "))
+	}
+	
+	// PRIORITY: If category is specified (with or without location), handle it first
+	if e.Category != "" {
+		locationName := ""
+		if len(e.Locations) > 0 {
+			locationName = strings.Join(e.Locations, " ")
+		}
+		
+		// Use the repository method that handles category+location properly
+		blocks, err = s.ingres.repo.GetBlocksByCategoryAndLocation(ctx, e.Category, locationName)
+		if err == nil && len(blocks) > 0 {
+			var blockNames []string
+			limit := 15
+			for i, b := range blocks {
+				if i >= limit {
+					break
+				}
+				blockNames = append(blockNames, b.BlockName)
+			}
+			
+			if locationName != "" {
+				r.Text = fmt.Sprintf("🔍 **%s Blocks in %s (%d total)**\n\n%s",
+					strings.Title(strings.ToLower(e.Category)),
+					strings.ToUpper(locationName),
+					len(blocks),
+					strings.Join(blockNames, ", "))
+			} else {
+				r.Text = fmt.Sprintf("🔍 **%s Blocks (%d total)**\n\n%s",
+					strings.Title(strings.ToLower(e.Category)),
+					len(blocks),
+					strings.Join(blockNames, ", "))
+			}
+			
+			if len(blocks) > limit {
+				r.Text += fmt.Sprintf("\n\n... and %d more blocks", len(blocks)-limit)
+			}
+			
+			// Add chart
+			r.Chart = &models.ChartPayload{
+				Type:  "bar",
+				Title: fmt.Sprintf("%s Blocks - %s", strings.Title(strings.ToLower(e.Category)), locationName),
+				XAxis: blockNames,
+				Series: []models.ChartSeries{
+					{
+						Name: "Count",
+						Data: func() []float64 {
+							data := make([]float64, len(blockNames))
+							for i := range data {
+								data[i] = 1
+							}
+							return data
+						}(),
+					},
+				},
+			}
+			return r, nil
+		}
+		
+		// If no blocks found for category
+		if locationName != "" {
+			r.Text = fmt.Sprintf("No %s blocks found in %s.", e.Category, locationName)
+		} else {
+			r.Text = fmt.Sprintf("No %s blocks found.", e.Category)
+		}
+		return r, nil
 	}
 	
 	switch e.Metric {
@@ -862,14 +1683,22 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 		}
 	}
 
-	r.Text = fmt.Sprintf("Found %d blocks where %s %s %.2f. Here are some: %s", 
+	r.Text = fmt.Sprintf("🔍 **Found %d blocks** where %s %s %.2f\n\n"+
+		"📊 **Top Results**: %s\n\n"+
+		"*Use the interactive chart below to explore all %d matching blocks.*",
 		len(summaries), e.Metric, e.Operator, e.Threshold, 
-		strings.Join(blockNames[:min(5, len(blockNames))], ", "))
+		strings.Join(blockNames[:min(5, len(blockNames))], ", "),
+		len(summaries))
 
-	// Create chart
+	// Create chart - use large-area for many results, brush-bar for fewer
+	chartType := "brush-bar"
+	if len(blockNames) > 10 {
+		chartType = "large-area" // Better for many data points with zoom
+	}
+
 	r.Chart = &models.ChartPayload{
-		Type:  "bar",
-		Title: fmt.Sprintf("Blocks by %s %s %.2f", e.Metric, e.Operator, e.Threshold),
+		Type:  chartType,
+		Title: fmt.Sprintf("🔍 Blocks by %s %s %.2f", e.Metric, e.Operator, e.Threshold),
 		XAxis: blockNames[:min(20, len(blockNames))],
 		Series: []models.ChartSeries{
 			{Name: strings.Title(e.Metric), Data: values[:min(20, len(values))], Type: "bar"},

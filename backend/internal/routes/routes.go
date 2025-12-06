@@ -1,7 +1,7 @@
-```go
 package routes
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/hxrshxz/ground-sense-bot/backend/internal/chat"
@@ -41,7 +41,34 @@ func RegisterRoutes(mux *http.ServeMux, cfg *config.Config, db *database.Service
 	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		chat.ServeWs(hub, w, r)
 	})
-	
+
+	// Debug Route for Testing
+	mux.HandleFunc("/api/debug/chat", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		var req struct {
+			Message  string `json:"message"`
+			Username string `json:"username"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		user := req.Username
+		if user == "" {
+			user = "debug_user"
+		}
+		resp, err := chatService.ProcessMessage(r.Context(), req.Message, user)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(resp)
+	})
+
 	// Register INGRES routes
 	mux.HandleFunc("/api/states", ingresController.GetStates)
 	mux.HandleFunc("/api/districts", ingresController.GetDistricts)

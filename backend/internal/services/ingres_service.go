@@ -77,6 +77,14 @@ func (s *IngresService) GetAssessmentTrends(ctx context.Context, blockUUID uuid.
 	return s.repo.GetAssessmentTrends(ctx, blockUUID, startYear, endYear)
 }
 
+func (s *IngresService) GetStateTrends(ctx context.Context, stateUUID uuid.UUID, startYear, endYear string) ([]models.AssessmentSummary, error) {
+	return s.repo.GetStateTrends(ctx, stateUUID, startYear, endYear)
+}
+
+func (s *IngresService) GetDistrictTrends(ctx context.Context, districtUUID uuid.UUID, startYear, endYear string) ([]models.AssessmentSummary, error) {
+	return s.repo.GetDistrictTrends(ctx, districtUUID, startYear, endYear)
+}
+
 func (s *IngresService) GetBlocksByNames(ctx context.Context, names []string) ([]models.Block, error) {
 	return s.repo.GetBlocksByNamesSimple(ctx, names)
 }
@@ -136,4 +144,12 @@ func (s *IngresService) GetBlocksByStage(ctx context.Context, threshold float64,
 
 func (s *IngresService) GetBlockByUUID(ctx context.Context, blockUUID uuid.UUID) (*models.Block, error) {
 	return s.repo.GetBlockByUUID(ctx, blockUUID)
+}
+
+func (s *IngresService) GetStateSummary(ctx context.Context, stateUUID uuid.UUID, year string) (*repositories.StateSummary, error) {
+	return s.repo.GetStateSummary(ctx, stateUUID, year)
+}
+
+func (s *IngresService) GetDistrictSummary(ctx context.Context, districtUUID uuid.UUID, year string) (*repositories.DistrictSummary, error) {
+	return s.repo.GetDistrictSummary(ctx, districtUUID, year)
 }

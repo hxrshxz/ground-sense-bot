@@ -56,7 +56,6 @@ import {
 import { GroundwaterComparisonChart } from "./GroundWaterComponent";
 import AIResponseRenderer from "./ai-components/AIResponseRenderer";
 import AIResponseRendererV2 from "./ai-components/AIResponseRendererV2";
-import GroundwaterAnalysisRenderer from "./ai-components/GroundwaterAnalysisRenderer";
 const StateDeepDiveCard = React.lazy(() => import("./cards/StateDeepDiveCard"));
 import { PUNJAB_PROFILE } from "@/data/stateGroundwaterData";
 import { GeminiApiService } from "../services/geminiApi";
@@ -89,202 +88,6 @@ const RainfallImpactCard = React.lazy(() =>
 const StateComparisonCard = React.lazy(
   () => import("./cards/StateComparisonCard")
 );
-// Newly added rich chart components
-const ExtractionTrendLine = React.lazy(
-  () => import("./charts/ExtractionTrendLine")
-);
-const RechargeCompositionDonut = React.lazy(
-  () => import("./charts/RechargeCompositionDonut")
-);
-const SectorUsageStackedBar = React.lazy(
-  () => import("./charts/SectorUsageStackedBar")
-);
-const RiskRadar = React.lazy(() => import("./charts/RiskRadar"));
-const KPIStatGroup = React.lazy(() => import("./charts/KPIStatGroup"));
-const ChartSkeleton = React.lazy(() => import("./charts/ChartSkeleton"));
-
-// Lightweight helper to map a state profile to chart props
-interface StateProfileLite {
-  timeSeries?: {
-    year: number;
-    extraction: number;
-    recharge?: number;
-    net?: number;
-  }[];
-  rechargeComponents?: { name: string; value: number }[];
-  sectors?: { name: string; value: number }[];
-  riskFactors?: { factor: string; score: number }[];
-  extractionStage?: number;
-  annualDeclineM?: number;
-  name?: string;
-}
-
-// Composite bundles for predefined graphical prompts
-const CropInsightBundle: React.FC<{ profile: StateProfileLite }> = ({
-  profile,
-}) => {
-  const trendData = (profile.timeSeries || []).map((d) => ({
-    year: d.year,
-    extraction: d.extraction,
-    recharge: d.recharge,
-    net: d.net,
-  }));
-  const rechargeSlices = (profile.rechargeComponents || []).map((r) => ({
-    name: r.name,
-    value: r.value,
-  }));
-  const sectorData = (profile.sectors || []).map((s) => ({
-    sector: s.name,
-    value: s.value,
-  }));
-  const kpis = [
-    {
-      label: "Stage",
-      value: (profile.extractionStage ?? "--") + "%",
-      change: undefined,
-      sparkline: trendData.map((t) => t.extraction),
-      color: "#0ea5e9",
-    },
-    {
-      label: "Decline",
-      value: (profile.annualDeclineM ?? "--") + " m/yr",
-      change: undefined,
-      sparkline: trendData.map((t) => t.net ?? 0),
-      color: "#ef4444",
-    },
-  ];
-  return (
-    <div className="space-y-6">
-      <CropRecommendationCard region={profile.name || "Region"} />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2">
-          <React.Suspense
-            fallback={<ChartSkeleton variant="line" height={280} />}
-          >
-            <ExtractionTrendLine data={trendData} />
-          </React.Suspense>
-        </div>
-        <div className="space-y-6">
-          <React.Suspense
-            fallback={<ChartSkeleton variant="donut" height={260} />}
-          >
-            <RechargeCompositionDonut data={rechargeSlices} />
-          </React.Suspense>
-          <React.Suspense
-            fallback={<ChartSkeleton variant="kpi" height={160} />}
-          >
-            <KPIStatGroup items={kpis} />
-          </React.Suspense>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const PolicyRechargeBundle: React.FC<{ profile: StateProfileLite }> = ({
-  profile,
-}) => {
-  const rechargeSlices = (profile.rechargeComponents || []).map((r) => ({
-    name: r.name,
-    value: r.value,
-  }));
-  const riskData = (profile.riskFactors || []).map((r) => ({
-    factor: r.factor,
-    score: r.score,
-  }));
-  const kpis = [
-    {
-      label: "Stage %",
-      value: (profile.extractionStage ?? "--") + "%",
-      sparkline: [],
-      color: "#6366f1",
-    },
-    {
-      label: "Decline",
-      value: (profile.annualDeclineM ?? "--") + " m/yr",
-      sparkline: [],
-      color: "#ef4444",
-    },
-  ];
-  return (
-    <div className="space-y-6">
-      <PolicyRechargeCard
-        region={profile.name || "Target Region"}
-        baselineRecharge={100}
-      />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="space-y-6">
-          <React.Suspense
-            fallback={<ChartSkeleton variant="donut" height={260} />}
-          >
-            <RechargeCompositionDonut data={rechargeSlices} />
-          </React.Suspense>
-          <React.Suspense
-            fallback={<ChartSkeleton variant="kpi" height={160} />}
-          >
-            <KPIStatGroup items={kpis} />
-          </React.Suspense>
-        </div>
-        <div className="md:col-span-2">
-          <React.Suspense
-            fallback={<ChartSkeleton variant="radar" height={300} />}
-          >
-            <RiskRadar data={riskData} />
-          </React.Suspense>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const RainfallImpactBundle: React.FC<{ profile: StateProfileLite }> = ({
-  profile,
-}) => {
-  const trendData = (profile.timeSeries || []).map((d) => ({
-    year: d.year,
-    extraction: d.extraction,
-    recharge: d.recharge,
-    net: d.net,
-  }));
-  const rechargeSlices = (profile.rechargeComponents || []).map((r) => ({
-    name: r.name,
-    value: r.value,
-  }));
-  const sectorData = (profile.sectors || []).map((s) => ({
-    sector: s.name,
-    value: s.value,
-  }));
-  return (
-    <div className="space-y-6">
-      <RainfallImpactCard
-        region={profile.name || "Region"}
-        season="Monsoon 2024"
-        stressIndex={profile.extractionStage}
-      />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2">
-          <React.Suspense
-            fallback={<ChartSkeleton variant="line" height={280} />}
-          >
-            <ExtractionTrendLine data={trendData} />
-          </React.Suspense>
-        </div>
-        <div>
-          <React.Suspense
-            fallback={<ChartSkeleton variant="donut" height={260} />}
-          >
-            <RechargeCompositionDonut data={rechargeSlices} />
-          </React.Suspense>
-        </div>
-      </div>
-      <div>
-        <React.Suspense fallback={<ChartSkeleton variant="bar" height={260} />}>
-          <SectorUsageStackedBar data={sectorData} />
-        </React.Suspense>
-      </div>
-    </div>
-  );
-};
 
 //================================================================================
 // --- LISTENING INDICATOR COMPONENT ---
@@ -1752,6 +1555,10 @@ Your response should sound like it's coming from a knowledgeable human analyst e
       // Actually, we add user messages locally in handleChatSubmit.
       // So we only care about BOT messages here.
       if (lastMsg.sender === "bot") {
+        console.log("Bot message received:", lastMsg);
+        console.log("Payload:", lastMsg.payload);
+        console.log("Chart:", lastMsg.payload?.chart);
+
         const newMsg: ChatMessage = {
           id: Number(lastMsg.id) || Date.now(),
           type: "ai",
@@ -1974,7 +1781,7 @@ Your response should sound like it's coming from a knowledgeable human analyst e
         const analysisResponse = {
           id: Date.now() + 1,
           type: "ai",
-          component: <GroundwaterAnalysisRenderer response={response} />,
+          content: response,
         };
 
         setChatHistory((prev) => [...prev, analysisResponse]);
@@ -2014,7 +1821,7 @@ Your response should sound like it's coming from a knowledgeable human analyst e
                 </div>
               }
             >
-              <CropInsightBundle profile={PUNJAB_PROFILE} />
+              <CropRecommendationCard region={PUNJAB_PROFILE.name} />
             </React.Suspense>
           ),
         };
@@ -2052,7 +1859,7 @@ Your response should sound like it's coming from a knowledgeable human analyst e
                 </div>
               }
             >
-              <PolicyRechargeBundle profile={PUNJAB_PROFILE} />
+              <PolicyRechargeCard region={PUNJAB_PROFILE.name} />
             </React.Suspense>
           ),
         };
@@ -2092,7 +1899,7 @@ Your response should sound like it's coming from a knowledgeable human analyst e
                 </div>
               }
             >
-              <RainfallImpactBundle profile={PUNJAB_PROFILE} />
+              <RainfallImpactCard region={PUNJAB_PROFILE.name} />
             </React.Suspense>
           ),
         };
@@ -2173,7 +1980,7 @@ Your response should sound like it's coming from a knowledgeable human analyst e
                 </div>
               }
             >
-              <PolicyRechargeBundle profile={PUNJAB_PROFILE} />
+              <PolicyRechargeCard region={PUNJAB_PROFILE.name} />
             </React.Suspense>
           ),
         };
@@ -2214,7 +2021,7 @@ Your response should sound like it's coming from a knowledgeable human analyst e
                 </div>
               }
             >
-              <RainfallImpactBundle profile={PUNJAB_PROFILE} />
+              <RainfallImpactCard region={PUNJAB_PROFILE.name} />
             </React.Suspense>
           ),
         };
@@ -2707,11 +2514,6 @@ Your response should sound like it's coming from a knowledgeable human analyst e
               : "border-slate-200/80"
           }`}
         >
-          <div className="flex items-center gap-3">
-            <Bot className="h-6 w-6 text-purple-600" />
-            <CardTitle className="text-xl">AI Data Analyst</CardTitle>
-            {/* Development button - only show in development mode */}
-          </div>
           <div className="flex items-center gap-2">
             {/* {!embedded && <NotificationBell />} */}
             <Button

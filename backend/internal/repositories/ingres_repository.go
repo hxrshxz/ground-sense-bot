@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/hxrshxz/ground-sense-bot/backend/internal/models"
@@ -202,6 +203,116 @@ func (r *IngresRepository) GetAssessmentTrends(ctx context.Context, blockUUID uu
 		ORDER BY year ASC
 	`
 	rows, err := r.DB.QueryContext(ctx, query, blockUUID, startYear, endYear)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var summaries []models.AssessmentSummary
+	for rows.Next() {
+		var a models.AssessmentSummary
+		var raw []byte
+		var rainfall, recharge, discharge, extractable, extraction, stage, availability sql.NullFloat64
+
+		if err := rows.Scan(
+			&a.AssessmentID, &a.BlockUUID, &a.Year, &rainfall, &recharge, &discharge,
+			&extractable, &extraction, &a.Category, &stage, &availability, &raw, &a.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		a.Rainfall = rainfall.Float64
+		a.TotalRecharge = recharge.Float64
+		a.TotalDischarge = discharge.Float64
+		a.TotalExtractable = extractable.Float64
+		a.TotalExtraction = extraction.Float64
+		a.Stage = stage.Float64
+		a.Availability = availability.Float64
+		a.Raw = raw
+		summaries = append(summaries, a)
+	}
+	return summaries, nil
+}
+
+// GetStateTrends retrieves aggregated state-level trends across years
+func (r *IngresRepository) GetStateTrends(ctx context.Context, stateUUID uuid.UUID, startYear, endYear string) ([]models.AssessmentSummary, error) {
+	query := `
+		SELECT 
+			MIN(a.assessment_id) as assessment_id,
+			s.state_uuid as block_uuid,
+			a.year,
+			AVG(a.rainfall) as rainfall,
+			SUM(a.total_recharge) as total_recharge,
+			SUM(a.total_discharge) as total_discharge,
+			SUM(a.total_extractable) as total_extractable,
+			SUM(a.total_extraction) as total_extraction,
+			'Aggregated' as category,
+			AVG(a.stage) as stage,
+			SUM(a.availability) as availability,
+			NULL as raw,
+			MAX(a.created_at) as created_at
+		FROM assessments_summary a
+		JOIN blocks b ON a.block_uuid = b.block_uuid
+		JOIN states s ON b.state_uuid = s.state_uuid
+		WHERE s.state_uuid = $1 AND a.year >= $2 AND a.year <= $3
+		GROUP BY s.state_uuid, a.year
+		ORDER BY a.year ASC
+	`
+	rows, err := r.DB.QueryContext(ctx, query, stateUUID, startYear, endYear)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var summaries []models.AssessmentSummary
+	for rows.Next() {
+		var a models.AssessmentSummary
+		var raw []byte
+		var rainfall, recharge, discharge, extractable, extraction, stage, availability sql.NullFloat64
+
+		if err := rows.Scan(
+			&a.AssessmentID, &a.BlockUUID, &a.Year, &rainfall, &recharge, &discharge,
+			&extractable, &extraction, &a.Category, &stage, &availability, &raw, &a.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		a.Rainfall = rainfall.Float64
+		a.TotalRecharge = recharge.Float64
+		a.TotalDischarge = discharge.Float64
+		a.TotalExtractable = extractable.Float64
+		a.TotalExtraction = extraction.Float64
+		a.Stage = stage.Float64
+		a.Availability = availability.Float64
+		a.Raw = raw
+		summaries = append(summaries, a)
+	}
+	return summaries, nil
+}
+
+// GetDistrictTrends retrieves aggregated district-level trends across years
+func (r *IngresRepository) GetDistrictTrends(ctx context.Context, districtUUID uuid.UUID, startYear, endYear string) ([]models.AssessmentSummary, error) {
+	query := `
+		SELECT 
+			MIN(a.assessment_id) as assessment_id,
+			d.district_uuid as block_uuid,
+			a.year,
+			AVG(a.rainfall) as rainfall,
+			SUM(a.total_recharge) as total_recharge,
+			SUM(a.total_discharge) as total_discharge,
+			SUM(a.total_extractable) as total_extractable,
+			SUM(a.total_extraction) as total_extraction,
+			'Aggregated' as category,
+			AVG(a.stage) as stage,
+			SUM(a.availability) as availability,
+			NULL as raw,
+			MAX(a.created_at) as created_at
+		FROM assessments_summary a
+		JOIN blocks b ON a.block_uuid = b.block_uuid
+		JOIN districts d ON b.district_uuid = d.district_uuid
+		WHERE d.district_uuid = $1 AND a.year >= $2 AND a.year <= $3
+		GROUP BY d.district_uuid, a.year
+		ORDER BY a.year ASC
+	`
+	rows, err := r.DB.QueryContext(ctx, query, districtUUID, startYear, endYear)
 	if err != nil {
 		return nil, err
 	}
@@ -482,6 +593,9 @@ func (r *IngresRepository) GetBlocksByCategoryAndLocation(ctx context.Context, c
 	var query string
 	var args []interface{}
 
+	// Normalize category for matching (handle over-exploited vs over_exploited)
+	categoryPattern := "%" + strings.ReplaceAll(strings.ToLower(category), "-", "%") + "%"
+
 	// First, try to match location with state name
 	stateQuery := `SELECT state_uuid FROM states WHERE state_name ILIKE $1 LIMIT 1`
 	var stateUUID uuid.UUID
@@ -493,11 +607,11 @@ func (r *IngresRepository) GetBlocksByCategoryAndLocation(ctx context.Context, c
 			SELECT DISTINCT b.block_uuid, b.block_name, b.district_uuid, b.state_uuid
 			FROM blocks b
 			JOIN assessments_summary a ON b.block_uuid = a.block_uuid
-			WHERE b.state_uuid = $1 AND a.category ILIKE $2 AND a.year = '2024-2025'
+			WHERE b.state_uuid = $1 AND LOWER(a.category) LIKE $2 AND a.year = '2024-2025'
 			ORDER BY b.block_name
 			LIMIT 100
 		`
-		args = []interface{}{stateUUID, category}
+		args = []interface{}{stateUUID, categoryPattern}
 	} else {
 		// Try district
 		districtQuery := `SELECT district_uuid FROM districts WHERE district_name ILIKE $1 LIMIT 1`
@@ -510,11 +624,11 @@ func (r *IngresRepository) GetBlocksByCategoryAndLocation(ctx context.Context, c
 				SELECT DISTINCT b.block_uuid, b.block_name, b.district_uuid, b.state_uuid
 				FROM blocks b
 				JOIN assessments_summary a ON b.block_uuid = a.block_uuid
-				WHERE b.district_uuid = $1 AND a.category ILIKE $2 AND a.year = '2024-2025'
+				WHERE b.district_uuid = $1 AND LOWER(a.category) LIKE $2 AND a.year = '2024-2025'
 				ORDER BY b.block_name
 				LIMIT 100
 			`
-			args = []interface{}{districtUUID, category}
+			args = []interface{}{districtUUID, categoryPattern}
 		} else {
 			// Location not found, return all blocks with category
 			return r.GetBlocksByCategory(ctx, category)
@@ -614,6 +728,37 @@ func (r *IngresRepository) GetStateSummary(ctx context.Context, stateUUID uuid.U
 	}
 	
 	return &summary, nil
+}
+
+// GetLatestStateYear returns the latest year available for a state's assessments_summary data
+func (r *IngresRepository) GetLatestStateYear(ctx context.Context, stateUUID uuid.UUID) (string, error) {
+	query := `
+		SELECT MAX(a.year) AS latest_year
+		FROM assessments_summary a
+		JOIN blocks b ON a.block_uuid = b.block_uuid
+		WHERE b.state_uuid = $1
+	`
+	var latest sql.NullString
+	err := r.DB.QueryRowContext(ctx, query, stateUUID).Scan(&latest)
+	if err != nil {
+		return "", err
+	}
+	if !latest.Valid {
+		return "", sql.ErrNoRows
+	}
+	return latest.String, nil
+}
+
+// GetStateSummaryLatest returns summary using the latest available year for the state
+func (r *IngresRepository) GetStateSummaryLatest(ctx context.Context, stateUUID uuid.UUID) (*StateSummary, error) {
+	latestYear, err := r.GetLatestStateYear(ctx, stateUUID)
+	if err != nil {
+		return nil, err
+	}
+	if latestYear == "" {
+		return nil, sql.ErrNoRows
+	}
+	return r.GetStateSummary(ctx, stateUUID, latestYear)
 }
 
 // GetDistrictSummary returns aggregated groundwater data for a district

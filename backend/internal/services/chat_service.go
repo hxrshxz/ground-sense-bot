@@ -83,14 +83,16 @@ func (s *UserSession) GetRecentContext(limit int) string {
 type ChatService struct {
 	nlp      *NLPService
 	ingres   *IngresService
+	rag      *RAGService // Added for RAG semantic search
 	sessions map[string]*UserSession
 	mu       sync.Mutex
 }
 
-func NewChatService(nlp *NLPService, ingres *IngresService) *ChatService {
+func NewChatService(nlp *NLPService, ingres *IngresService, rag *RAGService) *ChatService {
 	return &ChatService{
 		nlp:      nlp,
 		ingres:   ingres,
+		rag:      rag,
 		sessions: make(map[string]*UserSession),
 	}
 }
@@ -167,15 +169,12 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 		s.nlp.llm.AddToHistory("user", message)
 	}
 
+	// ========== NLP INTENT DETECTION FIRST ==========
+	// Try NLP intent handlers first, fall back to RAG if no intent match
 	fmt.Println("\n🧠 AI PROCESSING PIPELINE")
 	fmt.Println("├─ Step 1: Intent Classification & Entity Extraction...")
+	
 	intent, entities, sqlQuery := s.nlp.ParseMessage(message)
-	fmt.Printf("├─ ✅ Intent Detected: %s\n", intent)
-	fmt.Printf("├─ 📍 Locations Found: %v\n", entities.Locations)
-	fmt.Printf("├─ 📅 Year: %s\n", entities.Year)
-	if sqlQuery != "" {
-		fmt.Printf("├─ 🗄️  Dynamic SQL Generated: %s\n", sqlQuery[:min(100, len(sqlQuery))]+(func() string { if len(sqlQuery) > 100 { return "..." }; return "" })())
-	}
 	
 	// Context Merging Logic
 	// If new entities are missing locations but we have them in session, and the user implies context
@@ -185,7 +184,7 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 		// Check for context clues or just default to previous location if it makes sense
 		// Simple heuristic: If intent requires location (Trend, Compare, ListBlocks) and we have none, use previous.
 		if intent == IntentTrend || intent == IntentCompare || intent == IntentListBlocks || intent == IntentSummary {
-			fmt.Printf("├─ 🔗 Context Merging: Using previous location %v\n", session.LastEntities.Locations)
+			fmt.Printf("DEBUG: Using context location: %v\n", session.LastEntities.Locations)
 			entities.Locations = session.LastEntities.Locations
 			contextUsed = true
 		}
@@ -208,6 +207,460 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 
 	// If SQL is present, execute it and generate visualization
 	// BUT skip this path for TREND intent (handled by handleTrend below)
+	if sqlQuery != "" && intent != IntentTrend {
+		fmt.Printf("DEBUG: Executing SQL: %s\n", sqlQuery)
+		results, err := s.ingres.repo.RunRawQuery(ctx, sqlQuery)
+		
+		// Handle SQL execution errors
+		if err != nil {
+			fmt.Printf("ERROR: SQL execution failed: %v\n", err)
+			response.Text = "I encountered an error executing your query. Please try rephrasing your question."
+			
+			// Track in history
+			s.mu.Lock()
+			session.AddToHistory(message, response.Text, string(intent), entities.Locations)
+			s.mu.Unlock()
+			
+			return response, nil
+		}
+		
+		// Handle empty results
+		if len(results) == 0 {
+			response.Text = "No data found matching your criteria. Please try different parameters or check the location name."
+			
+			// Track in history
+			s.mu.Lock()
+			session.AddToHistory(message, response.Text, string(intent), entities.Locations)
+			s.mu.Unlock()
+			
+			return response, nil
+		}
+		
+		// Use LLM to pick chart shape but keep visuals hardcoded on frontend
+		response.Text = fmt.Sprintf("Here is the data you requested (%d results).", len(results))
+		response.Data = results
+
+		chartPayload, vizText := s.buildChartWithLLM(results, sqlQuery, message)
+		if chartPayload != nil {
+			response.Chart = chartPayload
+			if vizText != "" {
+				response.Text = vizText
+			}
+		} else {
+			// Fallback to simple bar if LLM mapping fails
+			fallbackChart := buildSimpleChart(results)
+			if fallbackChart != nil {
+				response.Chart = fallbackChart
+			}
+		}
+
+		// Track in conversation history
+		s.mu.Lock()
+		session.AddToHistory(message, response.Text, string(intent), entities.Locations)
+		s.mu.Unlock()
+		
+		// Add bot response to LLM history
+		if s.nlp.llm != nil {
+			s.nlp.llm.AddToHistory("assistant", response.Text)
+		}
+
+		return response, nil
+	}
+	
+	// Process with intent handlers
+	var handlerResult *models.ChatResponse
+	var handlerErr error
+	var shouldFallbackToRAG bool
+	var textLower string
+	
+	switch intent {
+	case IntentSummary:
+		handlerResult, handlerErr = s.handleSummary(ctx, entities, response)
+	case IntentTrend:
+		handlerResult, handlerErr = s.handleTrend(ctx, entities, response)
+	case IntentCompare:
+		handlerResult, handlerErr = s.handleCompare(ctx, entities, response)
+	case IntentRechargeBreakdown:
+		handlerResult, handlerErr = s.handleRechargeBreakdown(ctx, entities, response)
+	case IntentExtractionBreakdown:
+		handlerResult, handlerErr = s.handleExtractionBreakdown(ctx, entities, response)
+	case IntentDischargeBreakdown:
+		handlerResult, handlerErr = s.handleDischargeBreakdown(ctx, entities, response)
+	case IntentMapCategory:
+		handlerResult, handlerErr = s.handleMapCategory(ctx, entities, response)
+	case IntentListBlocks:
+		handlerResult, handlerErr = s.handleListBlocks(ctx, entities, response)
+	case IntentListDistricts:
+		handlerResult, handlerErr = s.handleListDistricts(ctx, entities, response)
+	case IntentListStates:
+		handlerResult, handlerErr = s.handleListStates(ctx, entities, response)
+	case IntentTopRanking:
+		handlerResult, handlerErr = s.handleTopRanking(ctx, entities, response)
+	case IntentCategoryDistribution, IntentDeficitAnalysis, IntentChangeAnalysis:
+		// These intents use dynamic SQL path above
+		// If we reach here, it means dynamic SQL failed
+		response.Text = "I understand you're looking for " + string(intent) + " analysis. Please try rephrasing your question."
+		handlerResult = response
+	default:
+		// Unknown intent - fall back to RAG search
+		fmt.Printf("├─ ⚠️  Unknown intent '%s', falling back to RAG search\n", intent)
+		goto RAG_FALLBACK
+	}
+	
+	// Handle errors from intent handlers
+	if handlerErr != nil {
+		fmt.Printf("ERROR: Intent handler failed: %v\n", handlerErr)
+		response.Text = "I encountered an error processing your request. Please try again."
+		return response, nil
+	}
+	
+	// Check if handler returned a "not found" or "no data" error message
+	// If so, fall back to RAG search for better results
+	shouldFallbackToRAG = false
+	if handlerResult != nil && handlerResult.Text != "" {
+		textLower = strings.ToLower(handlerResult.Text)
+		// Detect error patterns that indicate we should try RAG
+		errorPatterns := []string{
+			"location not found",
+			"no data found",
+			"couldn't find",
+			"could not find",
+			"i couldn't find",
+			"no blocks found",
+			"no districts found",
+			"no states found",
+			"no results",
+			"please provide at least two",
+			"please check the spelling",
+			"i found only",
+		}
+		
+		for _, pattern := range errorPatterns {
+			if strings.Contains(textLower, pattern) {
+				shouldFallbackToRAG = true
+				fmt.Printf("├─ ⚠️  Handler returned error/no data ('%s'), falling back to RAG search\n", pattern)
+				break
+			}
+		}
+	}
+	
+	if shouldFallbackToRAG {
+		goto RAG_FALLBACK
+	}
+	
+	// Track in conversation history
+	s.mu.Lock()
+	session.AddToHistory(message, handlerResult.Text, string(intent), entities.Locations)
+	s.mu.Unlock()
+	
+	// Add bot response to LLM history
+	if s.nlp.llm != nil {
+		s.nlp.llm.AddToHistory("assistant", handlerResult.Text)
+	}
+	
+	return handlerResult, nil
+
+RAG_FALLBACK:
+	// ========== RAG-BASED SEARCH (FALLBACK) ==========
+	// Use RAG semantic/hybrid search when no intent matches
+	fmt.Println("\n🔍 RAG SEMANTIC SEARCH PIPELINE (Fallback)")
+	fmt.Println("├─ Using RAG Hybrid Search (Keyword + Vector Semantic Search)")
+	
+	// Perform RAG search
+	if s.rag != nil {
+		var searchResp *HybridSearchResponse
+		var ragErr error
+		
+		msgLower := strings.ToLower(message)
+		
+		// Detect query type
+		isComparisonQuery := strings.Contains(msgLower, "compare") || 
+			strings.Contains(msgLower, " vs ") ||
+			strings.Contains(msgLower, "versus")
+		
+		// Detect if query asks for multiple entities
+		asksForMultipleEntities := strings.Contains(msgLower, "blocks in") ||
+			strings.Contains(msgLower, "blocks of") ||
+			strings.Contains(msgLower, "districts in") ||
+			strings.Contains(msgLower, "districts of")
+		
+		// Check if query mentions specific locations (common district names)
+		// This helps prioritize keyword search for location-specific queries
+		hasLocationKeywords := false
+		locationKeywords := []string{"amritsar", "ludhiana", "delhi", "mumbai", "bangalore", "chennai", 
+			"kolkata", "jaipur", "punjab", "haryana", "rajasthan", "gujarat", "maharashtra", 
+			"bihar", "uttar", "pradesh", "karnataka", "kerala", "tamil", "nadu", "andhra", 
+			"telangana", "madhya", "pradesh", "odisha", "west", "bengal", "assam",
+			"district", "block", "state", " in ", "punjabi", "ajmer", "bikaner", "patna", "lucknow"}
+		for _, keyword := range locationKeywords {
+			if strings.Contains(msgLower, keyword) {
+				hasLocationKeywords = true
+				break
+			}
+		}
+		
+		if isComparisonQuery || hasLocationKeywords {
+			// For location-specific queries, use keyword-only search for better matching
+			queryProcessed := message
+			
+			if isComparisonQuery {
+				// Example: "Compare Amritsar and Ludhiana" → "Amritsar OR Ludhiana"
+				queryProcessed = strings.ReplaceAll(message, " and ", " OR ")
+				queryProcessed = strings.ReplaceAll(queryProcessed, " & ", " OR ")
+				queryProcessed = strings.ReplaceAll(queryProcessed, ",", " OR ")
+				queryProcessed = strings.ReplaceAll(queryProcessed, "Compare ", "")
+				queryProcessed = strings.ReplaceAll(queryProcessed, "compare ", "")
+				queryProcessed = strings.ReplaceAll(queryProcessed, "versus ", "")
+				queryProcessed = strings.ReplaceAll(queryProcessed, " vs ", " OR ")
+				fmt.Printf("├─ Using keyword-only search for comparison query: %q\n", queryProcessed)
+			} else {
+				fmt.Printf("├─ Using keyword-only search for location-specific query\n")
+			}
+			
+			searchReq := HybridSearchRequest{
+				Query:       queryProcessed,
+				UseKeyword:  true,
+				UseSemantic: false,
+				Limit:       30,
+			}
+			searchResp, ragErr = s.rag.HybridSearch(ctx, searchReq)
+			
+			// Fallback to hybrid if keyword fails
+			if ragErr != nil || len(searchResp.Results) == 0 {
+				fmt.Println("├─ Keyword-only returned no results, trying hybrid search")
+				searchReq.UseSemantic = true
+				searchResp, ragErr = s.rag.HybridSearch(ctx, searchReq)
+			}
+		} else {
+			// Default hybrid search for non-comparison queries
+			searchReq := HybridSearchRequest{
+				Query:       message,
+				UseKeyword:  true,
+				UseSemantic: true,
+				Limit:       20,
+			}
+			searchResp, ragErr = s.rag.HybridSearch(ctx, searchReq)
+		}
+	if ragErr != nil {
+		fmt.Printf("❌ RAG search failed: %v\n", ragErr)
+		response := &models.ChatResponse{
+			Text: "I encountered an error searching the groundwater database. Please try again.",
+		}
+		return response, nil
+	}
+	
+	fmt.Printf("📊 RAG returned %d results before filtering\n", len(searchResp.Results))
+	if len(searchResp.Results) > 0 {
+		fmt.Println("🔍 Sample raw results:")
+		for i := 0; i < min(3, len(searchResp.Results)); i++ {
+			r := searchResp.Results[i]
+			fmt.Printf("  [%d] %s - %s (Score: %.2f) | Stage: %.2f, Rain: %.2f, Recharge: %.2f, Extraction: %.2f | Category: %s\n",
+				i+1, r.BlockName, r.DistrictName, r.Score, r.Stage, r.Rainfall, r.TotalRecharge, r.TotalExtraction, r.Category)
+		}
+	}
+	
+	if len(searchResp.Results) == 0 {
+		fmt.Println("├─ ⚠️  No results found")
+		response := &models.ChatResponse{
+			Text: s.buildNoDataFoundMessage(message),
+		}
+		return response, nil
+	}
+		
+		// Filter out blocks with zero/invalid data
+		filteredResults := make([]SearchResult, 0)
+		queryLower := strings.ToLower(message)
+		
+		for _, result := range searchResp.Results {
+			// Skip blocks with all zero values (incomplete data)
+			if result.Stage == 0 && result.Rainfall == 0 && result.TotalRecharge == 0 && result.TotalExtraction == 0 {
+				fmt.Printf("├─ Filtered: %s (all zeros)\n", result.BlockName)
+				continue
+			}
+			
+			// For location-based queries, filter out partial matches
+			// e.g., "Bihar" or "blocks in Bihar" should not match "Koch Bihar" (West Bengal)
+			if hasLocationKeywords && !asksForMultipleEntities {
+				stateNameLower := strings.ToLower(result.StateName)
+				districtNameLower := strings.ToLower(result.DistrictName)
+				
+				// Extract the main location name from query (remove "blocks in", "districts in", etc.)
+				mainLocation := queryLower
+				mainLocation = strings.ReplaceAll(mainLocation, "data in ", "")
+				mainLocation = strings.ReplaceAll(mainLocation, "data of ", "")
+				mainLocation = strings.ReplaceAll(mainLocation, "data for ", "")
+				mainLocation = strings.ReplaceAll(mainLocation, "groundwater in ", "")
+				mainLocation = strings.ReplaceAll(mainLocation, "groundwater of ", "")
+				mainLocation = strings.ReplaceAll(mainLocation, "groundwater for ", "")
+				mainLocation = strings.ReplaceAll(mainLocation, "block ", "")
+				mainLocation = strings.ReplaceAll(mainLocation, " district", "")
+				mainLocation = strings.TrimSpace(mainLocation)
+				
+				// STATE NAME must match exactly (prioritize state over block name)
+				// "bihar" should only match state "BIHAR", not block "BIHAR" in Uttar Pradesh
+				// Also check if mainLocation is a substring of a multi-word state name
+				stateMatches := stateNameLower == mainLocation || 
+					(len(mainLocation) > 3 && strings.Contains(" "+stateNameLower+" ", " "+mainLocation+" "))
+				
+				// DISTRICT NAME can match as substring
+				// "patna" matches "PATNA" district
+				// But "bihar" should NOT match "KOCH BIHAR" district
+				districtMatches := districtNameLower == mainLocation || 
+					(len(mainLocation) > 3 && strings.HasPrefix(districtNameLower, mainLocation))
+				
+				// For single-word queries, ONLY match state/district, not block names
+				// "Bihar" should match BIHAR state, not BIHAR block in Uttar Pradesh
+				if !stateMatches && !districtMatches {
+					fmt.Printf("├─ Filtered: %s - %s, %s (looking for '%s', state='%s', district='%s')\n", 
+						result.BlockName, result.DistrictName, result.StateName, mainLocation, stateNameLower, districtNameLower)
+					continue
+				}
+				
+				fmt.Printf("├─ ✅ Location match: %s in %s, %s (query='%s')\n", 
+					result.BlockName, result.DistrictName, result.StateName, mainLocation)
+			}
+			
+			// For comparison queries, prioritize results matching mentioned locations
+			if isComparisonQuery {
+				// Check if this result matches any location mentioned in the query
+				resultLocationMatch := strings.Contains(queryLower, strings.ToLower(result.DistrictName)) ||
+					strings.Contains(queryLower, strings.ToLower(result.BlockName)) ||
+					strings.Contains(queryLower, strings.ToLower(result.StateName))
+				
+				// Skip "Hilly Area" completely for comparison queries
+				if result.Category == "Hilly Area" {
+					fmt.Printf("├─ Filtered: %s (hilly area in comparison)\n", result.BlockName)
+					continue
+				}
+				
+				// For comparison queries, skip results that don't match any mentioned location
+				// UNLESS we have very few results (allow some flexibility)
+				if !resultLocationMatch && len(filteredResults) >= 5 {
+					fmt.Printf("├─ Filtered: %s - %s (no location match)\n", result.BlockName, result.DistrictName)
+					continue
+				}
+			} else {
+				// For non-comparison queries, skip "Hilly Area" unless explicitly queried
+				if result.Category == "Hilly Area" && !strings.Contains(queryLower, "hilly") {
+					fmt.Printf("├─ Filtered: %s (hilly area)\n", result.BlockName)
+					continue
+				}
+			}
+			
+			fmt.Printf("├─ Keeping: %s - %s (Stage: %.2f, Rain: %.2f)\n", result.BlockName, result.DistrictName, result.Stage, result.Rainfall)
+			filteredResults = append(filteredResults, result)
+			if len(filteredResults) >= 10 {
+				break
+			}
+		}
+		
+		fmt.Printf("✅ Filtering complete: %d results kept (from %d raw results)\n", len(filteredResults), len(searchResp.Results))
+		
+		if len(filteredResults) == 0 {
+			fmt.Println("├─ ⚠️  No valid results after filtering")
+			response := &models.ChatResponse{
+				Text: s.buildFilteredOutMessage(message, len(searchResp.Results)),
+			}
+			return response, nil
+		}
+		
+		fmt.Printf("├─ ✅ Found %d relevant assessments (filtered from %d)\n", len(filteredResults), len(searchResp.Results))
+		
+		// HIERARCHY AGGREGATION: Detect if query is for single state/district
+		// and aggregate block-level data accordingly
+		filteredResults = s.aggregateByHierarchy(filteredResults, msgLower)
+		
+		// Convert RAG results to visualization-friendly format
+		ragResultsAsMap := make([]map[string]interface{}, 0, len(filteredResults))
+		for _, result := range filteredResults {
+			ragResultsAsMap = append(ragResultsAsMap, map[string]interface{}{
+				"assessment_id":      result.AssessmentID,
+				"block_uuid":         result.BlockUUID,
+				"block_name":         result.BlockName,
+				"district_name":      result.DistrictName,
+				"state_name":         result.StateName,
+				"year":               result.Year,
+				"category":           result.Category,
+				"stage":              result.Stage,
+				"rainfall":           result.Rainfall,
+				"total_recharge":     result.TotalRecharge,
+				"total_extraction":   result.TotalExtraction,
+				"score":              result.Score,
+				"search_type":        result.SearchType,
+				"text_representation": result.TextRepresentation,
+				"raw_data":           result.RawData,
+			})
+		}
+		
+		// Build text response
+		textResponse := s.buildRAGTextResponse(filteredResults)
+		
+		response := &models.ChatResponse{
+			Text:   textResponse,
+			Intent: "RAG_SEARCH",
+			Data:   ragResultsAsMap,
+		}
+		
+		// Generate chart visualization from RAG results
+		fmt.Println("├─ 📊 Generating visualization from RAG results...")
+		chartPayload := s.buildRAGChart(filteredResults, message)
+		if chartPayload != nil {
+			response.Chart = chartPayload
+			fmt.Printf("├─ ✅ Chart generated: %s\n", chartPayload.Type)
+		}
+		
+		// Track in conversation history
+		s.mu.Lock()
+		session.AddToHistory(message, response.Text, "RAG_SEARCH", []string{})
+		s.mu.Unlock()
+		
+		// Add bot response to LLM history
+		if s.nlp.llm != nil {
+			s.nlp.llm.AddToHistory("assistant", response.Text)
+		}
+		
+		fmt.Println(strings.Repeat("=", 80) + "\n")
+		return response, nil
+	}
+	
+	// ========== OLD NLP APPROACH (COMMENTED OUT) ==========
+	/*
+	fmt.Println("\n🧠 AI PROCESSING PIPELINE")
+	fmt.Println("├─ Step 1: Intent Classification & Entity Extraction...")
+	intent, entities, sqlQuery := s.nlp.ParseMessage(message)
+	fmt.Printf("├─ ✅ Intent Detected: %s\n", intent)
+	fmt.Printf("├─ 📍 Locations Found: %v\n", entities.Locations)
+	fmt.Printf("├─ 📅 Year: %s\n", entities.Year)
+	if sqlQuery != "" {
+		fmt.Printf("├─ 🗄️  Dynamic SQL Generated: %s\n", sqlQuery[:min(100, len(sqlQuery))]+(func() string { if len(sqlQuery) > 100 { return "..." }; return "" })())
+	}
+	
+	// Context Merging Logic
+	contextUsed := false
+	if len(entities.Locations) == 0 && len(session.LastEntities.Locations) > 0 {
+		if intent == IntentTrend || intent == IntentCompare || intent == IntentListBlocks || intent == IntentSummary {
+			fmt.Printf("├─ 🔗 Context Merging: Using previous location %v\n", session.LastEntities.Locations)
+			entities.Locations = session.LastEntities.Locations
+			contextUsed = true
+		}
+	}
+	
+	s.mu.Lock()
+	if len(entities.Locations) > 0 {
+		session.LastEntities = entities
+	}
+	session.LastIntent = string(intent)
+	session.LastQuery = message
+	s.mu.Unlock()
+
+	fmt.Printf("DEBUG: Intent=%s, Entities=%+v, SQL=%s, ContextUsed=%v\n", intent, entities, sqlQuery, contextUsed)
+	
+	response := &models.ChatResponse{
+		Intent: string(intent),
+	}
+
+	// OLD SQL EXECUTION PATH (COMMENTED OUT)
+	/*
 	if sqlQuery != "" && intent != IntentTrend {
 		fmt.Printf("DEBUG: Executing SQL: %s\n", sqlQuery)
 		results, err := s.ingres.repo.RunRawQuery(ctx, sqlQuery)
@@ -271,7 +724,9 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 
 		return response, nil
 	}
+	*/
 	
+	/*
 	// Process with intent handlers
 	fmt.Println("\n├─ Step 2: Intent Handler Routing")
 	fmt.Printf("├─ 🎯 Routing to handler: %s\n", intent)
@@ -339,6 +794,381 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 	}
 	
 	return handlerResult, handlerErr
+	*/
+	
+	// If RAG is not available, return error
+	return &models.ChatResponse{
+		Text: "RAG service is not available. Please check the configuration.",
+	}, nil
+}
+
+// aggregateByHierarchy detects query type and aggregates block data to state/district level if needed
+func (s *ChatService) aggregateByHierarchy(results []SearchResult, queryLower string) []SearchResult {
+	if len(results) == 0 {
+		return results
+	}
+	
+	// Check if query explicitly asks for multiple entities
+	asksForMultiple := strings.Contains(queryLower, "blocks in") ||
+		strings.Contains(queryLower, "blocks of") ||
+		strings.Contains(queryLower, "districts in") ||
+		strings.Contains(queryLower, "districts of") ||
+		strings.Contains(queryLower, "compare") ||
+		strings.Contains(queryLower, " vs ")
+	
+	if asksForMultiple {
+		fmt.Println("├─ 🔍 Query asks for multiple entities - keeping individual results")
+		return results
+	}
+	
+	// Check if all results are from the same state
+	firstState := results[0].StateName
+	sameState := true
+	for _, r := range results {
+		if r.StateName != firstState {
+			sameState = false
+			break
+		}
+	}
+	
+	// Check if all results are from the same district
+	firstDistrict := results[0].DistrictName
+	sameDistrict := true
+	for _, r := range results {
+		if r.DistrictName != firstDistrict {
+			sameDistrict = false
+			break
+		}
+	}
+	
+	// If all from same district (and query doesn't ask for blocks), aggregate to district level
+	if sameDistrict && !strings.Contains(queryLower, "block") {
+		fmt.Printf("├─ 🔄 All results from same district (%s) - aggregating to district level\n", firstDistrict)
+		return []SearchResult{s.aggregateToDistrict(results)}
+	}
+	
+	// If all from same state but different districts (and query doesn't mention district/block)
+	// Check if query is simple enough to warrant state-level aggregation
+	if sameState && !sameDistrict {
+		// If query mentions "district" or "block", keep individual results
+		if strings.Contains(queryLower, "district") || strings.Contains(queryLower, "block") {
+			fmt.Println("├─ ✅ Query mentions district/block - keeping individual results")
+			return results
+		}
+		
+		// If query is very short (likely just a state name), aggregate to state level
+		queryWords := len(strings.Fields(queryLower))
+		if queryWords <= 3 {
+			fmt.Printf("├─ 🔄 Short query (%d words) about state %s - aggregating to state level\n", queryWords, firstState)
+			return []SearchResult{s.aggregateToState(results)}
+		}
+		
+		// For longer queries about specific topics (extraction, recharge, etc), keep individual results
+		fmt.Printf("├─ 🔄 Topic-specific query about %s - keeping individual district results\n", firstState)
+		return results
+	}
+	
+	// Otherwise, return individual block results
+	fmt.Println("├─ ✅ Keeping individual block-level results (multiple states)")
+	return results
+}
+
+// aggregateToState aggregates block-level data to state level
+func (s *ChatService) aggregateToState(results []SearchResult) SearchResult {
+	if len(results) == 0 {
+		return SearchResult{}
+	}
+	
+	stateName := results[0].StateName
+	year := results[0].Year // Use first result's year (most relevant)
+	
+	// Aggregate metrics (sum for volumes, average for stage)
+	var totalRainfall, totalRecharge, totalExtraction, totalStage float64
+	var stageCount int
+	categories := make(map[string]int)
+	
+	for _, r := range results {
+		totalRainfall += r.Rainfall
+		totalRecharge += r.TotalRecharge
+		totalExtraction += r.TotalExtraction
+		if r.Stage > 0 {
+			totalStage += r.Stage
+			stageCount++
+		}
+		categories[r.Category]++
+	}
+	
+	avgStage := float64(0)
+	if stageCount > 0 {
+		avgStage = totalStage / float64(stageCount)
+	}
+	
+	// Determine dominant category
+	dominantCategory := "N/A"
+	maxCount := 0
+	for cat, count := range categories {
+		if count > maxCount {
+			maxCount = count
+			dominantCategory = cat
+		}
+	}
+	
+	fmt.Printf("├─ 📊 State Aggregation: %s | %d blocks | Avg Stage: %.2f%% | Total Rain: %.2f | Recharge: %.2f | Extraction: %.2f\n",
+		stateName, len(results), avgStage, totalRainfall, totalRecharge, totalExtraction)
+	
+	return SearchResult{
+		AssessmentID:    results[0].AssessmentID, // Keep first ID for reference
+		BlockUUID:       results[0].BlockUUID,
+		BlockName:       fmt.Sprintf("%s (State-Level Aggregation)", stateName),
+		DistrictName:    "All Districts",
+		StateName:       stateName,
+		Year:            year,
+		Category:        dominantCategory,
+		Stage:           avgStage,
+		Rainfall:        totalRainfall,
+		TotalRecharge:   totalRecharge,
+		TotalExtraction: totalExtraction,
+		Score:           results[0].Score,
+		SearchType:      "aggregated",
+		TextRepresentation: fmt.Sprintf("State: %s | Year: %s | Aggregated from %d blocks | Average Stage: %.2f%% | Total Rainfall: %.2f mm | Total Recharge: %.2f BCM | Total Extraction: %.2f BCM",
+			stateName, year, len(results), avgStage, totalRainfall, totalRecharge, totalExtraction),
+	}
+}
+
+// aggregateToDistrict aggregates block-level data to district level
+func (s *ChatService) aggregateToDistrict(results []SearchResult) SearchResult {
+	if len(results) == 0 {
+		return SearchResult{}
+	}
+	
+	districtName := results[0].DistrictName
+	stateName := results[0].StateName
+	year := results[0].Year
+	
+	// Aggregate metrics
+	var totalRainfall, totalRecharge, totalExtraction, totalStage float64
+	var stageCount int
+	categories := make(map[string]int)
+	
+	for _, r := range results {
+		totalRainfall += r.Rainfall
+		totalRecharge += r.TotalRecharge
+		totalExtraction += r.TotalExtraction
+		if r.Stage > 0 {
+			totalStage += r.Stage
+			stageCount++
+		}
+		categories[r.Category]++
+	}
+	
+	avgStage := float64(0)
+	if stageCount > 0 {
+		avgStage = totalStage / float64(stageCount)
+	}
+	
+	// Determine dominant category
+	dominantCategory := "N/A"
+	maxCount := 0
+	for cat, count := range categories {
+		if count > maxCount {
+			maxCount = count
+			dominantCategory = cat
+		}
+	}
+	
+	fmt.Printf("├─ 📊 District Aggregation: %s, %s | %d blocks | Avg Stage: %.2f%% | Total Rain: %.2f | Recharge: %.2f | Extraction: %.2f\n",
+		districtName, stateName, len(results), avgStage, totalRainfall, totalRecharge, totalExtraction)
+	
+	return SearchResult{
+		AssessmentID:    results[0].AssessmentID,
+		BlockUUID:       results[0].BlockUUID,
+		BlockName:       fmt.Sprintf("%s (District-Level Aggregation)", districtName),
+		DistrictName:    districtName,
+		StateName:       stateName,
+		Year:            year,
+		Category:        dominantCategory,
+		Stage:           avgStage,
+		Rainfall:        totalRainfall,
+		TotalRecharge:   totalRecharge,
+		TotalExtraction: totalExtraction,
+		Score:           results[0].Score,
+		SearchType:      "aggregated",
+		TextRepresentation: fmt.Sprintf("District: %s, %s | Year: %s | Aggregated from %d blocks | Average Stage: %.2f%% | Total Rainfall: %.2f mm | Total Recharge: %.2f BCM | Total Extraction: %.2f BCM",
+			districtName, stateName, year, len(results), avgStage, totalRainfall, totalRecharge, totalExtraction),
+	}
+}
+
+// buildNoDataFoundMessage creates a contextual error message when no data is found
+func (s *ChatService) buildNoDataFoundMessage(query string) string {
+	queryLower := strings.ToLower(query)
+	
+	var sb strings.Builder
+	sb.WriteString("❌ **No Groundwater Data Found**\n\n")
+	
+	// Detect what type of query this was
+	if strings.Contains(queryLower, "compare") || strings.Contains(queryLower, " vs ") {
+		sb.WriteString("I couldn't find groundwater assessment data for the locations you mentioned.\n\n")
+		sb.WriteString("**Possible reasons:**\n")
+		sb.WriteString("- The location names might be misspelled\n")
+		sb.WriteString("- Data might not be available for these specific areas\n")
+		sb.WriteString("- Try using district names instead of city names (e.g., 'Amritsar' instead of 'Amritsar City')\n\n")
+	} else {
+		sb.WriteString("I couldn't find any groundwater assessments matching your query.\n\n")
+		sb.WriteString("**Possible reasons:**\n")
+		sb.WriteString("- The location might not have assessment data\n")
+		sb.WriteString("- Try different search terms or location names\n")
+		sb.WriteString("- Data might only be available for certain years\n\n")
+	}
+	
+	sb.WriteString("**📊 Available Data Coverage:**\n")
+	sb.WriteString("- **Years:** 2012-2013, 2016-2017, 2019-2020, 2021-2022, 2022-2023, 2023-2024, 2024-2025\n")
+	sb.WriteString("- **Locations:** 38 States, 590+ Districts, 5950+ Blocks\n")
+	sb.WriteString("- **Total Assessments:** 24,682 groundwater assessments\n\n")
+	
+	sb.WriteString("**💡 Try asking:**\n")
+	sb.WriteString("- \"Show me groundwater data for [district name]\"\n")
+	sb.WriteString("- \"Compare [district A] and [district B]\"\n")
+	sb.WriteString("- \"High groundwater extraction areas\"\n")
+	sb.WriteString("- \"Rainfall patterns in [state name]\"\n")
+	sb.WriteString("- \"Irrigation water usage in [district name]\"\n")
+	
+	return sb.String()
+}
+
+// buildFilteredOutMessage creates a message when results were found but filtered out
+func (s *ChatService) buildFilteredOutMessage(query string, rawResultCount int) string {
+	queryLower := strings.ToLower(query)
+	
+	var sb strings.Builder
+	sb.WriteString("⚠️ **Data Found But Incomplete**\n\n")
+	
+	sb.WriteString(fmt.Sprintf("I found %d potential matches, but they contained incomplete or invalid data.\n\n", rawResultCount))
+	
+	sb.WriteString("**Common reasons for filtering:**\n")
+	sb.WriteString("- Assessment data has all zero values (not yet surveyed)\n")
+	sb.WriteString("- Location is classified as 'Hilly Area' with no groundwater data\n")
+	
+	if strings.Contains(queryLower, "compare") || strings.Contains(queryLower, " vs ") {
+		sb.WriteString("- For comparison queries, results must match the mentioned locations\n")
+	}
+	
+	sb.WriteString("\n**💡 Suggestions:**\n")
+	sb.WriteString("- Try nearby districts or blocks\n")
+	sb.WriteString("- Check different years (data availability varies by year)\n")
+	sb.WriteString("- Use broader search terms (e.g., state name instead of specific block)\n\n")
+	
+	sb.WriteString("**Example queries that work well:**\n")
+	sb.WriteString("- \"Compare Amritsar and Ludhiana\"\n")
+	sb.WriteString("- \"Groundwater extraction in Punjab\"\n")
+	sb.WriteString("- \"Over-exploited blocks in Rajasthan\"\n")
+	
+	return sb.String()
+}
+
+// buildRAGTextResponse generates a formatted text response from RAG search results
+func (s *ChatService) buildRAGTextResponse(results []SearchResult) string {
+	if len(results) == 0 {
+		return "No results found."
+	}
+	
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("I found %d relevant groundwater assessments:\n\n", len(results)))
+	
+	for i, result := range results {
+		if i >= 5 {
+			sb.WriteString(fmt.Sprintf("\n...and %d more results", len(results)-5))
+			break
+		}
+		
+		sb.WriteString(fmt.Sprintf("%d. **%s** (%s, %s)\n", i+1, result.BlockName, result.DistrictName, result.StateName))
+		sb.WriteString(fmt.Sprintf("   - Year: %s\n", result.Year))
+		sb.WriteString(fmt.Sprintf("   - Category: **%s**\n", strings.ToUpper(result.Category)))
+		sb.WriteString(fmt.Sprintf("   - Stage of Extraction: %.2f%%\n", result.Stage))
+		sb.WriteString(fmt.Sprintf("   - Rainfall: %.2f mm\n", result.Rainfall))
+		sb.WriteString(fmt.Sprintf("   - Relevance: %.2f%%\n\n", result.Score*100))
+	}
+	
+	return sb.String()
+}
+
+// buildRAGChart creates visualizations from RAG search results
+func (s *ChatService) buildRAGChart(results []SearchResult, query string) *models.ChartPayload {
+	if len(results) == 0 {
+		return nil
+	}
+	
+	// Analyze query to determine best chart type
+	queryLower := strings.ToLower(query)
+	
+	// Bar chart for comparisons and listings (default)
+	labels := make([]string, 0, len(results))
+	stageData := make([]float64, 0, len(results))
+	rainfallData := make([]float64, 0, len(results))
+	extractionData := make([]float64, 0, len(results))
+	rechargeData := make([]float64, 0, len(results))
+	
+	for i, result := range results {
+		if i >= 10 {
+			break
+		}
+		labels = append(labels, result.BlockName)
+		stageData = append(stageData, result.Stage)
+		rainfallData = append(rainfallData, result.Rainfall)
+		extractionData = append(extractionData, result.TotalExtraction)
+		rechargeData = append(rechargeData, result.TotalRecharge)
+	}
+	
+	chart := &models.ChartPayload{
+		Type:  "bar",
+		Title: "Groundwater Assessment Results",
+		XAxis: labels,
+		Series: []models.ChartSeries{},
+	}
+	
+	// Determine which metrics to show based on query (prioritize more specific keywords)
+	if strings.Contains(queryLower, "recharge") && (strings.Contains(queryLower, "extraction") || strings.Contains(queryLower, "comparison") || strings.Contains(queryLower, "vs")) {
+		// Recharge vs Extraction comparison
+		chart.Series = append(chart.Series, models.ChartSeries{
+			Name: "Total Recharge (MCM)",
+			Data: rechargeData,
+		})
+		chart.Series = append(chart.Series, models.ChartSeries{
+			Name: "Total Extraction (MCM)",
+			Data: extractionData,
+		})
+		chart.Title = "Recharge vs Extraction"
+	} else if strings.Contains(queryLower, "rainfall") || strings.Contains(queryLower, "rain") {
+		chart.Series = append(chart.Series, models.ChartSeries{
+			Name: "Rainfall (mm)",
+			Data: rainfallData,
+		})
+		chart.Title = "Rainfall Distribution"
+	} else if strings.Contains(queryLower, "extraction") || strings.Contains(queryLower, "stage") || strings.Contains(queryLower, "depletion") {
+		chart.Series = append(chart.Series, models.ChartSeries{
+			Name: "Stage of Extraction (%)",
+			Data: stageData,
+		})
+		chart.Title = "Stage of Groundwater Extraction"
+	} else if strings.Contains(queryLower, "recharge") {
+		chart.Series = append(chart.Series, models.ChartSeries{
+			Name: "Total Recharge (MCM)",
+			Data: rechargeData,
+		})
+		chart.Title = "Groundwater Recharge"
+	} else {
+		// Default: show stage and rainfall
+		chart.Series = append(chart.Series, models.ChartSeries{
+			Name: "Stage of Extraction (%)",
+			Data: stageData,
+		})
+		chart.Series = append(chart.Series, models.ChartSeries{
+			Name: "Rainfall (mm)",
+			Data: rainfallData,
+		})
+		chart.Title = "Groundwater Metrics"
+	}
+	
+	return chart
 }
 
 // buildChartWithLLM calls the LLM visualization generator and maps it into ChartPayload
@@ -1762,18 +2592,80 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 				return r, nil
 			}
 			
-			// Try State
+			// Try State - show blocks with assessments
 			state, err := s.ingres.GetStateByName(ctx, locationName)
 			if err == nil && state != nil {
-				// List districts for state
-				districts, err := s.ingres.GetDistricts(ctx, state.StateUUID)
-				if err == nil && len(districts) > 0 {
-					var names []string
-					for _, d := range districts {
-						names = append(names, d.DistrictName)
+				// Get blocks with assessment data for this state
+				year := e.Year
+				if year == "" {
+					year = "2024-2025"
+				}
+				
+				sqlQuery := fmt.Sprintf(`
+					SELECT DISTINCT
+						b.block_name,
+						d.district_name,
+						a.stage,
+						a.category,
+						a.total_extraction
+					FROM assessments_summary a
+					JOIN blocks b ON a.block_uuid = b.block_uuid
+					JOIN districts d ON b.district_uuid = d.district_uuid
+					WHERE b.state_uuid = '%s'
+					AND a.year = '%s'
+					AND a.stage > 0
+					ORDER BY a.stage DESC
+					LIMIT 100
+				`, state.StateUUID, year)
+				
+				results, err := s.ingres.repo.RunRawQuery(ctx, sqlQuery)
+				if err == nil && len(results) > 0 {
+					// Create pie data for rose chart
+					var pieData []models.PieDatum
+					var blockNames []string
+					
+					for i, result := range results {
+						if i >= 50 { // Limit to 50 blocks for visualization
+							break
+						}
+						
+						blockName := ""
+						districtName := ""
+						stage := 0.0
+						
+						if bn, ok := result["block_name"].(string); ok {
+							blockName = bn
+						}
+						if dn, ok := result["district_name"].(string); ok {
+							districtName = dn
+						}
+						if s, ok := result["stage"].(float64); ok {
+							stage = s
+						}
+						
+						if blockName != "" && stage > 0 {
+							label := fmt.Sprintf("%s, %s", blockName, districtName)
+							blockNames = append(blockNames, blockName)
+							pieData = append(pieData, models.PieDatum{
+								Name:  label,
+								Value: stage,
+							})
+						}
 					}
-					r.Text = fmt.Sprintf("Here are the districts in %s (%d total):\n\n%s\n\nPlease ask for a specific district to see its blocks.", 
-						state.StateName, len(districts), strings.Join(names, ", "))
+					
+					r.Text = fmt.Sprintf("Here are the blocks in %s state (%d total blocks with data):\n\nShowing top %d blocks by extraction stage.", 
+						state.StateName, len(results), len(pieData))
+					
+					// Create rose/nightingale chart
+					if len(pieData) > 0 {
+						r.Chart = &models.ChartPayload{
+							Type:    "rose-pie",
+							Title:   fmt.Sprintf("Blocks in %s - Extraction Stages", state.StateName),
+							PieData: pieData,
+						}
+					}
+					
+					r.Data = results
 					return r, nil
 				}
 			}
@@ -1957,10 +2849,24 @@ func (s *ChatService) handleListStates(ctx context.Context, e Entities, r *model
 }
 
 func (s *ChatService) handleTopRanking(ctx context.Context, e Entities, r *models.ChatResponse) (*models.ChatResponse, error) {
-	// Get category (default: over_exploited)
+	// Get category - if not extracted by AI, parse from query
 	category := e.Category
 	if category == "" {
-		category = "over_exploited"
+		queryLower := strings.ToLower(e.OriginalQuery)
+		if strings.Contains(queryLower, "critical") && !strings.Contains(queryLower, "semi") {
+			category = "critical"
+		} else if strings.Contains(queryLower, "semi-critical") || strings.Contains(queryLower, "semi critical") {
+			category = "semi_critical"
+		} else if strings.Contains(queryLower, "over-exploited") || strings.Contains(queryLower, "over exploited") || strings.Contains(queryLower, "overexploited") {
+			category = "over_exploited"
+		} else if strings.Contains(queryLower, "safe") {
+			category = "safe"
+		} else if strings.Contains(queryLower, "salinity") || strings.Contains(queryLower, "saline") {
+			category = "salinity"
+		} else {
+			// Default: over_exploited
+			category = "over_exploited"
+		}
 	}
 	
 	year := e.Year

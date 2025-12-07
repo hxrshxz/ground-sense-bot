@@ -37,7 +37,7 @@ func RegisterRoutes(mux *http.ServeMux, cfg *config.Config, db *database.Service
 		logger.Warnf("Failed to initialize LLM Service: %v", err)
 	}
 	nlpService := services.NewNLPService(llmService)
-	chatService := services.NewChatService(nlpService, ingresService)
+	chatService := services.NewChatService(nlpService, ingresService, ragService)
 	hub := chat.NewHub(chatService)
 	go hub.Run()
 

@@ -53,19 +53,25 @@ export const useChatWebSocket = (url: string, username: string) => {
         console.log("📨 WEBSOCKET MESSAGE RECEIVED");
         console.log(`├─ Type: ${data.type || "text"}`);
         console.log(`├─ Sender: ${data.username || "Unknown"}`);
-        
+
         if (data.payload) {
           console.log(`├─ Intent: ${data.payload.intent || "N/A"}`);
           if (data.payload.chart) {
             console.log(`├─ Chart Type: ${data.payload.chart.type}`);
             console.log(`├─ Chart Title: ${data.payload.chart.title}`);
             if (data.payload.chart.comparisonData) {
-              console.log(`├─ Comparison Type: ${data.payload.chart.comparisonData.comparisonType}`);
-              console.log(`├─ Locations: ${data.payload.chart.comparisonData.locations.length}`);
+              console.log(
+                `├─ Comparison Type: ${data.payload.chart.comparisonData.comparisonType}`
+              );
+              console.log(
+                `├─ Locations: ${data.payload.chart.comparisonData.locations.length}`
+              );
             }
           }
           if (data.payload.map) {
-            console.log(`├─ Map Features: ${data.payload.map.features?.length || 0}`);
+            console.log(
+              `├─ Map Features: ${data.payload.map.features?.length || 0}`
+            );
           }
         }
         console.log("└─ Message parsed successfully");

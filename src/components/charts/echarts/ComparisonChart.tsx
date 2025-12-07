@@ -36,7 +36,7 @@ const ComparisonChart: React.FC<ComparisonChartProps> = ({ data }) => {
   });
   console.log("└─ Rendering horizontal bar chart...");
   console.log("=".repeat(80) + "\n");
-  
+
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
       safe: "#10b981",

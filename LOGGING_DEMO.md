@@ -7,29 +7,35 @@ This logging system provides real-time visibility into the AI processing pipelin
 ## 🎯 What Gets Logged
 
 ### Backend (Go Server)
+
 Located in terminal running `air` in `/backend` directory:
 
 1. **📨 User Message Reception**
+
    - Username, timestamp, query text
    - Session management (new/existing)
 
 2. **🧠 AI Processing Pipeline**
+
    - Intent classification results
    - Entity extraction (locations, years)
    - Dynamic SQL generation
    - Context merging (using conversation history)
 
 3. **🔍 Database Operations**
+
    - SQL query execution
    - Number of rows retrieved
    - Error handling
 
 4. **⚖️ Comparison Handler**
+
    - Location resolution (states/districts/blocks)
    - Best/worst performer calculation
    - Chart payload construction
 
 5. **📊 Chart Generation**
+
    - Chart type selection
    - LLM-assisted visualization
    - Data transformation
@@ -39,17 +45,21 @@ Located in terminal running `air` in `/backend` directory:
    - Map features count
 
 ### Frontend (Browser Console - F12)
+
 Press F12 in browser to see:
 
 1. **🔌 WebSocket Connection**
+
    - Connection status, URL, username
    - Reconnection attempts
 
 2. **📤 Message Sending**
+
    - User queries being sent
    - Request timestamp
 
 3. **📨 Message Reception**
+
    - Response type (text, chart, map)
    - Intent classification
    - Chart/map metadata
@@ -64,13 +74,16 @@ Press F12 in browser to see:
 ### Setup (Before Demo):
 
 1. **Terminal 1 - Backend Server**
+
    ```bash
    cd backend
    air
    ```
+
    Keep this visible! This shows all AI processing.
 
 2. **Terminal 2 - Frontend Dev Server**
+
    ```bash
    npm run dev
    ```
@@ -84,34 +97,37 @@ Press F12 in browser to see:
 ### During Demo:
 
 1. **Show Backend Terminal to Judges**
+
    - Point out the structured logging format
    - Explain each pipeline step as it processes
 
 2. **Show Browser Console**
+
    - Demonstrate WebSocket real-time communication
    - Show chart data being processed
    - Highlight the separation of concerns
 
 3. **Example Demo Flow**:
+
    ```
    User types: "compare amritsar and ludhiana"
-   
+
    BACKEND SHOWS:
    ════════════════════════════════════════════════════════
    📨 NEW USER MESSAGE | User: demo | Time: 02:45:30
    💬 Query: "compare amritsar and ludhiana"
    ════════════════════════════════════════════════════════
-   
+
    🧠 AI PROCESSING PIPELINE
    ├─ Step 1: Intent Classification & Entity Extraction...
    ├─ ✅ Intent Detected: INTENT_COMPARE
    ├─ 📍 Locations Found: [amritsar ludhiana]
    ├─ 📅 Year: 2024-2025
-   
+
    ├─ Step 2: Intent Handler Routing
    ├─ 🎯 Routing to handler: INTENT_COMPARE
    ├─ ⚖️  Executing Comparison Handler...
-   
+
    🔍 COMPARISON HANDLER
    ├─ Comparing 2 locations: [amritsar ludhiana]
    ├─ Year: 2024-2025
@@ -125,14 +141,14 @@ Press F12 in browser to see:
    ├─ 📦 Building comparison chart payload...
    ├─ ✅ Chart created with 2 locations
    └─ 📤 Sending response to frontend...
-   
+
    📤 RESPONSE SUMMARY
    ├─ Intent: INTENT_COMPARE
    ├─ Chart Type: comparison-card
    ├─ Chart Title: District Comparison - 2024-2025
    └─ Response Length: 387 characters
    ════════════════════════════════════════════════════════
-   
+
    BROWSER CONSOLE SHOWS:
    ════════════════════════════════════════════════════════
    📨 WEBSOCKET MESSAGE RECEIVED
@@ -145,7 +161,7 @@ Press F12 in browser to see:
    ├─ Locations: 2
    └─ Message parsed successfully
    ════════════════════════════════════════════════════════
-   
+
    📊 COMPARISON CHART RENDERING
    ├─ Type: DISTRICT
    ├─ Year: 2024-2025
@@ -184,22 +200,27 @@ Press F12 in browser to see:
 ## 💡 Talking Points for Judges
 
 1. **Real-time AI Processing**
+
    - "Notice how the system immediately classifies intent from natural language"
    - "Entity extraction automatically identifies locations and time periods"
 
 2. **Context Awareness**
+
    - "The system maintains conversation context - users can ask follow-up questions"
    - "Previous locations are remembered for contextual queries"
 
 3. **Smart Routing**
+
    - "Different intents route to specialized handlers"
    - "Database queries are optimized per handler type"
 
 4. **Visualization Intelligence**
+
    - "LLM helps choose appropriate chart types"
    - "Charts adapt based on data characteristics"
 
 5. **Error Handling**
+
    - "Every step has validation and error recovery"
    - "Users get helpful feedback when data is missing"
 
@@ -210,10 +231,12 @@ Press F12 in browser to see:
 ## 🔧 Customization
 
 To add more logging, edit:
+
 - **Backend**: `/backend/internal/services/chat_service.go`
 - **Frontend**: `/src/hooks/useChatWebSocket.ts` and chart components
 
 Use consistent emoji prefixes and structured format:
+
 ```go
 fmt.Printf("├─ 📊 Your log message: %v\n", data)
 ```

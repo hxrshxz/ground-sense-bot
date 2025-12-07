@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/hxrshxz/ground-sense-bot/backend/internal/config"
 	"github.com/hxrshxz/ground-sense-bot/backend/internal/database"
@@ -85,6 +86,22 @@ type GeminiEmbeddingResponse struct {
 	} `json:"embedding"`
 }
 
+// GeminiRerankerRequest for reranking API
+type GeminiRerankerRequest struct {
+	Model     string                  `json:"model"`
+	Query     string                  `json:"query"`
+	Documents []string                `json:"documents"`
+	TopN      int                     `json:"topN,omitempty"`
+}
+
+// GeminiRerankerResponse from reranking API
+type GeminiRerankerResponse struct {
+	Rankings []struct {
+		Index int     `json:"index"`
+		Score float64 `json:"score"`
+	} `json:"rankings"`
+}
+
 // NewRAGService creates a new RAG service
 func NewRAGService(db *database.Service, cfg *config.Config, logger *logrus.Logger) *RAGService {
 	return &RAGService{
@@ -132,7 +149,23 @@ func (s *RAGService) HybridSearch(ctx context.Context, req HybridSearchRequest) 
 	}
 
 	// Deduplicate and sort results
-	deduped := s.deduplicateResults(allResults, req.Limit)
+	deduped := s.deduplicateResults(allResults, req.Limit*3) // Get more results for reranking
+
+	// Apply Gemini reranking if we have results
+	if len(deduped) > 0 {
+		reranked, err := s.rerankResults(ctx, req.Query, deduped, req.Limit)
+		if err != nil {
+			s.logger.Warnf("Reranking failed, using original order: %v", err)
+		} else {
+			deduped = reranked
+			searchTypes = append(searchTypes, "reranked")
+		}
+	}
+
+	// Ensure we don't exceed the requested limit
+	if len(deduped) > req.Limit {
+		deduped = deduped[:req.Limit]
+	}
 
 	return &HybridSearchResponse{
 		Results:      deduped,
@@ -144,7 +177,7 @@ func (s *RAGService) HybridSearch(ctx context.Context, req HybridSearchRequest) 
 
 // keywordSearch performs full-text search using PostgreSQL
 func (s *RAGService) keywordSearch(ctx context.Context, req HybridSearchRequest) ([]SearchResult, error) {
-	// Build WHERE clause
+	// Build WHERE clause - search_vector now includes location names (from migration 002)
 	whereClauses := []string{"a.search_vector @@ websearch_to_tsquery('english', $1)"}
 	args := []interface{}{req.Query}
 	argCount := 1
@@ -176,13 +209,21 @@ func (s *RAGService) keywordSearch(ctx context.Context, req HybridSearchRequest)
 			a.rainfall, a.total_recharge, a.total_extraction, a.availability,
 			a.text_representation, a.raw,
 			b.block_name, d.district_name, s.state_name,
-			ts_rank_cd(a.search_vector, websearch_to_tsquery('english', $1)) as rank
+			ts_rank_cd(a.search_vector, websearch_to_tsquery('english', $1)) as rank,
+			-- Boost results where state/district name matches query
+			CASE 
+				WHEN LOWER(s.state_name) = LOWER($1) THEN 10.0
+				WHEN LOWER(d.district_name) = LOWER($1) THEN 5.0
+				WHEN LOWER(s.state_name) LIKE '%%' || LOWER($1) || '%%' THEN 3.0
+				WHEN LOWER(d.district_name) LIKE '%%' || LOWER($1) || '%%' THEN 2.0
+				ELSE 0.0
+			END as location_boost
 		FROM assessments_summary a
 		JOIN blocks b ON a.block_uuid = b.block_uuid
 		JOIN districts d ON b.district_uuid = d.district_uuid
 		JOIN states s ON b.state_uuid = s.state_uuid
 		WHERE %s
-		ORDER BY rank DESC
+		ORDER BY (rank + location_boost) DESC
 		LIMIT $%d
 	`, strings.Join(whereClauses, " AND "), argCount+1)
 
@@ -198,6 +239,7 @@ func (s *RAGService) keywordSearch(ctx context.Context, req HybridSearchRequest)
 	for rows.Next() {
 		var result SearchResult
 		var rawJSON []byte
+		var locationBoost float64
 
 		err := rows.Scan(
 			&result.AssessmentID,
@@ -215,11 +257,15 @@ func (s *RAGService) keywordSearch(ctx context.Context, req HybridSearchRequest)
 			&result.DistrictName,
 			&result.StateName,
 			&result.Score,
+			&locationBoost,
 		)
 		if err != nil {
 			s.logger.Warnf("Error scanning keyword result: %v", err)
 			continue
 		}
+
+		// Add location boost to score
+		result.Score += locationBoost
 
 		// Parse raw JSON
 		if len(rawJSON) > 0 {
@@ -473,4 +519,78 @@ func (s *RAGService) GetAssessmentByID(ctx context.Context, assessmentID int) (*
 	}
 
 	return &result, nil
+}
+
+// rerankResults uses Gemini's reranking API to reorder search results by relevance
+func (s *RAGService) rerankResults(ctx context.Context, query string, results []SearchResult, topN int) ([]SearchResult, error) {
+	if len(results) == 0 {
+		return results, nil
+	}
+
+	// Extract text representations
+	documents := make([]string, len(results))
+	for i, r := range results {
+		documents[i] = r.TextRepresentation
+	}
+
+	// Prepare Gemini reranking request
+	reqBody := GeminiRerankerRequest{
+		Model:     "gemini-2.0-flash",
+		Query:     query,
+		Documents: documents,
+		TopN:      topN,
+	}
+
+	reqJSON, err := json.Marshal(reqBody)
+	if err != nil {
+		return nil, fmt.Errorf("marshal reranker request: %w", err)
+	}
+
+	// Get API key from config
+	apiKey := s.config.Gemini.APIKey
+	if apiKey == "" {
+		return nil, fmt.Errorf("gemini API key not configured")
+	}
+
+	// Call Gemini reranking API
+	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:rerank?key=%s", apiKey)
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(reqJSON))
+	if err != nil {
+		return nil, fmt.Errorf("create reranker request: %w", err)
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("reranker API call: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("reranker API error: %d - %s", resp.StatusCode, string(body))
+	}
+
+	// Parse response
+	var rerankerResp GeminiRerankerResponse
+	if err := json.NewDecoder(resp.Body).Decode(&rerankerResp); err != nil {
+		return nil, fmt.Errorf("decode reranker response: %w", err)
+	}
+
+	// Reorder results based on rankings
+	reranked := make([]SearchResult, 0, len(rerankerResp.Rankings))
+	for _, ranking := range rerankerResp.Rankings {
+		if ranking.Index >= 0 && ranking.Index < len(results) {
+			result := results[ranking.Index]
+			// Store reranking score for debugging
+			result.Score = ranking.Score
+			reranked = append(reranked, result)
+		}
+	}
+
+	s.logger.Infof("Reranked %d results to %d (requested top %d)", len(results), len(reranked), topN)
+
+	return reranked, nil
 }

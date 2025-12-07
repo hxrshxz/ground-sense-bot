@@ -41,14 +41,15 @@ const (
 )
 
 type Entities struct {
-	Locations []string
-	Year      string
-	StartYear string
-	EndYear   string
-	Metric    string
-	Category  string
-	Threshold float64
-	Operator  string // ">", "<", "=", etc.
+	Locations     []string
+	Year          string
+	StartYear     string
+	EndYear       string
+	Metric        string
+	Category      string
+	Threshold     float64
+	Operator      string // ">", "<", "=", etc.
+	OriginalQuery string // Store original user query for semantic detection
 }
 
 type IntentAnalysis struct {
@@ -81,12 +82,13 @@ func (s *NLPService) ParseMessage(message string) (Intent, Entities, string) {
 	normalizedLocations := normalizeLocations(processedLocations)
 	
 	entities := Entities{
-		Locations: normalizedLocations,
-		Year:      analysis.Year,
-		Category:  analysis.Category,
-		Metric:    analysis.Metric,
-		Threshold: analysis.Threshold,
-		Operator:  analysis.Operator,
+		Locations:     normalizedLocations,
+		Year:          analysis.Year,
+		Category:      analysis.Category,
+		Metric:        analysis.Metric,
+		Threshold:     analysis.Threshold,
+		Operator:      analysis.Operator,
+		OriginalQuery: message, // Store for semantic detection
 	}
 
 	// Set defaults
@@ -903,6 +905,12 @@ LOCATIONS:
 - Common states: Punjab, Haryana, Rajasthan, Gujarat, Delhi, Maharashtra
 - Compound names: "Himachal Pradesh", "Uttar Pradesh", "Madhya Pradesh"
 - IGNORE: verbs, adjectives, metric names, numbers, units
+
+⚠️ CRITICAL: For COMPARE intent, SPLIT multiple locations into SEPARATE array elements:
+  "rajasthan and andhra pradesh" → ["rajasthan", "andhra pradesh"]
+  "compare ludhiana vs bathinda" → ["ludhiana", "bathinda"]
+  "punjab versus haryana" → ["punjab", "haryana"]
+  Split on: "and", "vs", "versus", ","
 
 YEAR:
 - Format: "YYYY-YYYY" (e.g., "2024-2025")

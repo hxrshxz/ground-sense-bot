@@ -130,8 +130,8 @@ def load_data():
 
             # Insert Block ONLY if file exists (only once, not per year)
             cur.execute("""
-                INSERT INTO blocks (block_uuid, block_name, district_uuid, state_uuid, geometry)
-                VALUES (%s, %s, %s, %s, NULL)
+                INSERT INTO blocks (block_uuid, block_name, district_uuid, state_uuid)
+                VALUES (%s, %s, %s, %s)
                 ON CONFLICT (block_uuid) DO NOTHING
             """, (b_uuid, b_name, d_uuid, s_uuid))
 

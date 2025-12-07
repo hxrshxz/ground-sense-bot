@@ -867,9 +867,11 @@ INTENT CLASSIFICATION RULES:
 10. TOP_RANKING
    → When: User wants TOP N or WORST/BEST performers
    → Keywords: "top", "worst", "best", "ranking", "highest", "lowest", "most", "least"
+   → EXTRACT NUMBER: "top 5" → threshold: 5, "top 10" → threshold: 10, "worst 3" → threshold: 3
    → Examples:
-      "Top 10 over-exploited blocks" → TOP_RANKING
-      "Which states have worst groundwater?" → TOP_RANKING
+      "Top 10 over-exploited blocks" → TOP_RANKING (threshold: 10)
+      "Top 5 safe states" → TOP_RANKING (threshold: 5)
+      "Which states have worst groundwater?" → TOP_RANKING (threshold: 10 default)
 
 11. CATEGORY_DISTRIBUTION
    → When: User asks for DISTRIBUTION or COUNT by CATEGORY
@@ -923,6 +925,10 @@ METRIC:
 THRESHOLD & OPERATOR:
 - "less than 500" → threshold: 500, operator: "<"
 - "greater than 90" → threshold: 90, operator: ">"
+- "top 5" → threshold: 5 (for TOP_RANKING intent)
+- "top 10" → threshold: 10 (for TOP_RANKING intent)
+- "worst 3" → threshold: 3 (for TOP_RANKING intent)
+- Default for TOP_RANKING: threshold: 10
 
 OUTPUT FORMAT:
 Return ONLY valid JSON (no markdown, no code blocks):

@@ -37,14 +37,39 @@ export const useChatWebSocket = (url: string, username: string) => {
     const socket = new WebSocket(`${url}?username=${username}`);
 
     socket.onopen = () => {
-      console.log("WebSocket Connected");
+      console.log("\n" + "=".repeat(80));
+      console.log("🔌 WEBSOCKET CONNECTED");
+      console.log(`├─ URL: ${url}`);
+      console.log(`├─ User: ${username}`);
+      console.log(`└─ Status: READY`);
+      console.log("=".repeat(80) + "\n");
       setIsConnected(true);
     };
 
     socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        console.log("WebSocket Message:", data);
+        console.log("\n" + "=".repeat(80));
+        console.log("📨 WEBSOCKET MESSAGE RECEIVED");
+        console.log(`├─ Type: ${data.type || "text"}`);
+        console.log(`├─ Sender: ${data.username || "Unknown"}`);
+        
+        if (data.payload) {
+          console.log(`├─ Intent: ${data.payload.intent || "N/A"}`);
+          if (data.payload.chart) {
+            console.log(`├─ Chart Type: ${data.payload.chart.type}`);
+            console.log(`├─ Chart Title: ${data.payload.chart.title}`);
+            if (data.payload.chart.comparisonData) {
+              console.log(`├─ Comparison Type: ${data.payload.chart.comparisonData.comparisonType}`);
+              console.log(`├─ Locations: ${data.payload.chart.comparisonData.locations.length}`);
+            }
+          }
+          if (data.payload.map) {
+            console.log(`├─ Map Features: ${data.payload.map.features?.length || 0}`);
+          }
+        }
+        console.log("└─ Message parsed successfully");
+        console.log("=".repeat(80) + "\n");
 
         // Transform backend message to frontend message format
         const newMessage: Message = {
@@ -58,17 +83,17 @@ export const useChatWebSocket = (url: string, username: string) => {
 
         setMessages((prev) => [...prev, newMessage]);
       } catch (error) {
-        console.error("Error parsing message:", error);
+        console.error("❌ Error parsing message:", error);
       }
     };
 
     socket.onclose = () => {
-      console.log("WebSocket Disconnected");
+      console.log("\n🔴 WEBSOCKET DISCONNECTED\n");
       setIsConnected(false);
     };
 
     socket.onerror = (error) => {
-      console.error("WebSocket Error:", error);
+      console.error("❌ WEBSOCKET ERROR:", error);
     };
 
     ws.current = socket;
@@ -86,9 +111,15 @@ export const useChatWebSocket = (url: string, username: string) => {
           username,
           type: "text",
         };
+        console.log("\n" + "=".repeat(80));
+        console.log("📤 SENDING MESSAGE");
+        console.log(`├─ User: ${username}`);
+        console.log(`├─ Query: "${content}"`);
+        console.log("└─ Waiting for response...");
+        console.log("=".repeat(80) + "\n");
         ws.current.send(JSON.stringify(msg));
       } else {
-        console.error("WebSocket is not connected");
+        console.error("❌ WebSocket is not connected");
       }
     },
     [username]

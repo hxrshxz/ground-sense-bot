@@ -36,7 +36,7 @@ type SearchResult struct {
 	Rainfall          float64                `json:"rainfall"`
 	TotalRecharge     float64                `json:"total_recharge"`
 	TotalExtraction   float64                `json:"total_extraction"`
-	Availability      float64                `json:"availability"`
+	Availability      *float64               `json:"availability,omitempty"`
 	TextRepresentation string                 `json:"text_representation"`
 	Score             float64                `json:"score"`
 	SearchType        string                 `json:"search_type"` // "keyword", "semantic", or "hybrid"

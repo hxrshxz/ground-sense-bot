@@ -323,7 +323,7 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 			fmt.Printf("├─ Chart Title: %s\n", handlerResult.Chart.Title)
 		}
 		if handlerResult.Map != nil {
-			fmt.Printf("├─ Map Data: %d locations\n", len(handlerResult.Map.Features))
+			fmt.Printf("├─ Map Title: %s\n", handlerResult.Map.Title)
 		}
 		fmt.Printf("├─ Response Length: %d characters\n", len(handlerResult.Text))
 		fmt.Println(strings.Repeat("=", 80) + "\n")
@@ -965,9 +965,14 @@ func (s *ChatService) buildTrendChart(trends []models.AssessmentSummary, locatio
 }
 
 func (s *ChatService) handleCompare(ctx context.Context, e Entities, r *models.ChatResponse) (*models.ChatResponse, error) {
+	fmt.Println("\n🔍 COMPARISON HANDLER")
+	fmt.Printf("├─ Comparing %d locations: %v\n", len(e.Locations), e.Locations)
+	fmt.Printf("├─ Year: %s\n", e.Year)
+	
 	// Validate minimum locations for comparison
 	if len(e.Locations) < 2 {
 		if len(e.Locations) == 1 {
+			fmt.Printf("├─ ⚠️  Only 1 location provided, need at least 2\n")
 			r.Text = fmt.Sprintf("I found %s. Please mention another location to compare it with.", e.Locations[0])
 			return r, nil
 		}
@@ -981,6 +986,7 @@ func (s *ChatService) handleCompare(ctx context.Context, e Entities, r *models.C
 	}
 
 	// Try to find states first
+	fmt.Println("├─ Searching database for locations...")
 	var statesFound []*models.State
 	var districtsFound []*models.District
 	var blocksFound []models.Block
@@ -1013,22 +1019,28 @@ func (s *ChatService) handleCompare(ctx context.Context, e Entities, r *models.C
 
 	// If all locations not found
 	if len(statesFound) == 0 && len(districtsFound) == 0 && len(blocksFound) == 0 {
+		fmt.Printf("├─ ❌ No locations found in database\n")
 		r.Text = fmt.Sprintf("I couldn't find any of these locations: %s. Please check the spelling.", strings.Join(e.Locations, ", "))
 		return r, nil
 	}
 
+	fmt.Printf("├─ ✅ Found: %d states, %d districts, %d blocks\n", len(statesFound), len(districtsFound), len(blocksFound))
+	
 	// Handle state comparison (if 2+ states found)
 	if len(statesFound) >= 2 {
+		fmt.Println("├─ 🏛️  Routing to STATE comparison handler")
 		return s.compareStates(ctx, statesFound, e.Year, r)
 	}
 
 	// Handle district comparison (if 2+ districts found)
 	if len(districtsFound) >= 2 {
+		fmt.Println("├─ 🏙️  Routing to DISTRICT comparison handler")
 		return s.compareDistricts(ctx, districtsFound, e.Year, r)
 	}
 
 	// Handle block comparison (if 2+ blocks found)
 	if len(blocksFound) >= 2 {
+		fmt.Println("├─ 🏘️  Routing to BLOCK comparison handler")
 		return s.compareBlocks(ctx, blocksFound, e.Year, r)
 	}
 
@@ -1174,10 +1186,14 @@ func (s *ChatService) compareDistricts(ctx context.Context, districts []*models.
 	}
 
 	if len(names) < 2 {
+		fmt.Println("├─ ❌ Insufficient data retrieved from database")
 		r.Text = fmt.Sprintf("Could not retrieve sufficient data for %s comparison.", year)
 		return r, nil
 	}
 
+	fmt.Printf("├─ ✅ Retrieved data for %d districts\n", len(names))
+	fmt.Printf("├─ 📊 Calculating best/worst performers...\n")
+	
 	// Find best and worst performers
 	bestIdx, worstIdx := 0, 0
 	for i := range stages {
@@ -1189,6 +1205,9 @@ func (s *ChatService) compareDistricts(ctx context.Context, districts []*models.
 		}
 	}
 
+	fmt.Printf("├─ 🏆 Best: %s (%.1f%% stage)\n", names[bestIdx], stages[bestIdx])
+	fmt.Printf("├─ ⚠️  Worst: %s (%.1f%% stage)\n", names[worstIdx], stages[worstIdx])
+
 	r.Text = fmt.Sprintf("🔍 **District Comparison Analysis (%s)**\n\n"+
 		"📊 **Comparing**: %s\n\n"+
 		"🏆 **Best Performer**: %s (%.1f%% stage)\n"+
@@ -1198,6 +1217,7 @@ func (s *ChatService) compareDistricts(ctx context.Context, districts []*models.
 		names[bestIdx], stages[bestIdx],
 		names[worstIdx], stages[worstIdx])
 	
+	fmt.Println("├─ 📦 Building comparison chart payload...")
 	// Build comparison data
 	comparisonPoints := make([]models.ComparisonDataPoint, 0, len(districts))
 	for i, district := range districts {
@@ -1238,6 +1258,9 @@ func (s *ChatService) compareDistricts(ctx context.Context, districts []*models.
 			ComparisonType: "district",
 		},
 	}
+	
+	fmt.Printf("├─ ✅ Chart created with %d locations\n", len(comparisonPoints))
+	fmt.Printf("└─ 📤 Sending response to frontend...\n\n")
 
 	return r, nil
 }
@@ -1934,18 +1957,31 @@ func (s *ChatService) handleListStates(ctx context.Context, e Entities, r *model
 }
 
 func (s *ChatService) handleTopRanking(ctx context.Context, e Entities, r *models.ChatResponse) (*models.ChatResponse, error) {
-	// Get top blocks by category (default: over_exploited)
+	// Get category (default: over_exploited)
 	category := e.Category
 	if category == "" {
 		category = "over_exploited"
 	}
+	
 	year := e.Year
 	if year == "" {
 		year = "2024-2025"
 	}
 
-	// Build SQL to get top blocks with the main ranking metric
-	sqlQuery := fmt.Sprintf(`
+	// Extract limit from threshold (AI can populate this) or default to 10
+	limit := 10
+	if e.Threshold > 0 && e.Threshold <= 50 {
+		limit = int(e.Threshold)
+	}
+
+	// Determine aggregation level: blocks (default), districts, or states
+	level := "blocks"
+	
+	// Build SQL based on level
+	var sqlQuery string
+	
+	if level == "blocks" {
+		sqlQuery = fmt.Sprintf(`
 		SELECT 
 			CONCAT(b.block_name, ', ', d.district_name) as location,
 			s.state_name,
@@ -1961,6 +1997,7 @@ func (s *ChatService) handleTopRanking(ctx context.Context, e Entities, r *model
 		AND a.year = '%s'
 		AND a.stage > 0
 	`, category, year)
+	}
 
 	// Add location filter if specified
 	if len(e.Locations) > 0 {
@@ -1968,9 +2005,9 @@ func (s *ChatService) handleTopRanking(ctx context.Context, e Entities, r *model
 		sqlQuery += fmt.Sprintf(" AND (UPPER(s.state_name) = '%s' OR UPPER(d.district_name) = '%s')\n", location, location)
 	}
 
-	sqlQuery += "\t\tORDER BY a.stage DESC\n\t\tLIMIT 10"
+	sqlQuery += fmt.Sprintf("\t\tORDER BY a.stage DESC\n\t\tLIMIT %d", limit)
 
-	fmt.Printf("DEBUG: Top Ranking SQL: %s\n", sqlQuery)
+	fmt.Printf("DEBUG: Top Ranking SQL (limit=%d, category=%s): %s\n", limit, category, sqlQuery)
 
 	// Execute query
 	results, err := s.ingres.repo.RunRawQuery(ctx, sqlQuery)

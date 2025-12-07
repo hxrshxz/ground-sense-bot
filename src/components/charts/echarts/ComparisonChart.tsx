@@ -22,6 +22,21 @@ interface ComparisonChartProps {
 }
 
 const ComparisonChart: React.FC<ComparisonChartProps> = ({ data }) => {
+  console.log("\n" + "=".repeat(80));
+  console.log("📊 COMPARISON CHART RENDERING");
+  console.log(`├─ Type: ${data.comparisonType.toUpperCase()}`);
+  console.log(`├─ Year: ${data.year}`);
+  console.log(`├─ Locations: ${data.locations.length}`);
+  data.locations.forEach((loc, idx) => {
+    console.log(`├─ [${idx + 1}] ${loc.name}:`);
+    console.log(`│  ├─ Rainfall: ${loc.rainfall.toFixed(0)}mm`);
+    console.log(`│  ├─ Recharge: ${loc.recharge.toFixed(1)} MCM`);
+    console.log(`│  ├─ Stage: ${loc.stage.toFixed(1)}%`);
+    console.log(`│  └─ Category: ${loc.category}`);
+  });
+  console.log("└─ Rendering horizontal bar chart...");
+  console.log("=".repeat(80) + "\n");
+  
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
       safe: "#10b981",

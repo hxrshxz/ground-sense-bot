@@ -468,16 +468,16 @@ const INGRESCommandBar = ({
     () =>
       language === "en-US"
         ? [
-            "Show data for Delhi block...",
             "List all critical blocks...",
             "Compare Amritsar and Ludhiana...",
-            "Why is groundwater declining in Delhi?",
-            "What caused water scarcity in Delhi?",
             "Show rainfall impact on groundwater...",
-            "Explain depletion causes in Ludhiana...",
+            "Explain depletion causes in Punjab...",
             "Compare groundwater levels of 2020-2024...",
             "What policy changes can improve recharge?",
             "How do cropping patterns affect extraction?",
+            "Show trend for Ludhiana district...",
+            "Which blocks are over-exploited?",
+            "Compare Punjab and Haryana groundwater...",
           ]
         : ["संगनेर ब्लॉक का डेटा दिखाएं...", "جميع بلوكوں کی فہرست بنائیں..."],
     [language]

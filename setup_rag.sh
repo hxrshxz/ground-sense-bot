@@ -19,7 +19,7 @@ if [ -z "$GEMINI_API_KEY" ]; then
     echo -e "${RED}❌ GEMINI_API_KEY not set!${NC}"
     echo ""
     echo "Please set your Gemini API key:"
-    echo "  export GEMINI_API_KEY='your-api-key-here'"
+    echo "  export GEMINI_API_KEY='AIzaSyDHglWBAM6AbsbaiRvF9h_j-hmPpXXoS-8"
     echo ""
     echo "Get your key from: https://makersuite.google.com/app/apikey"
     exit 1

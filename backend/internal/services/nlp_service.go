@@ -37,6 +37,12 @@ const (
 	IntentCategoryDistribution Intent = "CATEGORY_DISTRIBUTION"
 	IntentDeficitAnalysis     Intent = "DEFICIT_ANALYSIS"
 	IntentChangeAnalysis      Intent = "CHANGE_ANALYSIS"
+	// New predefined visualization intents
+	IntentYearlyComparison    Intent = "YEARLY_COMPARISON"
+	IntentCategorySummary     Intent = "CATEGORY_SUMMARY"
+	IntentCriticalAlerts      Intent = "CRITICAL_ALERTS"
+	IntentWaterBalance        Intent = "WATER_BALANCE"
+	IntentStateOverview       Intent = "STATE_OVERVIEW"
 	IntentUnknown             Intent = "UNKNOWN"
 )
 
@@ -851,9 +857,12 @@ INTENT CLASSIFICATION RULES:
       "Show me over-exploited blocks" → LIST_BLOCKS
 
 7. LIST_DISTRICTS
-   → When: User explicitly asks for DISTRICTS
+   → When: User explicitly asks for DISTRICTS in a state
+   → Keywords: "districts", "show districts", "list districts", "districts in"
    → Examples:
       "Show me all districts in Punjab" → LIST_DISTRICTS
+      "districts in rajasthan" → LIST_DISTRICTS
+      "list districts of haryana" → LIST_DISTRICTS
 
 8. LIST_STATES
    → When: User explicitly asks for STATES list
@@ -895,6 +904,41 @@ INTENT CLASSIFICATION RULES:
    → Examples:
       "How has Punjab changed over 4 years?" → CHANGE_ANALYSIS
       "Show me year-over-year improvement" → CHANGE_ANALYSIS
+
+14. YEARLY_COMPARISON
+   → When: User wants to compare SAME LOCATION across DIFFERENT YEARS
+   → Keywords: "year comparison", "2023 vs 2024", "compare years", "year over year"
+   → Examples:
+      "Compare Punjab 2023 vs 2024" → YEARLY_COMPARISON
+      "Show me Ludhiana in 2022 and 2024" → YEARLY_COMPARISON
+
+15. CATEGORY_SUMMARY
+   → When: User wants PIE CHART showing category distribution
+   → Keywords: "category breakdown", "how many safe", "category split", "category pie"
+   → Examples:
+      "Show category breakdown for Rajasthan" → CATEGORY_SUMMARY
+      "How many safe vs critical blocks in Punjab?" → CATEGORY_SUMMARY
+
+16. CRITICAL_ALERTS
+   → When: User wants to see URGENT/CRITICAL blocks needing attention
+   → Keywords: "critical blocks", "urgent", "need attention", "alerts", "warning"
+   → Examples:
+      "Show critical alerts for Punjab" → CRITICAL_ALERTS
+      "Which blocks need urgent attention?" → CRITICAL_ALERTS
+
+17. WATER_BALANCE
+   → When: User wants RECHARGE vs EXTRACTION balance analysis
+   → Keywords: "water balance", "recharge vs extraction", "balance analysis", "sustainability"
+   → Examples:
+      "Show water balance for Haryana" → WATER_BALANCE
+      "Is Punjab sustainable? Show recharge vs extraction" → WATER_BALANCE
+
+18. STATE_OVERVIEW
+   → When: User wants COMPREHENSIVE dashboard for entire state
+   → Keywords: "overview", "dashboard", "complete analysis", "full report"
+   → Examples:
+      "Give me complete overview of Punjab" → STATE_OVERVIEW
+      "Show full dashboard for Rajasthan" → STATE_OVERVIEW
 
 ENTITY EXTRACTION RULES:
 ═══════════════════════════════════════════════════════════
@@ -941,7 +985,7 @@ THRESHOLD & OPERATOR:
 OUTPUT FORMAT:
 Return ONLY valid JSON (no markdown, no code blocks):
 {
-  "intent": "SUMMARY|TREND|COMPARE|RECHARGE_BREAKDOWN|EXTRACTION_BREAKDOWN|LIST_BLOCKS|LIST_DISTRICTS|LIST_STATES|MAP_CATEGORY|TOP_RANKING|CATEGORY_DISTRIBUTION|DEFICIT_ANALYSIS|CHANGE_ANALYSIS",
+  "intent": "SUMMARY|TREND|COMPARE|RECHARGE_BREAKDOWN|EXTRACTION_BREAKDOWN|LIST_BLOCKS|LIST_DISTRICTS|LIST_STATES|MAP_CATEGORY|TOP_RANKING|CATEGORY_DISTRIBUTION|DEFICIT_ANALYSIS|CHANGE_ANALYSIS|YEARLY_COMPARISON|CATEGORY_SUMMARY|CRITICAL_ALERTS|WATER_BALANCE|STATE_OVERVIEW",
   "locations": ["location names"],
   "year": "2024-2025",
   "category": "safe|semi_critical|critical|over_exploited or empty",
@@ -957,6 +1001,10 @@ ANALYZE THE QUERY NOW AND RETURN JSON:`, message)
 	resp, err := s.llm.model.GenerateContent(ctx, genai.Text(prompt))
 	if err != nil {
 		fmt.Printf("AI QUERY ANALYSIS ERROR: %v\n", err)
+		// Rotate API key if we hit rate limit (429 error)
+		if strings.Contains(err.Error(), "429") || strings.Contains(err.Error(), "quota") {
+			s.llm.rotateAPIKey()
+		}
 		return nil, err
 	}
 
@@ -1110,6 +1158,16 @@ func (s *NLPService) mapIntent(aiIntent string) Intent {
 		return IntentDeficitAnalysis
 	case "CHANGE_ANALYSIS":
 		return IntentChangeAnalysis
+	case "YEARLY_COMPARISON":
+		return IntentYearlyComparison
+	case "CATEGORY_SUMMARY":
+		return IntentCategorySummary
+	case "CRITICAL_ALERTS":
+		return IntentCriticalAlerts
+	case "WATER_BALANCE":
+		return IntentWaterBalance
+	case "STATE_OVERVIEW":
+		return IntentStateOverview
 	default:
 		return IntentUnknown
 	}

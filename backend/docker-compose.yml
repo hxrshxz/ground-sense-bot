@@ -55,6 +55,8 @@ services:
       - DB_SSLMODE=disable
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - GEMINI_API_KEY=AIzaSyCCVCaclFVHqEV0QV14WdIvvfG5YKOJHmE
+      - GEMINI_API_KEYS=AIzaSyCCVCaclFVHqEV0QV14WdIvvfG5YKOJHmE,AIzaSyCq3KAagDLK5_g7eKuqBQIVzpEwTmpSr4w
     ports:
       - "8080:8080"
     depends_on:

@@ -279,23 +279,41 @@ const createGradientAreaChart = (
     left: "center",
     top: 10,
     textStyle: {
-      color: "#fff",
-      fontSize: 16,
-      fontWeight: 600,
+      color: "#ffffff",
+      fontSize: 22,
+      fontWeight: 700,
+      textShadowColor: "rgba(0, 0, 0, 0.5)",
+      textShadowBlur: 10,
+      textShadowOffsetX: 2,
+      textShadowOffsetY: 2,
     },
   },
   tooltip: {
     trigger: "axis",
     axisPointer: {
       type: "cross",
+      lineStyle: {
+        color: "rgba(138, 43, 226, 0.6)",
+        width: 2,
+        type: "dashed",
+      },
+      crossStyle: {
+        color: "rgba(138, 43, 226, 0.6)",
+      },
       label: {
-        backgroundColor: "#6a7985",
+        backgroundColor: "rgba(99, 102, 241, 0.9)",
+        borderColor: "rgba(138, 43, 226, 0.8)",
+        borderWidth: 2,
+        color: "#fff",
+        fontWeight: 600,
       },
     },
-    backgroundColor: "rgba(15, 23, 42, 0.95)",
-    borderColor: "rgba(99, 102, 241, 0.3)",
-    borderWidth: 1,
-    textStyle: { color: "#e2e8f0" },
+    backgroundColor: "rgba(10, 15, 30, 0.98)",
+    borderColor: "rgba(138, 43, 226, 0.6)",
+    borderWidth: 2,
+    textStyle: { color: "#ffffff", fontSize: 13 },
+    padding: 12,
+    extraCssText: "box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);",
   },
   legend: {
     data: series.map((s) => s.name),
@@ -365,12 +383,24 @@ const createGradientAreaChart = (
       type: "line",
       stack: "Total",
       smooth: true,
+      smoothMonotone: "x",
       lineStyle: {
-        width: 0,
+        width: 3,
+        shadowColor: gradientConfigs[idx % 5][0].color,
+        shadowBlur: 10,
+        shadowOffsetY: 2,
       },
-      showSymbol: false,
+      showSymbol: true,
+      symbol: "circle",
+      symbolSize: 8,
+      itemStyle: {
+        borderColor: "#fff",
+        borderWidth: 2,
+        shadowBlur: 10,
+        shadowColor: gradientConfigs[idx % 5][0].color,
+      },
       areaStyle: {
-        opacity: 0.8,
+        opacity: 0.85,
         color: new echarts.graphic.LinearGradient(
           0,
           0,
@@ -378,33 +408,126 @@ const createGradientAreaChart = (
           1,
           gradientConfigs[idx % 5]
         ),
+        shadowColor: "rgba(0, 0, 0, 0.3)",
+        shadowBlur: 20,
       },
       emphasis: {
         focus: "series",
+        lineStyle: {
+          width: 5,
+          shadowBlur: 20,
+        },
+        itemStyle: {
+          borderWidth: 3,
+          shadowBlur: 15,
+        },
+        scale: true,
       },
+      animationEasing: "elasticOut",
+      animationDelay: (idx: number) => idx * 10,
       data: s.data,
     };
   }),
 });
 
 // ============================================
-// 3️⃣ ROSE PIE CHART (Nightingale - Exact ECharts Example)
+// 3️⃣ ROSE PIE CHART (Nightingale - God-Level Graphics)
 // ============================================
 
 const createRosePieChart = (
   title: string,
   pieData: { name: string; value: number }[]
 ) => {
-  // Beautiful color palette from ECharts rose chart example
+  // Stunning gradient color palette with depth
   const roseColors = [
-    "#5470c6", // Blue (rose 1)
-    "#91cc75", // Lime Green (rose 2)
-    "#5d6d7e", // Dark Gray/Purple (rose 3)
-    "#ee9a49", // Orange (rose 4)
-    "#73c0de", // Cyan (rose 5)
-    "#fac858", // Yellow (rose 6)
-    "#ea7ccc", // Pink (rose 7)
-    "#9a60b4", // Purple (rose 8)
+    {
+      type: "linear",
+      x: 0,
+      y: 0,
+      x2: 0,
+      y2: 1,
+      colorStops: [
+        { offset: 0, color: "#667eea" },
+        { offset: 1, color: "#764ba2" },
+      ],
+    },
+    {
+      type: "linear",
+      x: 0,
+      y: 0,
+      x2: 0,
+      y2: 1,
+      colorStops: [
+        { offset: 0, color: "#f093fb" },
+        { offset: 1, color: "#f5576c" },
+      ],
+    },
+    {
+      type: "linear",
+      x: 0,
+      y: 0,
+      x2: 0,
+      y2: 1,
+      colorStops: [
+        { offset: 0, color: "#4facfe" },
+        { offset: 1, color: "#00f2fe" },
+      ],
+    },
+    {
+      type: "linear",
+      x: 0,
+      y: 0,
+      x2: 0,
+      y2: 1,
+      colorStops: [
+        { offset: 0, color: "#43e97b" },
+        { offset: 1, color: "#38f9d7" },
+      ],
+    },
+    {
+      type: "linear",
+      x: 0,
+      y: 0,
+      x2: 0,
+      y2: 1,
+      colorStops: [
+        { offset: 0, color: "#fa709a" },
+        { offset: 1, color: "#fee140" },
+      ],
+    },
+    {
+      type: "linear",
+      x: 0,
+      y: 0,
+      x2: 0,
+      y2: 1,
+      colorStops: [
+        { offset: 0, color: "#30cfd0" },
+        { offset: 1, color: "#330867" },
+      ],
+    },
+    {
+      type: "linear",
+      x: 0,
+      y: 0,
+      x2: 0,
+      y2: 1,
+      colorStops: [
+        { offset: 0, color: "#a8edea" },
+        { offset: 1, color: "#fed6e3" },
+      ],
+    },
+    {
+      type: "linear",
+      x: 0,
+      y: 0,
+      x2: 0,
+      y2: 1,
+      colorStops: [
+        { offset: 0, color: "#ff9a56" },
+        { offset: 1, color: "#ff6a88" },
+      ],
+    },
   ];
 
   return {
@@ -413,76 +536,117 @@ const createRosePieChart = (
       left: "center",
       top: 20,
       textStyle: {
-        color: "#e2e8f0",
-        fontSize: 20,
-        fontWeight: "600",
+        color: "#ffffff",
+        fontSize: 24,
+        fontWeight: "700",
+        textShadowColor: "rgba(0, 0, 0, 0.5)",
+        textShadowBlur: 10,
+        textShadowOffsetX: 2,
+        textShadowOffsetY: 2,
       },
     },
     legend: {
-      top: "bottom",
-      textStyle: {
-        color: "#cbd5e1",
-        fontSize: 12,
-      },
-      itemWidth: 18,
-      itemHeight: 14,
+      show: false, // Hide legend for cleaner look with many items
     },
     tooltip: {
       trigger: "item",
-      backgroundColor: "rgba(15, 23, 42, 0.95)",
-      borderColor: "rgba(255, 255, 255, 0.1)",
-      borderWidth: 1,
+      backgroundColor: "rgba(10, 15, 30, 0.98)",
+      borderColor: "rgba(138, 43, 226, 0.5)",
+      borderWidth: 2,
       textStyle: {
-        color: "#e2e8f0",
+        color: "#ffffff",
+        fontSize: 14,
       },
       formatter: (params: AnyData) => {
-        return `<div style="font-weight: 600; margin-bottom: 4px;">${
-          params.name
-        }</div>
-                <div><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background-color:${
-                  params.color
-                };margin-right:6px;"></span>
-                Value: <strong>${params.value.toFixed(2)}</strong> (${
-          params.percent
-        }%)</div>`;
+        const rank = params.dataIndex + 1;
+        return `<div style="padding: 8px;">
+                  <div style="font-weight: 700; font-size: 16px; margin-bottom: 8px; color: #667eea;">🏆 Rank #${rank}</div>
+                  <div style="font-weight: 600; margin-bottom: 6px; font-size: 14px;">${
+                    params.name
+                  }</div>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);"></span>
+                    <span style="font-size: 15px;">Value: <strong style="color: #43e97b;">${params.value.toFixed(
+                      2
+                    )}</strong></span>
+                  </div>
+                  <div style="margin-top: 4px; font-size: 12px; color: #94a3b8;">Share: ${params.percent.toFixed(
+                    1
+                  )}%</div>
+                </div>`;
       },
     },
     series: [
       {
         name: title || "Nightingale Chart",
         type: "pie",
-        radius: [60, 200],
-        center: ["50%", "50%"],
+        radius: [80, 240],
+        center: ["50%", "52%"],
         roseType: "area",
         itemStyle: {
-          borderRadius: 8,
-          borderColor: "rgba(255, 255, 255, 0.1)",
-          borderWidth: 2,
+          borderRadius: 12,
+          borderColor: "rgba(255, 255, 255, 0.2)",
+          borderWidth: 3,
+          shadowBlur: 25,
+          shadowColor: "rgba(0, 0, 0, 0.4)",
+          shadowOffsetX: 0,
+          shadowOffsetY: 5,
         },
         label: {
           show: true,
-          color: "#f1f5f9",
-          fontSize: 12,
-          fontWeight: "500",
+          color: "#ffffff",
+          fontSize: 13,
+          fontWeight: "600",
+          textShadowColor: "rgba(0, 0, 0, 0.8)",
+          textShadowBlur: 4,
           formatter: (params: AnyData) => {
-            return `${params.name}\n${params.value.toFixed(1)}`;
+            const rank = params.dataIndex + 1;
+            // Show top 8 labels to avoid clutter
+            if (rank <= 8) {
+              return `#${rank}\n${params.value.toFixed(1)}`;
+            }
+            return "";
+          },
+          position: "outside",
+          alignTo: "edge",
+          margin: 20,
+        },
+        labelLine: {
+          show: true,
+          length: 30,
+          length2: 20,
+          lineStyle: {
+            color: "rgba(255, 255, 255, 0.3)",
+            width: 2,
           },
         },
         emphasis: {
           label: {
             show: true,
-            fontSize: 14,
+            fontSize: 16,
             fontWeight: "bold",
+            color: "#ffffff",
           },
           itemStyle: {
-            shadowBlur: 20,
-            shadowColor: "rgba(0, 0, 0, 0.5)",
+            shadowBlur: 40,
+            shadowColor: "rgba(138, 43, 226, 0.8)",
+            borderWidth: 4,
+            borderColor: "rgba(255, 255, 255, 0.5)",
           },
+          scale: true,
+          scaleSize: 15,
         },
+        animationType: "scale",
+        animationEasing: "elasticOut",
+        animationDelay: (idx: number) => idx * 50,
         data: pieData.map((item, index) => ({
           ...item,
           itemStyle: {
             color: roseColors[index % roseColors.length],
+            borderColor: "rgba(255, 255, 255, 0.3)",
+            borderWidth: 3,
+            shadowBlur: 20,
+            shadowColor: "rgba(0, 0, 0, 0.3)",
           },
         })),
       },
@@ -513,37 +677,71 @@ const createTimelineBarChart = (chart: ChartData) => {
         data: timeline.data,
         bottom: 10,
         label: {
-          color: "rgba(255, 255, 255, 0.7)",
-          fontSize: 11,
+          color: "rgba(255, 255, 255, 0.9)",
+          fontSize: 12,
+          fontWeight: 600,
         },
-        lineStyle: { color: "rgba(255, 255, 255, 0.2)" },
+        lineStyle: {
+          color: "rgba(138, 43, 226, 0.5)",
+          width: 2,
+        },
+        itemStyle: {
+          color: "rgba(138, 43, 226, 0.3)",
+          borderColor: "rgba(138, 43, 226, 0.8)",
+          borderWidth: 2,
+        },
         controlStyle: {
-          color: "#80FFA5",
-          borderColor: "#80FFA5",
+          color: "#667eea",
+          borderColor: "#667eea",
+          borderWidth: 2,
+          shadowBlur: 10,
+          shadowColor: "rgba(102, 126, 234, 0.5)",
         },
         emphasis: {
           controlStyle: {
-            color: "#00DDFF",
-            borderColor: "#00DDFF",
+            color: "#f093fb",
+            borderColor: "#f093fb",
+            shadowBlur: 15,
+            shadowColor: "rgba(240, 147, 251, 0.8)",
+          },
+          itemStyle: {
+            color: "rgba(138, 43, 226, 0.6)",
+            borderColor: "rgba(240, 116, 245, 1)",
+            shadowBlur: 10,
           },
         },
         checkpointStyle: {
-          color: "#80FFA5",
-          borderColor: "#80FFA5",
+          color: "#667eea",
+          borderColor: "#f093fb",
+          borderWidth: 3,
+          shadowBlur: 15,
+          shadowColor: "rgba(102, 126, 234, 0.8)",
+          animation: true,
+          animationDuration: 300,
         },
       },
       title: {
         text: title,
         left: "center",
         top: 10,
-        textStyle: { color: "#fff", fontSize: 16, fontWeight: 600 },
+        textStyle: {
+          color: "#ffffff",
+          fontSize: 22,
+          fontWeight: 700,
+          textShadowColor: "rgba(0, 0, 0, 0.5)",
+          textShadowBlur: 10,
+          textShadowOffsetX: 2,
+          textShadowOffsetY: 2,
+        },
       },
       tooltip: {
         trigger: "axis",
-        backgroundColor: "rgba(15, 23, 42, 0.95)",
-        borderColor: "rgba(99, 102, 241, 0.3)",
-        borderWidth: 1,
-        textStyle: { color: "#e2e8f0" },
+        backgroundColor: "rgba(10, 15, 30, 0.98)",
+        borderColor: "rgba(138, 43, 226, 0.6)",
+        borderWidth: 2,
+        textStyle: { color: "#ffffff", fontSize: 13 },
+        padding: 12,
+        extraCssText: "box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);",
       },
       legend: {
         left: "right",
@@ -622,13 +820,37 @@ const createBrushBarChart = (
 ) => {
   const emphasisStyle = {
     itemStyle: {
-      shadowBlur: 10,
-      shadowColor: "rgba(0,0,0,0.3)",
+      shadowBlur: 30,
+      shadowColor: "rgba(138, 43, 226, 0.8)",
+      shadowOffsetY: 5,
     },
+    scale: true,
+    scaleSize: 10,
   };
 
-  // Generate colors with gradients
-  const barColors = ["#80FFA5", "#00DDFF", "#37A2FF", "#FF0087", "#FFBF00"];
+  // Stunning gradient colors for bars
+  const barGradients = [
+    [
+      { offset: 0, color: "#667eea" },
+      { offset: 1, color: "#764ba2" },
+    ],
+    [
+      { offset: 0, color: "#f093fb" },
+      { offset: 1, color: "#f5576c" },
+    ],
+    [
+      { offset: 0, color: "#4facfe" },
+      { offset: 1, color: "#00f2fe" },
+    ],
+    [
+      { offset: 0, color: "#43e97b" },
+      { offset: 1, color: "#38f9d7" },
+    ],
+    [
+      { offset: 0, color: "#fa709a" },
+      { offset: 1, color: "#fee140" },
+    ],
+  ];
 
   return {
     backgroundColor: "transparent",
@@ -636,13 +858,27 @@ const createBrushBarChart = (
       text: title,
       left: "center",
       top: 10,
-      textStyle: { color: "#fff", fontSize: 16, fontWeight: 600 },
+      textStyle: {
+        color: "#ffffff",
+        fontSize: 22,
+        fontWeight: 700,
+        textShadowColor: "rgba(0, 0, 0, 0.5)",
+        textShadowBlur: 10,
+        textShadowOffsetX: 2,
+        textShadowOffsetY: 2,
+      },
     },
     legend: {
       data: series.map((s) => s.name),
       left: "10%",
-      top: 40,
-      textStyle: { color: "rgba(255, 255, 255, 0.8)", fontSize: 11 },
+      top: 45,
+      textStyle: {
+        color: "rgba(255, 255, 255, 0.9)",
+        fontSize: 12,
+        fontWeight: 500,
+      },
+      itemWidth: 25,
+      itemHeight: 14,
     },
     brush: {
       toolbox: ["rect", "polygon", "lineX", "lineY", "keep", "clear"],
@@ -673,10 +909,18 @@ const createBrushBarChart = (
     },
     tooltip: {
       trigger: "axis",
-      backgroundColor: "rgba(15, 23, 42, 0.95)",
-      borderColor: "rgba(99, 102, 241, 0.3)",
-      borderWidth: 1,
-      textStyle: { color: "#e2e8f0" },
+      backgroundColor: "rgba(10, 15, 30, 0.98)",
+      borderColor: "rgba(138, 43, 226, 0.6)",
+      borderWidth: 2,
+      textStyle: { color: "#ffffff", fontSize: 13 },
+      padding: 12,
+      extraCssText: "box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);",
+      axisPointer: {
+        type: "shadow",
+        shadowStyle: {
+          color: "rgba(138, 43, 226, 0.15)",
+        },
+      },
     },
     xAxis: {
       data: xAxis.data,
@@ -708,17 +952,37 @@ const createBrushBarChart = (
     },
     series: series.map((s, idx) => ({
       name: s.name,
-      type: "bar",
+      type: s.type || "bar",
       stack: s.stack || (idx < 2 ? "one" : "two"),
       emphasis: emphasisStyle,
       data: s.data,
+      smooth: s.type === "line",
+      lineStyle:
+        s.type === "line"
+          ? {
+              width: 3,
+              shadowColor: barGradients[idx % 5][0].color,
+              shadowBlur: 10,
+            }
+          : undefined,
       itemStyle: {
-        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-          { offset: 0, color: barColors[idx % 5] },
-          { offset: 1, color: barColors[idx % 5] + "66" }, // Add transparency
-        ]),
-        borderRadius: [4, 4, 0, 0],
+        color: new echarts.graphic.LinearGradient(
+          0,
+          0,
+          0,
+          1,
+          barGradients[idx % 5]
+        ),
+        borderRadius: [8, 8, 0, 0],
+        borderColor: "rgba(255, 255, 255, 0.2)",
+        borderWidth: 2,
+        shadowBlur: 15,
+        shadowColor: "rgba(0, 0, 0, 0.3)",
+        shadowOffsetY: 3,
       },
+      animationType: "scale",
+      animationEasing: "elasticOut",
+      animationDelay: (idx: number) => idx * 30,
     })),
   };
 };
@@ -737,33 +1001,57 @@ const createLargeAreaChart = (
     left: "center",
     text: title,
     top: 10,
-    textStyle: { color: "#fff", fontSize: 16, fontWeight: 600 },
+    textStyle: {
+      color: "#ffffff",
+      fontSize: 22,
+      fontWeight: 700,
+      textShadowColor: "rgba(0, 0, 0, 0.5)",
+      textShadowBlur: 10,
+      textShadowOffsetX: 2,
+      textShadowOffsetY: 2,
+    },
   },
   tooltip: {
     trigger: "axis",
     position: function (pt: number[]) {
       return [pt[0], "10%"];
     },
-    backgroundColor: "rgba(15, 23, 42, 0.95)",
-    borderColor: "rgba(99, 102, 241, 0.3)",
-    borderWidth: 1,
-    textStyle: { color: "#e2e8f0" },
+    backgroundColor: "rgba(10, 15, 30, 0.98)",
+    borderColor: "rgba(138, 43, 226, 0.6)",
+    borderWidth: 2,
+    textStyle: { color: "#ffffff", fontSize: 13 },
+    padding: 12,
+    extraCssText: "box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);",
   },
   toolbox: {
     feature: {
       dataZoom: {
         yAxisIndex: "none",
-        iconStyle: { borderColor: "rgba(255,255,255,0.5)" },
+        iconStyle: {
+          borderColor: "rgba(138, 43, 226, 0.8)",
+          borderWidth: 2,
+        },
       },
       restore: {
-        iconStyle: { borderColor: "rgba(255,255,255,0.5)" },
+        iconStyle: {
+          borderColor: "rgba(138, 43, 226, 0.8)",
+          borderWidth: 2,
+        },
       },
       saveAsImage: {
-        iconStyle: { borderColor: "rgba(255,255,255,0.5)" },
+        iconStyle: {
+          borderColor: "rgba(138, 43, 226, 0.8)",
+          borderWidth: 2,
+        },
       },
     },
     right: 20,
     top: 10,
+    emphasis: {
+      iconStyle: {
+        borderColor: "rgba(240, 116, 245, 1)",
+      },
+    },
   },
   xAxis: {
     type: "category",
@@ -817,8 +1105,21 @@ const createLargeAreaChart = (
   series: series.map((s, idx) => ({
     name: s.name,
     type: "line",
-    symbol: "none",
+    symbol: "circle",
+    symbolSize: 6,
     sampling: "lttb",
+    smooth: true,
+    lineStyle: {
+      width: 2,
+      shadowColor: [
+        "rgb(255, 70, 131)",
+        "rgb(128, 255, 165)",
+        "rgb(0, 221, 255)",
+        "rgb(55, 162, 255)",
+        "rgb(255, 191, 0)",
+      ][idx % 5],
+      shadowBlur: 10,
+    },
     itemStyle: {
       color: [
         "rgb(255, 70, 131)",
@@ -827,6 +1128,8 @@ const createLargeAreaChart = (
         "rgb(55, 162, 255)",
         "rgb(255, 191, 0)",
       ][idx % 5],
+      borderColor: "#fff",
+      borderWidth: 2,
     },
     areaStyle: {
       color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [

@@ -267,6 +267,116 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 		return response, nil
 	}
 	
+	// KEYWORD-BASED INTENT FALLBACK
+	// When AI NLP fails (quota/errors), detect common intent patterns from query keywords
+	msgLower := strings.ToLower(message)
+	
+	// Detect LIST_DISTRICTS intent
+	if (strings.Contains(msgLower, "districts in") || 
+		strings.Contains(msgLower, "districts of") ||
+		strings.Contains(msgLower, "list districts") ||
+		strings.Contains(msgLower, "show districts")) && 
+		intent != IntentListDistricts {
+		fmt.Println("├─ 🔄 Keyword fallback: Detected LIST_DISTRICTS intent")
+		intent = IntentListDistricts
+		
+		// Extract location from "districts in X" or "districts of X" pattern
+		if strings.Contains(msgLower, "districts in") {
+			parts := strings.Split(msgLower, "districts in")
+			if len(parts) > 1 {
+				locationName := strings.TrimSpace(parts[1])
+				// Remove trailing words like "state"
+				locationName = strings.TrimSuffix(locationName, " state")
+				if locationName != "" {
+					entities.Locations = []string{locationName}
+					fmt.Printf("├─ 🔄 Extracted location: %s\n", locationName)
+				}
+			}
+		} else if strings.Contains(msgLower, "districts of") {
+			parts := strings.Split(msgLower, "districts of")
+			if len(parts) > 1 {
+				locationName := strings.TrimSpace(parts[1])
+				locationName = strings.TrimSuffix(locationName, " state")
+				if locationName != "" {
+					entities.Locations = []string{locationName}
+					fmt.Printf("├─ 🔄 Extracted location: %s\n", locationName)
+				}
+			}
+		}
+	}
+	
+	// Detect LIST_BLOCKS intent
+	if (strings.Contains(msgLower, "blocks in") || 
+		strings.Contains(msgLower, "blocks of") ||
+		strings.Contains(msgLower, "list blocks") ||
+		strings.Contains(msgLower, "show blocks")) && 
+		intent != IntentListBlocks {
+		fmt.Println("├─ 🔄 Keyword fallback: Detected LIST_BLOCKS intent")
+		intent = IntentListBlocks
+		
+		// Extract location from "blocks in X" or "blocks of X" pattern
+		if strings.Contains(msgLower, "blocks in") {
+			parts := strings.Split(msgLower, "blocks in")
+			if len(parts) > 1 {
+				locationName := strings.TrimSpace(parts[1])
+				locationName = strings.TrimSuffix(locationName, " state")
+				locationName = strings.TrimSuffix(locationName, " district")
+				if locationName != "" {
+					entities.Locations = []string{locationName}
+					fmt.Printf("├─ 🔄 Extracted location: %s\n", locationName)
+				}
+			}
+		} else if strings.Contains(msgLower, "blocks of") {
+			parts := strings.Split(msgLower, "blocks of")
+			if len(parts) > 1 {
+				locationName := strings.TrimSpace(parts[1])
+				locationName = strings.TrimSuffix(locationName, " state")
+				locationName = strings.TrimSuffix(locationName, " district")
+				if locationName != "" {
+					entities.Locations = []string{locationName}
+					fmt.Printf("├─ 🔄 Extracted location: %s\n", locationName)
+				}
+			}
+		}
+	}
+	
+	// Detect TOP_RANKING intent (top N critical/safe/over-exploited blocks)
+	if (strings.Contains(msgLower, "top ") || strings.Contains(msgLower, "worst ") || strings.Contains(msgLower, "most ")) &&
+		(strings.Contains(msgLower, "critical") || strings.Contains(msgLower, "over-exploited") || 
+		 strings.Contains(msgLower, "safe") || strings.Contains(msgLower, "semi-critical")) {
+		
+		if intent != IntentTopRanking {
+			fmt.Println("├─ 🔄 Keyword fallback: Detected TOP_RANKING intent")
+			intent = IntentTopRanking
+		}
+		
+		// Clear locations that are actually ranking keywords (top, worst, most, etc.)
+		// This runs regardless of whether intent was already TOP_RANKING to clean up bad entities
+		var filteredLocations []string
+		rankingKeywords := []string{"top", "worst", "most", "critical", "over-exploited", "safe", "semi-critical", "blocks", "districts", "10", "20", "50"}
+		for _, loc := range entities.Locations {
+			locLower := strings.ToLower(strings.TrimSpace(loc))
+			isRankingKeyword := false
+			for _, keyword := range rankingKeywords {
+				if locLower == keyword || strings.Contains(locLower, keyword) {
+					isRankingKeyword = true
+					break
+				}
+			}
+			if !isRankingKeyword && len(locLower) > 2 {
+				filteredLocations = append(filteredLocations, loc)
+			}
+		}
+		if len(filteredLocations) > 0 {
+			entities.Locations = filteredLocations
+			fmt.Printf("├─ 🔄 Filtered locations: %v\n", filteredLocations)
+		} else {
+			// Clear all locations if they're all ranking keywords
+			entities.Locations = []string{}
+			fmt.Println("├─ 🔄 Cleared all locations (all were ranking keywords)")
+		}
+	}
+	
 	// Process with intent handlers
 	var handlerResult *models.ChatResponse
 	var handlerErr error
@@ -296,11 +406,22 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 		handlerResult, handlerErr = s.handleListStates(ctx, entities, response)
 	case IntentTopRanking:
 		handlerResult, handlerErr = s.handleTopRanking(ctx, entities, response)
-	case IntentCategoryDistribution, IntentDeficitAnalysis, IntentChangeAnalysis:
-		// These intents use dynamic SQL path above
-		// If we reach here, it means dynamic SQL failed
-		response.Text = "I understand you're looking for " + string(intent) + " analysis. Please try rephrasing your question."
-		handlerResult = response
+	case IntentYearlyComparison:
+		handlerResult, handlerErr = s.handleYearlyComparison(ctx, entities, response)
+	case IntentCategorySummary:
+		handlerResult, handlerErr = s.handleCategorySummary(ctx, entities, response)
+	case IntentCriticalAlerts:
+		handlerResult, handlerErr = s.handleCriticalAlerts(ctx, entities, response)
+	case IntentWaterBalance:
+		handlerResult, handlerErr = s.handleWaterBalance(ctx, entities, response)
+	case IntentStateOverview:
+		handlerResult, handlerErr = s.handleStateOverview(ctx, entities, response)
+	case IntentCategoryDistribution:
+		handlerResult, handlerErr = s.handleCategoryDistribution(ctx, entities, response)
+	case IntentDeficitAnalysis:
+		handlerResult, handlerErr = s.handleDeficitAnalysis(ctx, entities, response)
+	case IntentChangeAnalysis:
+		handlerResult, handlerErr = s.handleChangeAnalysis(ctx, entities, response)
 	default:
 		// Unknown intent - fall back to RAG search
 		fmt.Printf("├─ ⚠️  Unknown intent '%s', falling back to RAG search\n", intent)
@@ -759,11 +880,12 @@ RAG_FALLBACK:
 		handlerResult, handlerErr = s.handleListStates(ctx, entities, response)
 	case IntentTopRanking:
 		handlerResult, handlerErr = s.handleTopRanking(ctx, entities, response)
-	case IntentCategoryDistribution, IntentDeficitAnalysis, IntentChangeAnalysis:
-		// These intents use dynamic SQL path above
-		// If we reach here, it means dynamic SQL failed
-		response.Text = "I understand you're looking for " + string(intent) + " analysis. Please try rephrasing your question."
-		handlerResult = response
+	case IntentCategoryDistribution:
+		handlerResult, handlerErr = s.handleCategoryDistribution(ctx, entities, response)
+	case IntentDeficitAnalysis:
+		handlerResult, handlerErr = s.handleDeficitAnalysis(ctx, entities, response)
+	case IntentChangeAnalysis:
+		handlerResult, handlerErr = s.handleChangeAnalysis(ctx, entities, response)
 	default:
 		response.Text = "I'm not sure what you mean. Try asking for a summary, trend, comparison, ranking, distribution, or recharge/extraction breakdowns."
 		handlerResult = response
@@ -1609,6 +1731,324 @@ func isValidYear(year string) bool {
 	return len(parts[0]) == 4 && len(parts[1]) == 4
 }
 
+// handleCategoryDistribution shows groundwater category breakdown with rose-pie chart
+func (s *ChatService) handleCategoryDistribution(ctx context.Context, e Entities, r *models.ChatResponse) (*models.ChatResponse, error) {
+	year := e.Year
+	if year == "" {
+		year = "2024-2025"
+	}
+	
+	// Determine location - state or district or all India
+	locationFilter := ""
+	locationName := "India"
+	
+	if len(e.Locations) > 0 {
+		loc := e.Locations[0]
+		locationFilter = strings.ToUpper(loc)
+		locationName = strings.Title(strings.ToLower(loc))
+	}
+	
+	// Build SQL for category distribution
+	sqlQuery := fmt.Sprintf(`
+		SELECT 
+			a.category,
+			COUNT(*) as block_count,
+			ROUND(AVG(CASE WHEN a.stage > 0 THEN a.stage END)::numeric, 2) as avg_stage,
+			ROUND((COUNT(*) * 100.0 / SUM(COUNT(*)) OVER())::numeric, 2) as percentage
+		FROM assessments_summary a
+		JOIN blocks b ON a.block_uuid = b.block_uuid
+		JOIN districts d ON b.district_uuid = d.district_uuid
+		JOIN states s ON d.state_uuid = s.state_uuid
+		WHERE a.year = '%s'
+		AND a.category NOT IN ('none', 'Hilly Area')`, year)
+	
+	if locationFilter != "" {
+		sqlQuery += fmt.Sprintf(`
+		AND (UPPER(s.state_name) = '%s' OR UPPER(d.district_name) = '%s')`, locationFilter, locationFilter)
+	}
+	
+	sqlQuery += `
+		GROUP BY a.category
+		ORDER BY block_count DESC`
+	
+	results, err := s.ingres.repo.RunRawQuery(ctx, sqlQuery)
+	if err != nil {
+		return nil, fmt.Errorf("category distribution query failed: %w", err)
+	}
+	
+	if len(results) == 0 {
+		r.Text = fmt.Sprintf("No category distribution data found for %s in %s.", locationName, year)
+		return r, nil
+	}
+	
+	// Build response text
+	r.Text = fmt.Sprintf("📊 **Groundwater Category Distribution: %s (%s)**\n\n", locationName, year)
+	
+	// Build pie data for rose-pie chart
+	var pieData []models.PieDatum
+	var totalBlocks float64
+	
+	// Category colors for display
+	categoryEmoji := map[string]string{
+		"safe":           "🟢",
+		"semi_critical":  "🟡",
+		"critical":       "🟠",
+		"over_exploited": "🔴",
+		"salinity":       "🔵",
+	}
+	
+	for _, row := range results {
+		category := ""
+		blockCount := 0.0
+		percentage := 0.0
+		avgStage := 0.0
+		
+		if c, ok := row["category"].(string); ok {
+			category = c
+		}
+		if bc, ok := row["block_count"].(int64); ok {
+			blockCount = float64(bc)
+		}
+		if p, ok := row["percentage"].(float64); ok {
+			percentage = p
+		}
+		if as, ok := row["avg_stage"].(float64); ok {
+			avgStage = as
+		}
+		
+		if category != "" && blockCount > 0 {
+			totalBlocks += blockCount
+			
+			emoji := categoryEmoji[strings.ToLower(category)]
+			if emoji == "" {
+				emoji = "⚪"
+			}
+			
+			displayName := strings.Title(strings.ReplaceAll(category, "_", " "))
+			r.Text += fmt.Sprintf("%s **%s**: %.0f blocks (%.1f%%) - Avg Stage: %.1f%%\n", 
+				emoji, displayName, blockCount, percentage, avgStage)
+			
+			pieData = append(pieData, models.PieDatum{
+				Name:  displayName,
+				Value: blockCount,
+			})
+		}
+	}
+	
+	r.Text += fmt.Sprintf("\n📈 **Total Blocks Analyzed**: %.0f", totalBlocks)
+	r.Data = results
+	
+	// Create rose-pie chart
+	if len(pieData) > 0 {
+		r.Chart = &models.ChartPayload{
+			Type:    "rose-pie",
+			Title:   fmt.Sprintf("Category Distribution - %s (%s)", locationName, year),
+			PieData: pieData,
+		}
+	}
+	
+	return r, nil
+}
+
+// handleDeficitAnalysis shows water deficit analysis with gradient-area chart
+func (s *ChatService) handleDeficitAnalysis(ctx context.Context, e Entities, r *models.ChatResponse) (*models.ChatResponse, error) {
+	year := e.Year
+	if year == "" {
+		year = "2024-2025"
+	}
+	
+	limit := 20
+	if e.Threshold > 0 && e.Threshold <= 50 {
+		limit = int(e.Threshold)
+	}
+	
+	// Build SQL for deficit analysis
+	sqlQuery := fmt.Sprintf(`
+		SELECT 
+			CONCAT(b.block_name, ', ', d.district_name) as location,
+			s.state_name,
+			ROUND(a.total_extraction::numeric, 2) as extraction,
+			ROUND(a.total_recharge::numeric, 2) as recharge,
+			ROUND((a.total_extraction - a.total_recharge)::numeric, 2) as deficit,
+			ROUND(a.stage::numeric, 2) as stage,
+			a.category
+		FROM assessments_summary a
+		JOIN blocks b ON a.block_uuid = b.block_uuid
+		JOIN districts d ON b.district_uuid = d.district_uuid
+		JOIN states s ON d.state_uuid = s.state_uuid
+		WHERE a.year = '%s'
+		AND a.total_extraction > a.total_recharge
+		AND a.stage > 0
+	`, year)
+	
+	if len(e.Locations) > 0 {
+		loc := strings.ToUpper(e.Locations[0])
+		sqlQuery += fmt.Sprintf(`
+		AND (UPPER(s.state_name) = '%s' OR UPPER(d.district_name) = '%s')`, loc, loc)
+	}
+	
+	sqlQuery += fmt.Sprintf(`
+		ORDER BY deficit DESC
+		LIMIT %d`, limit)
+	
+	results, err := s.ingres.repo.RunRawQuery(ctx, sqlQuery)
+	if err != nil {
+		return nil, fmt.Errorf("deficit analysis query failed: %w", err)
+	}
+	
+	if len(results) == 0 {
+		r.Text = fmt.Sprintf("No deficit data found for %s.", year)
+		return r, nil
+	}
+	
+	// Build response
+	locationText := ""
+	if len(e.Locations) > 0 {
+		locationText = fmt.Sprintf(" in %s", e.Locations[0])
+	}
+	
+	r.Text = fmt.Sprintf("💧 **Water Deficit Analysis%s (%s)**\n\n", locationText, year)
+	r.Text += fmt.Sprintf("Showing top %d blocks where extraction exceeds recharge:\n\n", len(results))
+	r.Data = results
+	
+	// Build chart data
+	var xAxisData []string
+	var extractionData []float64
+	var rechargeData []float64
+	
+	for i, row := range results {
+		if i >= 10 { // Limit chart to top 10 for readability
+			break
+		}
+		location := ""
+		extraction := 0.0
+		recharge := 0.0
+		
+		if l, ok := row["location"].(string); ok {
+			location = l
+		}
+		if e, ok := row["extraction"].(float64); ok {
+			extraction = e
+		}
+		if rc, ok := row["recharge"].(float64); ok {
+			recharge = rc
+		}
+		
+		xAxisData = append(xAxisData, location)
+		extractionData = append(extractionData, extraction)
+		rechargeData = append(rechargeData, recharge)
+	}
+	
+	// Create brush-bar chart for deficit comparison
+	if len(xAxisData) > 0 {
+		r.Chart = &models.ChartPayload{
+			Type:  "brush-bar",
+			Title: fmt.Sprintf("Water Deficit Analysis%s - %s", locationText, year),
+			XAxis: map[string]interface{}{
+				"data": xAxisData,
+			},
+			Series: []models.ChartSeries{
+				{Name: "Extraction (MCM)", Data: extractionData},
+				{Name: "Recharge (MCM)", Data: rechargeData},
+			},
+		}
+	}
+	
+	return r, nil
+}
+
+// handleChangeAnalysis shows year-over-year change analysis with timeline-bar chart
+func (s *ChatService) handleChangeAnalysis(ctx context.Context, e Entities, r *models.ChatResponse) (*models.ChatResponse, error) {
+	locationName := "India"
+	if len(e.Locations) > 0 {
+		locationName = strings.Title(strings.ToLower(e.Locations[0]))
+	}
+	
+	// Build SQL for change analysis over years
+	sqlQuery := `
+		SELECT 
+			a.year,
+			COUNT(*) as total_blocks,
+			ROUND(AVG(a.rainfall)::numeric, 2) as avg_rainfall,
+			ROUND(AVG(CASE WHEN a.stage > 0 THEN a.stage END)::numeric, 2) as avg_stage,
+			ROUND(SUM(a.total_recharge)::numeric, 2) as total_recharge,
+			ROUND(SUM(a.total_extraction)::numeric, 2) as total_extraction,
+			SUM(CASE WHEN LOWER(a.category) = 'over_exploited' THEN 1 ELSE 0 END) as overexploited_count
+		FROM assessments_summary a
+		JOIN blocks b ON a.block_uuid = b.block_uuid
+		JOIN districts d ON b.district_uuid = d.district_uuid
+		JOIN states s ON d.state_uuid = s.state_uuid`
+	
+	if len(e.Locations) > 0 {
+		loc := strings.ToUpper(e.Locations[0])
+		sqlQuery += fmt.Sprintf(`
+		WHERE (UPPER(s.state_name) = '%s' OR UPPER(d.district_name) = '%s')`, loc, loc)
+	}
+	
+	sqlQuery += `
+		GROUP BY a.year
+		ORDER BY a.year ASC`
+	
+	results, err := s.ingres.repo.RunRawQuery(ctx, sqlQuery)
+	if err != nil {
+		return nil, fmt.Errorf("change analysis query failed: %w", err)
+	}
+	
+	if len(results) == 0 {
+		r.Text = fmt.Sprintf("No multi-year data found for %s.", locationName)
+		return r, nil
+	}
+	
+	// Build response
+	r.Text = fmt.Sprintf("📈 **Year-over-Year Change Analysis: %s**\n\n", locationName)
+	r.Text += fmt.Sprintf("Tracking groundwater trends across %d assessment periods:\n\n", len(results))
+	r.Data = results
+	
+	// Build chart data
+	var years []string
+	var stageData []float64
+	var overexploitedData []float64
+	
+	for _, row := range results {
+		year := ""
+		avgStage := 0.0
+		overexploited := 0.0
+		
+		if y, ok := row["year"].(string); ok {
+			year = y
+		}
+		if as, ok := row["avg_stage"].(float64); ok {
+			avgStage = as
+		}
+		if oe, ok := row["overexploited_count"].(int64); ok {
+			overexploited = float64(oe)
+		}
+		
+		if year != "" {
+			years = append(years, year)
+			stageData = append(stageData, avgStage)
+			overexploitedData = append(overexploitedData, overexploited)
+		}
+	}
+	
+	// Create timeline-bar chart
+	if len(years) > 0 {
+		r.Chart = &models.ChartPayload{
+			Type:  "timeline-bar",
+			Title: fmt.Sprintf("Groundwater Trends - %s", locationName),
+			XAxis: map[string]interface{}{
+				"data": years,
+			},
+			Series: []models.ChartSeries{
+				{Name: "Avg Stage (%)", Data: stageData},
+				{Name: "Over-Exploited Blocks", Data: overexploitedData},
+			},
+		}
+	}
+	
+	return r, nil
+}
+
 func (s *ChatService) handleTrend(ctx context.Context, e Entities, r *models.ChatResponse) (*models.ChatResponse, error) {
 	blocks, err := s.ingres.GetBlocksByNames(ctx, e.Locations)
 	
@@ -2384,6 +2824,22 @@ func (s *ChatService) handleDischargeBreakdown(ctx context.Context, e Entities, 
 }
 
 func (s *ChatService) handleMapCategory(ctx context.Context, e Entities, r *models.ChatResponse) (*models.ChatResponse, error) {
+	// Parse category from query text if not set
+	if e.Category == "" {
+		queryLower := strings.ToLower(e.OriginalQuery)
+		if strings.Contains(queryLower, "critical") && !strings.Contains(queryLower, "semi") {
+			e.Category = "critical"
+		} else if strings.Contains(queryLower, "semi-critical") || strings.Contains(queryLower, "semi critical") {
+			e.Category = "semi_critical"
+		} else if strings.Contains(queryLower, "over-exploited") || strings.Contains(queryLower, "over exploited") {
+			e.Category = "over_exploited"
+		} else if strings.Contains(queryLower, "safe") {
+			e.Category = "safe"
+		} else if strings.Contains(queryLower, "salinity") {
+			e.Category = "salinity"
+		}
+	}
+	
 	if e.Category == "" {
 		r.Text = "Which category? (Safe, Critical, Semi-Critical, Over-Exploited)"
 		return r, nil
@@ -2474,6 +2930,22 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 	var locationFilter string
 	if len(e.Locations) > 0 {
 		locationFilter = strings.ToLower(strings.Join(e.Locations, " "))
+	}
+	
+	// Parse category from query text if not set
+	if e.Category == "" {
+		queryLower := strings.ToLower(e.OriginalQuery)
+		if strings.Contains(queryLower, "critical") && !strings.Contains(queryLower, "semi") {
+			e.Category = "critical"
+		} else if strings.Contains(queryLower, "semi-critical") || strings.Contains(queryLower, "semi critical") {
+			e.Category = "semi_critical"
+		} else if strings.Contains(queryLower, "over-exploited") || strings.Contains(queryLower, "over exploited") {
+			e.Category = "over_exploited"
+		} else if strings.Contains(queryLower, "safe") {
+			e.Category = "safe"
+		} else if strings.Contains(queryLower, "salinity") {
+			e.Category = "salinity"
+		}
 	}
 	
 	// PRIORITY: If category is specified (with or without location), handle it first
@@ -2778,7 +3250,96 @@ func (s *ChatService) handleListDistricts(ctx context.Context, e Entities, r *mo
 			return r, nil
 		}
 		
-		// Get districts for this state
+		// Get districts with assessment data for visualization
+		year := e.Year
+		if year == "" {
+			year = "2024-2025"
+		}
+		
+		// Query to get districts with their average stage data for visual representation
+		sqlQuery := fmt.Sprintf(`
+			SELECT 
+				d.district_name,
+				d.district_uuid,
+				COALESCE(AVG(CASE WHEN a.stage > 0 THEN a.stage ELSE NULL END), 0) as avg_stage,
+				COUNT(DISTINCT CASE WHEN a.block_uuid IS NOT NULL THEN b.block_uuid END) as block_count,
+				COUNT(DISTINCT b.block_uuid) as total_blocks
+			FROM districts d
+			JOIN blocks b ON d.district_uuid = b.district_uuid
+			LEFT JOIN assessments_summary a ON b.block_uuid = a.block_uuid AND a.year = '%s'
+			WHERE d.state_uuid = '%s'
+			GROUP BY d.district_uuid, d.district_name
+			HAVING COUNT(DISTINCT b.block_uuid) > 0
+			ORDER BY avg_stage DESC NULLS LAST
+			LIMIT 50
+		`, year, targetState.StateUUID)
+		
+		results, err := s.ingres.repo.RunRawQuery(ctx, sqlQuery)
+		if err == nil && len(results) > 0 {
+			// Create bar chart data - only include districts with valid data
+			var xAxisData []string
+			var stageData []float64
+			var blockCountData []float64
+			validCount := 0
+			
+			for _, result := range results {
+				districtName := ""
+				avgStage := 0.0
+				blockCount := 0.0
+				
+				if dn, ok := result["district_name"].(string); ok {
+					districtName = dn
+				}
+				if s, ok := result["avg_stage"].(float64); ok {
+					avgStage = s
+				}
+				if bc, ok := result["block_count"].(float64); ok {
+					blockCount = bc
+				}
+				
+				// Only add if we have meaningful data
+				if districtName != "" && blockCount > 0 {
+					xAxisData = append(xAxisData, districtName)
+					stageData = append(stageData, avgStage)
+					blockCountData = append(blockCountData, blockCount)
+					validCount++
+				}
+			}
+			
+			// Only return chart if we have valid data
+			if validCount == 0 {
+				// No valid data, fall through to simple district list
+				goto SIMPLE_DISTRICT_LIST
+			}
+			
+			r.Text = fmt.Sprintf("Here are all %d districts in %s state, visualized by their average groundwater extraction stage.", 
+				len(results), targetState.StateName)
+			
+			// Create beautiful bar chart
+			r.Chart = &models.ChartPayload{
+				Type:  "brush-bar",
+				Title: fmt.Sprintf("Districts in %s - Groundwater Stage Analysis", targetState.StateName),
+				XAxis: xAxisData,
+				Series: []models.ChartSeries{
+					{
+						Name: "Avg Extraction Stage (%)",
+						Data: stageData,
+						Type: "bar",
+					},
+					{
+						Name: "Number of Blocks",
+						Data: blockCountData,
+						Type: "line",
+					},
+				},
+			}
+			
+			r.Data = results
+			return r, nil
+		}
+		
+	SIMPLE_DISTRICT_LIST:
+		// Fallback: if query fails or no valid data, just list district names
 		districts, err := s.ingres.repo.GetDistrictsByState(ctx, targetState.StateUUID)
 		if err != nil {
 			r.Text = "Sorry, I encountered an error fetching districts data."
@@ -2849,25 +3410,30 @@ func (s *ChatService) handleListStates(ctx context.Context, e Entities, r *model
 }
 
 func (s *ChatService) handleTopRanking(ctx context.Context, e Entities, r *models.ChatResponse) (*models.ChatResponse, error) {
-	// Get category - if not extracted by AI, parse from query
-	category := e.Category
-	if category == "" {
-		queryLower := strings.ToLower(e.OriginalQuery)
-		if strings.Contains(queryLower, "critical") && !strings.Contains(queryLower, "semi") {
-			category = "critical"
-		} else if strings.Contains(queryLower, "semi-critical") || strings.Contains(queryLower, "semi critical") {
-			category = "semi_critical"
-		} else if strings.Contains(queryLower, "over-exploited") || strings.Contains(queryLower, "over exploited") || strings.Contains(queryLower, "overexploited") {
-			category = "over_exploited"
-		} else if strings.Contains(queryLower, "safe") {
-			category = "safe"
-		} else if strings.Contains(queryLower, "salinity") || strings.Contains(queryLower, "saline") {
-			category = "salinity"
-		} else {
-			// Default: over_exploited
-			category = "over_exploited"
-		}
+	// ALWAYS parse category from query text for reliability
+	queryLower := strings.ToLower(e.OriginalQuery)
+	category := ""
+	
+	// Check query text first (most reliable)
+	if strings.Contains(queryLower, "critical") && !strings.Contains(queryLower, "semi") {
+		category = "critical"
+	} else if strings.Contains(queryLower, "semi-critical") || strings.Contains(queryLower, "semi critical") {
+		category = "semi_critical"
+	} else if strings.Contains(queryLower, "over-exploited") || strings.Contains(queryLower, "over exploited") || strings.Contains(queryLower, "overexploited") {
+		category = "over_exploited"
+	} else if strings.Contains(queryLower, "safe") {
+		category = "safe"
+	} else if strings.Contains(queryLower, "salinity") || strings.Contains(queryLower, "saline") {
+		category = "salinity"
+	} else if e.Category != "" {
+		// Fall back to AI-extracted category if no keyword match
+		category = e.Category
+	} else {
+		// Final default
+		category = "over_exploited"
 	}
+	
+	fmt.Printf("DEBUG handleTopRanking: Query='%s', Detected category='%s'\n", queryLower, category)
 	
 	year := e.Year
 	if year == "" {
@@ -2913,7 +3479,9 @@ func (s *ChatService) handleTopRanking(ctx context.Context, e Entities, r *model
 
 	sqlQuery += fmt.Sprintf("\t\tORDER BY a.stage DESC\n\t\tLIMIT %d", limit)
 
-	fmt.Printf("DEBUG: Top Ranking SQL (limit=%d, category=%s): %s\n", limit, category, sqlQuery)
+	fmt.Printf("DEBUG: Top Ranking - Category extracted: '%s', Year: '%s', Limit: %d\n", category, year, limit)
+	fmt.Printf("DEBUG: Top Ranking - Original query: '%s'\n", e.OriginalQuery)
+	fmt.Printf("DEBUG: Top Ranking SQL: %s\n", sqlQuery)
 
 	// Execute query
 	results, err := s.ingres.repo.RunRawQuery(ctx, sqlQuery)

@@ -20,7 +20,14 @@ type ConversationMessage struct {
 
 // LLMService handles all LLM interactions with conversation context
 type LLMService struct {
-	client              *genai.Client
+	clients             []*genai.Client
+	models              []*genai.GenerativeModel
+	sqlModels           []*genai.GenerativeModel
+	vizModels           []*genai.GenerativeModel
+	currentKeyIndex     int
+	keyRotationMu       sync.Mutex
+	apiKeys             []string
+	client              *genai.Client    // Legacy - for backward compatibility
 	model               *genai.GenerativeModel
 	sqlModel            *genai.GenerativeModel
 	vizModel            *genai.GenerativeModel
@@ -80,36 +87,94 @@ RECHARGE SOURCES:
 `
 
 func NewLLMService(cfg *config.Config) (*LLMService, error) {
-	if cfg.Gemini.APIKey == "" {
+	// Get API keys - use APIKeys slice if available, otherwise fall back to single APIKey
+	apiKeys := cfg.Gemini.APIKeys
+	if len(apiKeys) == 0 && cfg.Gemini.APIKey != "" {
+		apiKeys = []string{cfg.Gemini.APIKey}
+	}
+	
+	if len(apiKeys) == 0 {
 		return nil, fmt.Errorf("GEMINI_API_KEY is not set")
 	}
 
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(cfg.Gemini.APIKey))
-	if err != nil {
-		return nil, err
+	
+	// Initialize clients for all API keys
+	clients := make([]*genai.Client, 0, len(apiKeys))
+	models := make([]*genai.GenerativeModel, 0, len(apiKeys))
+	sqlModels := make([]*genai.GenerativeModel, 0, len(apiKeys))
+	vizModels := make([]*genai.GenerativeModel, 0, len(apiKeys))
+	
+	for i, apiKey := range apiKeys {
+		client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
+		if err != nil {
+			fmt.Printf("Warning: Failed to create client for API key %d: %v\n", i+1, err)
+			continue
+		}
+		
+		// Main model for general queries
+		model := client.GenerativeModel("gemini-2.5-flash")
+		model.SetTemperature(0.3)
+
+		// SQL model with very low temperature for deterministic queries
+		sqlModel := client.GenerativeModel("gemini-2.5-flash")
+		sqlModel.SetTemperature(0.1)
+
+		// Visualization model with moderate creativity
+		vizModel := client.GenerativeModel("gemini-2.5-flash")
+		vizModel.SetTemperature(0.4)
+		
+		clients = append(clients, client)
+		models = append(models, model)
+		sqlModels = append(sqlModels, sqlModel)
+		vizModels = append(vizModels, vizModel)
 	}
-
-	// Main model for general queries
-	model := client.GenerativeModel("gemini-2.5-flash")
-	model.SetTemperature(0.3)
-
-	// SQL model with very low temperature for deterministic queries
-	sqlModel := client.GenerativeModel("gemini-2.5-flash")
-	sqlModel.SetTemperature(0.1)
-
-	// Visualization model with moderate creativity
-	vizModel := client.GenerativeModel("gemini-2.5-flash")
-	vizModel.SetTemperature(0.4)
+	
+	if len(clients) == 0 {
+		return nil, fmt.Errorf("failed to initialize any Gemini clients")
+	}
+	
+	fmt.Printf("🔑 Initialized %d Gemini API key(s) for rotation\n", len(clients))
 
 	return &LLMService{
-		client:              client,
-		model:               model,
-		sqlModel:            sqlModel,
-		vizModel:            vizModel,
+		clients:             clients,
+		models:              models,
+		sqlModels:           sqlModels,
+		vizModels:           vizModels,
+		apiKeys:             apiKeys,
+		currentKeyIndex:     0,
+		client:              clients[0],    // Legacy compatibility
+		model:               models[0],
+		sqlModel:            sqlModels[0],
+		vizModel:            vizModels[0],
 		conversationHistory: make([]ConversationMessage, 0),
 		maxHistoryLength:    10,
 	}, nil
+}
+
+// rotateAPIKey switches to the next available API key
+func (s *LLMService) rotateAPIKey() {
+	s.keyRotationMu.Lock()
+	defer s.keyRotationMu.Unlock()
+	
+	if len(s.clients) <= 1 {
+		return // Only one key, can't rotate
+	}
+	
+	s.currentKeyIndex = (s.currentKeyIndex + 1) % len(s.clients)
+	s.client = s.clients[s.currentKeyIndex]
+	s.model = s.models[s.currentKeyIndex]
+	s.sqlModel = s.sqlModels[s.currentKeyIndex]
+	s.vizModel = s.vizModels[s.currentKeyIndex]
+	
+	fmt.Printf("🔄 Rotated to API key %d of %d\n", s.currentKeyIndex+1, len(s.clients))
+}
+
+// getCurrentModels returns the current active models (thread-safe)
+func (s *LLMService) getCurrentModels() (*genai.GenerativeModel, *genai.GenerativeModel, *genai.GenerativeModel) {
+	s.keyRotationMu.Lock()
+	defer s.keyRotationMu.Unlock()
+	return s.model, s.sqlModel, s.vizModel
 }
 
 // AddToHistory adds a message to conversation history
@@ -360,6 +425,10 @@ Generate the visualization JSON now:`, DOMAIN_KNOWLEDGE, userMessage, query, dat
 	resp, err := s.vizModel.GenerateContent(ctx, genai.Text(prompt))
 	if err != nil {
 		fmt.Printf("DEBUG: GenerateVisualization LLM Error: %v\n", err)
+		// Rotate API key if we hit rate limit
+		if strings.Contains(err.Error(), "429") || strings.Contains(err.Error(), "quota") {
+			s.rotateAPIKey()
+		}
 		return "", "", err
 	}
 

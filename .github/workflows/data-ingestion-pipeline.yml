@@ -1,0 +1,458 @@
+name: INGRES Data Ingestion Pipeline
+
+on:
+  # Trigger manually for new year data
+  workflow_dispatch:
+    inputs:
+      year:
+        description: 'Year to collect (e.g., 2025-2026)'
+        required: true
+        default: '2025-2026'
+      force_full_refresh:
+        description: 'Force full data refresh (deletes existing data)'
+        required: false
+        type: boolean
+        default: false
+  
+  # Scheduled run - every month on the 1st at 2 AM UTC
+  schedule:
+    - cron: '0 2 1 * *'
+  
+  # Allow manual trigger from repository
+  push:
+    branches:
+      - main
+    paths:
+      - 'Data/ingres_gec_data_collector.py'
+      - 'load_data.py'
+      - '.github/workflows/data-ingestion-pipeline.yml'
+
+env:
+  DATA_YEAR: ${{ github.event.inputs.year || '2024-2025' }}
+  POSTGRES_HOST: localhost
+  POSTGRES_PORT: 5433
+  POSTGRES_DB: ground_sense_bot
+  POSTGRES_USER: admin
+  POSTGRES_PASSWORD: admin
+
+jobs:
+  # Job 1: Fetch data from INGRES API and store as JSON
+  fetch-ingres-data:
+    name: 📡 Fetch INGRES Data
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: 📦 Install Dependencies
+        run: |
+          cd Data
+          pip install -r requirements.txt
+          pip install psycopg2-binary tqdm
+      
+      - name: 🔧 Configure Data Paths
+        run: |
+          mkdir -p Data/data/${{ env.DATA_YEAR }}
+          echo "DATA_DIR=Data/data" >> $GITHUB_ENV
+          echo "INDEX_FILE=Data/master_index.json" >> $GITHUB_ENV
+      
+      - name: 🌐 Fetch Data from INGRES API
+        id: fetch_data
+        run: |
+          cd Data
+          echo "🚀 Starting INGRES data collection for ${{ env.DATA_YEAR }}..."
+          
+          # Update the year in the script if needed
+          python ingres_gec_data_collector.py
+          
+          echo "✅ Data collection completed"
+          
+          # Count collected files
+          FILE_COUNT=$(find data/${{ env.DATA_YEAR }} -name "*.json" 2>/dev/null | wc -l)
+          echo "📊 Collected $FILE_COUNT JSON files"
+          echo "file_count=$FILE_COUNT" >> $GITHUB_OUTPUT
+        continue-on-error: false
+      
+      - name: 📋 Verify Master Index
+        run: |
+          if [ -f "Data/master_index.json" ]; then
+            echo "✅ Master index file exists"
+            echo "📊 Index contents:"
+            python -c "
+import json
+with open('Data/master_index.json', 'r') as f:
+    data = json.load(f)
+    print(f'States: {len(data.get(\"states\", {}))}')
+    print(f'Districts: {len(data.get(\"districts\", {}))}')
+    print(f'Blocks: {len(data.get(\"blocks\", {}))}')
+            "
+          else
+            echo "❌ Master index file not found!"
+            exit 1
+          fi
+      
+      - name: 💾 Upload Raw JSON Data
+        uses: actions/upload-artifact@v4
+        with:
+          name: ingres-raw-data-${{ env.DATA_YEAR }}
+          path: |
+            Data/data/**/*.json
+            Data/master_index.json
+          retention-days: 30
+      
+      - name: 📝 Generate Data Report
+        run: |
+          echo "# 📊 INGRES Data Collection Report" > data_report.md
+          echo "" >> data_report.md
+          echo "**Collection Date:** $(date)" >> data_report.md
+          echo "**Year:** ${{ env.DATA_YEAR }}" >> data_report.md
+          echo "**Files Collected:** ${{ steps.fetch_data.outputs.file_count }}" >> data_report.md
+          echo "" >> data_report.md
+          
+          if [ -f "Data/collection.log" ]; then
+            echo "## Collection Log (Last 20 lines)" >> data_report.md
+            echo '```' >> data_report.md
+            tail -n 20 Data/collection.log >> data_report.md
+            echo '```' >> data_report.md
+          fi
+      
+      - name: 📤 Upload Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: data-collection-report
+          path: data_report.md
+          retention-days: 90
+
+  # Job 2: Load data into PostgreSQL
+  load-to-database:
+    name: 🗄️ Load Data to PostgreSQL
+    runs-on: ubuntu-latest
+    needs: fetch-ingres-data
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: 📦 Install Dependencies
+        run: |
+          pip install psycopg2-binary tqdm
+      
+      - name: 📥 Download Raw Data
+        uses: actions/download-artifact@v4
+        with:
+          name: ingres-raw-data-${{ env.DATA_YEAR }}
+          path: Data/
+      
+      - name: 🗃️ Setup Database Schema
+        run: |
+          # Wait for PostgreSQL to be ready
+          until pg_isready -h localhost -p 5433 -U ${{ env.POSTGRES_USER }}; do
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
+          
+          echo "✅ PostgreSQL is ready"
+          
+          # Run schema creation
+          PGPASSWORD=${{ env.POSTGRES_PASSWORD }} psql \
+            -h localhost \
+            -p 5433 \
+            -U ${{ env.POSTGRES_USER }} \
+            -d ${{ env.POSTGRES_DB }} \
+            -f backend/migrations/001_create_tables.sql
+          
+          echo "✅ Database schema created"
+      
+      - name: 📊 Load Data into PostgreSQL
+        id: load_data
+        run: |
+          echo "🚀 Starting data ingestion into PostgreSQL..."
+          
+          # Update database connection in load_data.py for CI environment
+          export PGHOST=localhost
+          export PGPORT=5433
+          export PGDATABASE=${{ env.POSTGRES_DB }}
+          export PGUSER=${{ env.POSTGRES_USER }}
+          export PGPASSWORD=${{ env.POSTGRES_PASSWORD }}
+          
+          python load_data.py
+          
+          echo "✅ Data ingestion completed"
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5433
+      
+      - name: 🔍 Verify Data Integrity
+        run: |
+          echo "🔍 Running data integrity checks..."
+          
+          PGPASSWORD=${{ env.POSTGRES_PASSWORD }} psql \
+            -h localhost \
+            -p 5433 \
+            -U ${{ env.POSTGRES_USER }} \
+            -d ${{ env.POSTGRES_DB }} \
+            -c "
+              SELECT 
+                'States' as table_name, COUNT(*) as row_count 
+              FROM states
+              UNION ALL
+              SELECT 'Districts', COUNT(*) FROM districts
+              UNION ALL
+              SELECT 'Blocks', COUNT(*) FROM blocks
+              UNION ALL
+              SELECT 'Assessments', COUNT(*) FROM assessments_summary;
+            "
+          
+          echo "✅ Data integrity check completed"
+      
+      - name: 📊 Generate Database Statistics
+        run: |
+          echo "# 📊 Database Load Statistics" > db_stats.md
+          echo "" >> db_stats.md
+          echo "**Load Date:** $(date)" >> db_stats.md
+          echo "**Year:** ${{ env.DATA_YEAR }}" >> db_stats.md
+          echo "" >> db_stats.md
+          echo "## Record Counts" >> db_stats.md
+          echo "" >> db_stats.md
+          
+          PGPASSWORD=${{ env.POSTGRES_PASSWORD }} psql \
+            -h localhost \
+            -p 5433 \
+            -U ${{ env.POSTGRES_USER }} \
+            -d ${{ env.POSTGRES_DB }} \
+            -c "
+              SELECT 
+                'States: ' || COUNT(*) 
+              FROM states
+              UNION ALL
+              SELECT 'Districts: ' || COUNT(*) FROM districts
+              UNION ALL
+              SELECT 'Blocks: ' || COUNT(*) FROM blocks
+              UNION ALL
+              SELECT 'Assessment Records: ' || COUNT(*) FROM assessments_summary
+              UNION ALL
+              SELECT 'Recharge Breakdown Records: ' || COUNT(*) FROM assessments_recharge_breakdown
+              UNION ALL
+              SELECT 'Extraction Breakdown Records: ' || COUNT(*) FROM assessments_extraction_breakdown;
+            " -t >> db_stats.md
+      
+      - name: 📤 Upload Database Statistics
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-load-statistics
+          path: db_stats.md
+          retention-days: 90
+      
+      - name: 💾 Backup Database
+        run: |
+          echo "💾 Creating database backup..."
+          
+          PGPASSWORD=${{ env.POSTGRES_PASSWORD }} pg_dump \
+            -h localhost \
+            -p 5433 \
+            -U ${{ env.POSTGRES_USER }} \
+            -d ${{ env.POSTGRES_DB }} \
+            -F c \
+            -f database_backup_${{ env.DATA_YEAR }}.dump
+          
+          echo "✅ Database backup created"
+      
+      - name: 📤 Upload Database Backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-backup-${{ env.DATA_YEAR }}
+          path: database_backup_${{ env.DATA_YEAR }}.dump
+          retention-days: 90
+
+  # Job 3: Generate RAG embeddings
+  generate-embeddings:
+    name: 🧠 Generate RAG Embeddings
+    runs-on: ubuntu-latest
+    needs: load-to-database
+    if: ${{ github.event.inputs.force_full_refresh == 'true' || github.event_name == 'schedule' }}
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: 📦 Install RAG Dependencies
+        run: |
+          cd Data
+          pip install -r requirements-rag.txt
+          pip install psycopg2-binary
+      
+      - name: 📥 Download Database Backup
+        uses: actions/download-artifact@v4
+        with:
+          name: database-backup-${{ env.DATA_YEAR }}
+      
+      - name: 🔄 Restore Database
+        run: |
+          # Wait for PostgreSQL
+          until pg_isready -h localhost -p 5433 -U ${{ env.POSTGRES_USER }}; do
+            sleep 2
+          done
+          
+          # Create schema first
+          PGPASSWORD=${{ env.POSTGRES_PASSWORD }} psql \
+            -h localhost \
+            -p 5433 \
+            -U ${{ env.POSTGRES_USER }} \
+            -d ${{ env.POSTGRES_DB }} \
+            -f backend/migrations/001_create_tables.sql
+          
+          # Restore data
+          PGPASSWORD=${{ env.POSTGRES_PASSWORD }} pg_restore \
+            -h localhost \
+            -p 5433 \
+            -U ${{ env.POSTGRES_USER }} \
+            -d ${{ env.POSTGRES_DB }} \
+            -c \
+            database_backup_${{ env.DATA_YEAR }}.dump || true
+      
+      - name: 🧠 Generate Embeddings
+        run: |
+          cd Data
+          echo "🚀 Generating RAG embeddings..."
+          
+          python ingest_rag_data.py
+          
+          echo "✅ Embeddings generated"
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5433
+      
+      - name: 📊 Embedding Statistics
+        run: |
+          echo "# 🧠 Embedding Generation Report" > embedding_stats.md
+          echo "" >> embedding_stats.md
+          echo "**Generation Date:** $(date)" >> embedding_stats.md
+          echo "**Year:** ${{ env.DATA_YEAR }}" >> embedding_stats.md
+          echo "" >> embedding_stats.md
+          
+          PGPASSWORD=${{ env.POSTGRES_PASSWORD }} psql \
+            -h localhost \
+            -p 5433 \
+            -U ${{ env.POSTGRES_USER }} \
+            -d ${{ env.POSTGRES_DB }} \
+            -c "SELECT COUNT(*) as embedding_count FROM assessment_embeddings;" -t >> embedding_stats.md
+      
+      - name: 📤 Upload Embedding Stats
+        uses: actions/upload-artifact@v4
+        with:
+          name: embedding-statistics
+          path: embedding_stats.md
+          retention-days: 90
+
+  # Job 4: Notify and Cleanup
+  notify:
+    name: 📢 Notify & Cleanup
+    runs-on: ubuntu-latest
+    needs: [fetch-ingres-data, load-to-database]
+    if: always()
+    
+    steps:
+      - name: 📥 Download All Reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: '*-report*'
+          merge-multiple: true
+      
+      - name: 📊 Generate Final Summary
+        run: |
+          echo "# 🎉 Data Ingestion Pipeline Summary" > final_summary.md
+          echo "" >> final_summary.md
+          echo "**Pipeline Run:** ${{ github.run_number }}" >> final_summary.md
+          echo "**Date:** $(date)" >> final_summary.md
+          echo "**Year:** ${{ env.DATA_YEAR }}" >> final_summary.md
+          echo "**Trigger:** ${{ github.event_name }}" >> final_summary.md
+          echo "" >> final_summary.md
+          
+          if [ -f "data_report.md" ]; then
+            cat data_report.md >> final_summary.md
+          fi
+          
+          if [ -f "db_stats.md" ]; then
+            cat db_stats.md >> final_summary.md
+          fi
+          
+          echo "" >> final_summary.md
+          echo "---" >> final_summary.md
+          echo "✅ **Pipeline Status:** ${{ job.status }}" >> final_summary.md
+      
+      - name: 📤 Upload Final Summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipeline-final-summary
+          path: final_summary.md
+          retention-days: 365
+      
+      - name: 💬 Create Issue Comment (if triggered manually)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let summary = '# 📊 Data Ingestion Pipeline Complete\n\n';
+            
+            if (fs.existsSync('final_summary.md')) {
+              summary += fs.readFileSync('final_summary.md', 'utf8');
+            }
+            
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Data Ingestion Complete - ${{ env.DATA_YEAR }}`,
+              body: summary,
+              labels: ['data-pipeline', 'automated']
+            });

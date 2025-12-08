@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -123,13 +124,15 @@ func Load() *Config {
 			BurstSize:       getEnvAsInt("RATE_LIMIT_BURST", 100),
 		},
 		Gemini: GeminiConfig{
-			APIKey: getEnv("GEMINI_API_KEY", ""),
+			APIKey:  getEnv("GEMINI_API_KEY", ""),
+			APIKeys: getEnvAsStringSlice("GEMINI_API_KEYS", getEnv("GEMINI_API_KEY", "")),
 		},
 	}
 }
 
 type GeminiConfig struct {
-	APIKey string
+	APIKey  string
+	APIKeys []string // Multiple API keys for rotation
 }
 
 func getEnv(key, defaultValue string) string {
@@ -164,4 +167,27 @@ func getEnvAsDuration(key string, defaultValue time.Duration) time.Duration {
 		}
 	}
 	return defaultValue
+}
+
+// getEnvAsStringSlice parses a comma-separated environment variable into a slice
+func getEnvAsStringSlice(key string, defaultValue string) []string {
+	if value := os.Getenv(key); value != "" {
+		// Split by comma and trim whitespace
+		parts := strings.Split(value, ",")
+		result := make([]string, 0, len(parts))
+		for _, part := range parts {
+			trimmed := strings.TrimSpace(part)
+			if trimmed != "" {
+				result = append(result, trimmed)
+			}
+		}
+		if len(result) > 0 {
+			return result
+		}
+	}
+	// Fallback to default single value
+	if defaultValue != "" {
+		return []string{defaultValue}
+	}
+	return []string{}
 }

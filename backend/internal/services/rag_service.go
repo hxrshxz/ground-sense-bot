@@ -151,7 +151,10 @@ func (s *RAGService) HybridSearch(ctx context.Context, req HybridSearchRequest) 
 	// Deduplicate and sort results
 	deduped := s.deduplicateResults(allResults, req.Limit*3) // Get more results for reranking
 
-	// Apply Gemini reranking if we have results
+	// DISABLED: Apply Gemini reranking to save API quota
+	// Reranking was consuming too many API calls and hitting quota limits
+	// Results are already sorted by relevance from keyword/semantic search
+	/*
 	if len(deduped) > 0 {
 		reranked, err := s.rerankResults(ctx, req.Query, deduped, req.Limit)
 		if err != nil {
@@ -161,6 +164,7 @@ func (s *RAGService) HybridSearch(ctx context.Context, req HybridSearchRequest) 
 			searchTypes = append(searchTypes, "reranked")
 		}
 	}
+	*/
 
 	// Ensure we don't exceed the requested limit
 	if len(deduped) > req.Limit {

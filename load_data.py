@@ -11,12 +11,13 @@ INDEX_FILE = Path("Data/master_index.json")
 YEARS = ["2012-2013", "2016-2017", "2019-2020", "2021-2022", "2022-2023", "2023-2024", "2024-2025"]
 
 def get_db_connection():
+    """Get database connection with environment variable support for CI/CD"""
     return psycopg2.connect(
-        host="localhost",
-        port="5433",
-        database="ground_sense_bot",
-        user="admin",
-        password="admin"
+        host=os.getenv("POSTGRES_HOST", "localhost"),
+        port=os.getenv("POSTGRES_PORT", "5433"),
+        database=os.getenv("POSTGRES_DB", "ground_sense_bot"),
+        user=os.getenv("POSTGRES_USER", "admin"),
+        password=os.getenv("POSTGRES_PASSWORD", "admin")
     )
 
 def safe_float(val):

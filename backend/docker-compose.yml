@@ -20,6 +20,30 @@ services:
       timeout: 5s
       retries: 5
 
+  # Ollama - Local LLM for SQL generation (cost-free alternative to Gemini)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ground-sense-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - ground-sense-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    # Uncomment below for GPU support
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
   # Redis (Optional - for caching and sessions)
   redis:
     image: redis:7-alpine
@@ -102,6 +126,7 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  ollama_data:
 
 networks:
   ground-sense-network:

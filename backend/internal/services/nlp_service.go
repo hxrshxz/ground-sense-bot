@@ -43,6 +43,9 @@ const (
 	IntentCriticalAlerts      Intent = "CRITICAL_ALERTS"
 	IntentWaterBalance        Intent = "WATER_BALANCE"
 	IntentStateOverview       Intent = "STATE_OVERVIEW"
+	// New detailed visualization intents
+	IntentRiskProfile         Intent = "RISK_PROFILE"
+	IntentSectorUsage         Intent = "SECTOR_USAGE"
 	IntentUnknown             Intent = "UNKNOWN"
 )
 
@@ -82,6 +85,15 @@ func (s *NLPService) ParseMessage(message string) (Intent, Entities, string) {
 
 	// Convert AI analysis to our types
 	intent := s.mapIntent(analysis.Intent)
+	
+	// Keyword-based intent override for new visualization intents
+	// (LLM sometimes mis-classifies these as SUMMARY)
+	msgLower := strings.ToLower(message)
+	if strings.Contains(msgLower, "risk") || strings.Contains(msgLower, "sustainability") || strings.Contains(msgLower, "vulnerability") {
+		intent = IntentRiskProfile
+	} else if strings.Contains(msgLower, "sector") && (strings.Contains(msgLower, "usage") || strings.Contains(msgLower, "breakdown")) {
+		intent = IntentSectorUsage
+	}
 	
 	// Process locations - split if they contain spaces and are not compound names
 	processedLocations := s.processLocations(analysis.Locations)
@@ -820,9 +832,13 @@ INTENT CLASSIFICATION RULES:
 1. SUMMARY
    → When: User asks for status, info, data about ONE specific location
    → Keywords: "status", "show me", "tell me about", "what is", "information on", "how is"
+   → ⚠️ DO NOT USE for queries containing: "risk", "sector", "sustainability", "vulnerability", "threat"
    → Examples:
       "What is the status of Ludhiana?" → SUMMARY
       "Show me groundwater data for Chandigarh" → SUMMARY
+   → Counter-examples (NOT SUMMARY):
+      "Risk profile of Ludhiana" → RISK_PROFILE (use #19)
+      "Sector usage for Punjab" → SECTOR_USAGE (use #20)
 
 2. RECHARGE_BREAKDOWN
    → When: User asks about SOURCES/COMPONENTS of RECHARGE
@@ -940,6 +956,20 @@ INTENT CLASSIFICATION RULES:
       "Give me complete overview of Punjab" → STATE_OVERVIEW
       "Show full dashboard for Rajasthan" → STATE_OVERVIEW
 
+19. RISK_PROFILE
+   → When: User asks about RISK, SUSTAINABILITY, THREAT, or VULNERABILITY
+   → Keywords: "risk", "sustainability", "threat", "vulnerability", "risk profile", "future outlook"
+   → Examples:
+      "Risk profile of Ludhiana" → RISK_PROFILE
+      "Sustainability analysis for Punjab" → RISK_PROFILE
+
+20. SECTOR_USAGE
+   → When: User asks about USAGE BY SECTOR (Agriculture, Domestic, Industry)
+   → Keywords: "sector usage", "sector breakdown", "where is water used", "usage by sector", "consumption pattern"
+   → Examples:
+      "Sector usage for Haryana" → SECTOR_USAGE
+      "Where is water used in Jaipur?" → SECTOR_USAGE
+
 ENTITY EXTRACTION RULES:
 ═══════════════════════════════════════════════════════════
 
@@ -985,7 +1015,7 @@ THRESHOLD & OPERATOR:
 OUTPUT FORMAT:
 Return ONLY valid JSON (no markdown, no code blocks):
 {
-  "intent": "SUMMARY|TREND|COMPARE|RECHARGE_BREAKDOWN|EXTRACTION_BREAKDOWN|LIST_BLOCKS|LIST_DISTRICTS|LIST_STATES|MAP_CATEGORY|TOP_RANKING|CATEGORY_DISTRIBUTION|DEFICIT_ANALYSIS|CHANGE_ANALYSIS|YEARLY_COMPARISON|CATEGORY_SUMMARY|CRITICAL_ALERTS|WATER_BALANCE|STATE_OVERVIEW",
+  "intent": "SUMMARY|TREND|COMPARE|RECHARGE_BREAKDOWN|EXTRACTION_BREAKDOWN|LIST_BLOCKS|LIST_DISTRICTS|LIST_STATES|MAP_CATEGORY|TOP_RANKING|CATEGORY_DISTRIBUTION|DEFICIT_ANALYSIS|CHANGE_ANALYSIS|YEARLY_COMPARISON|CATEGORY_SUMMARY|CRITICAL_ALERTS|WATER_BALANCE|STATE_OVERVIEW|RISK_PROFILE|SECTOR_USAGE",
   "locations": ["location names"],
   "year": "2024-2025",
   "category": "safe|semi_critical|critical|over_exploited or empty",
@@ -1057,6 +1087,7 @@ func (s *NLPService) processLocations(locations []string) []string {
 		"water": true, "groundwater": true, "data": true, "status": true, "summary": true,
 		"trend": true, "compare": true, "vs": true, "versus": true, "list": true, "all": true,
 		"me": true, "about": true, "give": true, "from": true, "to": true, "with": true,
+		"risk": true, "profile": true, "sector": true, "usage": true, "analysis": true, "sustainability": true,
 	}
 	
 	processed := []string{}
@@ -1174,6 +1205,14 @@ func (s *NLPService) mapIntent(aiIntent string) Intent {
 }
 
 func (s *NLPService) determineIntent(msg string) Intent {
+	// New visualization intents (check first for priority)
+	if strings.Contains(msg, "risk") || strings.Contains(msg, "sustainability") || strings.Contains(msg, "vulnerability") || strings.Contains(msg, "threat") {
+		return IntentRiskProfile
+	}
+	if strings.Contains(msg, "sector") && (strings.Contains(msg, "usage") || strings.Contains(msg, "breakdown") || strings.Contains(msg, "consumption")) {
+		return IntentSectorUsage
+	}
+	
 	if strings.Contains(msg, "compare") || strings.Contains(msg, "vs") {
 		return IntentCompare
 	}
@@ -1268,6 +1307,9 @@ func (s *NLPService) extractEntities(msg string) Entities {
 		"extraction": true, "discharge": true, "groundwater": true, "status": true, "summary": true,
 		"about": true, "year": true, "years": true, "from": true, "to": true, "district": true, "block": true,
 		"state": true, "data": true, "give": true, "me": true, "tell": true, "list": true, "all": true, "blocks": true,
+		// New visualization keywords
+		"risk": true, "profile": true, "sector": true, "usage": true, "sustainability": true, "vulnerability": true,
+		"threat": true, "analysis": true, "consumption": true,
 	}
 	
 	var potentialLocations []string

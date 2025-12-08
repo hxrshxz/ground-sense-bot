@@ -22,6 +22,17 @@ interface SeriesData {
   type?: string;
 }
 
+export interface RiskData {
+  factor: string;
+  score: number;
+  fullMark?: number;
+}
+
+export interface SectorData {
+  sector: string;
+  value: number;
+}
+
 export interface ChartData {
   type:
     | "stacked-area"
@@ -37,7 +48,10 @@ export interface ChartData {
     | "metrics-card"
     | "trend-card"
     | "comparison-card"
-    | "stacked-bar"; // Horizontal stacked bar for rankings
+    | "comparison-card"
+    | "stacked-bar"
+    | "risk-radar"
+    | "sector-stacked-bar"; // Horizontal stacked bar for rankings
   title: string;
   subtitle?: string;
   xAxis?: string[] | { data: string[]; name?: string };
@@ -59,6 +73,10 @@ export interface ChartData {
   trendData?: TrendData;
   // New comparison data for the comparison-card type
   comparisonData?: ComparisonData;
+  // New risk data
+  riskData?: RiskData[];
+  // New sector data
+  sectorData?: SectorData[];
 }
 
 interface ChartRendererProps {
@@ -150,6 +168,13 @@ const ChartRenderer: React.FC<ChartRendererProps> = ({
 
     // Smart chart type selection
     switch (type) {
+      case "sector-stacked-bar": {
+        // Create beautiful gradient stacked area chart for sector usage
+        return createSectorGradientChart(title, chart.sectorData || []);
+      }
+      case "risk-radar":
+          return createRiskRadarChart(title, chart.riskData || []);
+
       case "stacked-bar":
         return createStackedBarChart(title, series, xAxis);
 
@@ -1332,4 +1357,238 @@ const createStackedBarChart = (
   };
 };
 
+// ============================================
+// 5️⃣ RISK POLAR BAR CHART (Radial Polar Bar - Premium)
+// ============================================
+
+const createRiskRadarChart = (title: string, data: RiskData[]) => {
+  // Vibrant gradient colors for each risk factor
+  const colors = [
+    new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+      { offset: 0, color: '#667eea' },
+      { offset: 1, color: '#764ba2' }
+    ]),
+    new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+      { offset: 0, color: '#f093fb' },
+      { offset: 1, color: '#f5576c' }
+    ]),
+    new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+      { offset: 0, color: '#4facfe' },
+      { offset: 1, color: '#00f2fe' }
+    ]),
+    new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+      { offset: 0, color: '#43e97b' },
+      { offset: 1, color: '#38f9d7' }
+    ]),
+  ];
+
+  return {
+    title: {
+      text: title,
+      left: "center",
+      top: 15,
+      textStyle: {
+        color: "#ffffff",
+        fontSize: 20,
+        fontWeight: 700,
+        textShadowColor: "rgba(0, 0, 0, 0.5)",
+        textShadowBlur: 8,
+      },
+    },
+    polar: {
+      radius: [40, '75%'],
+    },
+    radiusAxis: {
+      max: 100,
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: { 
+        color: 'rgba(255,255,255,0.6)',
+        fontSize: 10,
+      },
+      splitLine: {
+        lineStyle: {
+          color: 'rgba(255,255,255,0.15)',
+          type: 'dashed'
+        }
+      }
+    },
+    angleAxis: {
+      type: 'category',
+      data: data.map(d => d.factor),
+      startAngle: 90,
+      axisLine: { 
+        lineStyle: { color: 'rgba(255,255,255,0.3)' } 
+      },
+      axisTick: { show: false },
+      axisLabel: {
+        color: '#fff',
+        fontSize: 11,
+        fontWeight: 600,
+        padding: [0, 0, 0, 0],
+      },
+      splitLine: {
+        lineStyle: {
+          color: 'rgba(255,255,255,0.1)'
+        }
+      }
+    },
+    tooltip: {
+      trigger: 'item',
+      backgroundColor: 'rgba(10, 15, 30, 0.95)',
+      borderColor: 'rgba(102, 126, 234, 0.6)',
+      borderWidth: 2,
+      textStyle: { color: '#fff', fontSize: 13 },
+      formatter: (params: AnyData) => {
+        return `<b>${params.name}</b><br/>Risk Score: <span style="color:#f5576c;font-weight:bold">${params.value.toFixed(1)}%</span>`;
+      }
+    },
+    series: {
+      type: 'bar',
+      data: data.map((d, idx) => ({
+        value: d.score,
+        itemStyle: {
+          color: colors[idx % colors.length],
+          borderRadius: [4, 4, 0, 0],
+          shadowBlur: 15,
+          shadowColor: 'rgba(0,0,0,0.3)',
+        }
+      })),
+      coordinateSystem: 'polar',
+      barWidth: 25,
+      label: {
+        show: true,
+        position: 'middle',
+        formatter: '{c}%',
+        color: '#fff',
+        fontSize: 11,
+        fontWeight: 'bold',
+        textShadowColor: 'rgba(0,0,0,0.5)',
+        textShadowBlur: 3,
+      },
+      emphasis: {
+        itemStyle: {
+          shadowBlur: 25,
+          shadowColor: 'rgba(102, 126, 234, 0.8)',
+        }
+      }
+    },
+    animationDuration: 1500,
+    animationEasing: 'elasticOut',
+  };
+};
+
+// ============================================
+// 6️⃣ SECTOR GRADIENT CHART (Gradient Stacked Area - Premium)
+// ============================================
+
+const createSectorGradientChart = (title: string, data: SectorData[]) => {
+  // Gradient color configurations for each sector
+  const gradientConfigs = [
+    [{ offset: 0, color: 'rgb(128, 255, 165)' }, { offset: 1, color: 'rgb(1, 191, 236)' }],
+    [{ offset: 0, color: 'rgb(0, 221, 255)' }, { offset: 1, color: 'rgb(77, 119, 255)' }],
+    [{ offset: 0, color: 'rgb(255, 0, 135)' }, { offset: 1, color: 'rgb(135, 0, 157)' }],
+    [{ offset: 0, color: 'rgb(255, 191, 0)' }, { offset: 1, color: 'rgb(224, 62, 76)' }],
+    [{ offset: 0, color: 'rgb(55, 162, 255)' }, { offset: 1, color: 'rgb(116, 21, 219)' }],
+  ];
+
+  // Calculate total and percentages
+  const total = data.reduce((sum, d) => sum + d.value, 0);
+
+  return {
+    color: ['#80FFA5', '#00DDFF', '#FF0087', '#FFBF00', '#37A2FF'],
+    title: {
+      text: title,
+      left: 'center',
+      top: 15,
+      textStyle: {
+        color: '#ffffff',
+        fontSize: 20,
+        fontWeight: 700,
+        textShadowColor: 'rgba(0, 0, 0, 0.5)',
+        textShadowBlur: 8,
+      }
+    },
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'cross',
+        lineStyle: { color: 'rgba(138, 43, 226, 0.6)', width: 2, type: 'dashed' },
+        label: {
+          backgroundColor: 'rgba(99, 102, 241, 0.9)',
+          borderColor: 'rgba(138, 43, 226, 0.8)',
+          color: '#fff',
+        }
+      },
+      backgroundColor: 'rgba(10, 15, 30, 0.98)',
+      borderColor: 'rgba(138, 43, 226, 0.6)',
+      borderWidth: 2,
+      textStyle: { color: '#ffffff', fontSize: 13 },
+      formatter: (params: AnyData) => {
+        if (!Array.isArray(params)) return '';
+        let result = `<div style="padding: 4px;"><b>Sector Distribution</b><br/>`;
+        params.forEach((p: AnyData) => {
+          const pct = ((p.value / total) * 100).toFixed(1);
+          result += `${p.marker} ${p.seriesName}: <b>${pct}%</b> (${(p.value/1000).toFixed(0)}K MCM)<br/>`;
+        });
+        return result + '</div>';
+      }
+    },
+    legend: {
+      data: data.map(d => d.sector),
+      bottom: 10,
+      textStyle: { color: 'rgba(255, 255, 255, 0.85)', fontSize: 12, fontWeight: 500 },
+      itemWidth: 20,
+      itemHeight: 12,
+    },
+    grid: {
+      left: '5%',
+      right: '5%',
+      bottom: '15%',
+      top: '18%',
+      containLabel: true
+    },
+    xAxis: [{
+      type: 'category',
+      boundaryGap: false,
+      data: ['Share'],
+      axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.2)' } },
+      axisLabel: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 12 },
+    }],
+    yAxis: [{
+      type: 'value',
+      axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.2)' } },
+      axisLabel: { 
+        color: 'rgba(255, 255, 255, 0.7)', 
+        fontSize: 11,
+        formatter: (val: number) => `${(val/1000000).toFixed(1)}M`
+      },
+      splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.08)' } },
+    }],
+    series: data.map((sector, idx) => ({
+      name: sector.sector,
+      type: 'line',
+      stack: 'Total',
+      smooth: true,
+      lineStyle: { width: 0 },
+      showSymbol: false,
+      areaStyle: {
+        opacity: 0.85,
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, gradientConfigs[idx % gradientConfigs.length])
+      },
+      emphasis: { focus: 'series' },
+      label: idx === data.length - 1 ? {
+        show: true,
+        position: 'top',
+        formatter: (params: AnyData) => `${((params.value / total) * 100).toFixed(0)}%`,
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: 'bold',
+      } : undefined,
+      data: [sector.value],
+    })),
+    animationDuration: 1500,
+    animationEasing: 'cubicOut',
+  };
+};
 export default ChartRenderer;

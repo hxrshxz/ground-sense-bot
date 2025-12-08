@@ -11,14 +11,22 @@ import (
 )
 
 type Config struct {
-	Server   ServerConfig
-	Database DatabaseConfig
-	JWT      JWTConfig
-	Redis    RedisConfig
-	Email    EmailConfig
-	Storage  StorageConfig
+	Server    ServerConfig
+	Database  DatabaseConfig
+	JWT       JWTConfig
+	Redis     RedisConfig
+	Email     EmailConfig
+	Storage   StorageConfig
 	RateLimit RateLimitConfig
 	Gemini    GeminiConfig
+	Ollama    OllamaConfig
+}
+
+// OllamaConfig for local LLM settings
+type OllamaConfig struct {
+	Enabled bool   // Use local LLM instead of Gemini
+	BaseURL string // Ollama server URL (default: http://localhost:11434)
+	Model   string // Model to use (default: sqlcoder:7b)
 }
 
 type ServerConfig struct {
@@ -126,6 +134,11 @@ func Load() *Config {
 		Gemini: GeminiConfig{
 			APIKey:  getEnv("GEMINI_API_KEY", ""),
 			APIKeys: getEnvAsStringSlice("GEMINI_API_KEYS", getEnv("GEMINI_API_KEY", "")),
+		},
+		Ollama: OllamaConfig{
+			Enabled: getEnvAsBool("OLLAMA_ENABLED", false),
+			BaseURL: getEnv("OLLAMA_URL", "http://localhost:11434"),
+			Model:   getEnv("OLLAMA_MODEL", "sqlcoder:7b"),
 		},
 	}
 }

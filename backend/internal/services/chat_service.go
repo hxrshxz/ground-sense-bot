@@ -422,6 +422,10 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 		handlerResult, handlerErr = s.handleDeficitAnalysis(ctx, entities, response)
 	case IntentChangeAnalysis:
 		handlerResult, handlerErr = s.handleChangeAnalysis(ctx, entities, response)
+	case IntentRiskProfile:
+		handlerResult, handlerErr = s.handleRiskProfile(ctx, entities, response)
+	case IntentSectorUsage:
+		handlerResult, handlerErr = s.handleSectorUsage(ctx, entities, response)
 	default:
 		// Unknown intent - fall back to RAG search
 		fmt.Printf("├─ ⚠️  Unknown intent '%s', falling back to RAG search\n", intent)
@@ -886,6 +890,10 @@ RAG_FALLBACK:
 		handlerResult, handlerErr = s.handleDeficitAnalysis(ctx, entities, response)
 	case IntentChangeAnalysis:
 		handlerResult, handlerErr = s.handleChangeAnalysis(ctx, entities, response)
+	case IntentRiskProfile:
+		handlerResult, handlerErr = s.handleRiskProfile(ctx, entities, response)
+	case IntentSectorUsage:
+		handlerResult, handlerErr = s.handleSectorUsage(ctx, entities, response)
 	default:
 		response.Text = "I'm not sure what you mean. Try asking for a summary, trend, comparison, ranking, distribution, or recharge/extraction breakdowns."
 		handlerResult = response
@@ -2044,6 +2052,195 @@ func (s *ChatService) handleChangeAnalysis(ctx context.Context, e Entities, r *m
 				{Name: "Over-Exploited Blocks", Data: overexploitedData},
 			},
 		}
+	}
+	
+	return r, nil
+}
+
+// handleRiskProfile shows multidimensional risk analysis with risk-radar chart
+func (s *ChatService) handleRiskProfile(ctx context.Context, e Entities, r *models.ChatResponse) (*models.ChatResponse, error) {
+	year := e.Year
+	if year == "" {
+		year = "2024-2025"
+	}
+	
+	locationName := "India"
+	locationFilter := ""
+	if len(e.Locations) > 0 {
+		locationName = strings.Title(strings.ToLower(e.Locations[0]))
+		locationFilter = strings.ToUpper(e.Locations[0])
+	}
+
+	// Get aggregated stats for risk calculation
+	sqlQuery := fmt.Sprintf(`
+		SELECT 
+			ROUND(AVG(a.stage)::numeric, 2) as avg_stage,
+			ROUND(AVG(a.rainfall)::numeric, 2) as avg_rainfall,
+			ROUND(SUM(a.total_extraction)::numeric, 2) as total_extraction,
+			ROUND(SUM(a.total_recharge)::numeric, 2) as total_recharge,
+			COUNT(*) as total_blocks,
+			SUM(CASE WHEN LOWER(a.category) = 'over_exploited' THEN 1 ELSE 0 END) as oe_blocks
+		FROM assessments_summary a
+		JOIN blocks b ON a.block_uuid = b.block_uuid
+		JOIN districts d ON b.district_uuid = d.district_uuid
+		JOIN states s ON d.state_uuid = s.state_uuid
+		WHERE a.year = '%s'
+		AND a.stage > 0`, year)
+
+	if locationFilter != "" {
+		sqlQuery += fmt.Sprintf(`
+		AND (UPPER(s.state_name) = '%s' OR UPPER(d.district_name) = '%s' OR UPPER(b.block_name) = '%s')`, locationFilter, locationFilter, locationFilter)
+	}
+
+	results, err := s.ingres.repo.RunRawQuery(ctx, sqlQuery)
+	if err != nil {
+		return nil, fmt.Errorf("risk profile query failed: %w", err)
+	}
+
+	if len(results) == 0 {
+		r.Text = fmt.Sprintf("No risk data available for %s.", locationName)
+		return r, nil
+	}
+
+	row := results[0]
+	avgStage := 0.0
+	avgRainfall := 0.0
+	totalExtraction := 0.0
+	totalRecharge := 0.0
+	totalBlocks := 0.0
+	oeBlocks := 0.0
+
+	if v, ok := row["avg_stage"].(float64); ok { avgStage = v }
+	if v, ok := row["avg_rainfall"].(float64); ok { avgRainfall = v }
+	if v, ok := row["total_extraction"].(float64); ok { totalExtraction = v }
+	if v, ok := row["total_recharge"].(float64); ok { totalRecharge = v }
+	if v, ok := row["total_blocks"].(int64); ok { totalBlocks = float64(v) }
+	if v, ok := row["oe_blocks"].(int64); ok { oeBlocks = float64(v) }
+
+	// Risk Scores (0-100)
+	// 1. Extraction Pressure: Stage scaled. 0-100% -> 0-100 score. >100% -> 100.
+	riskExtraction := avgStage
+	if riskExtraction > 100 { riskExtraction = 100 }
+
+	// 2. Climate Vulnerability: (2000 - Rainfall)/20. 0 rain -> 100 risk. 2000 rain -> 0 risk.
+	riskClimate := 0.0
+	if avgRainfall < 2000 {
+		riskClimate = (2000 - avgRainfall) / 20.0
+	}
+
+	// 3. Sustainability Gap: Deficit ratio.
+	riskSustainability := 0.0
+	if totalExtraction > totalRecharge {
+		if totalRecharge > 0 {
+			 riskSustainability = ((totalExtraction - totalRecharge) / totalRecharge) * 100
+		} else {
+			 riskSustainability = 100
+		}
+	}
+	if riskSustainability > 100 { riskSustainability = 100 }
+
+	// 4. Criticality Index: % of Over-Exploited blocks
+	riskCriticality := 0.0
+	if totalBlocks > 0 {
+		riskCriticality = (oeBlocks / totalBlocks) * 100
+	}
+
+	riskData := []models.RiskFactor{
+		{Factor: "Extraction Pressure", Score: riskExtraction, FullMark: 100},
+		{Factor: "Climate Vulnerability", Score: riskClimate, FullMark: 100},
+		{Factor: "Sustainability Gap", Score: riskSustainability, FullMark: 100},
+		{Factor: "Criticality Index", Score: riskCriticality, FullMark: 100},
+	}
+
+	r.Text = fmt.Sprintf("🛡️ **Risk Profile Analysis: %s**\n\n", locationName)
+	r.Text += fmt.Sprintf("• **Avg Stage**: %.1f%%\n", avgStage)
+	r.Text += fmt.Sprintf("• **Rainfall**: %.1f mm\n", avgRainfall)
+	r.Text += fmt.Sprintf("• **Critical Blocks**: %.0f/%.0f\n\n", oeBlocks, totalBlocks)
+	r.Text += "*Evaluating multidimensional risks...*"
+
+	r.Chart = &models.ChartPayload{
+		Type: "risk-radar",
+		Title: fmt.Sprintf("Sustainability Risk Profile - %s", locationName),
+		RiskData: riskData,
+	}
+	return r, nil
+}
+
+// handleSectorUsage shows sectoral water usage with sector-stacked-bar chart
+func (s *ChatService) handleSectorUsage(ctx context.Context, e Entities, r *models.ChatResponse) (*models.ChatResponse, error) {
+	year := e.Year
+	if year == "" {
+		year = "2024-2025"
+	}
+
+	locationName := "India"
+	locationFilter := ""
+	if len(e.Locations) > 0 {
+		locationName = strings.Title(strings.ToLower(e.Locations[0]))
+		locationFilter = strings.ToUpper(e.Locations[0])
+	}
+
+	// Query assessments_extraction_breakdown joined with location tables
+	sqlQuery := fmt.Sprintf(`
+		SELECT 
+			eb.source,
+			SUM(eb.total) as total_volume
+		FROM assessments_extraction_breakdown eb
+		JOIN assessments_summary a ON eb.assessment_id = a.assessment_id
+		JOIN blocks b ON a.block_uuid = b.block_uuid
+		JOIN districts d ON b.district_uuid = d.district_uuid
+		JOIN states s ON d.state_uuid = s.state_uuid
+		WHERE a.year = '%s'`, year)
+	
+	if locationFilter != "" {
+		sqlQuery += fmt.Sprintf(`
+		AND (UPPER(s.state_name) = '%s' OR UPPER(d.district_name) = '%s' OR UPPER(b.block_name) = '%s')`, locationFilter, locationFilter, locationFilter)
+	}
+
+	sqlQuery += `
+		GROUP BY eb.source
+		ORDER BY total_volume DESC`
+
+	results, err := s.ingres.repo.RunRawQuery(ctx, sqlQuery)
+	if err != nil {
+		return nil, fmt.Errorf("sector usage query failed: %w", err)
+	}
+
+	if len(results) == 0 {
+		 r.Text = fmt.Sprintf("No sector usage data found for %s in %s.", locationName, year)
+		 return r, nil
+	}
+
+	var sectorData []models.SectorUsage
+	var totalVol float64
+
+	for _, row := range results {
+		source := ""
+		val := 0.0
+		if s, ok := row["source"].(string); ok { source = s }
+		if v, ok := row["total_volume"].(float64); ok { val = v }
+
+		if source != "Total" && val > 0 {
+			totalVol += val
+			sectorData = append(sectorData, models.SectorUsage{
+				Sector: strings.Title(source),
+				Value: val,
+			})
+		}
+	}
+
+	r.Text = fmt.Sprintf("🏭 **Sectoral Water Usage: %s**\n\n", locationName)
+	r.Text += fmt.Sprintf("Total Annual Extraction: **%.2f MCM**\n\n", totalVol)
+	
+	for _, s := range sectorData {
+		pct := (s.Value / totalVol) * 100
+		r.Text += fmt.Sprintf("• **%s**: %.1f%%\n", s.Sector, pct)
+	}
+
+	r.Chart = &models.ChartPayload{
+		Type: "sector-stacked-bar",
+		Title: fmt.Sprintf("Sector-wise Extraction - %s (%s)", locationName, year),
+		SectorData: sectorData,
 	}
 	
 	return r, nil

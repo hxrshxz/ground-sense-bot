@@ -34,6 +34,9 @@ type LLMService struct {
 	conversationHistory []ConversationMessage
 	historyMu           sync.RWMutex
 	maxHistoryLength    int
+	// Local LLM support
+	ollamaClient     *OllamaClient
+	useLocalLLM      bool
 }
 
 // Domain knowledge for groundwater analysis
@@ -87,19 +90,35 @@ RECHARGE SOURCES:
 `
 
 func NewLLMService(cfg *config.Config) (*LLMService, error) {
+	// Initialize Ollama client if enabled
+	var ollamaClient *OllamaClient
+	useLocalLLM := cfg.Ollama.Enabled
+	
+	if useLocalLLM {
+		ollamaClient = NewOllamaClient(cfg.Ollama.BaseURL, cfg.Ollama.Model)
+		ctx := context.Background()
+		if ollamaClient.IsAvailable(ctx) {
+			fmt.Printf("🦙 Ollama local LLM enabled (model: %s)\n", cfg.Ollama.Model)
+		} else {
+			fmt.Println("⚠️ Ollama enabled but not available, falling back to Gemini")
+			useLocalLLM = false
+		}
+	}
+
 	// Get API keys - use APIKeys slice if available, otherwise fall back to single APIKey
 	apiKeys := cfg.Gemini.APIKeys
 	if len(apiKeys) == 0 && cfg.Gemini.APIKey != "" {
 		apiKeys = []string{cfg.Gemini.APIKey}
 	}
 	
-	if len(apiKeys) == 0 {
-		return nil, fmt.Errorf("GEMINI_API_KEY is not set")
+	// If using local LLM exclusively and no Gemini keys, that's OK for SQL generation
+	if len(apiKeys) == 0 && !useLocalLLM {
+		return nil, fmt.Errorf("GEMINI_API_KEY is not set and OLLAMA_ENABLED is false")
 	}
 
 	ctx := context.Background()
 	
-	// Initialize clients for all API keys
+	// Initialize clients for all API keys (may be empty if using only local LLM)
 	clients := make([]*genai.Client, 0, len(apiKeys))
 	models := make([]*genai.GenerativeModel, 0, len(apiKeys))
 	sqlModels := make([]*genai.GenerativeModel, 0, len(apiKeys))
@@ -130,26 +149,38 @@ func NewLLMService(cfg *config.Config) (*LLMService, error) {
 		vizModels = append(vizModels, vizModel)
 	}
 	
-	if len(clients) == 0 {
-		return nil, fmt.Errorf("failed to initialize any Gemini clients")
+	// Must have either Gemini clients or local LLM
+	if len(clients) == 0 && !useLocalLLM {
+		return nil, fmt.Errorf("failed to initialize any LLM clients")
 	}
 	
-	fmt.Printf("🔑 Initialized %d Gemini API key(s) for rotation\n", len(clients))
-
-	return &LLMService{
+	if len(clients) > 0 {
+		fmt.Printf("🔑 Initialized %d Gemini API key(s) for rotation\n", len(clients))
+	}
+	
+	// Build result with optional fields
+	result := &LLMService{
 		clients:             clients,
 		models:              models,
 		sqlModels:           sqlModels,
 		vizModels:           vizModels,
 		apiKeys:             apiKeys,
 		currentKeyIndex:     0,
-		client:              clients[0],    // Legacy compatibility
-		model:               models[0],
-		sqlModel:            sqlModels[0],
-		vizModel:            vizModels[0],
 		conversationHistory: make([]ConversationMessage, 0),
 		maxHistoryLength:    10,
-	}, nil
+		ollamaClient:        ollamaClient,
+		useLocalLLM:         useLocalLLM,
+	}
+	
+	// Set legacy fields if Gemini clients available
+	if len(clients) > 0 {
+		result.client = clients[0]
+		result.model = models[0]
+		result.sqlModel = sqlModels[0]
+		result.vizModel = vizModels[0]
+	}
+	
+	return result, nil
 }
 
 // rotateAPIKey switches to the next available API key
@@ -223,6 +254,25 @@ func (s *LLMService) ClearHistory() {
 }
 
 func (s *LLMService) GenerateSQL(userMessage string, schema string) (string, error) {
+	// Route to local LLM if enabled
+	if s.useLocalLLM && s.ollamaClient != nil {
+		ctx := context.Background()
+		sql, err := s.ollamaClient.GenerateSQL(ctx, userMessage, schema, DOMAIN_KNOWLEDGE)
+		if err != nil {
+			fmt.Printf("⚠️ Local LLM SQL generation failed, trying Gemini: %v\n", err)
+			// Fall through to Gemini
+		} else {
+			// Add to history and return
+			s.AddToHistory("user", userMessage)
+			return sql, nil
+		}
+	}
+	
+	// Fallback: check if Gemini is available
+	if s.sqlModel == nil {
+		return "", fmt.Errorf("no LLM available for SQL generation")
+	}
+
 	ctx := context.Background()
 	historyContext := s.GetHistoryContext()
 

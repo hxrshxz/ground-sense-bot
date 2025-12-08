@@ -21,9 +21,25 @@ type ChartPayload struct {
 	TimelineOptions []TimelineOption   `json:"timelineOptions,omitempty"`
 	Options     map[string]interface{} `json:"options,omitempty"` // Extra ECharts options (rarely used)
 	EChartsOption interface{}          `json:"echarts_option,omitempty"` // Ignored by frontend renderer but kept for compatibility
-	MetricsData *MetricsData           `json:"metricsData,omitempty"` // For metrics-card type
-	TrendData   *TrendData             `json:"trendData,omitempty"`   // For trend-card type
-	ComparisonData *ComparisonData     `json:"comparisonData,omitempty"` // For comparison-card type
+	MetricsData    *MetricsData    `json:"metricsData,omitempty"`    // For metrics-card type
+	TrendData      *TrendData      `json:"trendData,omitempty"`      // For trend-card type
+	ComparisonData *ComparisonData `json:"comparisonData,omitempty"` // For comparison-card type
+	RiskData       []RiskFactor    `json:"riskData,omitempty"`       // For risk-radar type
+	SectorData     []SectorUsage   `json:"sectorData,omitempty"`     // For sector-stacked-bar type
+}
+
+// RiskFactor represents a single dimension in the risk radar
+type RiskFactor struct {
+	Factor string  `json:"factor"`
+	Score  float64 `json:"score"` // 0-100 scale (higher is riskier)
+	FullMark float64 `json:"fullMark,omitempty"` // Max value (usually 100)
+}
+
+// SectorUsage represents usage share for a sector
+type SectorUsage struct {
+	Sector string  `json:"sector"`
+	Value  float64 `json:"value"` // Percentage or absolute value
+	Color  string  `json:"color,omitempty"`
 }
 
 // MetricsData holds groundwater metrics for visualization

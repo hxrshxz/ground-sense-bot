@@ -73,41 +73,21 @@ type IntentAnalysis struct {
 }
 
 func (s *NLPService) ParseMessage(message string) (Intent, Entities, string) {
-	// Use AI to analyze the query
-	analysis, err := s.analyzeQueryWithAI(message)
-	if err != nil {
-		// Fallback to rule-based
-		msg := strings.ToLower(message)
-		intent := s.determineIntent(msg)
-		entities := s.extractEntities(msg)
-		return intent, entities, ""
-	}
-
-	// Convert AI analysis to our types
-	intent := s.mapIntent(analysis.Intent)
+	// Use LOCAL rule-based intent detection (no Gemini API calls!)
+	msg := strings.ToLower(message)
+	intent := s.determineIntent(msg)
+	entities := s.extractEntities(msg)
+	entities.OriginalQuery = message // Store original for dynamic SQL
 	
-	// Keyword-based intent override for new visualization intents
-	// (LLM sometimes mis-classifies these as SUMMARY)
-	msgLower := strings.ToLower(message)
-	if strings.Contains(msgLower, "risk") || strings.Contains(msgLower, "sustainability") || strings.Contains(msgLower, "vulnerability") {
+	// Keyword-based intent override for specialized visualizations
+	if strings.Contains(msg, "risk") || strings.Contains(msg, "sustainability") || strings.Contains(msg, "vulnerability") {
 		intent = IntentRiskProfile
-	} else if strings.Contains(msgLower, "sector") && (strings.Contains(msgLower, "usage") || strings.Contains(msgLower, "breakdown")) {
+	} else if strings.Contains(msg, "sector") && (strings.Contains(msg, "usage") || strings.Contains(msg, "breakdown")) {
 		intent = IntentSectorUsage
 	}
-	
-	// Process locations - split if they contain spaces and are not compound names
-	processedLocations := s.processLocations(analysis.Locations)
-	normalizedLocations := normalizeLocations(processedLocations)
-	
-	entities := Entities{
-		Locations:     normalizedLocations,
-		Year:          analysis.Year,
-		Category:      analysis.Category,
-		Metric:        analysis.Metric,
-		Threshold:     analysis.Threshold,
-		Operator:      analysis.Operator,
-		OriginalQuery: message, // Store for semantic detection
-	}
+
+	// Normalize locations
+	entities.Locations = normalizeLocations(entities.Locations)
 
 	// Set defaults
 	if entities.Year == "" {
@@ -116,15 +96,16 @@ func (s *NLPService) ParseMessage(message string) (Intent, Entities, string) {
 	entities.StartYear = "2012-2013"
 	entities.EndYear = entities.Year
 
-	// Generate dynamic SQL for complex queries
+	// Generate DYNAMIC SQL using LOCAL LLM (SQLCoder via Ollama)
 	sqlQuery := ""
+	var err error
 	if s.shouldGenerateDynamicSQL(intent, entities, message) {
 		sqlQuery, err = s.generateDynamicSQL(message, intent, entities)
 		if err != nil {
 			fmt.Printf("ERROR: Dynamic SQL generation failed: %v\n", err)
 			sqlQuery = "" // Fallback to hardcoded handlers
 		} else {
-			fmt.Printf("DEBUG: Generated Dynamic SQL: %s\n", sqlQuery)
+			fmt.Printf("DEBUG: Generated Dynamic SQL (Local LLM): %s\n", sqlQuery)
 		}
 	}
 
@@ -191,8 +172,6 @@ func normalizeLocations(locs []string) []string {
 
 // generateDynamicSQL creates a SQL query using AI based on user intent
 func (s *NLPService) generateDynamicSQL(message string, intent Intent, entities Entities) (string, error) {
-	ctx := context.Background()
-	
 	// Build comprehensive database schema context with ACTUAL data from the database
 	schema := `
 ╔══════════════════════════════════════════════════════════════════════════════╗
@@ -743,23 +722,11 @@ WHERE a.category = 'Over-Exploited'         ❌ WRONG
 
 NOW GENERATE THE SQL QUERY FOR THE USER'S REQUEST:`
 
-	resp, err := s.llm.model.GenerateContent(ctx, genai.Text(prompt))
+	// Use LLMService.GenerateSQL which routes to local Ollama (SQLCoder)
+	sqlText, err := s.llm.GenerateSQL(message, prompt)
 	if err != nil {
 		return "", fmt.Errorf("AI SQL generation failed: %w", err)
 	}
-
-	if len(resp.Candidates) == 0 || len(resp.Candidates[0].Content.Parts) == 0 {
-		return "", fmt.Errorf("no SQL response from AI")
-	}
-
-	sqlText := fmt.Sprintf("%v", resp.Candidates[0].Content.Parts[0])
-	
-	// Clean up the SQL
-	sqlText = strings.TrimSpace(sqlText)
-	sqlText = strings.TrimPrefix(sqlText, "```sql")
-	sqlText = strings.TrimPrefix(sqlText, "```")
-	sqlText = strings.TrimSuffix(sqlText, "```")
-	sqlText = strings.TrimSpace(sqlText)
 	
 	// Basic validation - must contain SELECT
 	if !strings.Contains(strings.ToUpper(sqlText), "SELECT") {

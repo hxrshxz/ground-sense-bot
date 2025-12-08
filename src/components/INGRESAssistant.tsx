@@ -565,7 +565,7 @@ const INGRESCommandBar = ({
             </Button>
           </div>
 
-          {/* Popular queries suggestion buttons */}
+          {/* Popular queries suggestion buttons - Dynamic queries that work with backend */}
           <div className="flex flex-wrap gap-2 justify-center">
             <Button
               variant="outline"
@@ -584,37 +584,36 @@ const INGRESCommandBar = ({
               size="sm"
               className="bg-white/50 hover:bg-white text-blue-700 border-blue-200"
               onClick={() => {
-                const query =
-                  "What crops should I grow in a water-scarce region ?";
+                const query = "Show trend for Punjab";
                 onInputChange({ target: { value: query } } as any);
                 onSubmit();
               }}
             >
-              Crop recommendations
+              Trend Analysis
             </Button>
             <Button
               variant="outline"
               size="sm"
               className="bg-white/50 hover:bg-white text-emerald-700 border-emerald-200"
               onClick={() => {
-                const query = "Show rainfall impact on groundwater";
+                const query = "List all critical blocks in Punjab";
                 onInputChange({ target: { value: query } } as any);
                 onSubmit();
               }}
             >
-              Rainfall Impact
+              Critical Blocks
             </Button>
             <Button
               variant="outline"
               size="sm"
               className="bg-white/50 hover:bg-white text-amber-700 border-amber-200"
               onClick={() => {
-                const query = "What policy changes can improve recharge?";
+                const query = "Show map of over-exploited blocks";
                 onInputChange({ target: { value: query } } as any);
                 onSubmit();
               }}
             >
-              Policy Recommendations
+              Groundwater Map
             </Button>
           </div>
 

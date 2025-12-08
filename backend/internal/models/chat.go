@@ -2,11 +2,12 @@ package models
 
 // ChatResponse is the structured response sent to the client
 type ChatResponse struct {
-	Text   string        `json:"text"`
-	Intent string        `json:"intent"`
-	Chart  *ChartPayload `json:"chart,omitempty"`
-	Map    *MapPayload   `json:"map,omitempty"`
-	Data   interface{}   `json:"data,omitempty"`
+	Text        string        `json:"text"`
+	Intent      string        `json:"intent"`
+	Chart       *ChartPayload `json:"chart,omitempty"`
+	Map         *MapPayload   `json:"map,omitempty"`
+	Data        interface{}   `json:"data,omitempty"`
+	Suggestions []string      `json:"suggestions,omitempty"` // Dynamic follow-up query suggestions
 }
 
 // ChartPayload defines the structure for ECharts

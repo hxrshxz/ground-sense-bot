@@ -7,9 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/google/generative-ai-go/genai"
 	"github.com/hxrshxz/ground-sense-bot/backend/internal/config"
-	"google.golang.org/api/option"
 )
 
 // ConversationMessage represents a message in conversation history
@@ -18,25 +16,12 @@ type ConversationMessage struct {
 	Content string `json:"content"`
 }
 
-// LLMService handles all LLM interactions with conversation context
+// LLMService handles all LLM interactions using Ollama (Qwen 2.5-coder)
 type LLMService struct {
-	clients             []*genai.Client
-	models              []*genai.GenerativeModel
-	sqlModels           []*genai.GenerativeModel
-	vizModels           []*genai.GenerativeModel
-	currentKeyIndex     int
-	keyRotationMu       sync.Mutex
-	apiKeys             []string
-	client              *genai.Client    // Legacy - for backward compatibility
-	model               *genai.GenerativeModel
-	sqlModel            *genai.GenerativeModel
-	vizModel            *genai.GenerativeModel
+	ollamaClient        *OllamaClient
 	conversationHistory []ConversationMessage
 	historyMu           sync.RWMutex
 	maxHistoryLength    int
-	// Local LLM support
-	ollamaClient     *OllamaClient
-	useLocalLLM      bool
 }
 
 // Domain knowledge for groundwater analysis
@@ -90,122 +75,21 @@ RECHARGE SOURCES:
 `
 
 func NewLLMService(cfg *config.Config) (*LLMService, error) {
-	// Initialize Ollama client if enabled
-	var ollamaClient *OllamaClient
-	useLocalLLM := cfg.Ollama.Enabled
-	
-	if useLocalLLM {
-		ollamaClient = NewOllamaClient(cfg.Ollama.BaseURL, cfg.Ollama.Model)
-		ctx := context.Background()
-		if ollamaClient.IsAvailable(ctx) {
-			fmt.Printf("🦙 Ollama local LLM enabled (model: %s)\n", cfg.Ollama.Model)
-		} else {
-			fmt.Println("⚠️ Ollama enabled but not available, falling back to Gemini")
-			useLocalLLM = false
-		}
-	}
-
-	// Get API keys - use APIKeys slice if available, otherwise fall back to single APIKey
-	apiKeys := cfg.Gemini.APIKeys
-	if len(apiKeys) == 0 && cfg.Gemini.APIKey != "" {
-		apiKeys = []string{cfg.Gemini.APIKey}
-	}
-	
-	// If using local LLM exclusively and no Gemini keys, that's OK for SQL generation
-	if len(apiKeys) == 0 && !useLocalLLM {
-		return nil, fmt.Errorf("GEMINI_API_KEY is not set and OLLAMA_ENABLED is false")
-	}
-
+	// Initialize Ollama client - now required (no Gemini fallback)
+	ollamaClient := NewOllamaClient(cfg.Ollama.BaseURL, cfg.Ollama.Model)
 	ctx := context.Background()
 	
-	// Initialize clients for all API keys (may be empty if using only local LLM)
-	clients := make([]*genai.Client, 0, len(apiKeys))
-	models := make([]*genai.GenerativeModel, 0, len(apiKeys))
-	sqlModels := make([]*genai.GenerativeModel, 0, len(apiKeys))
-	vizModels := make([]*genai.GenerativeModel, 0, len(apiKeys))
-	
-	for i, apiKey := range apiKeys {
-		client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
-		if err != nil {
-			fmt.Printf("Warning: Failed to create client for API key %d: %v\n", i+1, err)
-			continue
-		}
-		
-		// Main model for general queries
-		model := client.GenerativeModel("gemini-2.5-flash")
-		model.SetTemperature(0.3)
-
-		// SQL model with very low temperature for deterministic queries
-		sqlModel := client.GenerativeModel("gemini-2.5-flash")
-		sqlModel.SetTemperature(0.1)
-
-		// Visualization model with moderate creativity
-		vizModel := client.GenerativeModel("gemini-2.5-flash")
-		vizModel.SetTemperature(0.4)
-		
-		clients = append(clients, client)
-		models = append(models, model)
-		sqlModels = append(sqlModels, sqlModel)
-		vizModels = append(vizModels, vizModel)
+	if !ollamaClient.IsAvailable(ctx) {
+		return nil, fmt.Errorf("Ollama is not available at %s. Please ensure Ollama is running with model: %s", cfg.Ollama.BaseURL, cfg.Ollama.Model)
 	}
 	
-	// Must have either Gemini clients or local LLM
-	if len(clients) == 0 && !useLocalLLM {
-		return nil, fmt.Errorf("failed to initialize any LLM clients")
-	}
+	fmt.Printf("🦙 Ollama local LLM enabled (model: %s)\n", cfg.Ollama.Model)
 	
-	if len(clients) > 0 {
-		fmt.Printf("🔑 Initialized %d Gemini API key(s) for rotation\n", len(clients))
-	}
-	
-	// Build result with optional fields
-	result := &LLMService{
-		clients:             clients,
-		models:              models,
-		sqlModels:           sqlModels,
-		vizModels:           vizModels,
-		apiKeys:             apiKeys,
-		currentKeyIndex:     0,
+	return &LLMService{
+		ollamaClient:        ollamaClient,
 		conversationHistory: make([]ConversationMessage, 0),
 		maxHistoryLength:    10,
-		ollamaClient:        ollamaClient,
-		useLocalLLM:         useLocalLLM,
-	}
-	
-	// Set legacy fields if Gemini clients available
-	if len(clients) > 0 {
-		result.client = clients[0]
-		result.model = models[0]
-		result.sqlModel = sqlModels[0]
-		result.vizModel = vizModels[0]
-	}
-	
-	return result, nil
-}
-
-// rotateAPIKey switches to the next available API key
-func (s *LLMService) rotateAPIKey() {
-	s.keyRotationMu.Lock()
-	defer s.keyRotationMu.Unlock()
-	
-	if len(s.clients) <= 1 {
-		return // Only one key, can't rotate
-	}
-	
-	s.currentKeyIndex = (s.currentKeyIndex + 1) % len(s.clients)
-	s.client = s.clients[s.currentKeyIndex]
-	s.model = s.models[s.currentKeyIndex]
-	s.sqlModel = s.sqlModels[s.currentKeyIndex]
-	s.vizModel = s.vizModels[s.currentKeyIndex]
-	
-	fmt.Printf("🔄 Rotated to API key %d of %d\n", s.currentKeyIndex+1, len(s.clients))
-}
-
-// getCurrentModels returns the current active models (thread-safe)
-func (s *LLMService) getCurrentModels() (*genai.GenerativeModel, *genai.GenerativeModel, *genai.GenerativeModel) {
-	s.keyRotationMu.Lock()
-	defer s.keyRotationMu.Unlock()
-	return s.model, s.sqlModel, s.vizModel
+	}, nil
 }
 
 // AddToHistory adds a message to conversation history
@@ -254,25 +138,6 @@ func (s *LLMService) ClearHistory() {
 }
 
 func (s *LLMService) GenerateSQL(userMessage string, schema string) (string, error) {
-	// Route to local LLM if enabled
-	if s.useLocalLLM && s.ollamaClient != nil {
-		ctx := context.Background()
-		sql, err := s.ollamaClient.GenerateSQL(ctx, userMessage, schema, DOMAIN_KNOWLEDGE)
-		if err != nil {
-			fmt.Printf("⚠️ Local LLM SQL generation failed, trying Gemini: %v\n", err)
-			// Fall through to Gemini
-		} else {
-			// Add to history and return
-			s.AddToHistory("user", userMessage)
-			return sql, nil
-		}
-	}
-	
-	// Fallback: check if Gemini is available
-	if s.sqlModel == nil {
-		return "", fmt.Errorf("no LLM available for SQL generation")
-	}
-
 	ctx := context.Background()
 	historyContext := s.GetHistoryContext()
 
@@ -317,22 +182,12 @@ SQL:`, DOMAIN_KNOWLEDGE, historyContext, schema, userMessage)
 	// Add to history
 	s.AddToHistory("user", userMessage)
 
-	resp, err := s.sqlModel.GenerateContent(ctx, genai.Text(prompt))
+	sql, err := s.ollamaClient.Generate(ctx, prompt)
 	if err != nil {
 		return "", fmt.Errorf("SQL generation failed: %w", err)
 	}
 
-	if len(resp.Candidates) == 0 || resp.Candidates[0].Content == nil {
-		return "", fmt.Errorf("no response from LLM")
-	}
-
-	part := resp.Candidates[0].Content.Parts[0]
-	text, ok := part.(genai.Text)
-	if !ok {
-		return "", fmt.Errorf("unexpected response format")
-	}
-
-	sql := string(text)
+	// Clean the response
 	sql = strings.TrimSpace(sql)
 	sql = strings.TrimPrefix(sql, "```sql")
 	sql = strings.TrimPrefix(sql, "```")
@@ -472,29 +327,13 @@ CRITICAL RULES:
 
 Generate the visualization JSON now:`, DOMAIN_KNOWLEDGE, userMessage, query, dataStr)
 
-	resp, err := s.vizModel.GenerateContent(ctx, genai.Text(prompt))
+	response, err := s.ollamaClient.Generate(ctx, prompt)
 	if err != nil {
 		fmt.Printf("DEBUG: GenerateVisualization LLM Error: %v\n", err)
-		// Rotate API key if we hit rate limit
-		if strings.Contains(err.Error(), "429") || strings.Contains(err.Error(), "quota") {
-			s.rotateAPIKey()
-		}
 		return "", "", err
 	}
 
-	if len(resp.Candidates) == 0 || resp.Candidates[0].Content == nil {
-		fmt.Printf("DEBUG: GenerateVisualization No Candidates\n")
-		return "", "", fmt.Errorf("no response from LLM")
-	}
-
-	part := resp.Candidates[0].Content.Parts[0]
-	text, ok := part.(genai.Text)
-	if !ok {
-		fmt.Printf("DEBUG: GenerateVisualization Unexpected Format\n")
-		return "", "", fmt.Errorf("unexpected response format")
-	}
-
-	jsonStr := string(text)
+	jsonStr := response
 	fmt.Printf("DEBUG: GenerateVisualization Raw JSON: %s\n", jsonStr)
 	
 	// Clean markdown code blocks

@@ -760,6 +760,7 @@ type ChatMessage = {
   text?: string;
   component?: React.ReactNode;
   imageData?: string;
+  suggestions?: string[];
 };
 
 // --- FIX: Updated component to manage animation and markdown rendering ---
@@ -1565,6 +1566,7 @@ Your response should sound like it's coming from a knowledgeable human analyst e
           component: lastMsg.payload?.chart ? (
             <ChartRenderer chart={lastMsg.payload.chart} />
           ) : undefined,
+          suggestions: lastMsg.payload?.suggestions || [],
         };
         setChatHistory((prev) => {
           // Avoid duplicates if possible (simple check by ID or content)
@@ -2475,22 +2477,64 @@ Your response should sound like it's coming from a knowledgeable human analyst e
                       </div>
                     ) : msg.component ? (
                       // If it's a graph component, render it directly without extra styling
-                      msg.component
+                      <div className="space-y-3">
+                        {msg.component}
+                        {/* Suggestion Buttons Below Graph */}
+                        {msg.suggestions && msg.suggestions.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mt-4 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                            <span className="w-full text-xs font-medium text-slate-500 mb-1 flex items-center gap-1">
+                              <Lightbulb className="w-3 h-3" /> Follow-up queries:
+                            </span>
+                            {msg.suggestions.map((suggestion: string, i: number) => (
+                              <Button
+                                key={i}
+                                variant="outline"
+                                size="sm"
+                                className="text-xs bg-white hover:bg-purple-50 hover:text-purple-700 hover:border-purple-300 transition-colors"
+                                onClick={() => handleChatSubmit(suggestion)}
+                              >
+                                {suggestion}
+                              </Button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     ) : (
                       // If it's an AI text message, render it inside the styled bubble
-                      <div
-                        className={`p-4 rounded-2xl rounded-bl-lg border shadow-sm prose prose-base max-w-none ${
-                          embedded
-                            ? "bg-slate-700/50 text-slate-200 border-slate-600"
-                            : "bg-white text-slate-800"
-                        }`}
-                      >
-                        {isLastMessage ? (
-                          <AnimatedMarkdownMessage text={msg.text || ""} />
-                        ) : (
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                            {msg.text}
-                          </ReactMarkdown>
+                      <div className="space-y-3">
+                        <div
+                          className={`p-4 rounded-2xl rounded-bl-lg border shadow-sm prose prose-base max-w-none ${
+                            embedded
+                              ? "bg-slate-700/50 text-slate-200 border-slate-600"
+                              : "bg-white text-slate-800"
+                          }`}
+                        >
+                          {isLastMessage ? (
+                            <AnimatedMarkdownMessage text={msg.text || ""} />
+                          ) : (
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                              {msg.text}
+                            </ReactMarkdown>
+                          )}
+                        </div>
+                        {/* Suggestion Buttons Below Text */}
+                        {msg.suggestions && msg.suggestions.length > 0 && (
+                          <div className="flex flex-wrap gap-2 p-3 bg-gradient-to-r from-purple-50 to-sky-50 rounded-xl border border-purple-100">
+                            <span className="w-full text-xs font-medium text-purple-600 mb-1 flex items-center gap-1">
+                              <Lightbulb className="w-3 h-3" /> 🔍 Drill-down:
+                            </span>
+                            {msg.suggestions.map((suggestion: string, i: number) => (
+                              <Button
+                                key={i}
+                                variant="outline"
+                                size="sm"
+                                className="text-xs bg-white hover:bg-purple-100 hover:text-purple-800 hover:border-purple-400 border-purple-200 transition-all shadow-sm"
+                                onClick={() => handleChatSubmit(suggestion)}
+                              >
+                                {suggestion}
+                              </Button>
+                            ))}
+                          </div>
                         )}
                       </div>
                     )}

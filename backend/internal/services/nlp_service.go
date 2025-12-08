@@ -7,8 +7,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-
-	"github.com/google/generative-ai-go/genai"
 )
 
 type NLPService struct{
@@ -994,23 +992,13 @@ Return ONLY valid JSON (no markdown, no code blocks):
 
 ANALYZE THE QUERY NOW AND RETURN JSON:`, message)
 
-	fmt.Printf("AI QUERY ANALYSIS: Sending prompt to Gemini...\n")
-	resp, err := s.llm.model.GenerateContent(ctx, genai.Text(prompt))
+	fmt.Printf("AI QUERY ANALYSIS: Sending prompt to Ollama...\n")
+	responseText, err := s.llm.ollamaClient.Generate(ctx, prompt)
 	if err != nil {
 		fmt.Printf("AI QUERY ANALYSIS ERROR: %v\n", err)
-		// Rotate API key if we hit rate limit (429 error)
-		if strings.Contains(err.Error(), "429") || strings.Contains(err.Error(), "quota") {
-			s.llm.rotateAPIKey()
-		}
 		return nil, err
 	}
 
-	if len(resp.Candidates) == 0 || len(resp.Candidates[0].Content.Parts) == 0 {
-		fmt.Printf("AI QUERY ANALYSIS ERROR: No response from AI\n")
-		return nil, fmt.Errorf("no response from AI")
-	}
-
-	responseText := fmt.Sprintf("%v", resp.Candidates[0].Content.Parts[0])
 	fmt.Printf("AI RAW RESPONSE: %s\n", responseText)
 	
 	// Clean up response - remove markdown code blocks if present

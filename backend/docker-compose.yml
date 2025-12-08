@@ -21,23 +21,24 @@ services:
       retries: 5
 
   # Ollama - Local LLM for SQL generation (cost-free alternative to Gemini)
-  ollama:
-    image: ollama/ollama:latest
-    container_name: ground-sense-ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama_data:/root/.ollama
-    networks:
-      - ground-sense-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    # Uncomment below for GPU support
-    # deploy:
-    #   resources:
+  # COMMENTED OUT: Using system Ollama running on host at localhost:11434
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   container_name: ground-sense-ollama
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - ollama_data:/root/.ollama
+  #   networks:
+  #     - ground-sense-network
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #   # Uncomment below for GPU support
+  #   # deploy:
+  #   #   resources:
     #     reservations:
     #       devices:
     #         - driver: nvidia
@@ -79,8 +80,9 @@ services:
       - DB_SSLMODE=disable
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - GEMINI_API_KEY=AIzaSyCCVCaclFVHqEV0QV14WdIvvfG5YKOJHmE
-      - GEMINI_API_KEYS=AIzaSyCCVCaclFVHqEV0QV14WdIvvfG5YKOJHmE,AIzaSyCq3KAagDLK5_g7eKuqBQIVzpEwTmpSr4w
+      - OLLAMA_ENABLED=true
+      - OLLAMA_URL=http://host.docker.internal:11434
+      - OLLAMA_MODEL=sqlcoder:7b
     ports:
       - "8080:8080"
     depends_on:

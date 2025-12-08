@@ -385,7 +385,24 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 	
 	switch intent {
 	case IntentSummary:
-		handlerResult, handlerErr = s.handleSummary(ctx, entities, response)
+		// USE NEW FOCUSED 4-ATTRIBUTE HANDLER
+		if len(entities.Locations) > 0 {
+			loc := entities.Locations[0]
+			// Try state first, then district, then block
+			state, _ := s.ingres.GetStateByName(ctx, loc)
+			if state != nil {
+				handlerResult, handlerErr = s.handleStateQuery(ctx, loc, entities.Year)
+			} else {
+				district, _ := s.ingres.GetDistrictByName(ctx, loc)
+				if district != nil {
+					handlerResult, handlerErr = s.handleDistrictQuery(ctx, loc, entities.Year)
+				} else {
+					handlerResult, handlerErr = s.handleBlockQuery(ctx, loc, entities.Year)
+				}
+			}
+		} else {
+			handlerResult, handlerErr = s.handleListAllStates(ctx, entities.Year)
+		}
 	case IntentTrend:
 		handlerResult, handlerErr = s.handleTrend(ctx, entities, response)
 	case IntentCompare:
@@ -399,9 +416,20 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 	case IntentMapCategory:
 		handlerResult, handlerErr = s.handleMapCategory(ctx, entities, response)
 	case IntentListBlocks:
-		handlerResult, handlerErr = s.handleListBlocks(ctx, entities, response)
+		// USE NEW FOCUSED 4-ATTRIBUTE HANDLER
+		if len(entities.Locations) > 0 {
+			handlerResult, handlerErr = s.handleListBlocksFocused(ctx, entities.Locations[0], entities.Year)
+		} else {
+			response.Text = "Please specify a district. Example: 'Show blocks in Ludhiana'"
+			handlerResult = response
+		}
 	case IntentListDistricts:
-		handlerResult, handlerErr = s.handleListDistricts(ctx, entities, response)
+		// USE NEW FOCUSED 4-ATTRIBUTE HANDLER
+		if len(entities.Locations) > 0 {
+			handlerResult, handlerErr = s.handleListDistrictsFocused(ctx, entities.Locations[0], entities.Year)
+		} else {
+			handlerResult, handlerErr = s.handleListAllStates(ctx, entities.Year)
+		}
 	case IntentListStates:
 		handlerResult, handlerErr = s.handleListStates(ctx, entities, response)
 	case IntentTopRanking:

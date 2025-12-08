@@ -1,15 +1,12 @@
 package services
 
 import (
-	"bytes"
 	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/hxrshxz/ground-sense-bot/backend/internal/config"
 	"github.com/hxrshxz/ground-sense-bot/backend/internal/database"
@@ -387,62 +384,12 @@ func (s *RAGService) semanticSearch(ctx context.Context, req HybridSearchRequest
 	return results, nil
 }
 
-// generateEmbedding generates an embedding for a text using Gemini API
+// generateEmbedding generates an embedding for a text
+// NOTE: Semantic search is disabled - requires embedding model (Gemini was removed)
 func (s *RAGService) generateEmbedding(text string) (string, error) {
-	apiKey := s.config.Gemini.APIKey
-	if apiKey == "" {
-		return "", fmt.Errorf("Gemini API key not configured")
-	}
-
-	reqBody := GeminiEmbeddingRequest{
-		Content: GeminiContent{
-			Parts: []GeminiPart{
-				{Text: text},
-			},
-		},
-		TaskType: "retrieval_query",
-	}
-
-	jsonData, err := json.Marshal(reqBody)
-	if err != nil {
-		return "", err
-	}
-
-	// Gemini embedding model: text-embedding-004
-	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=%s", apiKey)
-	
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
-	if err != nil {
-		return "", err
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := s.client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("Gemini API error (%d): %s", resp.StatusCode, string(body))
-	}
-
-	var embResp GeminiEmbeddingResponse
-	if err := json.NewDecoder(resp.Body).Decode(&embResp); err != nil {
-		return "", err
-	}
-
-	if len(embResp.Embedding.Values) == 0 {
-		return "", fmt.Errorf("no embedding returned from Gemini")
-	}
-
-	// Convert embedding to PostgreSQL vector format
-	embedding := embResp.Embedding.Values
-	vectorStr := fmt.Sprintf("[%v]", strings.Trim(strings.Join(strings.Fields(fmt.Sprint(embedding)), ","), "[]"))
-
-	return vectorStr, nil
+	// Gemini API was removed - semantic search is now disabled
+	// To re-enable, integrate a local embedding model (e.g., sentence-transformers via Ollama)
+	return "", fmt.Errorf("semantic search disabled: no embedding model configured")
 }
 
 // deduplicateResults removes duplicate results and sorts by score
@@ -526,75 +473,9 @@ func (s *RAGService) GetAssessmentByID(ctx context.Context, assessmentID int) (*
 }
 
 // rerankResults uses Gemini's reranking API to reorder search results by relevance
+// NOTE: Disabled since Gemini was removed
 func (s *RAGService) rerankResults(ctx context.Context, query string, results []SearchResult, topN int) ([]SearchResult, error) {
-	if len(results) == 0 {
-		return results, nil
-	}
-
-	// Extract text representations
-	documents := make([]string, len(results))
-	for i, r := range results {
-		documents[i] = r.TextRepresentation
-	}
-
-	// Prepare Gemini reranking request
-	reqBody := GeminiRerankerRequest{
-		Model:     "gemini-2.0-flash",
-		Query:     query,
-		Documents: documents,
-		TopN:      topN,
-	}
-
-	reqJSON, err := json.Marshal(reqBody)
-	if err != nil {
-		return nil, fmt.Errorf("marshal reranker request: %w", err)
-	}
-
-	// Get API key from config
-	apiKey := s.config.Gemini.APIKey
-	if apiKey == "" {
-		return nil, fmt.Errorf("gemini API key not configured")
-	}
-
-	// Call Gemini reranking API
-	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:rerank?key=%s", apiKey)
-	httpReq, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(reqJSON))
-	if err != nil {
-		return nil, fmt.Errorf("create reranker request: %w", err)
-	}
-
-	httpReq.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(httpReq)
-	if err != nil {
-		return nil, fmt.Errorf("reranker API call: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("reranker API error: %d - %s", resp.StatusCode, string(body))
-	}
-
-	// Parse response
-	var rerankerResp GeminiRerankerResponse
-	if err := json.NewDecoder(resp.Body).Decode(&rerankerResp); err != nil {
-		return nil, fmt.Errorf("decode reranker response: %w", err)
-	}
-
-	// Reorder results based on rankings
-	reranked := make([]SearchResult, 0, len(rerankerResp.Rankings))
-	for _, ranking := range rerankerResp.Rankings {
-		if ranking.Index >= 0 && ranking.Index < len(results) {
-			result := results[ranking.Index]
-			// Store reranking score for debugging
-			result.Score = ranking.Score
-			reranked = append(reranked, result)
-		}
-	}
-
-	s.logger.Infof("Reranked %d results to %d (requested top %d)", len(results), len(reranked), topN)
-
-	return reranked, nil
+	// Gemini API was removed - reranking is now disabled
+	// Results are already sorted by relevance from keyword/semantic search
+	return nil, fmt.Errorf("reranking disabled: Gemini API was removed")
 }

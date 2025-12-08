@@ -18,7 +18,6 @@ type Config struct {
 	Email     EmailConfig
 	Storage   StorageConfig
 	RateLimit RateLimitConfig
-	Gemini    GeminiConfig
 	Ollama    OllamaConfig
 }
 
@@ -131,22 +130,15 @@ func Load() *Config {
 			RequestsPerHour: getEnvAsInt("RATE_LIMIT_REQUESTS", 1000),
 			BurstSize:       getEnvAsInt("RATE_LIMIT_BURST", 100),
 		},
-		Gemini: GeminiConfig{
-			APIKey:  getEnv("GEMINI_API_KEY", ""),
-			APIKeys: getEnvAsStringSlice("GEMINI_API_KEYS", getEnv("GEMINI_API_KEY", "")),
-		},
 		Ollama: OllamaConfig{
-			Enabled: getEnvAsBool("OLLAMA_ENABLED", false),
+			Enabled: getEnvAsBool("OLLAMA_ENABLED", true), // Default to true now
 			BaseURL: getEnv("OLLAMA_URL", "http://localhost:11434"),
-			Model:   getEnv("OLLAMA_MODEL", "sqlcoder:7b"),
+			Model:   getEnv("OLLAMA_MODEL", "qwen2.5-coder:7b"),
 		},
 	}
 }
 
-type GeminiConfig struct {
-	APIKey  string
-	APIKeys []string // Multiple API keys for rotation
-}
+// GeminiConfig removed - now using Ollama/Qwen only
 
 func getEnv(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {

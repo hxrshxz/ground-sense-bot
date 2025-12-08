@@ -145,4 +145,39 @@ type MapPayload struct {
 	Zoom    int         `json:"zoom,omitempty"`
 }
 
+// FourAttributeData - Focused response structure for mentor's 4 key attributes
+type FourAttributeData struct {
+	LocationName string  `json:"locationName"`
+	LocationType string  `json:"locationType"` // "state", "district", "block"
+	Year         string  `json:"year"`
+	
+	// The 4 Key Attributes (as per mentor feedback)
+	Extractable float64 `json:"extractable"` // Annual Extractable GW Resources (MCM)
+	Extraction  float64 `json:"extraction"`  // Annual GW Extraction (MCM)
+	Stage       float64 `json:"stage"`       // Stage of Extraction (%)
+	Category    string  `json:"category"`    // Categorization
+	
+	// Hierarchical navigation
+	ParentName  string `json:"parentName,omitempty"`  // Parent location name
+	ParentType  string `json:"parentType,omitempty"`  // Parent location type
+	ChildCount  int    `json:"childCount,omitempty"`  // Number of child units
+	ChildType   string `json:"childType,omitempty"`   // "districts" or "blocks"
+}
 
+// HierarchyItem - Single item in a list of districts/blocks
+type HierarchyItem struct {
+	Name       string  `json:"name"`
+	Stage      float64 `json:"stage"`
+	Category   string  `json:"category"`
+	Extraction float64 `json:"extraction"`
+}
+
+// HierarchyListData - Response for "list districts/blocks" queries
+type HierarchyListData struct {
+	ParentName   string          `json:"parentName"`
+	ParentType   string          `json:"parentType"`
+	Year         string          `json:"year"`
+	Items        []HierarchyItem `json:"items"`
+	TotalCount   int             `json:"totalCount"`
+	DrillDownHint string         `json:"drillDownHint,omitempty"` // e.g., "Show blocks in [district]"
+}

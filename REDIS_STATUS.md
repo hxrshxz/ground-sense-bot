@@ -3,12 +3,14 @@
 ## Current Situation
 
 ### ✅ What's Working:
+
 - Redis container running: `ground-sense-redis`
 - Redis responding to health checks: `PONG`
 - Docker network configured correctly
 - Config structure exists in `config.go`
 
 ### ❌ What's NOT Working:
+
 - **No Redis client initialized** in Go application
 - **No cache layer implemented** in services
 - **Zero keys stored** in Redis (DBSIZE = 0)
@@ -20,6 +22,7 @@
 Redis could give you **massive performance boost** for:
 
 ### 1. **Query Result Caching** (High Impact)
+
 ```go
 // Without Redis: 200-500ms per query
 "Show data for Punjab" → Database query every time
@@ -29,15 +32,18 @@ Redis could give you **massive performance boost** for:
 ```
 
 ### 2. **Session Management** (Medium Impact)
+
 - Store conversation history in Redis
 - Faster context retrieval
 - Survives server restarts
 
 ### 3. **Rate Limiting** (Low Impact)
+
 - Prevent API abuse
 - Track user queries per minute
 
 ### 4. **LLM Response Caching** (High Impact)
+
 ```go
 // Without Redis: 2-3s for Gemini API call
 "Compare Punjab and Haryana" → Call Gemini every time
@@ -49,12 +55,14 @@ Same query → Instant from cache
 ## Performance Comparison
 
 ### Current System (No Redis):
+
 ```
 User Query → Intent Detection → Database Query → LLM Processing → Response
    0ms          50ms               200ms           2000ms          = 2.25s
 ```
 
 ### With Redis Caching:
+
 ```
 User Query → Check Cache → Return Cached Result
    0ms          10ms            = 10ms (225x faster!)
@@ -65,6 +73,7 @@ User Query → Check Cache → Return Cached Result
 ### ⚠️ For SIH Demo: **OPTIONAL (Don't Risk It)**
 
 **Reasons to SKIP for now:**
+
 1. ✅ System already fast enough (< 500ms for most queries)
 2. ✅ Works perfectly without it
 3. ❌ Adding caching = new complexity = new bugs
@@ -72,6 +81,7 @@ User Query → Check Cache → Return Cached Result
 5. ❌ Judges won't notice 200ms vs 20ms
 
 **Reasons to ADD after SIH:**
+
 1. Real production deployment needs caching
 2. Handles high concurrent load better
 3. Reduces database stress
@@ -79,22 +89,24 @@ User Query → Check Cache → Return Cached Result
 
 ## Decision Matrix
 
-| Scenario | Recommendation |
-|----------|----------------|
-| **Demo < 3 days away** | ❌ DON'T add caching - too risky |
-| **Demo > 1 week away** | ✅ Add basic query caching |
-| **After winning SIH** | ✅ Add full Redis layer |
-| **Production deployment** | ✅ Absolutely required |
+| Scenario                  | Recommendation                   |
+| ------------------------- | -------------------------------- |
+| **Demo < 3 days away**    | ❌ DON'T add caching - too risky |
+| **Demo > 1 week away**    | ✅ Add basic query caching       |
+| **After winning SIH**     | ✅ Add full Redis layer          |
+| **Production deployment** | ✅ Absolutely required           |
 
 ## If You Want to Add Redis (Post-SIH)
 
 ### Step 1: Install Redis Client
+
 ```bash
 cd backend
 go get github.com/redis/go-redis/v9
 ```
 
 ### Step 2: Create Cache Service
+
 Create `backend/internal/services/cache_service.go`:
 
 ```go
@@ -118,7 +130,7 @@ func NewCacheService(cfg *config.Config) *CacheService {
         Password: cfg.Redis.Password,
         DB:       cfg.Redis.DB,
     })
-    
+
     return &CacheService{client: client}
 }
 
@@ -156,7 +168,7 @@ type ChatService struct {
 func (s *ChatService) ProcessMessage(ctx context.Context, username, message string) (*models.ChatResponse, error) {
     // Generate cache key
     cacheKey := fmt.Sprintf("query:%s:%s", username, message)
-    
+
     // Try cache first
     if cached, err := s.cache.Get(ctx, cacheKey); err == nil {
         var response models.ChatResponse
@@ -165,15 +177,15 @@ func (s *ChatService) ProcessMessage(ctx context.Context, username, message stri
             return &response, nil
         }
     }
-    
+
     fmt.Println("⚠️  Cache MISS - Processing query")
-    
+
     // Process query normally
     response := // ... your existing logic
-    
+
     // Cache the result (5 minute TTL)
     s.cache.Set(ctx, cacheKey, response, 5*time.Minute)
-    
+
     return response, nil
 }
 ```
@@ -201,15 +213,18 @@ session:{username}:context → Last entities (30 min TTL)
 ## Current Recommendation: **DON'T ADD NOW**
 
 ### Why?
+
 1. **Your system is already impressive** - Fast enough for judges
 2. **Limited time** - Focus on fixing bugs, not adding features
 3. **New code = new risks** - Cache invalidation is hard
 4. **Demo doesn't need it** - Judges won't notice 200ms difference
 
 ### What to Tell Judges?
+
 **If they ask about Redis:**
 
 "We have Redis running for future production scalability. Currently focusing on core AI features and data accuracy. Post-demo, we'll implement multi-layer caching for:
+
 - Query result caching (225x faster repeat queries)
 - LLM response caching (reduce API costs)
 - Session persistence (better context awareness)
@@ -217,6 +232,7 @@ session:{username}:context → Last entities (30 min TTL)
 This is production-ready architecture, just waiting for polish."
 
 ### Focus on Instead:
+
 1. ✅ Polish existing visualizations
 2. ✅ Test all predefined prompts
 3. ✅ Prepare demo script
@@ -235,13 +251,15 @@ This is production-ready architecture, just waiting for polish."
 
 ## Summary
 
-**Redis Status**: 
+**Redis Status**:
+
 - 🟡 Running but not utilized
 - 🟡 Good architecture (forward-thinking)
 - 🟢 Not a blocker for demo
 - 🔴 Should be added for production
 
-**Action**: 
+**Action**:
+
 - ✅ Keep Redis running (shows good architecture)
 - ✅ Don't add caching code now (too risky)
 - ✅ Add to roadmap slide in presentation

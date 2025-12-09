@@ -132,7 +132,7 @@ I provide data on 4 Key Attributes:
 1. Annual Extractable Ground Water Resources (ham)
 2. Annual Ground Water Extraction (ham)
 3. Stage of Extraction (%)
-4. Category (Safe/Semi-Critical/Critical/Over-Exploited)
+4. Category (Safe/Semi-Critical/Critical/Over-Exploited/Saline/Hilly Area)
 
 Queries:
 - State level: "Show Punjab data"

@@ -68,7 +68,7 @@ func RegisterRoutes(mux *http.ServeMux, cfg *config.Config, db *database.Service
 		if user == "" {
 			user = "debug_user"
 		}
-		resp, err := chatService.ProcessMessage(r.Context(), req.Message, user)
+		resp, err := chatService.ProcessMessageDirect(r.Context(), req.Message, user)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

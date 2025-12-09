@@ -58,7 +58,6 @@ STATE-LEVEL INSIGHTS:
 - Punjab: 79% over-exploited, 170% avg stage, rice-wheat intensive
 - Rajasthan: High salinity, 450mm rainfall, desert regions
 - Haryana: 60% critical+over-exploited, high agricultural demand
-- Delhi: Urban stress, 90%+ over-exploited, limited recharge
 - Tamil Nadu: Coastal salinity, monsoon dependent
 - Gujarat: Mixed status, western areas critical
 

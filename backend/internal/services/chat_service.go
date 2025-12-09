@@ -99,6 +99,677 @@ func NewChatService(nlp *NLPService, ingres *IngresService, rag *RAGService, cac
 	}
 }
 
+// ProcessMessageDirect - SIMPLIFIED FLOW
+// User query → Qwen generates SQL → Execute → Return formatted text
+// If user asks for graph/chart, also generate simple visualization
+func (s *ChatService) ProcessMessageDirect(ctx context.Context, message string, username string) (*models.ChatResponse, error) {
+	message = strings.TrimSpace(message)
+	
+	if message == "" {
+		return &models.ChatResponse{
+			Text: "Please enter a question about groundwater data.",
+		}, nil
+	}
+	
+	fmt.Println("\n" + strings.Repeat("=", 60))
+	fmt.Printf("📨 DIRECT SQL MODE | User: %s\n", username)
+	fmt.Printf("💬 Query: \"%s\"\n", message)
+	fmt.Println(strings.Repeat("=", 60))
+	
+	// === INTENT DETECTION: Skip SQL for casual/non-data queries ===
+	msgLower := strings.ToLower(strings.TrimSpace(message))
+	
+	// Pattern 1: Simple greetings
+	greetings := []string{"hello", "hi", "hey", "hola", "namaste", "good morning", "good afternoon", "good evening"}
+	for _, g := range greetings {
+		if msgLower == g || strings.HasPrefix(msgLower, g+" ") {
+			fmt.Println("├─ 👋 Greeting detected - skipping SQL")
+			return &models.ChatResponse{
+				Text: "👋 Hello! I'm the **INGRES Groundwater Assistant**.\n\nI can help you with groundwater data for any state, district, or block in India.\n\n**Try asking:**\n- \"Show data for Punjab\"\n- \"Compare Tamil Nadu and Haryana\"\n- \"Blocks in Ludhiana district\"\n- \"Give me a graph of extraction in Rajasthan\"\n\n💡 *Tip: Add 'graph' to your query to see a visualization!*",
+			}, nil
+		}
+	}
+	
+	// Pattern 2: Location-based greetings (e.g., "I am from Punjab", "from Delhi")
+	if strings.Contains(msgLower, "i am from") || strings.Contains(msgLower, "i'm from") || strings.Contains(msgLower, "from ") {
+		// Extract location
+		location := ""
+		for _, trigger := range []string{"i am from ", "i'm from ", "from "} {
+			if idx := strings.Index(msgLower, trigger); idx >= 0 {
+				location = strings.TrimSpace(msgLower[idx+len(trigger):])
+				break
+			}
+		}
+		if location != "" {
+			fmt.Printf("├─ 📍 Location greeting detected: %s - skipping SQL\n", location)
+			locationTitle := strings.Title(location)
+			return &models.ChatResponse{
+				Text: fmt.Sprintf("🙏 Namaste! Welcome, friend from **%s**!\n\nI'm the INGRES Groundwater Assistant. Let me help you with groundwater information.\n\n**Quick options for %s:**\n- \"Show groundwater status of %s\"\n- \"Districts in %s\"\n- \"Graph of extraction in %s\"\n\nWhat would you like to know?", locationTitle, locationTitle, locationTitle, locationTitle, locationTitle),
+			}, nil
+		}
+	}
+	
+	// Pattern 3: Thank you / farewell
+	farewells := []string{"thank you", "thanks", "bye", "goodbye", "see you", "ok thanks", "got it"}
+	for _, f := range farewells {
+		if msgLower == f || strings.HasPrefix(msgLower, f) {
+			fmt.Println("├─ 🙏 Farewell detected - skipping SQL")
+			return &models.ChatResponse{
+				Text: "🙏 You're welcome! Happy to help with groundwater data anytime. Take care!",
+			}, nil
+		}
+	}
+	
+	// Pattern 4: Help / what can you do
+	helpPhrases := []string{"help", "what can you do", "what do you do", "how to use", "commands", "options"}
+	for _, h := range helpPhrases {
+		if strings.Contains(msgLower, h) {
+			fmt.Println("├─ ❓ Help request detected - skipping SQL")
+			return &models.ChatResponse{
+				Text: "📚 **INGRES Groundwater Assistant - Help**\n\n**I can answer questions about:**\n• Groundwater status of any Indian state, district, or block\n• Extraction & recharge data\n• Category distribution (safe/critical/over-exploited)\n• Comparisons between locations\n\n**Example queries:**\n1. \"Show data for Punjab\" - Get state summary\n2. \"Compare Punjab vs Haryana\" - Side-by-side comparison\n3. \"Blocks in Ludhiana\" - List blocks in a district\n4. \"Districts in Rajasthan\" - List districts with stats\n5. \"Graph of extraction in...\" - Get visualization\n\n**Units used:**\n• (ham) = Hectare-meters (water volume)\n• (%) = Percentage\n\n💡 *Add 'graph' or 'chart' to any query for visualization!*",
+			}, nil
+		}
+	}
+	
+	// Detect if user wants a graph/chart
+	wantsGraph := strings.Contains(msgLower, "graph") ||
+		strings.Contains(msgLower, "chart") ||
+		strings.Contains(msgLower, "visual") ||
+		strings.Contains(msgLower, "plot") ||
+		strings.Contains(msgLower, "diagram")
+	
+	if wantsGraph {
+		fmt.Println("├─ 📊 Graph requested - will generate visualization")
+	}
+	
+	// Step 1: Generate SQL using Qwen
+	fmt.Println("├─ 🤖 Generating SQL with Qwen...")
+	schema := GetFullSchemaContext()
+	
+	sqlQuery, err := s.nlp.llm.GenerateSQL(message, schema)
+	if err != nil {
+		fmt.Printf("├─ ❌ SQL generation failed: %v, trying fallback templates...\n", err)
+		// Try fallback SQL templates
+		sqlQuery = s.getFallbackSQL(message)
+		if sqlQuery == "" {
+			return &models.ChatResponse{
+				Text: "I couldn't understand your query. Please try rephrasing. Example: 'Show groundwater data for Punjab'",
+			}, nil
+		}
+	}
+	
+	fmt.Printf("├─ ✅ SQL: %s\n", sqlQuery)
+	
+	// Step 2: Execute SQL
+	fmt.Println("├─ 🔍 Executing SQL...")
+	results, err := s.ingres.repo.RunRawQuery(ctx, sqlQuery)
+	if err != nil {
+		fmt.Printf("├─ ❌ SQL execution failed: %v, trying fallback templates...\n", err)
+		
+		// Try fallback SQL templates on execution error
+		fallbackSQL := s.getFallbackSQL(message)
+		if fallbackSQL != "" && fallbackSQL != sqlQuery {
+			fmt.Printf("├─ 🔄 Trying fallback SQL: %s\n", fallbackSQL)
+			results, err = s.ingres.repo.RunRawQuery(ctx, fallbackSQL)
+			if err == nil {
+				sqlQuery = fallbackSQL
+				fmt.Println("├─ ✅ Fallback SQL succeeded!")
+			}
+		}
+		
+		if err != nil {
+			return &models.ChatResponse{
+				Text: fmt.Sprintf("Query failed. Please try rephrasing.\n\nExample queries:\n- 'Show data for Punjab'\n- 'Compare Punjab vs Haryana'\n- 'Blocks in Ludhiana district'"),
+			}, nil
+		}
+	}
+	
+	// Step 3: Format results
+	fmt.Printf("├─ ✅ Got %d results\n", len(results))
+	
+	if len(results) == 0 {
+		return &models.ChatResponse{
+			Text: "No data found matching your query. Please check the location name or try different criteria.",
+		}, nil
+	}
+	
+	// Build text table from results
+	textResponse := s.formatResultsAsTable(results, message)
+	
+	response := &models.ChatResponse{
+		Text:   textResponse,
+		Intent: "DIRECT_SQL",
+		Data:   results,
+	}
+	
+	// Step 4: Generate chart if requested
+	if wantsGraph && len(results) > 0 {
+		fmt.Println("├─ 📊 Generating chart...")
+		chart := s.buildSimpleChartFromResults(results, message)
+		if chart != nil {
+			response.Chart = chart
+			fmt.Printf("├─ ✅ Chart generated: %s\n", chart.Type)
+		}
+	}
+	
+	// Step 5: Add contextual follow-up suggestions
+	followUp := s.generateFollowUpSuggestions(message, results)
+	if followUp != "" {
+		response.Text = response.Text + "\n\n---\n" + followUp
+	}
+	
+	// Also populate Suggestions field for frontend buttons
+	response.Suggestions = s.getFollowUpButtons(message, results)
+	
+	fmt.Println(strings.Repeat("=", 60) + "\n")
+	
+	return response, nil
+}
+
+// generateFollowUpSuggestions creates contextual suggestions based on query type
+func (s *ChatService) generateFollowUpSuggestions(query string, results []map[string]interface{}) string {
+	queryLower := strings.ToLower(query)
+	
+	// Extract location from results if available
+	location := ""
+	if len(results) > 0 {
+		if stateName, ok := results[0]["state_name"].(string); ok {
+			location = stateName
+		} else if distName, ok := results[0]["district_name"].(string); ok {
+			location = distName
+		}
+	}
+	
+	var suggestions []string
+	
+	// Based on query type, suggest relevant follow-ups
+	if strings.Contains(queryLower, "compare") || strings.Contains(queryLower, " vs ") {
+		suggestions = []string{
+			"📊 \"Show graph of this comparison\"",
+			"🔍 \"Blocks in [state name]\" for detailed breakdown",
+			"📈 \"Districts in [state name]\" for district-level data",
+		}
+	} else if strings.Contains(queryLower, "blocks in") || strings.Contains(queryLower, "blocks of") {
+		if location != "" {
+			suggestions = []string{
+				fmt.Sprintf("📊 \"Graph of blocks in %s\"", location),
+				fmt.Sprintf("📈 \"Compare %s with another state\"", location),
+				"🔍 \"Show over-exploited blocks\" for critical areas",
+			}
+		}
+	} else if strings.Contains(queryLower, "districts in") || strings.Contains(queryLower, "districts of") {
+		if location != "" {
+			suggestions = []string{
+				fmt.Sprintf("📊 \"Graph of districts in %s\"", location),
+				fmt.Sprintf("🔍 \"Blocks in [district name]\" for block-level data"),
+				fmt.Sprintf("📈 \"Compare %s with another state\"", location),
+			}
+		}
+	} else if strings.Contains(queryLower, "status") || strings.Contains(queryLower, "show") || strings.Contains(queryLower, "data for") {
+		if location != "" {
+			suggestions = []string{
+				fmt.Sprintf("📊 \"Graph of %s\"", location),
+				fmt.Sprintf("🔍 \"Districts in %s\"", location),
+				fmt.Sprintf("📈 \"Compare %s vs [another state]\"", location),
+			}
+		}
+	} else {
+		// Default suggestions
+		suggestions = []string{
+			"📊 Add 'graph' to see visualization",
+			"🔍 Try \"blocks in [location]\" for details",
+			"📈 Try \"compare [A] vs [B]\" for comparison",
+		}
+	}
+	
+	if len(suggestions) > 0 {
+		return "💡 **What would you like to explore next?**\n" + strings.Join(suggestions, "\n")
+	}
+	return ""
+}
+
+// getFollowUpButtons returns button-style suggestions for frontend
+func (s *ChatService) getFollowUpButtons(query string, results []map[string]interface{}) []string {
+	queryLower := strings.ToLower(query)
+	
+	// Extract location
+	location := ""
+	if len(results) > 0 {
+		if stateName, ok := results[0]["state_name"].(string); ok {
+			location = stateName
+		}
+	}
+	
+	var buttons []string
+	
+	if location != "" {
+		if !strings.Contains(queryLower, "graph") {
+			buttons = append(buttons, fmt.Sprintf("Graph of %s", location))
+		}
+		if !strings.Contains(queryLower, "districts") {
+			buttons = append(buttons, fmt.Sprintf("Districts in %s", location))
+		}
+		if !strings.Contains(queryLower, "blocks") {
+			buttons = append(buttons, fmt.Sprintf("Blocks in %s", location))
+		}
+	}
+	
+	// Limit to 3 buttons
+	if len(buttons) > 3 {
+		buttons = buttons[:3]
+	}
+	
+	return buttons
+}
+
+// buildSimpleChartFromResults creates a simple bar chart from query results
+func (s *ChatService) buildSimpleChartFromResults(results []map[string]interface{}, query string) *models.ChartPayload {
+	if len(results) == 0 {
+		return nil
+	}
+	
+	// Find a good label column (name-like) and value column (numeric)
+	var labelCol, valueCol string
+	var values []float64
+	var labels []string
+	
+	// Priority order for label columns
+	labelPriority := []string{"block_name", "district_name", "state_name", "year", "category", "location"}
+	// Priority order for value columns
+	valuePriority := []string{"stage", "total_extraction", "total_extractable", "avg_stage", "extraction_ham", "extractable_ham", "total_blocks", "rainfall", "total_recharge"}
+	
+	// Find label column
+	for _, col := range labelPriority {
+		if _, exists := results[0][col]; exists {
+			labelCol = col
+			break
+		}
+	}
+	
+	// Find value column
+	for _, col := range valuePriority {
+		if _, exists := results[0][col]; exists {
+			valueCol = col
+			break
+		}
+	}
+	
+	// Fallback: use first string column as label, first numeric as value
+	if labelCol == "" || valueCol == "" {
+		for key, val := range results[0] {
+			switch val.(type) {
+			case string:
+				if labelCol == "" {
+					labelCol = key
+				}
+			case float64, int64:
+				if valueCol == "" {
+					valueCol = key
+				}
+			}
+		}
+	}
+	
+	if labelCol == "" || valueCol == "" {
+		return nil
+	}
+	
+	// Extract data (limit to 15 items for readability)
+	maxItems := 15
+	if len(results) < maxItems {
+		maxItems = len(results)
+	}
+	
+	for i := 0; i < maxItems; i++ {
+		row := results[i]
+		
+		// Get label
+		if lbl, ok := row[labelCol].(string); ok {
+			labels = append(labels, lbl)
+		} else {
+			labels = append(labels, fmt.Sprintf("%v", row[labelCol]))
+		}
+		
+		// Get value
+		switch v := row[valueCol].(type) {
+		case float64:
+			values = append(values, v)
+		case int64:
+			values = append(values, float64(v))
+		default:
+			values = append(values, 0)
+		}
+	}
+	
+	if len(labels) == 0 || len(values) == 0 {
+		return nil
+	}
+	
+	// Determine chart type based on data
+	chartType := "brush-bar"
+	if len(labels) <= 6 {
+		chartType = "rose-pie" // Use pie for small datasets
+	}
+	
+	// Build chart title
+	title := "📊 Query Results"
+	queryLower := strings.ToLower(query)
+	if strings.Contains(queryLower, "stage") || strings.Contains(queryLower, "extraction") {
+		title = "📊 Groundwater Extraction Analysis"
+	} else if strings.Contains(queryLower, "block") {
+		title = "📊 Block-wise Data"
+	} else if strings.Contains(queryLower, "district") {
+		title = "📊 District-wise Data"
+	} else if strings.Contains(queryLower, "state") {
+		title = "📊 State-wise Data"
+	}
+	
+	// Format value column name for display
+	valueName := strings.ReplaceAll(valueCol, "_", " ")
+	valueName = strings.Title(valueName)
+	
+	return &models.ChartPayload{
+		Type:  chartType,
+		Title: title,
+		XAxis: labels,
+		Series: []models.ChartSeries{
+			{
+				Name: valueName,
+				Data: values,
+			},
+		},
+	}
+}
+
+// getFallbackSQL returns a predefined SQL template based on query patterns
+// Used as fallback when Qwen-generated SQL fails
+func (s *ChatService) getFallbackSQL(message string) string {
+	msgLower := strings.ToLower(message)
+	
+	// Pattern 1: "A vs B" or "Compare A and B" - State comparison
+	if strings.Contains(msgLower, " vs ") || strings.Contains(msgLower, "compare") {
+		// Extract state names
+		var state1, state2 string
+		
+		if strings.Contains(msgLower, " vs ") {
+			parts := strings.Split(msgLower, " vs ")
+			if len(parts) >= 2 {
+				state1 = strings.TrimSpace(parts[0])
+				state2 = strings.TrimSpace(parts[1])
+				// Clean up common prefixes
+				state1 = strings.TrimPrefix(state1, "compare ")
+				state1 = strings.TrimPrefix(state1, "show ")
+			}
+		} else if strings.Contains(msgLower, " and ") {
+			// "Compare A and B"
+			msgClean := strings.ReplaceAll(msgLower, "compare ", "")
+			msgClean = strings.ReplaceAll(msgClean, "show ", "")
+			parts := strings.Split(msgClean, " and ")
+			if len(parts) >= 2 {
+				state1 = strings.TrimSpace(parts[0])
+				state2 = strings.TrimSpace(parts[1])
+			}
+		}
+		
+		if state1 != "" && state2 != "" {
+			fmt.Printf("├─ 📋 Using comparison template: %s vs %s\n", state1, state2)
+			// Use separate LIKE conditions for each state to handle multi-word names
+			return fmt.Sprintf(`
+				SELECT s.state_name,
+				       COUNT(*) as total_blocks,
+				       ROUND(AVG(CASE WHEN a.stage > 0 THEN a.stage END)::numeric, 2) as "avg_stage(%%)",
+				       ROUND(SUM(a.total_extractable)::numeric, 2) as "extractable(ham)",
+				       ROUND(SUM(a.total_extraction)::numeric, 2) as "extraction(ham)",
+				       SUM(CASE WHEN a.category = 'safe' THEN 1 ELSE 0 END) as safe_blocks,
+				       SUM(CASE WHEN a.category = 'over_exploited' THEN 1 ELSE 0 END) as overexploited_blocks
+				FROM assessments_summary a
+				JOIN blocks b ON a.block_uuid = b.block_uuid
+				JOIN states s ON b.state_uuid = s.state_uuid
+				WHERE (UPPER(REPLACE(s.state_name, ' ', '')) LIKE UPPER('%%' || REPLACE('%s', ' ', '') || '%%')
+				       OR UPPER(REPLACE(s.state_name, ' ', '')) LIKE UPPER('%%' || REPLACE('%s', ' ', '') || '%%'))
+				AND a.year = '2024-2025'
+				GROUP BY s.state_name
+				ORDER BY s.state_name
+			`, state1, state2)
+		}
+	}
+	
+	// Pattern 2: "Status of X" or "Data for X" - State/District summary
+	if strings.Contains(msgLower, "status") || strings.Contains(msgLower, "data for") || strings.Contains(msgLower, "show") {
+		// Extract location
+		location := ""
+		for _, trigger := range []string{"status of ", "data for ", "show ", "for "} {
+			if idx := strings.Index(msgLower, trigger); idx >= 0 {
+				location = strings.TrimSpace(msgLower[idx+len(trigger):])
+				// Clean up
+				location = strings.TrimSuffix(location, " state")
+				location = strings.TrimSuffix(location, " district")
+				break
+			}
+		}
+		
+		if location != "" && len(location) > 2 {
+			fmt.Printf("├─ 📋 Using summary template for: %s\n", location)
+			return fmt.Sprintf(`
+				SELECT s.state_name,
+				       COUNT(*) as total_blocks,
+				       ROUND(AVG(CASE WHEN a.stage > 0 THEN a.stage END)::numeric, 2) as "avg_stage(%%)",
+				       ROUND(SUM(a.total_extractable)::numeric, 2) as "extractable(ham)",
+				       ROUND(SUM(a.total_extraction)::numeric, 2) as "extraction(ham)",
+				       SUM(CASE WHEN a.category = 'safe' THEN 1 ELSE 0 END) as safe,
+				       SUM(CASE WHEN a.category = 'critical' THEN 1 ELSE 0 END) as critical,
+				       SUM(CASE WHEN a.category = 'over_exploited' THEN 1 ELSE 0 END) as over_exploited
+				FROM assessments_summary a
+				JOIN blocks b ON a.block_uuid = b.block_uuid
+				JOIN states s ON b.state_uuid = s.state_uuid
+				WHERE UPPER(REPLACE(s.state_name, ' ', '')) LIKE UPPER('%%' || REPLACE('%s', ' ', '') || '%%')
+				AND a.year = '2024-2025'
+				GROUP BY s.state_name
+			`, location)
+		}
+	}
+	
+	// Pattern 3: "Blocks in X" - List blocks
+	if strings.Contains(msgLower, "blocks in") || strings.Contains(msgLower, "blocks of") {
+		location := ""
+		for _, trigger := range []string{"blocks in ", "blocks of "} {
+			if idx := strings.Index(msgLower, trigger); idx >= 0 {
+				location = strings.TrimSpace(msgLower[idx+len(trigger):])
+				break
+			}
+		}
+		
+		if location != "" && len(location) > 2 {
+			fmt.Printf("├─ 📋 Using blocks template for: %s\n", location)
+			return fmt.Sprintf(`
+				SELECT b.block_name, d.district_name, s.state_name,
+				       ROUND(a.stage::numeric, 2) as "stage(%%)", 
+				       a.category,
+				       ROUND(a.total_extractable::numeric, 2) as "extractable(ham)",
+				       ROUND(a.total_extraction::numeric, 2) as "extraction(ham)"
+				FROM assessments_summary a
+				JOIN blocks b ON a.block_uuid = b.block_uuid
+				JOIN districts d ON b.district_uuid = d.district_uuid
+				JOIN states s ON b.state_uuid = s.state_uuid
+				WHERE (UPPER(REPLACE(s.state_name, ' ', '')) LIKE UPPER('%%' || REPLACE('%s', ' ', '') || '%%')
+				       OR LOWER(d.district_name) LIKE LOWER('%%%s%%'))
+				AND a.year = '2024-2025'
+				ORDER BY a.stage DESC
+				LIMIT 30
+			`, location, location)
+		}
+	}
+	
+	// Pattern 4: "Districts in X" - List districts
+	if strings.Contains(msgLower, "districts in") || strings.Contains(msgLower, "districts of") {
+		location := ""
+		for _, trigger := range []string{"districts in ", "districts of "} {
+			if idx := strings.Index(msgLower, trigger); idx >= 0 {
+				location = strings.TrimSpace(msgLower[idx+len(trigger):])
+				break
+			}
+		}
+		
+		if location != "" && len(location) > 2 {
+			fmt.Printf("├─ 📋 Using districts template for: %s\n", location)
+			return fmt.Sprintf(`
+				SELECT d.district_name, s.state_name,
+				       COUNT(*) as total_blocks,
+				       ROUND(AVG(CASE WHEN a.stage > 0 THEN a.stage END)::numeric, 2) as "avg_stage(%%)",
+				       ROUND(SUM(a.total_extraction)::numeric, 2) as "extraction(ham)"
+				FROM assessments_summary a
+				JOIN blocks b ON a.block_uuid = b.block_uuid
+				JOIN districts d ON b.district_uuid = d.district_uuid
+				JOIN states s ON b.state_uuid = s.state_uuid
+				WHERE UPPER(REPLACE(s.state_name, ' ', '')) LIKE UPPER('%%' || REPLACE('%s', ' ', '') || '%%')
+				AND a.year = '2024-2025'
+				GROUP BY d.district_name, s.state_name
+				ORDER BY "avg_stage(%%)" DESC
+			`, location)
+		}
+	}
+	
+	// No matching pattern
+	return ""
+}
+
+// formatNumberWithCommas formats a float64 with comma separators (Indian style: 9,30,116.00)
+func formatNumberWithCommas(n float64) string {
+	// Format with 2 decimal places first
+	str := fmt.Sprintf("%.2f", n)
+	
+	// Split integer and decimal parts
+	parts := strings.Split(str, ".")
+	intPart := parts[0]
+	decPart := parts[1]
+	
+	// Add comma separators to integer part (Indian numbering: 12,34,567)
+	var result strings.Builder
+	length := len(intPart)
+	
+	// Handle negative numbers
+	startIdx := 0
+	if intPart[0] == '-' {
+		result.WriteByte('-')
+		startIdx = 1
+		length--
+	}
+	
+	for i := startIdx; i < len(intPart); i++ {
+		pos := len(intPart) - i
+		// Indian format: first comma after 3 digits, then every 2 digits
+		if i > startIdx {
+			if pos == 3 || (pos > 3 && (pos-3)%2 == 0) {
+				result.WriteByte(',')
+			}
+		}
+		result.WriteByte(intPart[i])
+	}
+	
+	return result.String() + "." + decPart
+}
+
+// formatResultsAsTable formats query results as markdown table
+func (s *ChatService) formatResultsAsTable(results []map[string]interface{}, query string) string {
+	if len(results) == 0 {
+		return "No results found."
+	}
+	
+	var builder strings.Builder
+	builder.WriteString(fmt.Sprintf("📊 **Query Results** (%d rows)\n\n", len(results)))
+	
+	// Get column headers from first row
+	headers := make([]string, 0)
+	for key := range results[0] {
+		headers = append(headers, key)
+	}
+	
+	// Sort headers for consistent ordering (put common ones first)
+	priorityOrder := []string{"state_name", "district_name", "block_name", "year", "category", "stage", "total_extraction", "total_extractable", "rainfall", "total_recharge"}
+	sortedHeaders := make([]string, 0)
+	
+	for _, p := range priorityOrder {
+		for _, h := range headers {
+			if h == p {
+				sortedHeaders = append(sortedHeaders, h)
+				break
+			}
+		}
+	}
+	// Add remaining headers
+	for _, h := range headers {
+		found := false
+		for _, s := range sortedHeaders {
+			if s == h {
+				found = true
+				break
+			}
+		}
+		if !found {
+			sortedHeaders = append(sortedHeaders, h)
+		}
+	}
+	headers = sortedHeaders
+	
+	// Limit columns for readability (max 7)
+	if len(headers) > 7 {
+		headers = headers[:7]
+	}
+	
+	// Build table header
+	builder.WriteString("| ")
+	for _, h := range headers {
+		displayName := strings.ReplaceAll(h, "_", " ")
+		displayName = strings.Title(displayName)
+		builder.WriteString(fmt.Sprintf("%s | ", displayName))
+	}
+	builder.WriteString("\n|")
+	for range headers {
+		builder.WriteString("---|")
+	}
+	builder.WriteString("\n")
+	
+	// Build table rows (limit to 20 rows for readability)
+	maxRows := 20
+	if len(results) < maxRows {
+		maxRows = len(results)
+	}
+	
+	for i := 0; i < maxRows; i++ {
+		row := results[i]
+		builder.WriteString("| ")
+		for _, h := range headers {
+			val := row[h]
+			valStr := ""
+			switch v := val.(type) {
+			case float64:
+				// Always format with 2 decimal places and add comma separators
+				valStr = formatNumberWithCommas(v)
+			case int64:
+				valStr = formatNumberWithCommas(float64(v))
+			case string:
+				valStr = v
+			case nil:
+				valStr = "-"
+			default:
+				valStr = fmt.Sprintf("%v", v)
+			}
+			// Truncate long values
+			if len(valStr) > 25 {
+				valStr = valStr[:22] + "..."
+			}
+			builder.WriteString(fmt.Sprintf("%s | ", valStr))
+		}
+		builder.WriteString("\n")
+	}
+	
+	if len(results) > 20 {
+		builder.WriteString(fmt.Sprintf("\n*...and %d more rows*\n", len(results)-20))
+	}
+	
+	return builder.String()
+}
+
 // Helper struct to parse LLM visualization JSON
 type visualizationPayload struct {
 	Type        string      `json:"type"`
@@ -141,6 +812,17 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 		return &models.ChatResponse{
 			Text: "Please enter a question about groundwater data.",
 		}, nil
+	}
+
+	// Block specific location queries (e.g., Delhi)
+	msgLowerCheck := strings.ToLower(strings.TrimSpace(message))
+	blockedLocations := []string{"delhi", "new delhi"}
+	for _, blocked := range blockedLocations {
+		if msgLowerCheck == blocked || strings.HasPrefix(msgLowerCheck, blocked+" ") || strings.HasSuffix(msgLowerCheck, " "+blocked) {
+			return &models.ChatResponse{
+				Text: "I cannot provide data for this location. Please try another state or district.",
+			}, nil
+		}
 	}
 
 	fmt.Println("\n" + strings.Repeat("=", 80))

@@ -116,9 +116,10 @@ type ComparisonData struct {
 }
 
 type ChartSeries struct {
-	Name string    `json:"name"`
-	Data []float64 `json:"data"`
-	Type string    `json:"type,omitempty"` // Override type per series
+	Name    string        `json:"name"`
+	Data    []float64     `json:"data,omitempty"`
+	DataAny []interface{} `json:"dataAny,omitempty"` // For styled data items with itemStyle
+	Type    string        `json:"type,omitempty"`    // Override type per series
 }
 
 type PieDatum struct {

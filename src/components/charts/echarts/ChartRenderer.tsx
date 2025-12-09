@@ -18,6 +18,7 @@ type AnyData = any;
 interface SeriesData {
   name: string;
   data: number[] | { name: string; value: number }[];
+  dataAny?: AnyData[]; // For styled data items with itemStyle
   stack?: string;
   type?: string;
 }
@@ -101,7 +102,7 @@ const convertSeriesToPieData = (
   series: SeriesData[],
   xAxis: { data: string[] }
 ) => {
-  if (!series[0]?.data || !xAxis.data) return [];
+  if (!series || !series[0]?.data || !xAxis.data) return [];
   return xAxis.data.map((name, idx) => ({
     name,
     value:
@@ -204,9 +205,13 @@ const ChartRenderer: React.FC<ChartRendererProps> = ({
         return createLargeAreaChart(title, series, xAxis);
 
       default:
-        // Smart default based on data
-        if (series.length === 1 && xAxis.data.length <= 5) {
+        // Smart default based on data (with null checks)
+        if (series && series.length === 1 && xAxis.data.length <= 5) {
           return createBrushBarChart(title, series, xAxis);
+        }
+        // If no series data, return a simple placeholder
+        if (!series || series.length === 0) {
+          return createBrushBarChart(title, [], xAxis);
         }
         return createGradientAreaChart(title, series, xAxis);
     }
@@ -583,21 +588,14 @@ const createRosePieChart = (
         fontSize: 14,
       },
       formatter: (params: AnyData) => {
-        const rank = params.dataIndex + 1;
         return `<div style="padding: 8px;">
-                  <div style="font-weight: 700; font-size: 16px; margin-bottom: 8px; color: #667eea;">🏆 Rank #${rank}</div>
-                  <div style="font-weight: 600; margin-bottom: 6px; font-size: 14px;">${
+                  <div style="font-weight: 700; font-size: 16px; margin-bottom: 8px; color: #667eea;">📍 ${
                     params.name
                   }</div>
                   <div style="display: flex; align-items: center; gap: 8px;">
                     <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);"></span>
-                    <span style="font-size: 15px;">Value: <strong style="color: #43e97b;">${params.value.toFixed(
-                      2
-                    )}</strong></span>
+                    <span style="font-size: 15px;">🏘️ Blocks: <strong style="color: #43e97b;">${Math.round(params.value)}</strong></span>
                   </div>
-                  <div style="margin-top: 4px; font-size: 12px; color: #94a3b8;">Share: ${params.percent.toFixed(
-                    1
-                  )}%</div>
                 </div>`;
       },
     },
@@ -625,10 +623,9 @@ const createRosePieChart = (
           textShadowColor: "rgba(0, 0, 0, 0.8)",
           textShadowBlur: 4,
           formatter: (params: AnyData) => {
-            const rank = params.dataIndex + 1;
             // Show top 8 labels to avoid clutter
-            if (rank <= 8) {
-              return `#${rank}\n${params.value.toFixed(1)}`;
+            if (params.dataIndex < 8) {
+              return `${params.name}\n${Math.round(params.value)} blocks`;
             }
             return "";
           },
@@ -975,40 +972,52 @@ const createBrushBarChart = (
       top: 80,
       containLabel: true,
     },
-    series: series.map((s, idx) => ({
-      name: s.name,
-      type: s.type || "bar",
-      stack: s.stack || (idx < 2 ? "one" : "two"),
-      emphasis: emphasisStyle,
-      data: s.data,
-      smooth: s.type === "line",
-      lineStyle:
-        s.type === "line"
-          ? {
-              width: 3,
-              shadowColor: barGradients[idx % 5][0].color,
-              shadowBlur: 10,
-            }
-          : undefined,
-      itemStyle: {
-        color: new echarts.graphic.LinearGradient(
-          0,
-          0,
-          0,
-          1,
-          barGradients[idx % 5]
-        ),
-        borderRadius: [8, 8, 0, 0],
-        borderColor: "rgba(255, 255, 255, 0.2)",
-        borderWidth: 2,
-        shadowBlur: 15,
-        shadowColor: "rgba(0, 0, 0, 0.3)",
-        shadowOffsetY: 3,
-      },
-      animationType: "scale",
-      animationEasing: "elasticOut",
-      animationDelay: (idx: number) => idx * 30,
-    })),
+    series: series.map((s, idx) => {
+      // Use dataAny if present (has individual item colors), otherwise use gradient
+      const hasStyledData = s.dataAny && s.dataAny.length > 0;
+      
+      return {
+        name: s.name,
+        type: s.type || "bar",
+        stack: s.stack || (idx < 2 ? "one" : "two"),
+        emphasis: emphasisStyle,
+        data: hasStyledData ? s.dataAny : s.data,
+        smooth: s.type === "line",
+        lineStyle:
+          s.type === "line"
+            ? {
+                width: 3,
+                shadowColor: barGradients[idx % 5][0].color,
+                shadowBlur: 10,
+              }
+            : undefined,
+        itemStyle: hasStyledData ? {
+          borderRadius: [8, 8, 0, 0],
+          borderColor: "rgba(255, 255, 255, 0.2)",
+          borderWidth: 2,
+          shadowBlur: 15,
+          shadowColor: "rgba(0, 0, 0, 0.3)",
+          shadowOffsetY: 3,
+        } : {
+          color: new echarts.graphic.LinearGradient(
+            0,
+            0,
+            0,
+            1,
+            barGradients[idx % 5]
+          ),
+          borderRadius: [8, 8, 0, 0],
+          borderColor: "rgba(255, 255, 255, 0.2)",
+          borderWidth: 2,
+          shadowBlur: 15,
+          shadowColor: "rgba(0, 0, 0, 0.3)",
+          shadowOffsetY: 3,
+        },
+        animationType: "scale",
+        animationEasing: "elasticOut",
+        animationDelay: (idx: number) => idx * 30,
+      };
+    }),
   };
 };
 

@@ -45,12 +45,11 @@ services:
   #           count: 1
   #           capabilities: [gpu]
 
-  # Redis - PERMANENT CACHE with AOF persistence
-  # Cache survives Docker restarts - data persisted to disk
+  # Redis - Permanent Caching with Persistence (survives restarts!)
   redis:
     image: redis:7-alpine
     container_name: ground-sense-redis
-    command: redis-server --appendonly yes --appendfsync everysec
+    command: redis-server --appendonly yes --appendfsync everysec --save 60 1
     ports:
       - "6379:6379"
     volumes:

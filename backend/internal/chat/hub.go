@@ -54,16 +54,16 @@ func (h *Hub) Run() {
 			// Let's assume for now we want to reply to the sender.
 			// But the `Broadcast` channel loses the sender context.
 			// We need to refactor `readPump` to send the client along with the message, or handle processing in `readPump`.
-			
+
 			// Let's modify the flow:
 			// 1. Client sends message -> readPump
 			// 2. readPump calls ChatService directly? Or sends to Hub?
 			// If we want to keep Hub managing concurrency, we should send a struct {Client, Message} to a channel.
-			
+
 			// However, to keep it simple and compatible with the "Broadcast" name (even if it's a misnomer for a bot),
 			// let's assume we broadcast user messages to everyone (chatroom style) AND bot responses to everyone.
 			// OR, better: The bot replies to the room.
-			
+
 			h.mutex.Lock()
 			for client := range h.Clients {
 				select {
@@ -83,15 +83,15 @@ func (h *Hub) Run() {
 						log.Printf("Error processing message: %v", err)
 						return
 					}
-					
+
 					// Debug: Log if chart is included
 					if response.Chart != nil {
-						log.Printf("DEBUG: Chart included in response - Type: %s, Title: %s, Series count: %d", 
+						log.Printf("DEBUG: Chart included in response - Type: %s, Title: %s, Series count: %d",
 							response.Chart.Type, response.Chart.Title, len(response.Chart.Series))
 					} else {
 						log.Printf("DEBUG: No chart in response")
 					}
-					
+
 					// Wrap response in Message
 					botMsg := models.Message{
 						Username: "Bot",
@@ -99,7 +99,7 @@ func (h *Hub) Run() {
 						Payload:  response,
 						Content:  response.Text, // Fallback text
 					}
-					
+
 					h.Broadcast <- botMsg
 				}(message)
 			}

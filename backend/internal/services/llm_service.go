@@ -78,13 +78,13 @@ func NewLLMService(cfg *config.Config) (*LLMService, error) {
 	// Initialize Ollama client - now required (no Gemini fallback)
 	ollamaClient := NewOllamaClient(cfg.Ollama.BaseURL, cfg.Ollama.Model)
 	ctx := context.Background()
-	
+
 	if !ollamaClient.IsAvailable(ctx) {
 		return nil, fmt.Errorf("Ollama is not available at %s. Please ensure Ollama is running with model: %s", cfg.Ollama.BaseURL, cfg.Ollama.Model)
 	}
-	
+
 	fmt.Printf("🦙 Ollama local LLM enabled (model: %s)\n", cfg.Ollama.Model)
-	
+
 	return &LLMService{
 		ollamaClient:        ollamaClient,
 		conversationHistory: make([]ConversationMessage, 0),
@@ -201,9 +201,9 @@ SQL:`, DOMAIN_KNOWLEDGE, historyContext, schema, userMessage)
 	}
 
 	// Validate dangerous operations are not present
-	if strings.Contains(sqlUpper, "DROP") || strings.Contains(sqlUpper, "DELETE") || 
-	   strings.Contains(sqlUpper, "TRUNCATE") || strings.Contains(sqlUpper, "INSERT") ||
-	   strings.Contains(sqlUpper, "UPDATE") {
+	if strings.Contains(sqlUpper, "DROP") || strings.Contains(sqlUpper, "DELETE") ||
+		strings.Contains(sqlUpper, "TRUNCATE") || strings.Contains(sqlUpper, "INSERT") ||
+		strings.Contains(sqlUpper, "UPDATE") {
 		return "", fmt.Errorf("invalid SQL: contains prohibited operations")
 	}
 
@@ -335,7 +335,7 @@ Generate the visualization JSON now:`, DOMAIN_KNOWLEDGE, userMessage, query, dat
 
 	jsonStr := response
 	fmt.Printf("DEBUG: GenerateVisualization Raw JSON: %s\n", jsonStr)
-	
+
 	// Clean markdown code blocks
 	jsonStr = strings.TrimSpace(jsonStr)
 	if strings.HasPrefix(jsonStr, "```") {
@@ -348,7 +348,7 @@ Generate the visualization JSON now:`, DOMAIN_KNOWLEDGE, userMessage, query, dat
 			jsonStr = jsonStr[:idx]
 		}
 	}
-	
+
 	return strings.TrimSpace(jsonStr), "", nil
 }
 

@@ -24,34 +24,34 @@ func NewOverviewController(ingresService *services.IngresService, logger *logrus
 
 // BlockOverviewData represents the data returned for a block overview
 type BlockOverviewData struct {
-	BlockName            string  `json:"block_name"`
-	DistrictName         string  `json:"district_name"`
-	StateName            string  `json:"state_name"`
-	Year                 string  `json:"year"`
-	Category             string  `json:"category"`
-	Stage                float64 `json:"stage"`
-	Rainfall             float64 `json:"rainfall"`
-	TotalRecharge        float64 `json:"total_recharge"`
-	TotalExtraction      float64 `json:"total_extraction"`
-	TotalExtractable     float64 `json:"total_extractable"`
-	TotalDischarge       float64 `json:"total_discharge"`
-	Availability         float64 `json:"availability"`
+	BlockName        string  `json:"block_name"`
+	DistrictName     string  `json:"district_name"`
+	StateName        string  `json:"state_name"`
+	Year             string  `json:"year"`
+	Category         string  `json:"category"`
+	Stage            float64 `json:"stage"`
+	Rainfall         float64 `json:"rainfall"`
+	TotalRecharge    float64 `json:"total_recharge"`
+	TotalExtraction  float64 `json:"total_extraction"`
+	TotalExtractable float64 `json:"total_extractable"`
+	TotalDischarge   float64 `json:"total_discharge"`
+	Availability     float64 `json:"availability"`
 }
 
 // DistrictOverviewData represents the data returned for a district overview
 type DistrictOverviewData struct {
-	DistrictName          string  `json:"district_name"`
-	StateName             string  `json:"state_name"`
-	Year                  string  `json:"year"`
-	TotalBlocks           int     `json:"total_blocks"`
-	SafeBlocks            int     `json:"safe_blocks"`
-	SemiCriticalBlocks    int     `json:"semi_critical_blocks"`
-	CriticalBlocks        int     `json:"critical_blocks"`
-	OverExploitedBlocks   int     `json:"over_exploited_blocks"`
-	AvgStage              float64 `json:"avg_stage"`
-	TotalRainfall         float64 `json:"total_rainfall"`
-	TotalRecharge         float64 `json:"total_recharge"`
-	TotalExtraction       float64 `json:"total_extraction"`
+	DistrictName        string  `json:"district_name"`
+	StateName           string  `json:"state_name"`
+	Year                string  `json:"year"`
+	TotalBlocks         int     `json:"total_blocks"`
+	SafeBlocks          int     `json:"safe_blocks"`
+	SemiCriticalBlocks  int     `json:"semi_critical_blocks"`
+	CriticalBlocks      int     `json:"critical_blocks"`
+	OverExploitedBlocks int     `json:"over_exploited_blocks"`
+	AvgStage            float64 `json:"avg_stage"`
+	TotalRainfall       float64 `json:"total_rainfall"`
+	TotalRecharge       float64 `json:"total_recharge"`
+	TotalExtraction     float64 `json:"total_extraction"`
 }
 
 // GetBlockOverview handles GET /api/blocks/{blockId}
@@ -60,7 +60,7 @@ func (c *OverviewController) GetBlockOverview(w http.ResponseWriter, r *http.Req
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-	
+
 	if r.Method == "OPTIONS" {
 		w.WriteHeader(http.StatusOK)
 		return
@@ -73,7 +73,7 @@ func (c *OverviewController) GetBlockOverview(w http.ResponseWriter, r *http.Req
 		return
 	}
 	blockUUIDStr := pathParts[3]
-	
+
 	blockUUID, err := uuid.Parse(blockUUIDStr)
 	if err != nil {
 		http.Error(w, "Invalid block UUID", http.StatusBadRequest)
@@ -142,7 +142,7 @@ func (c *OverviewController) GetDistrictOverview(w http.ResponseWriter, r *http.
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-	
+
 	if r.Method == "OPTIONS" {
 		w.WriteHeader(http.StatusOK)
 		return
@@ -155,7 +155,7 @@ func (c *OverviewController) GetDistrictOverview(w http.ResponseWriter, r *http.
 		return
 	}
 	districtUUIDStr := pathParts[3]
-	
+
 	districtUUID, err := uuid.Parse(districtUUIDStr)
 	if err != nil {
 		http.Error(w, "Invalid district UUID", http.StatusBadRequest)

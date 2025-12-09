@@ -20,9 +20,9 @@ type OllamaClient struct {
 
 // OllamaRequest represents a request to the Ollama API
 type OllamaRequest struct {
-	Model  string `json:"model"`
-	Prompt string `json:"prompt"`
-	Stream bool   `json:"stream"`
+	Model   string         `json:"model"`
+	Prompt  string         `json:"prompt"`
+	Stream  bool           `json:"stream"`
 	Options *OllamaOptions `json:"options,omitempty"`
 }
 
@@ -35,13 +35,13 @@ type OllamaOptions struct {
 
 // OllamaResponse represents a response from the Ollama API
 type OllamaResponse struct {
-	Model     string `json:"model"`
-	Response  string `json:"response"`
-	Done      bool   `json:"done"`
-	Context   []int  `json:"context,omitempty"`
-	TotalDuration int64 `json:"total_duration,omitempty"`
-	LoadDuration  int64 `json:"load_duration,omitempty"`
-	EvalCount     int   `json:"eval_count,omitempty"`
+	Model         string `json:"model"`
+	Response      string `json:"response"`
+	Done          bool   `json:"done"`
+	Context       []int  `json:"context,omitempty"`
+	TotalDuration int64  `json:"total_duration,omitempty"`
+	LoadDuration  int64  `json:"load_duration,omitempty"`
+	EvalCount     int    `json:"eval_count,omitempty"`
 }
 
 // NewOllamaClient creates a new Ollama client
@@ -52,7 +52,7 @@ func NewOllamaClient(baseURL, model string) *OllamaClient {
 	if model == "" {
 		model = "sqlcoder:7b" // Default to SQLCoder for text-to-SQL
 	}
-	
+
 	return &OllamaClient{
 		BaseURL: baseURL,
 		Model:   model,

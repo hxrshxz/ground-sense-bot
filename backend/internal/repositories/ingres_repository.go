@@ -347,7 +347,7 @@ func (r *IngresRepository) GetBlocksByNamesSimple(ctx context.Context, names []s
 	if len(names) == 0 {
 		return nil, nil
 	}
-	
+
 	var blocks []models.Block
 	for _, name := range names {
 		// Exact or fuzzy match
@@ -395,7 +395,7 @@ func (r *IngresRepository) GetAssessmentComparison(ctx context.Context, blockUUI
 	if len(blockUUIDs) == 0 {
 		return nil, nil
 	}
-	
+
 	// Fallback implementation using loop to avoid array issues
 	var summaries []models.AssessmentSummary
 	for _, uid := range blockUUIDs {
@@ -456,7 +456,7 @@ func (r *IngresRepository) GetAssessmentByBlockAndYear(ctx context.Context, bloc
 		WHERE block_uuid = $1 AND year = $2
 	`
 	row := r.DB.QueryRowContext(ctx, query, blockUUID, year)
-	
+
 	var a models.AssessmentSummary
 	err := row.Scan(
 		&a.AssessmentID, &a.BlockUUID, &a.Year, &a.Category, &a.Stage, &a.Rainfall,
@@ -468,7 +468,6 @@ func (r *IngresRepository) GetAssessmentByBlockAndYear(ctx context.Context, bloc
 	return &a, nil
 }
 
-
 // ValidateSQL performs hybrid validation on SQL queries
 // Level 1: Security check (block DROP, DELETE, UPDATE, INSERT, TRUNCATE)
 // Level 2: EXPLAIN dry-run (catches column/table typos)
@@ -476,27 +475,27 @@ func (r *IngresRepository) ValidateSQL(ctx context.Context, query string) error 
 	// Level 1: Security Check (Fast - in-memory)
 	upperQuery := strings.ToUpper(query)
 	dangerousKeywords := []string{"DROP", "DELETE", "UPDATE", "INSERT", "TRUNCATE", "ALTER", "CREATE", "GRANT", "REVOKE"}
-	
+
 	for _, keyword := range dangerousKeywords {
 		// Check if keyword appears as a command (not just in a string or column name)
 		if strings.Contains(upperQuery, keyword+" ") || strings.HasPrefix(upperQuery, keyword) {
 			return fmt.Errorf("security violation: %s operations are not allowed", keyword)
 		}
 	}
-	
+
 	// Must start with SELECT or WITH (CTEs are allowed)
 	trimmedQuery := strings.TrimSpace(upperQuery)
 	if !strings.HasPrefix(trimmedQuery, "SELECT") && !strings.HasPrefix(trimmedQuery, "WITH") {
 		return fmt.Errorf("only SELECT and WITH (CTE) queries are allowed")
 	}
-	
+
 	// Level 2: EXPLAIN Validation (Accurate - catches typos like district_uid vs district_uuid)
 	explainQuery := "EXPLAIN " + query
 	_, err := r.DB.ExecContext(ctx, explainQuery)
 	if err != nil {
 		return fmt.Errorf("SQL validation failed: %v", err)
 	}
-	
+
 	return nil
 }
 
@@ -507,7 +506,7 @@ func (r *IngresRepository) RunRawQuery(ctx context.Context, query string) ([]map
 	if err := r.ValidateSQL(ctx, query); err != nil {
 		return nil, fmt.Errorf("query validation failed: %w", err)
 	}
-	
+
 	rows, err := r.DB.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
@@ -537,7 +536,7 @@ func (r *IngresRepository) RunRawQuery(ctx context.Context, query string) ([]map
 		rowMap := make(map[string]interface{})
 		for i, col := range columns {
 			val := values[i]
-			
+
 			// Handle byte arrays (common for strings in some drivers)
 			if b, ok := val.([]byte); ok {
 				rowMap[col] = string(b)
@@ -560,7 +559,7 @@ func (r *IngresRepository) GetBlocksByRainfall(ctx context.Context, threshold fl
 		ORDER BY rainfall
 		LIMIT 50
 	`, operator)
-	
+
 	rows, err := r.DB.QueryContext(ctx, query, year, threshold)
 	if err != nil {
 		return nil, err
@@ -601,7 +600,7 @@ func (r *IngresRepository) GetBlocksByStage(ctx context.Context, threshold float
 		ORDER BY stage DESC
 		LIMIT 50
 	`, operator)
-	
+
 	rows, err := r.DB.QueryContext(ctx, query, year, threshold)
 	if err != nil {
 		return nil, err
@@ -658,7 +657,7 @@ func (r *IngresRepository) GetBlocksByCategoryAndLocation(ctx context.Context, c
 	stateQuery := `SELECT state_uuid FROM states WHERE state_name ILIKE $1 LIMIT 1`
 	var stateUUID uuid.UUID
 	err := r.DB.QueryRowContext(ctx, stateQuery, location).Scan(&stateUUID)
-	
+
 	if err == nil {
 		// Found state, get blocks in that state with category
 		query = `
@@ -675,7 +674,7 @@ func (r *IngresRepository) GetBlocksByCategoryAndLocation(ctx context.Context, c
 		districtQuery := `SELECT district_uuid FROM districts WHERE district_name ILIKE $1 LIMIT 1`
 		var districtUUID uuid.UUID
 		err := r.DB.QueryRowContext(ctx, districtQuery, location).Scan(&districtUUID)
-		
+
 		if err == nil {
 			// Found district
 			query = `
@@ -761,10 +760,10 @@ func (r *IngresRepository) GetStateSummary(ctx context.Context, stateUUID uuid.U
 		WHERE b.state_uuid = $1 AND a.year = $2
 		GROUP BY s.state_name
 	`
-	
+
 	var summary StateSummary
 	summary.Year = year
-	
+
 	err := r.DB.QueryRowContext(ctx, query, stateUUID, year).Scan(
 		&summary.StateName,
 		&summary.TotalBlocks,
@@ -777,14 +776,14 @@ func (r *IngresRepository) GetStateSummary(ctx context.Context, stateUUID uuid.U
 		&summary.CriticalBlocks,
 		&summary.OverExploitedBlocks,
 	)
-	
+
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
 		return nil, err
 	}
-	
+
 	return &summary, nil
 }
 
@@ -841,10 +840,10 @@ func (r *IngresRepository) GetDistrictSummary(ctx context.Context, districtUUID 
 		WHERE b.district_uuid = $1 AND a.year = $2
 		GROUP BY d.district_name, s.state_name
 	`
-	
+
 	var summary DistrictSummary
 	summary.Year = year
-	
+
 	err := r.DB.QueryRowContext(ctx, query, districtUUID, year).Scan(
 		&summary.DistrictName,
 		&summary.StateName,
@@ -858,13 +857,13 @@ func (r *IngresRepository) GetDistrictSummary(ctx context.Context, districtUUID 
 		&summary.CriticalBlocks,
 		&summary.OverExploitedBlocks,
 	)
-	
+
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
 		return nil, err
 	}
-	
+
 	return &summary, nil
 }

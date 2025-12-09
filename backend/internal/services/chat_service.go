@@ -148,11 +148,8 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 	fmt.Printf("💬 Query: \"%s\"\n", message)
 	fmt.Println(strings.Repeat("=", 80))
 	
-	// CHECK FOR GREETING/HELLO - Guide users toward 4 key attributes
-	if isGreeting(message) {
-		fmt.Println("├─ 👋 Detected greeting, returning welcome message")
-		return s.handleWelcome(ctx)
-	}
+	
+	// Note: Greeting detection removed - all queries are processed directly by handlers
 
 
 	// Get or create session

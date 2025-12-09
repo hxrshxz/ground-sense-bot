@@ -145,27 +145,30 @@ SQL GENERATION RULES (MUST FOLLOW EXACTLY)
 5. Default year: WHERE a.year = '2024-2025'
 6. Add LIMIT 50 for list queries
 7. Use ROUND(value::numeric, 2) for decimals
+7. DO NOT round values in SQL - return full precision
 8. For stage averages: AVG(CASE WHEN a.stage > 0 THEN a.stage ELSE NULL END)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 SQL EXAMPLES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Example 1 - "List over-exploited blocks in Punjab":
-SELECT b.block_name, d.district_name, a.stage, a.category
+Example 1 - "List districts in Punjab":
+SELECT d.district_name, s.state_name, COUNT(*) as total_blocks
 FROM assessments_summary a
 JOIN blocks b ON a.block_uuid = b.block_uuid
 JOIN districts d ON b.district_uuid = d.district_uuid
 JOIN states s ON b.state_uuid = s.state_uuid
-WHERE UPPER(s.state_name) = UPPER('punjab')
-AND LOWER(a.category) = 'over_exploited'
+WHERE UPPER(s.state_name) = UPPER('PUNJAB')
 AND a.year = '2024-2025'
-ORDER BY a.stage DESC
+GROUP BY d.district_name, s.state_name
+ORDER BY d.district_name
 LIMIT 50
 
 Example 2 - "Groundwater status of Ludhiana":
-SELECT b.block_name, d.district_name, s.state_name, a.year,
-       a.rainfall, a.total_recharge, a.total_extraction, a.stage, a.category
+SELECT d.district_name,
+       AVG(CASE WHEN a.stage > 0 THEN a.stage END) as avg_stage,
+       SUM(a.total_extractable) as total_extractable,
+       SUM(a.total_extraction) as total_extraction, a.category
 FROM assessments_summary a
 JOIN blocks b ON a.block_uuid = b.block_uuid
 JOIN districts d ON b.district_uuid = d.district_uuid

@@ -516,19 +516,19 @@ func (s *Service) GetUserByEmail(ctx context.Context, email string) (*User, erro
 
 // User represents the user model for database operations
 type User struct {
-	ID             string    `db:"id"`
-	Username       string    `db:"username"`
-	Email          string    `db:"email"`
-	PasswordHash   string    `db:"password_hash"`
-	FirstName      *string   `db:"first_name"`
-	LastName       *string   `db:"last_name"`
-	Phone          *string   `db:"phone"`
-	AvatarURL      *string   `db:"avatar_url"`
-	Role           string    `db:"role"`
-	Status         string    `db:"status"`
-	EmailVerified  bool      `db:"email_verified"`
-	PhoneVerified  bool      `db:"phone_verified"`
-	LastLoginAt    *time.Time `db:"last_login_at"`
-	CreatedAt      time.Time `db:"created_at"`
-	UpdatedAt      time.Time `db:"updated_at"`
+	ID            string     `db:"id"`
+	Username      string     `db:"username"`
+	Email         string     `db:"email"`
+	PasswordHash  string     `db:"password_hash"`
+	FirstName     *string    `db:"first_name"`
+	LastName      *string    `db:"last_name"`
+	Phone         *string    `db:"phone"`
+	AvatarURL     *string    `db:"avatar_url"`
+	Role          string     `db:"role"`
+	Status        string     `db:"status"`
+	EmailVerified bool       `db:"email_verified"`
+	PhoneVerified bool       `db:"phone_verified"`
+	LastLoginAt   *time.Time `db:"last_login_at"`
+	CreatedAt     time.Time  `db:"created_at"`
+	UpdatedAt     time.Time  `db:"updated_at"`
 }

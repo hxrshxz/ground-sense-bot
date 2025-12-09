@@ -468,11 +468,8 @@ const INGRESCommandBar = ({
     () =>
       language === "en-US"
         ? [
-            "Show data for Delhi block...",
             "List all critical blocks...",
             "Compare Amritsar and Ludhiana...",
-            "Why is groundwater declining in Delhi?",
-            "What caused water scarcity in Delhi?",
             "Show rainfall impact on groundwater...",
             "Explain depletion causes in Ludhiana...",
             "Compare groundwater levels of 2020-2024...",

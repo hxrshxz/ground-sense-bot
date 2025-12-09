@@ -12,27 +12,27 @@ type ChatResponse struct {
 
 // ChartPayload defines the structure for ECharts
 type ChartPayload struct {
-	Type        string                 `json:"type"` // e.g., stacked-area, gradient-area, rose-pie, timeline-bar, brush-bar, large-area, metrics-card, trend-card
-	Title       string                 `json:"title"`
-	Explanation string                 `json:"explanation,omitempty"`
-	XAxis       interface{}            `json:"xAxis,omitempty"` // []string or { data: []string }
-	Series      []ChartSeries          `json:"series"`
-	PieData     []PieDatum             `json:"pieData,omitempty"`
-	Timeline    *TimelinePayload       `json:"timeline,omitempty"`
-	TimelineOptions []TimelineOption   `json:"timelineOptions,omitempty"`
-	Options     map[string]interface{} `json:"options,omitempty"` // Extra ECharts options (rarely used)
-	EChartsOption interface{}          `json:"echarts_option,omitempty"` // Ignored by frontend renderer but kept for compatibility
-	MetricsData    *MetricsData    `json:"metricsData,omitempty"`    // For metrics-card type
-	TrendData      *TrendData      `json:"trendData,omitempty"`      // For trend-card type
-	ComparisonData *ComparisonData `json:"comparisonData,omitempty"` // For comparison-card type
-	RiskData       []RiskFactor    `json:"riskData,omitempty"`       // For risk-radar type
-	SectorData     []SectorUsage   `json:"sectorData,omitempty"`     // For sector-stacked-bar type
+	Type            string                 `json:"type"` // e.g., stacked-area, gradient-area, rose-pie, timeline-bar, brush-bar, large-area, metrics-card, trend-card
+	Title           string                 `json:"title"`
+	Explanation     string                 `json:"explanation,omitempty"`
+	XAxis           interface{}            `json:"xAxis,omitempty"` // []string or { data: []string }
+	Series          []ChartSeries          `json:"series"`
+	PieData         []PieDatum             `json:"pieData,omitempty"`
+	Timeline        *TimelinePayload       `json:"timeline,omitempty"`
+	TimelineOptions []TimelineOption       `json:"timelineOptions,omitempty"`
+	Options         map[string]interface{} `json:"options,omitempty"`        // Extra ECharts options (rarely used)
+	EChartsOption   interface{}            `json:"echarts_option,omitempty"` // Ignored by frontend renderer but kept for compatibility
+	MetricsData     *MetricsData           `json:"metricsData,omitempty"`    // For metrics-card type
+	TrendData       *TrendData             `json:"trendData,omitempty"`      // For trend-card type
+	ComparisonData  *ComparisonData        `json:"comparisonData,omitempty"` // For comparison-card type
+	RiskData        []RiskFactor           `json:"riskData,omitempty"`       // For risk-radar type
+	SectorData      []SectorUsage          `json:"sectorData,omitempty"`     // For sector-stacked-bar type
 }
 
 // RiskFactor represents a single dimension in the risk radar
 type RiskFactor struct {
-	Factor string  `json:"factor"`
-	Score  float64 `json:"score"` // 0-100 scale (higher is riskier)
+	Factor   string  `json:"factor"`
+	Score    float64 `json:"score"`              // 0-100 scale (higher is riskier)
 	FullMark float64 `json:"fullMark,omitempty"` // Max value (usually 100)
 }
 
@@ -45,25 +45,25 @@ type SectorUsage struct {
 
 // MetricsData holds groundwater metrics for visualization
 type MetricsData struct {
-	LocationName       string                  `json:"locationName"`
-	LocationType       string                  `json:"locationType"` // "block", "district", "state"
-	Year               string                  `json:"year"`
-	Category           string                  `json:"category"`
-	Rainfall           float64                 `json:"rainfall"`
-	TotalRecharge      float64                 `json:"totalRecharge"`
-	TotalExtraction    float64                 `json:"totalExtraction"`
-	TotalExtractable   float64                 `json:"totalExtractable"`
-	NaturalDischarge   float64                 `json:"naturalDischarge"`
-	Stage              float64                 `json:"stage"`
-	Availability       float64                 `json:"availability,omitempty"`
-	RechargeBreakdown  []BreakdownItem         `json:"rechargeBreakdown,omitempty"`
-	ExtractionBreakdown []BreakdownItem        `json:"extractionBreakdown,omitempty"`
+	LocationName        string          `json:"locationName"`
+	LocationType        string          `json:"locationType"` // "block", "district", "state"
+	Year                string          `json:"year"`
+	Category            string          `json:"category"`
+	Rainfall            float64         `json:"rainfall"`
+	TotalRecharge       float64         `json:"totalRecharge"`
+	TotalExtraction     float64         `json:"totalExtraction"`
+	TotalExtractable    float64         `json:"totalExtractable"`
+	NaturalDischarge    float64         `json:"naturalDischarge"`
+	Stage               float64         `json:"stage"`
+	Availability        float64         `json:"availability,omitempty"`
+	RechargeBreakdown   []BreakdownItem `json:"rechargeBreakdown,omitempty"`
+	ExtractionBreakdown []BreakdownItem `json:"extractionBreakdown,omitempty"`
 	// Aggregated data for district/state
-	TotalBlocks        int                     `json:"totalBlocks,omitempty"`
-	SafeBlocks         int                     `json:"safeBlocks,omitempty"`
-	SemiCriticalBlocks int                     `json:"semiCriticalBlocks,omitempty"`
-	CriticalBlocks     int                     `json:"criticalBlocks,omitempty"`
-	OverExploitedBlocks int                    `json:"overExploitedBlocks,omitempty"`
+	TotalBlocks         int `json:"totalBlocks,omitempty"`
+	SafeBlocks          int `json:"safeBlocks,omitempty"`
+	SemiCriticalBlocks  int `json:"semiCriticalBlocks,omitempty"`
+	CriticalBlocks      int `json:"criticalBlocks,omitempty"`
+	OverExploitedBlocks int `json:"overExploitedBlocks,omitempty"`
 }
 
 // BreakdownItem represents a source and its value
@@ -84,21 +84,21 @@ type TrendDataPoint struct {
 
 // TrendData holds trend analysis data for visualization
 type TrendData struct {
-	LocationName      string           `json:"locationName"`
-	LocationType      string           `json:"locationType"` // "block", "district", "state"
-	StartYear         string           `json:"startYear"`
-	EndYear           string           `json:"endYear"`
-	DataPoints        []TrendDataPoint `json:"dataPoints"`
+	LocationName string           `json:"locationName"`
+	LocationType string           `json:"locationType"` // "block", "district", "state"
+	StartYear    string           `json:"startYear"`
+	EndYear      string           `json:"endYear"`
+	DataPoints   []TrendDataPoint `json:"dataPoints"`
 	// Calculated insights (percentage change from first to last year)
-	RechargeChange    float64          `json:"rechargeChange"`
-	ExtractionChange  float64          `json:"extractionChange"`
-	StageChange       float64          `json:"stageChange"`
-	OverallTrend      string           `json:"overallTrend"` // "improving", "stable", "declining"
+	RechargeChange   float64 `json:"rechargeChange"`
+	ExtractionChange float64 `json:"extractionChange"`
+	StageChange      float64 `json:"stageChange"`
+	OverallTrend     string  `json:"overallTrend"` // "improving", "stable", "declining"
 }
 
 // ComparisonDataPoint represents a single location's data in comparison
 type ComparisonDataPoint struct {
-	Name           string  `json:"name"`           // Location name (frontend expects "name" not "locationName")
+	Name           string  `json:"name"` // Location name (frontend expects "name" not "locationName")
 	Recharge       float64 `json:"recharge"`
 	Extraction     float64 `json:"extraction"`
 	Stage          float64 `json:"stage"`
@@ -110,9 +110,9 @@ type ComparisonDataPoint struct {
 
 // ComparisonData holds comparison data for multiple locations
 type ComparisonData struct {
-	Year           string                 `json:"year"`
-	Locations      []ComparisonDataPoint  `json:"locations"`
-	ComparisonType string                 `json:"comparisonType"` // "state", "district", "block"
+	Year           string                `json:"year"`
+	Locations      []ComparisonDataPoint `json:"locations"`
+	ComparisonType string                `json:"comparisonType"` // "state", "district", "block"
 }
 
 type ChartSeries struct {
@@ -132,8 +132,8 @@ type XAxisDataItem struct {
 type PieDatum struct {
 	Name         string  `json:"name"`
 	Value        float64 `json:"value"`
-	BlockUUID    string  `json:"blockUuid,omitempty"`     // For clickable navigation to block overview
-	DistrictUUID string  `json:"districtUuid,omitempty"`  // For clickable navigation to district overview
+	BlockUUID    string  `json:"blockUuid,omitempty"`    // For clickable navigation to block overview
+	DistrictUUID string  `json:"districtUuid,omitempty"` // For clickable navigation to district overview
 }
 
 type TimelinePayload struct {
@@ -157,21 +157,21 @@ type MapPayload struct {
 
 // FourAttributeData - Focused response structure for mentor's 4 key attributes
 type FourAttributeData struct {
-	LocationName string  `json:"locationName"`
-	LocationType string  `json:"locationType"` // "state", "district", "block"
-	Year         string  `json:"year"`
-	
+	LocationName string `json:"locationName"`
+	LocationType string `json:"locationType"` // "state", "district", "block"
+	Year         string `json:"year"`
+
 	// The 4 Key Attributes (as per mentor feedback)
 	Extractable float64 `json:"extractable"` // Annual Extractable GW Resources (MCM)
 	Extraction  float64 `json:"extraction"`  // Annual GW Extraction (MCM)
 	Stage       float64 `json:"stage"`       // Stage of Extraction (%)
 	Category    string  `json:"category"`    // Categorization
-	
+
 	// Hierarchical navigation
-	ParentName  string `json:"parentName,omitempty"`  // Parent location name
-	ParentType  string `json:"parentType,omitempty"`  // Parent location type
-	ChildCount  int    `json:"childCount,omitempty"`  // Number of child units
-	ChildType   string `json:"childType,omitempty"`   // "districts" or "blocks"
+	ParentName string `json:"parentName,omitempty"` // Parent location name
+	ParentType string `json:"parentType,omitempty"` // Parent location type
+	ChildCount int    `json:"childCount,omitempty"` // Number of child units
+	ChildType  string `json:"childType,omitempty"`  // "districts" or "blocks"
 }
 
 // HierarchyItem - Single item in a list of districts/blocks
@@ -184,10 +184,10 @@ type HierarchyItem struct {
 
 // HierarchyListData - Response for "list districts/blocks" queries
 type HierarchyListData struct {
-	ParentName   string          `json:"parentName"`
-	ParentType   string          `json:"parentType"`
-	Year         string          `json:"year"`
-	Items        []HierarchyItem `json:"items"`
-	TotalCount   int             `json:"totalCount"`
-	DrillDownHint string         `json:"drillDownHint,omitempty"` // e.g., "Show blocks in [district]"
+	ParentName    string          `json:"parentName"`
+	ParentType    string          `json:"parentType"`
+	Year          string          `json:"year"`
+	Items         []HierarchyItem `json:"items"`
+	TotalCount    int             `json:"totalCount"`
+	DrillDownHint string          `json:"drillDownHint,omitempty"` // e.g., "Show blocks in [district]"
 }

@@ -40,12 +40,12 @@ type BlockInfo struct {
 
 // AssessmentData from JSON files
 type AssessmentData struct {
-	Rainfall                          interface{} `json:"rainfall"`
-	StageOfExtraction                 interface{} `json:"stageOfExtraction"`
-	Category                          interface{} `json:"category"`
+	Rainfall                          interface{}  `json:"rainfall"`
+	StageOfExtraction                 interface{}  `json:"stageOfExtraction"`
+	Category                          interface{}  `json:"category"`
 	RechargeData                      RechargeData `json:"rechargeData"`
 	DraftData                         DraftData    `json:"draftData"`
-	CurrentAvailabilityForAllPurposes interface{} `json:"currentAvailabilityForAllPurposes"`
+	CurrentAvailabilityForAllPurposes interface{}  `json:"currentAvailabilityForAllPurposes"`
 }
 
 type RechargeData struct {

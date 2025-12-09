@@ -29,10 +29,10 @@ func (s *IngresService) GetBlocks(ctx context.Context, districtUUID uuid.UUID) (
 }
 
 type BlockAssessment struct {
-	Summary             *models.AssessmentSummary        `json:"summary"`
-	RechargeBreakdown   []models.RechargeBreakdown       `json:"recharge_breakdown"`
-	DischargeBreakdown  []models.DischargeBreakdown      `json:"discharge_breakdown"`
-	ExtractionBreakdown []models.ExtractionBreakdown     `json:"extraction_breakdown"`
+	Summary             *models.AssessmentSummary    `json:"summary"`
+	RechargeBreakdown   []models.RechargeBreakdown   `json:"recharge_breakdown"`
+	DischargeBreakdown  []models.DischargeBreakdown  `json:"discharge_breakdown"`
+	ExtractionBreakdown []models.ExtractionBreakdown `json:"extraction_breakdown"`
 }
 
 func (s *IngresService) GetBlockAssessment(ctx context.Context, blockUUID uuid.UUID, year string) (*BlockAssessment, error) {

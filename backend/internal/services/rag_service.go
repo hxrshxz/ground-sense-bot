@@ -23,22 +23,22 @@ type RAGService struct {
 
 // SearchResult represents a single search result
 type SearchResult struct {
-	AssessmentID      int                    `json:"assessment_id"`
-	BlockUUID         string                 `json:"block_uuid"`
-	BlockName         string                 `json:"block_name"`
-	DistrictName      string                 `json:"district_name"`
-	StateName         string                 `json:"state_name"`
-	Year              string                 `json:"year"`
-	Category          string                 `json:"category"`
-	Stage             float64                `json:"stage"`
-	Rainfall          float64                `json:"rainfall"`
-	TotalRecharge     float64                `json:"total_recharge"`
-	TotalExtraction   float64                `json:"total_extraction"`
-	Availability      *float64               `json:"availability,omitempty"`
+	AssessmentID       int                    `json:"assessment_id"`
+	BlockUUID          string                 `json:"block_uuid"`
+	BlockName          string                 `json:"block_name"`
+	DistrictName       string                 `json:"district_name"`
+	StateName          string                 `json:"state_name"`
+	Year               string                 `json:"year"`
+	Category           string                 `json:"category"`
+	Stage              float64                `json:"stage"`
+	Rainfall           float64                `json:"rainfall"`
+	TotalRecharge      float64                `json:"total_recharge"`
+	TotalExtraction    float64                `json:"total_extraction"`
+	Availability       *float64               `json:"availability,omitempty"`
 	TextRepresentation string                 `json:"text_representation"`
-	Score             float64                `json:"score"`
-	SearchType        string                 `json:"search_type"` // "keyword", "semantic", or "hybrid"
-	RawData           map[string]interface{} `json:"raw_data,omitempty"`
+	Score              float64                `json:"score"`
+	SearchType         string                 `json:"search_type"` // "keyword", "semantic", or "hybrid"
+	RawData            map[string]interface{} `json:"raw_data,omitempty"`
 }
 
 // HybridSearchRequest represents a search query
@@ -85,10 +85,10 @@ type GeminiEmbeddingResponse struct {
 
 // GeminiRerankerRequest for reranking API
 type GeminiRerankerRequest struct {
-	Model     string                  `json:"model"`
-	Query     string                  `json:"query"`
-	Documents []string                `json:"documents"`
-	TopN      int                     `json:"topN,omitempty"`
+	Model     string   `json:"model"`
+	Query     string   `json:"query"`
+	Documents []string `json:"documents"`
+	TopN      int      `json:"topN,omitempty"`
 }
 
 // GeminiRerankerResponse from reranking API
@@ -152,15 +152,15 @@ func (s *RAGService) HybridSearch(ctx context.Context, req HybridSearchRequest) 
 	// Reranking was consuming too many API calls and hitting quota limits
 	// Results are already sorted by relevance from keyword/semantic search
 	/*
-	if len(deduped) > 0 {
-		reranked, err := s.rerankResults(ctx, req.Query, deduped, req.Limit)
-		if err != nil {
-			s.logger.Warnf("Reranking failed, using original order: %v", err)
-		} else {
-			deduped = reranked
-			searchTypes = append(searchTypes, "reranked")
+		if len(deduped) > 0 {
+			reranked, err := s.rerankResults(ctx, req.Query, deduped, req.Limit)
+			if err != nil {
+				s.logger.Warnf("Reranking failed, using original order: %v", err)
+			} else {
+				deduped = reranked
+				searchTypes = append(searchTypes, "reranked")
+			}
 		}
-	}
 	*/
 
 	// Ensure we don't exceed the requested limit

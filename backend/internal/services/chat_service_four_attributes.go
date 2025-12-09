@@ -22,11 +22,11 @@ import (
 // handleStateQuery - Returns 4 key attributes for a state with GroundwaterMetricsCard visualization
 func (s *ChatService) handleStateQuery(ctx context.Context, stateName string, year string) (*models.ChatResponse, error) {
 	r := &models.ChatResponse{Intent: "state_query"}
-	
+
 	if year == "" {
 		year = "2024-2025"
 	}
-	
+
 	// Get state
 	state, err := s.ingres.GetStateByName(ctx, stateName)
 	fmt.Printf("├─ 🔍 DEBUG handleStateQuery: stateName='%s', state=%v, err=%v\n", stateName, state, err)
@@ -35,9 +35,9 @@ func (s *ChatService) handleStateQuery(ctx context.Context, stateName string, ye
 		r.Suggestions = []string{"Punjab groundwater status", "Haryana groundwater", "Show all states"}
 		return r, nil
 	}
-	
+
 	fmt.Printf("├─ ✅ State found: UUID=%s, Name=%s\n", state.StateUUID, state.StateName)
-	
+
 	// COMPREHENSIVE query with category breakdown
 	query := fmt.Sprintf(`
 		WITH block_data AS (
@@ -69,7 +69,7 @@ func (s *ChatService) handleStateQuery(ctx context.Context, stateName string, ye
 			(SELECT cnt FROM category_counts WHERE cat LIKE '%%over%%') as over_exploited_count,
 			(SELECT cat FROM category_counts ORDER BY cnt DESC LIMIT 1) as dominant_category
 	`, state.StateUUID, year, state.StateUUID)
-	
+
 	fmt.Printf("├─ 🗄️ Executing SQL query for state...\n")
 	results, err := s.ingres.repo.RunRawQuery(ctx, query)
 	fmt.Printf("├─ 🔍 DEBUG SQL results: len=%d, err=%v\n", len(results), err)
@@ -77,7 +77,7 @@ func (s *ChatService) handleStateQuery(ctx context.Context, stateName string, ye
 		r.Text = fmt.Sprintf("❌ No data found for %s in %s", state.StateName, year)
 		return r, nil
 	}
-	
+
 	row := results[0]
 	extractable := getFloat(row, "extractable")
 	extraction := getFloat(row, "extraction")
@@ -89,10 +89,10 @@ func (s *ChatService) handleStateQuery(ctx context.Context, stateName string, ye
 	criticalCount := int(getFloat(row, "critical_count"))
 	overExploitedCount := int(getFloat(row, "over_exploited_count"))
 	category := getString(row, "dominant_category")
-	
+
 	categoryDisplay := formatCategory(category)
 	stageStatus := getStageStatus(avgStage)
-	
+
 	// Calculate balance
 	balance := extractable - extraction
 	balanceStatus := "Surplus"
@@ -101,7 +101,7 @@ func (s *ChatService) handleStateQuery(ctx context.Context, stateName string, ye
 		balanceStatus = "Deficit"
 		balanceEmoji = "⚠️"
 	}
-	
+
 	// Build comprehensive response
 	r.Text = fmt.Sprintf(`🏛️ **%s State** - Comprehensive Analysis (%s)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -129,27 +129,27 @@ func (s *ChatService) handleStateQuery(ctx context.Context, stateName string, ye
 		balance, balanceEmoji, balanceStatus,
 		districtCount, blockCount,
 		safeCount, semiCriticalCount, criticalCount, overExploitedCount)
-	
+
 	// Use metrics-card chart type with comprehensive data
 	r.Chart = &models.ChartPayload{
 		Type:  "metrics-card",
 		Title: fmt.Sprintf("%s State - Groundwater Dashboard", state.StateName),
 		MetricsData: &models.MetricsData{
-			LocationName:       state.StateName,
-			LocationType:       "state",
-			Year:               year,
-			TotalExtractable:   extractable,
-			TotalExtraction:    extraction,
-			Stage:              avgStage,
-			Category:           category,
-			TotalBlocks:        blockCount,
-			SafeBlocks:         safeCount,
-			SemiCriticalBlocks: semiCriticalCount,
-			CriticalBlocks:     criticalCount,
+			LocationName:        state.StateName,
+			LocationType:        "state",
+			Year:                year,
+			TotalExtractable:    extractable,
+			TotalExtraction:     extraction,
+			Stage:               avgStage,
+			Category:            category,
+			TotalBlocks:         blockCount,
+			SafeBlocks:          safeCount,
+			SemiCriticalBlocks:  semiCriticalCount,
+			CriticalBlocks:      criticalCount,
 			OverExploitedBlocks: overExploitedCount,
 		},
 	}
-	
+
 	// Context-aware suggestions
 	otherState := "Haryana"
 	if state.StateName == "Haryana" {
@@ -163,48 +163,48 @@ func (s *ChatService) handleStateQuery(ctx context.Context, stateName string, ye
 		fmt.Sprintf("Safe blocks in %s", state.StateName),
 		fmt.Sprintf("%s groundwater trends", otherState),
 	}
-	
+
 	// Set structured data for API consumers
 	r.Data = &models.MetricsData{
-		LocationName:       state.StateName,
-		LocationType:       "state",
-		Year:               year,
-		TotalExtractable:   extractable,
-		TotalExtraction:    extraction,
-		Stage:              avgStage,
-		Category:           category,
-		TotalBlocks:        blockCount,
-		SafeBlocks:         safeCount,
-		SemiCriticalBlocks: semiCriticalCount,
-		CriticalBlocks:     criticalCount,
+		LocationName:        state.StateName,
+		LocationType:        "state",
+		Year:                year,
+		TotalExtractable:    extractable,
+		TotalExtraction:     extraction,
+		Stage:               avgStage,
+		Category:            category,
+		TotalBlocks:         blockCount,
+		SafeBlocks:          safeCount,
+		SemiCriticalBlocks:  semiCriticalCount,
+		CriticalBlocks:      criticalCount,
 		OverExploitedBlocks: overExploitedCount,
 	}
-	
+
 	return r, nil
 }
 
 // handleDistrictQuery - Returns COMPREHENSIVE 4 key attributes for a district with beautiful visualizations
 func (s *ChatService) handleDistrictQuery(ctx context.Context, districtName string, year string) (*models.ChatResponse, error) {
 	r := &models.ChatResponse{Intent: "district_query"}
-	
+
 	if year == "" {
 		year = "2024-2025"
 	}
-	
+
 	// Get district
 	district, err := s.ingres.GetDistrictByName(ctx, districtName)
 	if err != nil || district == nil {
 		r.Text = fmt.Sprintf("❌ District '%s' not found.", districtName)
 		return r, nil
 	}
-	
+
 	// Get state name for context
 	state, _ := s.ingres.repo.GetStateByUUID(ctx, district.StateUUID)
 	stateName := "Unknown"
 	if state != nil {
 		stateName = state.StateName
 	}
-	
+
 	// COMPREHENSIVE QUERY: Get all block data + category counts + aggregates
 	query := fmt.Sprintf(`
 		WITH block_data AS (
@@ -236,13 +236,13 @@ func (s *ChatService) handleDistrictQuery(ctx context.Context, districtName stri
 			(SELECT cnt FROM category_counts WHERE cat = 'over exploited') as over_exploited_count,
 			(SELECT cat FROM category_counts ORDER BY cnt DESC LIMIT 1) as dominant_category
 	`, district.DistrictUUID, year)
-	
+
 	results, err := s.ingres.repo.RunRawQuery(ctx, query)
 	if err != nil || len(results) == 0 {
 		r.Text = fmt.Sprintf("❌ No data found for %s district in %s", district.DistrictName, year)
 		return r, nil
 	}
-	
+
 	row := results[0]
 	extractable := getFloat(row, "extractable")
 	extraction := getFloat(row, "extraction")
@@ -253,10 +253,10 @@ func (s *ChatService) handleDistrictQuery(ctx context.Context, districtName stri
 	criticalCount := int(getFloat(row, "critical_count"))
 	overExploitedCount := int(getFloat(row, "over_exploited_count"))
 	category := getString(row, "dominant_category")
-	
+
 	categoryDisplay := formatCategory(category)
 	stageStatus := getStageStatus(avgStage)
-	
+
 	// Calculate balance
 	balance := extractable - extraction
 	balanceStatus := "Surplus"
@@ -265,7 +265,7 @@ func (s *ChatService) handleDistrictQuery(ctx context.Context, districtName stri
 		balanceStatus = "Deficit"
 		balanceEmoji = "⚠️"
 	}
-	
+
 	// Build COMPREHENSIVE response text
 	r.Text = fmt.Sprintf(`🏢 **%s District** - Comprehensive Analysis (%s)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -299,23 +299,23 @@ func (s *ChatService) handleDistrictQuery(ctx context.Context, districtName stri
 		balance, balanceEmoji, balanceStatus,
 		blockCount, safeCount, semiCriticalCount, criticalCount, overExploitedCount,
 		district.DistrictName, district.DistrictName, stateName)
-	
+
 	// Set structured data with metrics
 	r.Data = &models.MetricsData{
 		LocationName:        district.DistrictName,
 		LocationType:        "district",
-		Year:               year,
-		TotalExtractable:   extractable,
-		TotalExtraction:    extraction,
-		Stage:              avgStage,
-		Category:           category,
-		TotalBlocks:        blockCount,
-		SafeBlocks:         safeCount,
-		SemiCriticalBlocks: semiCriticalCount,
-		CriticalBlocks:     criticalCount,
+		Year:                year,
+		TotalExtractable:    extractable,
+		TotalExtraction:     extraction,
+		Stage:               avgStage,
+		Category:            category,
+		TotalBlocks:         blockCount,
+		SafeBlocks:          safeCount,
+		SemiCriticalBlocks:  semiCriticalCount,
+		CriticalBlocks:      criticalCount,
 		OverExploitedBlocks: overExploitedCount,
 	}
-	
+
 	// Add follow-up suggestions using actual category
 	// Select a different district for comparison (avoid self-comparison)
 	comparisonDistricts := []string{"Amritsar", "Patiala", "Gurdaspur", "Jalandhar", "Bathinda"}
@@ -334,47 +334,47 @@ func (s *ChatService) handleDistrictQuery(ctx context.Context, districtName stri
 		fmt.Sprintf("Critical areas in %s", stateName),
 		fmt.Sprintf("%s district groundwater", otherDistrict),
 	}
-	
+
 	// Use metrics-card for district (same as state) - shows all 4 key attributes properly
 	r.Chart = &models.ChartPayload{
-		Type:    "metrics-card",
-		Title:   fmt.Sprintf("%s District - Groundwater Dashboard", district.DistrictName),
+		Type:  "metrics-card",
+		Title: fmt.Sprintf("%s District - Groundwater Dashboard", district.DistrictName),
 		MetricsData: &models.MetricsData{
 			LocationName:        district.DistrictName,
 			LocationType:        "district",
-			Year:               year,
-			TotalExtractable:   extractable,
-			TotalExtraction:    extraction,
-			Stage:              avgStage,
-			Category:           category,
-			TotalBlocks:        blockCount,
-			SafeBlocks:         safeCount,
-			SemiCriticalBlocks: semiCriticalCount,
-			CriticalBlocks:     criticalCount,
+			Year:                year,
+			TotalExtractable:    extractable,
+			TotalExtraction:     extraction,
+			Stage:               avgStage,
+			Category:            category,
+			TotalBlocks:         blockCount,
+			SafeBlocks:          safeCount,
+			SemiCriticalBlocks:  semiCriticalCount,
+			CriticalBlocks:      criticalCount,
 			OverExploitedBlocks: overExploitedCount,
 		},
 	}
-	
+
 	return r, nil
 }
 
 // handleBlockQuery - Returns 4 key attributes for a single block
 func (s *ChatService) handleBlockQuery(ctx context.Context, blockName string, year string) (*models.ChatResponse, error) {
 	r := &models.ChatResponse{Intent: "block_query"}
-	
+
 	if year == "" {
 		year = "2024-2025"
 	}
-	
+
 	// Try to find block
 	blocks, err := s.ingres.GetBlocksByNames(ctx, []string{blockName})
 	if err != nil || len(blocks) == 0 {
 		r.Text = fmt.Sprintf("❌ Block '%s' not found.", blockName)
 		return r, nil
 	}
-	
+
 	block := blocks[0]
-	
+
 	// Get assessment data
 	query := fmt.Sprintf(`
 		SELECT 
@@ -390,13 +390,13 @@ func (s *ChatService) handleBlockQuery(ctx context.Context, blockName string, ye
 		JOIN states s ON b.state_uuid = s.state_uuid
 		WHERE b.block_uuid = '%s' AND a.year = '%s'
 	`, block.BlockUUID, year)
-	
+
 	results, err := s.ingres.repo.RunRawQuery(ctx, query)
 	if err != nil || len(results) == 0 {
 		r.Text = fmt.Sprintf("❌ No data found for block %s in %s", block.BlockName, year)
 		return r, nil
 	}
-	
+
 	row := results[0]
 	extractable := getFloat(row, "extractable")
 	extraction := getFloat(row, "extraction")
@@ -404,10 +404,10 @@ func (s *ChatService) handleBlockQuery(ctx context.Context, blockName string, ye
 	category := getString(row, "category")
 	districtName := getString(row, "district_name")
 	stateName := getString(row, "state_name")
-	
+
 	categoryDisplay := formatCategory(category)
 	stageStatus := getStageStatus(stage)
-	
+
 	r.Text = fmt.Sprintf(`📍 **%s Block** (%s, %s) - %s
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -422,7 +422,7 @@ func (s *ChatService) handleBlockQuery(ctx context.Context, blockName string, ye
 		block.BlockName, districtName, stateName, year,
 		extractable, extraction, stage, stageStatus, categoryDisplay,
 		stateName, districtName, block.BlockName)
-	
+
 	r.Data = &models.FourAttributeData{
 		LocationName: block.BlockName,
 		LocationType: "block",
@@ -434,7 +434,7 @@ func (s *ChatService) handleBlockQuery(ctx context.Context, blockName string, ye
 		ParentName:   districtName,
 		ParentType:   "district",
 	}
-	
+
 	r.Suggestions = []string{
 		fmt.Sprintf("Show blocks in %s", districtName),
 		fmt.Sprintf("%s district overview", districtName),
@@ -442,24 +442,24 @@ func (s *ChatService) handleBlockQuery(ctx context.Context, blockName string, ye
 		fmt.Sprintf("Critical blocks in %s", districtName),
 		fmt.Sprintf("%s areas in %s", formatCategory(category), districtName),
 	}
-	
+
 	return r, nil
 }
 
 // handleListDistrictsFocused - Lists all districts in a state with 4-attribute summary
 func (s *ChatService) handleListDistrictsFocused(ctx context.Context, stateName string, year string) (*models.ChatResponse, error) {
 	r := &models.ChatResponse{Intent: "list_districts"}
-	
+
 	if year == "" {
 		year = "2024-2025"
 	}
-	
+
 	state, err := s.ingres.GetStateByName(ctx, stateName)
 	if err != nil || state == nil {
 		r.Text = fmt.Sprintf("❌ State '%s' not found.", stateName)
 		return r, nil
 	}
-	
+
 	query := fmt.Sprintf(`
 		SELECT 
 			d.district_name,
@@ -477,54 +477,54 @@ func (s *ChatService) handleListDistrictsFocused(ctx context.Context, stateName 
 		GROUP BY d.district_uuid, d.district_name
 		ORDER BY avg_stage DESC NULLS LAST
 	`, year, state.StateUUID, year)
-	
+
 	results, err := s.ingres.repo.RunRawQuery(ctx, query)
 	if err != nil || len(results) == 0 {
 		r.Text = fmt.Sprintf("❌ No district data found for %s in %s", state.StateName, year)
 		return r, nil
 	}
-	
+
 	// Build response text
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("📋 **Districts in %s** - %s\n", state.StateName, year))
 	sb.WriteString("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n")
 	sb.WriteString("| # | District | Stage | Category | Blocks |\n")
 	sb.WriteString("|---|----------|-------|----------|--------|\n")
-	
+
 	items := make([]models.HierarchyItem, 0, len(results))
 	xAxisData := make([]string, 0, len(results))
 	stageData := make([]float64, 0, len(results))
-	
+
 	for i, row := range results {
 		name := getString(row, "district_name")
 		stage := getFloat(row, "avg_stage")
 		category := getString(row, "dominant_category")
 		extraction := getFloat(row, "total_extraction")
 		blockCount := int(getFloat(row, "block_count"))
-		
+
 		categoryEmoji := getCategoryEmoji(category)
-		
-		sb.WriteString(fmt.Sprintf("| %d | %s | %.1f%% | %s %s | %d |\n", 
+
+		sb.WriteString(fmt.Sprintf("| %d | %s | %.1f%% | %s %s | %d |\n",
 			i+1, name, stage, categoryEmoji, formatCategory(category), blockCount))
-		
+
 		items = append(items, models.HierarchyItem{
 			Name:       name,
 			Stage:      stage,
 			Category:   category,
 			Extraction: extraction,
 		})
-		
+
 		if i < 15 { // Limit chart data
 			xAxisData = append(xAxisData, name)
 			stageData = append(stageData, stage)
 		}
 	}
-	
+
 	sb.WriteString(fmt.Sprintf("\n📍 **Total:** %d districts\n", len(results)))
 	sb.WriteString("\n🔍 **Drill-down:** Type \"Show blocks in [District Name]\" for block-level details")
-	
+
 	r.Text = sb.String()
-	
+
 	r.Data = &models.HierarchyListData{
 		ParentName:    state.StateName,
 		ParentType:    "state",
@@ -533,7 +533,7 @@ func (s *ChatService) handleListDistrictsFocused(ctx context.Context, stateName 
 		TotalCount:    len(items),
 		DrillDownHint: "Show blocks in [District Name]",
 	}
-	
+
 	otherState := "Haryana"
 	if state.StateName == "Haryana" {
 		otherState = "Punjab"
@@ -546,7 +546,7 @@ func (s *ChatService) handleListDistrictsFocused(ctx context.Context, stateName 
 		fmt.Sprintf("%s groundwater trends", otherState),
 		fmt.Sprintf("Compare %s with %s", state.StateName, otherState),
 	}
-	
+
 	// Build bar data with category-based colors
 	barData := make([]map[string]interface{}, 0, len(xAxisData))
 	for i := 0; i < len(xAxisData) && i < 15; i++ {
@@ -558,7 +558,7 @@ func (s *ChatService) handleListDistrictsFocused(ctx context.Context, stateName 
 			},
 		})
 	}
-	
+
 	r.Chart = &models.ChartPayload{
 		Type:  "brush-bar",
 		Title: fmt.Sprintf("%s - District-wise Extraction Stage", state.StateName),
@@ -567,30 +567,30 @@ func (s *ChatService) handleListDistrictsFocused(ctx context.Context, stateName 
 			{Name: "Extraction Stage (%)", DataAny: toInterfaceSlice(barData), Type: "bar"},
 		},
 	}
-	
+
 	return r, nil
 }
 
 // handleListBlocksFocused - Lists all blocks in a district
 func (s *ChatService) handleListBlocksFocused(ctx context.Context, districtName string, year string) (*models.ChatResponse, error) {
 	r := &models.ChatResponse{Intent: "list_blocks"}
-	
+
 	if year == "" {
 		year = "2024-2025"
 	}
-	
+
 	district, err := s.ingres.GetDistrictByName(ctx, districtName)
 	if err != nil || district == nil {
 		r.Text = fmt.Sprintf("❌ District '%s' not found.", districtName)
 		return r, nil
 	}
-	
+
 	state, _ := s.ingres.repo.GetStateByUUID(ctx, district.StateUUID)
 	stateName := ""
 	if state != nil {
 		stateName = state.StateName
 	}
-	
+
 	query := fmt.Sprintf(`
 		SELECT 
 			b.block_name,
@@ -603,41 +603,41 @@ func (s *ChatService) handleListBlocksFocused(ctx context.Context, districtName 
 		WHERE b.district_uuid = '%s' AND a.year = '%s'
 		ORDER BY a.stage DESC NULLS LAST
 	`, district.DistrictUUID, year)
-	
+
 	results, err := s.ingres.repo.RunRawQuery(ctx, query)
 	if err != nil || len(results) == 0 {
 		r.Text = fmt.Sprintf("❌ No block data found for %s district in %s", district.DistrictName, year)
 		return r, nil
 	}
-	
+
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("📋 **Blocks in %s District** (%s) - %s\n", district.DistrictName, stateName, year))
 	sb.WriteString("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n")
 	sb.WriteString("| # | Block | Stage | Category | Extraction |\n")
 	sb.WriteString("|---|-------|-------|----------|------------|\n")
-	
+
 	items := make([]models.HierarchyItem, 0, len(results))
 	xAxisData := make([]string, 0, len(results))
 	barData := make([]map[string]interface{}, 0, len(results))
-	
+
 	for i, row := range results {
 		name := getString(row, "block_name")
 		stage := getFloat(row, "stage")
 		category := getString(row, "category")
 		extraction := getFloat(row, "total_extraction")
-		
+
 		categoryEmoji := getCategoryEmoji(category)
-		
+
 		sb.WriteString(fmt.Sprintf("| %d | %s | %.1f%% | %s %s | %.1f MCM |\n",
 			i+1, name, stage, categoryEmoji, formatCategory(category), extraction))
-		
+
 		items = append(items, models.HierarchyItem{
 			Name:       name,
 			Stage:      stage,
 			Category:   category,
 			Extraction: extraction,
 		})
-		
+
 		if i < 20 {
 			xAxisData = append(xAxisData, name)
 			// Add category-based color for each bar
@@ -650,13 +650,13 @@ func (s *ChatService) handleListBlocksFocused(ctx context.Context, districtName 
 			})
 		}
 	}
-	
+
 	sb.WriteString(fmt.Sprintf("\n📍 **Total:** %d blocks\n", len(results)))
-	sb.WriteString(fmt.Sprintf("\n⬆️ **Navigate up:** \"%s district overview\" or \"%s state overview\"", 
+	sb.WriteString(fmt.Sprintf("\n⬆️ **Navigate up:** \"%s district overview\" or \"%s state overview\"",
 		district.DistrictName, stateName))
-	
+
 	r.Text = sb.String()
-	
+
 	r.Data = &models.HierarchyListData{
 		ParentName: district.DistrictName,
 		ParentType: "district",
@@ -664,7 +664,7 @@ func (s *ChatService) handleListBlocksFocused(ctx context.Context, districtName 
 		Items:      items,
 		TotalCount: len(items),
 	}
-	
+
 	// Select a different district for comparison (avoid self-comparison)
 	comparisonDistricts := []string{"Ludhiana", "Patiala", "Amritsar", "Jalandhar", "Gurdaspur"}
 	otherDistrict := "Ludhiana"
@@ -681,7 +681,7 @@ func (s *ChatService) handleListBlocksFocused(ctx context.Context, districtName 
 		fmt.Sprintf("Critical blocks in %s", district.DistrictName),
 		fmt.Sprintf("Show districts in %s", stateName),
 	}
-	
+
 	r.Chart = &models.ChartPayload{
 		Type:  "brush-bar",
 		Title: fmt.Sprintf("%s District - Block-wise Extraction Stage", district.DistrictName),
@@ -690,18 +690,18 @@ func (s *ChatService) handleListBlocksFocused(ctx context.Context, districtName 
 			{Name: "Extraction Stage (%)", DataAny: toInterfaceSlice(barData), Type: "bar"},
 		},
 	}
-	
+
 	return r, nil
 }
 
 // handleListAllStates - Lists all states with summary
 func (s *ChatService) handleListAllStates(ctx context.Context, year string) (*models.ChatResponse, error) {
 	r := &models.ChatResponse{Intent: "list_states"}
-	
+
 	if year == "" {
 		year = "2024-2025"
 	}
-	
+
 	query := fmt.Sprintf(`
 		SELECT 
 			s.state_name,
@@ -717,45 +717,45 @@ func (s *ChatService) handleListAllStates(ctx context.Context, year string) (*mo
 		GROUP BY s.state_uuid, s.state_name
 		ORDER BY avg_stage DESC NULLS LAST
 	`, year)
-	
+
 	results, err := s.ingres.repo.RunRawQuery(ctx, query)
 	if err != nil || len(results) == 0 {
 		r.Text = "❌ No state data found."
 		return r, nil
 	}
-	
+
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("🗺️ **All States - Groundwater Status** (%s)\n", year))
 	sb.WriteString("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n")
 	sb.WriteString("| # | State | Avg Stage | Districts | Blocks |\n")
 	sb.WriteString("|---|-------|-----------|-----------|--------|\n")
-	
+
 	items := make([]models.HierarchyItem, 0)
-	
+
 	for i, row := range results {
 		name := getString(row, "state_name")
 		stage := getFloat(row, "avg_stage")
 		extraction := getFloat(row, "total_extraction")
 		districtCount := int(getFloat(row, "district_count"))
 		blockCount := int(getFloat(row, "block_count"))
-		
+
 		stageEmoji := getStageEmoji(stage)
-		
+
 		sb.WriteString(fmt.Sprintf("| %d | %s %s | %.1f%% | %d | %d |\n",
 			i+1, stageEmoji, name, stage, districtCount, blockCount))
-		
+
 		items = append(items, models.HierarchyItem{
 			Name:       name,
 			Stage:      stage,
 			Extraction: extraction,
 		})
 	}
-	
+
 	sb.WriteString(fmt.Sprintf("\n📍 **Total:** %d states with data\n", len(results)))
 	sb.WriteString("\n🔍 **Drill-down:** Type \"[State Name] groundwater status\" for detailed view")
-	
+
 	r.Text = sb.String()
-	
+
 	r.Suggestions = []string{
 		fmt.Sprintf("%s groundwater status", items[0].Name),
 		fmt.Sprintf("Show districts in %s", items[0].Name),
@@ -764,7 +764,7 @@ func (s *ChatService) handleListAllStates(ctx context.Context, year string) (*mo
 		fmt.Sprintf("Compare %s with %s", items[0].Name, items[1].Name),
 		fmt.Sprintf("Safe blocks in %s", items[1].Name),
 	}
-	
+
 	return r, nil
 }
 
@@ -853,7 +853,7 @@ func getCategoryColor(category string) string {
 	case "safe":
 		return "#22c55e" // Green
 	case "semi critical", "semi_critical":
-		return "#eab308" // Yellow  
+		return "#eab308" // Yellow
 	case "critical":
 		return "#f97316" // Orange
 	case "over exploited", "over_exploited":
@@ -895,7 +895,7 @@ func sortByStageDesc(items []models.HierarchyItem) {
 // handleWelcome - Returns welcome message with guidance on the 4 key attributes
 func (s *ChatService) handleWelcome(ctx context.Context) (*models.ChatResponse, error) {
 	r := &models.ChatResponse{Intent: "welcome"}
-	
+
 	r.Text = `👋 **Welcome to India Groundwater Information System!**
 
 I help you explore groundwater data focused on **The 4 Key Attributes:**
@@ -917,7 +917,7 @@ I help you explore groundwater data focused on **The 4 Key Attributes:**
 • "Compare Punjab and Haryana"
 
 💡 I'll guide you through the data at each level!`
-	
+
 	r.Suggestions = []string{
 		"Show all states",
 		"Punjab groundwater status",
@@ -927,14 +927,14 @@ I help you explore groundwater data focused on **The 4 Key Attributes:**
 		"Critical blocks in Punjab",
 		"Ludhiana district overview",
 	}
-	
+
 	return r, nil
 }
 
 // handleUnknownQuery - Guides users to ask about the 4 key attributes
 func (s *ChatService) handleUnknownQuery(ctx context.Context, originalQuery string) (*models.ChatResponse, error) {
 	r := &models.ChatResponse{Intent: "guidance"}
-	
+
 	r.Text = fmt.Sprintf(`🤔 I understand you asked about: "%s"
 
 Let me help you find the right information! I specialize in **The 4 Key Groundwater Attributes:**
@@ -950,7 +950,7 @@ Let me help you find the right information! I specialize in **The 4 Key Groundwa
 • **Block Level:** "Sunam block details"
 
 ⬇️ **Or try these suggestions:**`, originalQuery)
-	
+
 	r.Suggestions = []string{
 		"Show all states",
 		"Punjab groundwater status",
@@ -960,14 +960,14 @@ Let me help you find the right information! I specialize in **The 4 Key Groundwa
 		"Critical blocks in Punjab",
 		"Safe areas in Haryana",
 	}
-	
+
 	return r, nil
 }
 
 // isGreeting checks if the message is a greeting
 func isGreeting(message string) bool {
 	greetings := []string{
-		"hello", "hi", "hey", "greetings", "good morning", 
+		"hello", "hi", "hey", "greetings", "good morning",
 		"good afternoon", "good evening", "namaste", "welcome",
 		"start", "help", "assist", "what can you do",
 	}
@@ -979,4 +979,3 @@ func isGreeting(message string) bool {
 	}
 	return len(msgLower) < 3 // Very short messages are likely greetings
 }
-

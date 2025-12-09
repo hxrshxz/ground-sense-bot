@@ -101,7 +101,28 @@ const ComparisonChart: React.FC<ComparisonChartProps> = ({ data }) => {
     yAxis: {
       type: "category",
       data: data.locations.map((loc) => loc.name),
-      axisLabel: { color: "#F8FAFC", fontSize: 14, fontWeight: "bold", margin: 12 },
+      axisLabel: { 
+        color: "#F8FAFC", 
+        fontSize: 14, 
+        fontWeight: "bold", 
+        margin: 12,
+        // Color code location names by category for blocks
+        formatter: (value: string, index: number) => {
+          const loc = data.locations[index];
+          if (data.comparisonType === "block" && loc) {
+            const colors = getCategoryColors(loc.category);
+            return `{${loc.category}|${value}}`;
+          }
+          return value;
+        },
+        rich: {
+          safe: { color: CATEGORY_COLORS.safe.textOnDark, fontWeight: "bold" },
+          semi_critical: { color: CATEGORY_COLORS.semiCritical.textOnDark, fontWeight: "bold" },
+          critical: { color: CATEGORY_COLORS.critical.textOnDark, fontWeight: "bold" },
+          over_exploited: { color: CATEGORY_COLORS.overExploited.textOnDark, fontWeight: "bold" },
+          unknown: { color: CATEGORY_COLORS.unknown.textOnDark, fontWeight: "bold" },
+        },
+      },
       axisLine: { lineStyle: { color: "#F8FAFC", width: 2 } },
       axisTick: { show: false },
     },

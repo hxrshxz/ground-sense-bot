@@ -15,7 +15,7 @@
 - **Data Points:** 238,000+ rows covering 2022-2025
 - **Response Time:** 200-400ms average
 - **Concurrency:** 1000+ goroutines/simultaneous users
-- **AI Models:** SQLCoder:7b (Local Ollama) + Gemini 2.5 Flash (Fallback)
+- **AI Models:** SQLCoder:7b (Local Ollama) for SQL generation
 
 ---
 
@@ -231,7 +231,7 @@ backend/
 │   ├── services/
 │   │   ├── chat_service.go            # 3210 lines - MAIN ORCHESTRATOR
 │   │   ├── nlp_service.go             # 1304 lines - Intent detection
-│   │   ├── llm_service.go             # 521 lines - Ollama/Gemini
+│   │   ├── llm_service.go             # 521 lines - Ollama SQL generation
 │   │   ├── ingres_service.go          # INGRES API client
 │   │   ├── ollama_client.go           # Ollama wrapper
 │   │   ├── rag_service.go             # RAG pipeline
@@ -572,7 +572,7 @@ src/
 │   └── use-mobile.tsx                   # Mobile detection
 ├── services/
 │   ├── aiResponseService.ts             # AI integration
-│   ├── geminiApi.ts                     # Gemini API calls
+│   ├── websocketApi.ts                  # WebSocket connections
 │   ├── mapAutomationService.ts          # Map automation
 │   ├── mapAutomationClient.ts           # WebSocket client
 │   └── mockMapData.ts                   # Test data

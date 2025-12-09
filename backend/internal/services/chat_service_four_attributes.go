@@ -225,9 +225,9 @@ func (s *ChatService) handleDistrictQuery(ctx context.Context, districtName stri
 			(SELECT ROUND(AVG(CASE WHEN stage > 0 AND stage < 1000 THEN stage ELSE NULL END)::numeric, 1) FROM block_data) as avg_stage,
 			(SELECT COUNT(*) FROM block_data) as block_count,
 			(SELECT cnt FROM category_counts WHERE cat = 'safe') as safe_count,
-			(SELECT cnt FROM category_counts WHERE cat = 'semi_critical') as semi_critical_count,
+			(SELECT cnt FROM category_counts WHERE cat = 'semi critical') as semi_critical_count,
 			(SELECT cnt FROM category_counts WHERE cat = 'critical') as critical_count,
-			(SELECT cnt FROM category_counts WHERE cat = 'over_exploited') as over_exploited_count,
+			(SELECT cnt FROM category_counts WHERE cat = 'over exploited') as over_exploited_count,
 			(SELECT cat FROM category_counts ORDER BY cnt DESC LIMIT 1) as dominant_category
 	`, district.DistrictUUID, year)
 	
@@ -314,29 +314,14 @@ func (s *ChatService) handleDistrictQuery(ctx context.Context, districtName stri
 	r.Suggestions = []string{
 		fmt.Sprintf("Show blocks in %s", district.DistrictName),
 		fmt.Sprintf("Critical blocks in %s", district.DistrictName),
-		fmt.Sprintf("Compare %s with other districts", district.DistrictName),
+		fmt.Sprintf("Compare %s with Ludhiana and Patiala", district.DistrictName),
 		fmt.Sprintf("%s state overview", stateName),
 	}
 	
-	// Create BEAUTIFUL PIE CHART showing category distribution
-	pieData := []models.PieDatum{}
-	if safeCount > 0 {
-		pieData = append(pieData, models.PieDatum{Name: "🟢 Safe", Value: float64(safeCount)})
-	}
-	if semiCriticalCount > 0 {
-		pieData = append(pieData, models.PieDatum{Name: "🟡 Semi-Critical", Value: float64(semiCriticalCount)})
-	}
-	if criticalCount > 0 {
-		pieData = append(pieData, models.PieDatum{Name: "🟠 Critical", Value: float64(criticalCount)})
-	}
-	if overExploitedCount > 0 {
-		pieData = append(pieData, models.PieDatum{Name: "🔴 Over-Exploited", Value: float64(overExploitedCount)})
-	}
-	
+	// Use metrics-card for district (same as state) - shows all 4 key attributes properly
 	r.Chart = &models.ChartPayload{
-		Type:    "rose-pie",
-		Title:   fmt.Sprintf("%s District - Block Category Distribution", district.DistrictName),
-		PieData: pieData,
+		Type:    "metrics-card",
+		Title:   fmt.Sprintf("%s District - Groundwater Dashboard", district.DistrictName),
 		MetricsData: &models.MetricsData{
 			LocationName:        district.DistrictName,
 			LocationType:        "district",
@@ -534,12 +519,24 @@ func (s *ChatService) handleListDistrictsFocused(ctx context.Context, stateName 
 		fmt.Sprintf("%s groundwater status", state.StateName),
 	}
 	
+	// Build bar data with category-based colors
+	barData := make([]map[string]interface{}, 0, len(xAxisData))
+	for i := 0; i < len(xAxisData) && i < 15; i++ {
+		color := getCategoryColor(items[i].Category)
+		barData = append(barData, map[string]interface{}{
+			"value": stageData[i],
+			"itemStyle": map[string]interface{}{
+				"color": color,
+			},
+		})
+	}
+	
 	r.Chart = &models.ChartPayload{
 		Type:  "brush-bar",
 		Title: fmt.Sprintf("%s - District-wise Extraction Stage", state.StateName),
 		XAxis: map[string]interface{}{"data": xAxisData},
 		Series: []models.ChartSeries{
-			{Name: "Extraction Stage (%)", Data: stageData, Type: "bar"},
+			{Name: "Extraction Stage (%)", DataAny: toInterfaceSlice(barData), Type: "bar"},
 		},
 	}
 	
@@ -781,21 +778,49 @@ func getStageStatus(stage float64) string {
 }
 
 func getCategoryEmoji(category string) string {
-	category = strings.ToLower(category)
+	category = strings.ToLower(strings.TrimSpace(category))
 	switch category {
 	case "safe":
 		return "🟢"
-	case "semi_critical":
+	case "semi critical", "semi_critical":
 		return "🟡"
 	case "critical":
 		return "🟠"
-	case "over_exploited":
+	case "over exploited", "over_exploited":
 		return "🔴"
 	case "salinity":
 		return "🔵"
 	default:
 		return "⚪"
 	}
+}
+
+// getCategoryColor returns hex color based on category level
+func getCategoryColor(category string) string {
+	category = strings.ToLower(strings.TrimSpace(category))
+	switch category {
+	case "safe":
+		return "#22c55e" // Green
+	case "semi critical", "semi_critical":
+		return "#eab308" // Yellow  
+	case "critical":
+		return "#f97316" // Orange
+	case "over exploited", "over_exploited":
+		return "#ef4444" // Red
+	case "salinity":
+		return "#3b82f6" // Blue
+	default:
+		return "#6b7280" // Gray
+	}
+}
+
+// toInterfaceSlice converts map slice to interface slice
+func toInterfaceSlice(data []map[string]interface{}) []interface{} {
+	result := make([]interface{}, len(data))
+	for i, v := range data {
+		result[i] = v
+	}
+	return result
 }
 
 func getStageEmoji(stage float64) string {

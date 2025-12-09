@@ -6,85 +6,101 @@
 
 @layer base {
   :root {
-    /* Light theme - clean slate colors */
-    --background: 210 20% 98%;
-    --foreground: 215 25% 27%;
+    /* Government Theme - Professional & Clean */
+    /* Primary Colors */
+    --gov-primary: #1A4D8F;
+    --gov-primary-dark: #0A355A;
+    
+    /* Neutrals */
+    --gov-bg-light: #F7F9FC;
+    --gov-surface: #FFFFFF;
+    --gov-light-grey: #E6E9EF;
+    --gov-medium-grey: #C8CED8;
+    --gov-dark-grey: #3A3F47;
+    --gov-deep-grey: #1F242B;
+    
+    /* Accents */
+    --gov-green: #3A7F4B;
+    --gov-yellow: #D3A128;
+    --gov-red: #B04040;
+    --gov-blue: #2474C6;
+    
+    /* Tokens */
+    --gov-border: rgba(0, 0, 0, 0.06);
+    --gov-shadow: 0px 2px 6px rgba(0, 0, 0, 0.05);
+
+    /* HSL conversions for shadcn/ui compatibility */
+    --background: 216 33% 97%;
+    --foreground: 216 17% 25%;
 
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 27%;
+    --card-foreground: 216 17% 25%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 27%;
+    --popover-foreground: 216 17% 25%;
 
-    /* INGRES brand colors - professional blue/purple gradient system */
-    --primary: 258 90% 66%;
+    /* Government Primary Blue */
+    --primary: 213 69% 33%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 204 100% 63%;
+    --primary-glow: 210 73% 46%;
 
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 215 25% 27%;
+    --secondary: 216 33% 95%;
+    --secondary-foreground: 216 17% 25%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 20% 50%;
+    --muted: 216 20% 93%;
+    --muted-foreground: 216 10% 45%;
 
-    --accent: 210 40% 94%;
-    --accent-foreground: 215 25% 27%;
+    --accent: 216 25% 94%;
+    --accent-foreground: 216 17% 25%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 61% 47%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 258 90% 66%;
+    --border: 216 20% 91%;
+    --input: 216 20% 91%;
+    --ring: 213 69% 33%;
 
     /* INGRES specific design tokens */
     --ingres-surface: 0 0% 100%;
-    --ingres-surface-elevated: 210 40% 99%;
-    --ingres-backdrop: 210 20% 98%;
+    --ingres-surface-elevated: 216 33% 99%;
+    --ingres-backdrop: 216 33% 97%;
 
-    /* Gradient system for INGRES branding */
+    /* Gradient system - subtle government theme */
     --gradient-primary: linear-gradient(
       135deg,
-      hsl(258 90% 66%),
-      hsl(204 100% 63%)
+      #1A4D8F,
+      #2474C6
     );
     --gradient-surface: linear-gradient(
       180deg,
-      hsl(0 0% 100%),
-      hsl(210 40% 99%)
+      #FFFFFF,
+      #F7F9FC
     );
     --gradient-glow: linear-gradient(
       135deg,
-      hsl(258 90% 66% / 0.1),
-      hsl(204 100% 63% / 0.1)
+      rgba(26, 77, 143, 0.1),
+      rgba(36, 116, 198, 0.1)
     );
 
     /* Shadows for depth */
-    --shadow-soft: 0 2px 8px hsl(215 25% 27% / 0.08);
-    --shadow-elevated: 0 8px 30px hsl(215 25% 27% / 0.12);
-    --shadow-command: 0 12px 40px hsl(258 90% 66% / 0.15);
+    --shadow-soft: 0px 2px 6px rgba(0, 0, 0, 0.05);
+    --shadow-elevated: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-command: 0 4px 16px rgba(26, 77, 143, 0.1);
 
     /* Animation tokens */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --transition-smooth: all 0.2s ease-in-out;
+    --transition-bounce: all 0.3s ease-in-out;
 
-    --radius: 0.5rem;
+    --radius: 0.375rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 216 33% 98%;
+    --sidebar-foreground: 216 17% 25%;
+    --sidebar-primary: 213 69% 33%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 216 25% 96%;
+    --sidebar-accent-foreground: 216 17% 25%;
+    --sidebar-border: 216 20% 91%;
+    --sidebar-ring: 213 69% 33%;
   }
 
   .dark {

@@ -509,13 +509,11 @@ const INGRESCommandBar = ({
     // Otherwise, this will be provided by parent.
   }
   return (
-    <motion.div className="w-full max-w-3xl mx-auto">
+    <motion.div className="w-full max-w-2xl mx-auto">
       <div className="relative">
-        <div className="absolute -inset-1 bg-gradient-to-r from-purple-400 to-sky-400 rounded-3xl blur-lg opacity-30"></div>
-        <div className="relative bg-white/70 backdrop-blur-xl  border border-white/40 rounded-2xl shadow-lg p-4 space-y-4">
-          <div className="flex items-center space-x-4">
+        <div className="relative bg-white border border-[rgba(0,0,0,0.06)] rounded-lg shadow-[0px_2px_6px_rgba(0,0,0,0.05)] p-3">
+          <div className="flex items-center space-x-3">
             <div className="relative w-full flex items-center">
-              <Search className="h-6 w-6 text-slate-500 absolute left-3" />
               <AnimatePresence mode="wait">
                 {!inputValue && !isListening && (
                   <motion.p
@@ -523,7 +521,7 @@ const INGRESCommandBar = ({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="absolute left-12 text-base text-slate-600 pointer-events-none"
+                    className="absolute left-3 text-sm text-[#C8CED8] pointer-events-none"
                   >
                     {currentPlaceholder}
                   </motion.p>
@@ -532,23 +530,23 @@ const INGRESCommandBar = ({
               <Input
                 value={inputValue}
                 onChange={onInputChange}
-                className="w-full bg-transparent border-none text-xl h-auto py-4 pl-12 pr-12 text-slate-900 focus-visible:ring-0"
+                className="w-full bg-transparent border-none text-base h-auto py-2 pl-3 pr-10 text-[#3A3F47] focus-visible:ring-0"
                 onKeyDown={(e) => e.key === "Enter" && onSubmit()}
               />
               {hasSpeechSupport && (
                 <button
                   onClick={onMicClick}
-                  className={`absolute right-3 p-2 rounded-full transition-all duration-200 ${
+                  className={`absolute right-1 p-1.5 rounded transition-all duration-200 ${
                     isListening
-                      ? "bg-green-100 shadow-md"
-                      : "hover:bg-slate-200/60"
+                      ? "bg-[#3A7F4B]/10"
+                      : "hover:bg-[#E6E9EF]"
                   }`}
                 >
                   <Mic
-                    className={`h-6 w-6 ${
+                    className={`h-4 w-4 ${
                       isListening
-                        ? "text-green-600 animate-pulse"
-                        : "text-slate-500"
+                        ? "text-[#3A7F4B] animate-pulse"
+                        : "text-[#C8CED8]"
                     }`}
                   />
                 </button>
@@ -556,63 +554,13 @@ const INGRESCommandBar = ({
             </div>
             <Button
               onClick={onSubmit}
-              className="px-4 py-2 rounded-lg text-white [background:linear-gradient(90deg,#3b82f6_0%,#2563eb_100%)]"
+              className="px-4 py-2 rounded text-sm text-white bg-[#1A4D8F] hover:bg-[#0A355A]"
             >
               Submit
             </Button>
           </div>
 
-          {/* Popular queries suggestion buttons - Dynamic queries that work with backend */}
-          <div className="flex flex-wrap gap-2 justify-center">
-            <Button
-              variant="outline"
-              size="sm"
-              className="bg-white/50 hover:bg-white text-purple-700 border-purple-200"
-              onClick={() => {
-                const query = "Compare Amritsar and Ludhiana";
-                onInputChange({ target: { value: query } } as any);
-                onSubmit();
-              }}
-            >
-              Compare Amritsar & Ludhiana
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="bg-white/50 hover:bg-white text-blue-700 border-blue-200"
-              onClick={() => {
-                const query = "Show trend for Punjab";
-                onInputChange({ target: { value: query } } as any);
-                onSubmit();
-              }}
-            >
-              Trend Analysis
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="bg-white/50 hover:bg-white text-emerald-700 border-emerald-200"
-              onClick={() => {
-                const query = "List all critical blocks in Punjab";
-                onInputChange({ target: { value: query } } as any);
-                onSubmit();
-              }}
-            >
-              Critical Blocks
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="bg-white/50 hover:bg-white text-amber-700 border-amber-200"
-              onClick={() => {
-                const query = "Show map of over-exploited blocks";
-                onInputChange({ target: { value: query } } as any);
-                onSubmit();
-              }}
-            >
-              Groundwater Map
-            </Button>
-          </div>
+
 
           <div className="flex items-center justify-between pl-2 pr-1">
             <div className="flex items-center gap-2">
@@ -674,21 +622,6 @@ const INGRESCommandBar = ({
                 </div>
               </Button>
             </div>
-            <input
-              type="file"
-              ref={fileInputRef}
-              className="hidden"
-              accept="image/*"
-              onChange={onFileSelect}
-            />
-            <Button
-              variant="ghost"
-              className="h-auto px-3 py-1.5 rounded-lg"
-              onClick={() => setIsMapAnalysisOpen(true)}
-            >
-              <Camera className="h-4 w-4 mr-2" />
-              <span>Analyze Map</span>
-            </Button>
           </div>
         </div>
       </div>
@@ -2350,7 +2283,7 @@ Your response should sound like it's coming from a knowledgeable human analyst e
           setIsMapAnalysisOpen={setIsMapAnalysisOpen}
         />
       </div>
-      <motion.div
+      {/* <motion.div
         initial="hidden"
         animate="visible"
         variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
@@ -2367,7 +2300,7 @@ Your response should sound like it's coming from a knowledgeable human analyst e
             <MemoizedStatCard stat={stat} />
           </motion.div>
         ))}
-      </motion.div>
+      </motion.div> */}
     </div>
   );
 

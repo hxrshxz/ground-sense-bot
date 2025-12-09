@@ -169,3 +169,8 @@ func (s *IngresService) GetAssessmentByBlockAndYear(ctx context.Context, blockUU
 func (s *IngresService) GetRepository() *repositories.IngresRepository {
 	return s.repo
 }
+
+// RunRawQuery executes a raw SQL query (for Text-to-SQL pipeline)
+func (s *IngresService) RunRawQuery(ctx context.Context, query string) ([]map[string]interface{}, error) {
+	return s.repo.RunRawQuery(ctx, query)
+}

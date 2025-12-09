@@ -24,7 +24,6 @@ Features included:
 
 Deploy to Vercel:
 1. Connect this repo to Vercel
-2. Set environment variable: VITE_GEMINI_API_KEY
 3. Deploy automatically!
 
 Local testing:
@@ -38,7 +37,5 @@ echo "✅ Deployment setup complete!"
 echo ""
 echo "🚀 Next steps:"
 echo "1. Push to GitHub: git add . && git commit -m 'Deploy ready' && git push"
-echo "2. Connect to Vercel and deploy"
-echo "3. Set VITE_GEMINI_API_KEY in Vercel environment variables"
-echo ""
+echo "2. Connect to Vercel and deploy"echo ""
 echo "🎭 For judges: npm run dev to see the automation demo!"

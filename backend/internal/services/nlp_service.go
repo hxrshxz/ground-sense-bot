@@ -1278,7 +1278,24 @@ func (s *NLPService) extractEntities(msg string) Entities {
 	// Let's try to extract proper nouns from the *original* message if we had it, but we lowercased it.
 	// Let's change ParseMessage signature to take original message? No, let's just use a simple stop-word filter on the lowercased msg.
 	
-	words := strings.Fields(msg)
+	// Known compound state names - match these BEFORE splitting by spaces
+	compoundStates := []string{
+		"uttar pradesh", "himachal pradesh", "madhya pradesh", "andhra pradesh",
+		"arunachal pradesh", "west bengal", "tamil nadu", "jammu and kashmir",
+	}
+	
+	// First, extract any compound state names from the message
+	var foundCompounds []string
+	msgLower := msg
+	for _, compound := range compoundStates {
+		if strings.Contains(msgLower, compound) {
+			foundCompounds = append(foundCompounds, strings.ToUpper(compound))
+			// Remove the compound from message so individual words aren't extracted
+			msgLower = strings.Replace(msgLower, compound, "", -1)
+		}
+	}
+	
+	words := strings.Fields(msgLower)
 	stopWords := map[string]bool{
 		"compare": true, "trend": true, "map": true, "show": true, "what": true, "is": true, "the": true,
 		"of": true, "in": true, "for": true, "and": true, "vs": true, "breakdown": true, "recharge": true,
@@ -1287,14 +1304,18 @@ func (s *NLPService) extractEntities(msg string) Entities {
 		"state": true, "data": true, "give": true, "me": true, "tell": true, "list": true, "all": true, "blocks": true,
 		// New visualization keywords
 		"risk": true, "profile": true, "sector": true, "usage": true, "sustainability": true, "vulnerability": true,
-		"threat": true, "analysis": true, "consumption": true,
+		"threat": true, "analysis": true, "consumption": true, "overview": true,
 	}
 	
 	var potentialLocations []string
+	// Add compound states first
+	potentialLocations = append(potentialLocations, foundCompounds...)
+	
+	// Then add remaining single-word locations
 	for _, w := range words {
 		cleanWord := strings.Trim(w, "?!,.")
-		if !stopWords[cleanWord] && !yearRegex.MatchString(cleanWord) {
-			potentialLocations = append(potentialLocations, cleanWord)
+		if !stopWords[cleanWord] && !yearRegex.MatchString(cleanWord) && len(cleanWord) > 2 {
+			potentialLocations = append(potentialLocations, strings.ToUpper(cleanWord))
 		}
 	}
 	e.Locations = potentialLocations

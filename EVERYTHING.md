@@ -352,11 +352,9 @@ func (s *LLMService) GenerateSQL(ctx context.Context, query string, schema strin
         if err == nil {
             return sql, nil  // ✅ Local LLM succeeded
         }
-        log.Printf("Ollama failed: %v, falling back to Gemini", err)
+        log.Printf("Ollama SQL generation failed: %v", err)
+        return "", err
     }
-
-    // Fallback to Gemini API
-    return s.generateSQLWithGemini(ctx, query, schema)
 }
 ```
 
@@ -679,38 +677,6 @@ response := ollama.GenerateSQL(context.Background(), prompt)
 
 ---
 
-### Remote Model: Gemini 2.5 Flash (Fallback)
-
-**API:** Google Cloud Generative AI  
-**Model:** `gemini-2.5-flash`  
-**Cost:** ~$0.075 per 1M input tokens, $0.30 per 1M output tokens  
-**Latency:** 1-2 seconds (network)  
-**Usage Rate:** <5% (only when Ollama unavailable)
-
-**Advantages:**
-
-- ✅ Text generation (not just SQL)
-- ✅ Better for complex reasoning
-- ✅ Multilingual support
-- ✅ Longer context window
-
-**Configuration:**
-
-```go
-// backend/.env
-GEMINI_API_KEY=AIza...
-GEMINI_API_KEY_2=AIza...
-GEMINI_API_KEY_3=AIza...
-```
-
-**Why Multiple Keys?**
-
-- Rate limiting protection
-- Load balancing
-- Key rotation for security
-
----
-
 ## 📊 DATA COVERAGE
 
 ### Years Available
@@ -779,9 +745,6 @@ OLLAMA_URL=http://host.docker.internal:11434
 OLLAMA_MODEL=sqlcoder:7b
 USE_LOCAL_LLM=true
 
-GEMINI_API_KEY=AIza...
-GEMINI_API_KEY_2=AIza...
-
 REDIS_HOST=localhost
 REDIS_PORT=6379
 
@@ -834,7 +797,7 @@ ECharts renders horizontal bar chart (t=200-250ms)
     ↓
 User sees visualization (t=250ms TOTAL)
 
-💡 TIMELINE: Query → Response in 250ms (local) or 2-3s (dynamic SQL with Gemini)
+💡 TIMELINE: Query → Response in 250ms (local) or 400-800ms (dynamic SQL with Ollama)
 ```
 
 ---
@@ -893,7 +856,7 @@ Expected: Generated SQL → Result
 | Simple Query (Pre-optimized) | 50-150ms       | Compare, Trend, List       |
 | Database Query               | 50-200ms       | Depends on result set size |
 | Dynamic SQL Generation       | 400-800ms      | Ollama local               |
-| Dynamic SQL Fallback         | 1-2s           | Gemini API                 |
+| Dynamic SQL Ollama           | 400-800ms      | Local Ollama SQLCoder      |
 | Chart Rendering              | 50-100ms       | ECharts                    |
 | **Total (Pre-optimized)**    | **200-400ms**  | Most common queries        |
 | **Total (Dynamic SQL)**      | **600-1000ms** | Custom queries             |
@@ -904,7 +867,7 @@ Expected: Generated SQL → Result
 
 ### API Keys
 
-- **Gemini API Keys** rotated automatically (3 fallback keys)
+- **Ollama SQLCoder** for intelligent SQL generation
 - Environment variables stored in `.env` (not in code)
 - Docker secrets for production deployment
 
@@ -938,18 +901,18 @@ Expected: Generated SQL → Result
 
 ## 📁 KEY FILES QUICK REFERENCE
 
-| File                                                | Lines | Purpose                              |
-| --------------------------------------------------- | ----- | ------------------------------------ |
-| `backend/internal/services/chat_service.go`         | 3210  | Main orchestrator & handlers         |
-| `backend/internal/services/nlp_service.go`          | 1304  | Intent detection & entity extraction |
-| `backend/internal/services/llm_service.go`          | 521   | Ollama & Gemini integration          |
-| `src/components/INGRESAssistant.tsx`                | 2585  | Chat UI & message handling           |
-| `src/components/charts/echarts/ChartRenderer.tsx`   | 1595  | Chart type router                    |
-| `src/components/charts/echarts/ComparisonChart.tsx` | 340   | Horizontal bar chart                 |
-| `backend/internal/models/chat.go`                   | -     | Data structures                      |
-| `backend/pkg/websocket/handler.go`                  | -     | WebSocket handler                    |
-| `schema.sql`                                        | 80    | Database schema                      |
-| `src/hooks/useChatWebSocket.ts`                     | -     | WebSocket client                     |
+| File                                                | Lines | Purpose                               |
+| --------------------------------------------------- | ----- | ------------------------------------- |
+| `backend/internal/services/chat_service.go`         | 3210  | Main orchestrator & handlers          |
+| `backend/internal/services/nlp_service.go`          | 1304  | Intent detection & entity extraction  |
+| `backend/internal/services/llm_service.go`          | 521   | Ollama integration for SQL generation |
+| `src/components/INGRESAssistant.tsx`                | 2585  | Chat UI & message handling            |
+| `src/components/charts/echarts/ChartRenderer.tsx`   | 1595  | Chart type router                     |
+| `src/components/charts/echarts/ComparisonChart.tsx` | 340   | Horizontal bar chart                  |
+| `backend/internal/models/chat.go`                   | -     | Data structures                       |
+| `backend/pkg/websocket/handler.go`                  | -     | WebSocket handler                     |
+| `schema.sql`                                        | 80    | Database schema                       |
+| `src/hooks/useChatWebSocket.ts`                     | -     | WebSocket client                      |
 
 ---
 
@@ -989,7 +952,7 @@ Expected: Generated SQL → Result
 - **Database:** PostgreSQL with 5,796 blocks, 238,000 assessment rows
 - **Backend:** Go with 3 main services (Chat, NLP, LLM)
 - **Frontend:** React with ECharts for visualization
-- **LLM:** SQLCoder:7b local (400-800ms) + Gemini fallback
+- **LLM:** SQLCoder:7b local (400-800ms)
 - **Scalability:** Goroutines handle 1000+ concurrent users
 
 ### Closing (30 seconds)
@@ -1007,7 +970,7 @@ A: Local keyword matching in `nlp_service.go` line 500. Free and instant (1ms).
 A: Via PostgreSQL prepared statements. Query building starts at line 2750 in `chat_service.go`.
 
 **Q: What if the user asks an unknown question?**  
-A: We generate SQL dynamically. Ollama SQLCoder at line 725, or fall back to Gemini API (line 350 in llm_service.go).
+A: We generate SQL dynamically using Ollama SQLCoder at line 725 in llm_service.go.
 
 **Q: How fast is your system?**  
 A: 200-400ms for pre-optimized queries, 600-1000ms for dynamic SQL. ProcessMessage() is at line 127 in chat_service.go.

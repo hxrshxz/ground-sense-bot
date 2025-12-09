@@ -45,8 +45,8 @@ Redis could give you **massive performance boost** for:
 ### 4. **LLM Response Caching** (High Impact)
 
 ```go
-// Without Redis: 2-3s for Gemini API call
-"Compare Punjab and Haryana" → Call Gemini every time
+// Without Redis: 400-800ms for Ollama SQL generation
+"Compare Punjab and Haryana" → Call Ollama every time
 
 // With Redis: 50ms for cached response
 Same query → Instant from cache

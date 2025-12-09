@@ -54,10 +54,10 @@ if strings.Contains(queryLower, "critical") && !strings.Contains(queryLower, "se
 - State partial match: +3.0 boost
 - District partial match: +2.0 boost
 
-### 5. **Gemini Reranking** - rag_service.go
+### 5. **Ollama Reranking** - rag_service.go
 
-**Status**: Implemented but requires GEMINI_API_KEY environment variable
-**Function**: `rerankResults()` uses Gemini 2.0 Flash to semantically rerank search results
+**Status**: Implemented but requires OLLAMA_API_KEY environment variable
+**Function**: `rerankResults()` uses Ollama 2.0 Flash to semantically rerank search results
 
 ## Database Validation
 
@@ -144,6 +144,6 @@ bash test_queries.sh
 2. `/backend/internal/services/rag_service.go`
 
    - KeywordSearch() - Added location boosting
-   - rerankResults() - New function for Gemini reranking
+   - rerankResults() - New function for Ollama reranking
 
 3. `/backend/test_queries.sh` - New comprehensive test script

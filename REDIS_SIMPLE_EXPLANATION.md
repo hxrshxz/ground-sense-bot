@@ -7,9 +7,11 @@
 ## 🎯 Simple Answers
 
 ### Q1: Do we need to turn on Docker for Redis to work?
+
 **Answer: YES** ✅
 
 Redis runs inside Docker container. You must start Docker first:
+
 ```bash
 cd backend
 docker-compose up -d redis
@@ -18,7 +20,8 @@ docker-compose up -d redis
 ---
 
 ### Q2: If Docker stops and we start it again, will cache still work?
-**Answer: YES!** ✅ 
+
+**Answer: YES!** ✅
 
 **All cached data is PERMANENT and survives restarts!**
 
@@ -48,6 +51,7 @@ Your Cache Storage:
 ## 🔄 What Happens During Docker Restart
 
 ### Step 1: Docker Stops
+
 ```bash
 docker-compose down
 # OR
@@ -55,6 +59,7 @@ docker stop ground-sense-redis
 ```
 
 **What happens to cache?**
+
 - ✅ All data is saved to disk (redis_data volume)
 - ✅ Container stops, but data stays safe on disk
 - ✅ Nothing is lost!
@@ -62,11 +67,13 @@ docker stop ground-sense-redis
 ---
 
 ### Step 2: Docker Starts Again
+
 ```bash
 docker-compose up -d redis
 ```
 
 **What happens?**
+
 1. Docker starts Redis container
 2. Redis reads `appendonly.aof` from disk
 3. All your cached queries are loaded back into memory
@@ -77,6 +84,7 @@ docker-compose up -d redis
 ## 🧪 Proof - Test It Yourself
 
 ### Test 1: Cache Data Before Restart
+
 ```bash
 # 1. Start Redis
 cd backend
@@ -91,6 +99,7 @@ docker exec -it ground-sense-redis redis-cli GET test_key
 ```
 
 ### Test 2: Stop Docker
+
 ```bash
 docker-compose down
 # OR
@@ -98,11 +107,13 @@ docker stop ground-sense-redis
 ```
 
 ### Test 3: Start Docker Again
+
 ```bash
 docker-compose up -d redis
 ```
 
 ### Test 4: Check if Data Still Exists
+
 ```bash
 docker exec -it ground-sense-redis redis-cli GET test_key
 # Output: "Hello World" ✅ STILL THERE!
@@ -115,6 +126,7 @@ docker exec -it ground-sense-redis redis-cli GET test_key
 ## 📊 Real-World Scenario
 
 ### Day 1: Monday Morning
+
 ```bash
 # Start your system
 docker-compose up -d
@@ -125,12 +137,14 @@ docker-compose up -d
 ```
 
 ### Day 1: Monday Night
+
 ```bash
 # Stop server
 docker-compose down
 ```
 
 ### Day 2: Tuesday Morning
+
 ```bash
 # Start system again
 docker-compose up -d
@@ -160,7 +174,7 @@ redis:
   #       ^^^^^^^^^^^^^^^^ Auto-restart if Docker crashes
 
 volumes:
-  redis_data:  # Docker creates this volume ONCE and keeps it forever
+  redis_data: # Docker creates this volume ONCE and keeps it forever
 ```
 
 ---
@@ -178,6 +192,7 @@ volumes:
 ## 🚀 How to Start Everything
 
 ### Full System Startup
+
 ```bash
 cd backend
 
@@ -198,12 +213,14 @@ docker exec -it ground-sense-redis redis-cli PING
 ## 💡 Important Notes
 
 ### Cache Persists When:
+
 - ✅ Docker container stops
 - ✅ Docker container restarts
 - ✅ Server reboots (as long as Docker auto-starts)
 - ✅ `docker-compose down` and then `docker-compose up`
 
 ### Cache is DELETED When:
+
 - ❌ You manually delete the volume: `docker volume rm backend_redis_data`
 - ❌ You run: `docker-compose down -v` (the `-v` flag deletes volumes)
 
@@ -215,13 +232,14 @@ docker exec -it ground-sense-redis redis-cli PING
 
 **What to say**:
 
-> "Our Redis cache uses **permanent persistence** with AOF (Append Only File). Every query result is written to disk immediately. When Docker restarts, all cached data loads automatically. 
+> "Our Redis cache uses **permanent persistence** with AOF (Append Only File). Every query result is written to disk immediately. When Docker restarts, all cached data loads automatically.
 >
-> This means the first user query takes 5 seconds for LLM to generate SQL. But that same query - whether asked 1 hour later or 1 month later - responds in 2 milliseconds from cache. 
+> This means the first user query takes 5 seconds for LLM to generate SQL. But that same query - whether asked 1 hour later or 1 month later - responds in 2 milliseconds from cache.
 >
 > Even if we restart the entire server, the cache survives. **It's permanent storage, not temporary memory.**"
 
 **Show them**:
+
 1. Query something (5s first time)
 2. Stop Docker: `docker-compose down`
 3. Start Docker: `docker-compose up -d`
@@ -231,19 +249,19 @@ docker exec -it ground-sense-redis redis-cli PING
 
 ## ✅ Summary
 
-| Question | Answer |
-|----------|--------|
-| Does cache survive Docker restart? | YES ✅ |
-| Do I need Docker running for Redis? | YES ✅ |
-| Is data lost when container stops? | NO ✅ |
-| How is data preserved? | Saved to disk in Docker volume |
-| How long is cache kept? | Forever (until manually deleted) |
-| What happens on restart? | Automatic reload from disk |
-| Performance after restart? | Same - 2ms cache hits |
+| Question                            | Answer                           |
+| ----------------------------------- | -------------------------------- |
+| Does cache survive Docker restart?  | YES ✅                           |
+| Do I need Docker running for Redis? | YES ✅                           |
+| Is data lost when container stops?  | NO ✅                            |
+| How is data preserved?              | Saved to disk in Docker volume   |
+| How long is cache kept?             | Forever (until manually deleted) |
+| What happens on restart?            | Automatic reload from disk       |
+| Performance after restart?          | Same - 2ms cache hits            |
 
 ---
 
-**Bottom Line**: 
-Start Docker → Redis loads all your cached data → Cache works exactly as before. 
+**Bottom Line**:
+Start Docker → Redis loads all your cached data → Cache works exactly as before.
 Stop Docker → Data saved to disk → Nothing lost.
 **Your cache is PERMANENT!** 🎯

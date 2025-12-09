@@ -210,7 +210,7 @@ User Query
             ↓
         ┌─────────────────────────────┐
         │  LLM Chart Selector         │
-        │  (Gemini analyzes results)  │
+        │  (Ollama analyzes results)  │
         └─────────────────────────────┘
             ↓
         Frontend Renders Chart

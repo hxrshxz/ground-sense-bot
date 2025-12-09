@@ -43,7 +43,7 @@ npm run dev
 
 - ✅ Automatically analyzes map data with comprehensive prompt
 - ✅ Provides groundwater insights and recommendations
-- ✅ Uses advanced Gemini vision capabilities
+- ✅ Uses advanced Ollama SQL generation capabilities
 
 ### 🚀 Deployment Ready:
 

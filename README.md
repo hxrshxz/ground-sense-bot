@@ -90,7 +90,6 @@ npm run preview
 Create a `.env` file with your configuration:
 
 ```env
-VITE_GEMINI_API_KEY=your_gemini_api_key_here
 VITE_API_BASE_URL=http://localhost:8080/api/v1
 ```
 

@@ -57,7 +57,6 @@
 
 - ✅ Changed PostgreSQL to **pgvector/pgvector:pg16**
 - ✅ Auto-loads RAG migrations on startup
-- ✅ Reads **GEMINI_API_KEY** from your `.env` file
 - ✅ Added optional ingestion service
 
 ### 2️⃣ Created Helper Scripts

@@ -91,18 +91,16 @@ export const HIERARCHY_LEVELS = {
 // ============================================================================
 
 export const CATEGORY_COLORS = {
-  // Safe: #9eb6cb (Grey-Blue) - Stage < 70%
+  // Safe: White - Stage < 70%
   safe: {
-    primary: '#9eb6cb',      // User specified exact color
-    background: '#F1F5F8',   // Very light version
-    backgroundDark: 'rgba(158, 182, 203, 0.2)',
-    border: '#78909C',       // Darker shade for border
-    text: '#546E7A',         // Dark slate for text
-    textOnDark: '#B0BEC5',   // Light slate for dark bg
-    gradient: 'linear-gradient(135deg, #9eb6cb 0%, #78909C 100%)',
-    emoji: '🟢',             // Keeping green emoji for semantic meaning or switching? User only mentioned colors. Let's keep circle emojis matching color roughly if possible, but standard emoji dots are limited.
-                             // Actually, let's use the color circle that matches best or generic.
-                             // Safe is usually generic good.
+    primary: '#FFFFFF',      // White as per INGRES specification
+    background: '#F8F9FA',   // Very light grey for contrast
+    backgroundDark: 'rgba(255, 255, 255, 0.2)',
+    border: '#E0E0E0',       // Light grey border for visibility
+    text: '#424242',         // Dark grey for text on white
+    textOnDark: '#FFFFFF',   // White for dark backgrounds
+    gradient: 'linear-gradient(135deg, #FFFFFF 0%, #F5F5F5 100%)',
+    emoji: '⚪',
     stage: { min: 0, max: 70 },
     label: 'Safe',
   },

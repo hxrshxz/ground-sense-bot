@@ -1,19 +1,26 @@
-# ✅ RAG Implementation Complete!
+# ⚠️ RAG Implementation - Deprecated
 
-## 🎉 What's Been Done
+## 📌 Important Note
 
-Your hybrid RAG (Retrieval-Augmented Generation) system is **ready to use** with:
+The Gemini-based RAG (Retrieval-Augmented Generation) system described in this document is **no longer in use**.
 
-✅ **Gemini AI** - FREE embeddings (no OpenAI needed!)  
-✅ **PostgreSQL on port 5433** - Your existing port  
-✅ **Docker setup** - Easy pgvector installation  
-✅ **Hybrid search** - Keyword + Semantic AI search  
-✅ **Go backend** - Fully integrated RAG service  
-✅ **27K JSON files** - Ready to ingest with embeddings
+The system now uses:
+- ✅ **Ollama** for local SQL generation
+- ✅ **PostgreSQL** for direct database queries
+- ✅ **No external AI APIs** required
+
+This file is kept for reference only.
 
 ---
 
-## 📁 Files Created
+## Historical Information
+
+This document previously described a hybrid RAG system with Gemini AI embeddings. That implementation has been replaced with a simpler, faster approach using Ollama for SQL generation directly from natural language queries.
+
+For current system architecture, refer to:
+- `EVERYTHING.md` - Complete system documentation
+- `OLLAMA_STATUS.md` - Current LLM implementation
+- `CODE_WALKTHROUGH.md` - How the system works today
 
 ```
 ground-sense-bot/
@@ -57,7 +64,6 @@ ground-sense-bot/
 ### 1️⃣ Test Gemini Connection
 
 ```bash
-export GEMINI_API_KEY="your-gemini-api-key"
 python3 test_gemini.py
 ```
 
@@ -171,8 +177,6 @@ ports: ["5434:5432"]  # Use 5434 instead
 ### Gemini API key not found?
 
 ```bash
-echo $GEMINI_API_KEY  # Should show your key
-export GEMINI_API_KEY="your-key-here"
 ```
 
 ### Docker not installed?
@@ -243,7 +247,6 @@ sudo sh get-docker.sh
 Run this now:
 
 ```bash
-export GEMINI_API_KEY="your-key-here"
 ./setup_rag.sh
 ```
 

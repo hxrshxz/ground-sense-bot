@@ -288,7 +288,7 @@ When query doesn't match any predefined intent:
 3. SQL is validated before execution
 4. Result is formatted as ChartData
 5. Frontend ChartRenderer detects format and shows appropriate chart
-6. Gemini API generates descriptive text (if needed)
+6. Ollama generates SQL or provides response
 ```
 
 **Example Unknown Query**:
@@ -384,7 +384,7 @@ When presenting these prompts:
 
    - Intent detection: Local keyword matching (no API)
    - SQL generation: Local Ollama (no cost)
-   - Only Gemini for text generation
+   - Only Ollama for SQL generation
 
 3. **Schema Awareness**
 

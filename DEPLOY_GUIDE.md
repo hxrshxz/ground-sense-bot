@@ -22,7 +22,6 @@
 3. **Set Environment Variable**:
 
    - In Vercel dashboard → Settings → Environment Variables
-   - Add: `VITE_GEMINI_API_KEY` = your Gemini API key
 
 4. **Deploy**:
    - Click "Deploy" - that's it! 🎉
@@ -88,7 +87,6 @@ GitHub Push → Vercel Build → Deploy
 
 Only one required:
 
-- `VITE_GEMINI_API_KEY` - Your Google Gemini API key
 
 ## GitHub Actions (Automatic)
 
@@ -126,7 +124,6 @@ Then just push to GitHub and connect to Vercel! 🚀
 
 ## Support
 
-- 🎭 **Demo Issues**: Make sure `VITE_GEMINI_API_KEY` is set
 - 🤖 **Full Automation**: Run local automation server
 - 🚀 **Deployment**: Check Vercel function logs
 - 💡 **Features**: All automation + AI features included

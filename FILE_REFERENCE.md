@@ -16,7 +16,7 @@
 - `backend/internal/services/nlp_service.go` - Intent classification & entity extraction
 - `backend/internal/services/chat_service.go` - Main message processor & handlers
 - `backend/internal/services/database_service.go` - Database queries
-- `backend/internal/services/llm_service.go` - LLM API calls (Gemini, Ollama)
+- `backend/internal/services/llm_service.go` - Ollama SQL generation
 
 **Routes & Controllers**
 
@@ -96,7 +96,7 @@
 - `src/hooks/use-toast.ts` - Toast notifications
 - `src/lib/utils.ts` - Helper functions
 - `src/lib/stateDetection.ts` - Location parsing
-- `src/services/geminiApi.ts` - Gemini API client
+- `src/services/websocketApi.ts` - WebSocket client
 - `src/services/mapAutomationService.ts` - Map API service
 
 ### Data Files

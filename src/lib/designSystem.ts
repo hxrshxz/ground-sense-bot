@@ -184,27 +184,27 @@ export const ATTRIBUTE_COLORS = {
   extractable: {
     primary: "#3B82F6", // Blue 500
     background: "#DBEAFE", // Blue 100
-    backgroundDark: "rgba(59, 130, 246, 0.15)",
+    backgroundDark: "#3B82F6",
     text: "#1E40AF", // Blue 800
-    textOnDark: "#60A5FA", // Blue 400
+    textOnDark: "#FFFFFF", // White
     gradient: "linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)",
     icon: "💧",
   },
   extraction: {
     primary: "#F97316", // Orange 500
     background: "#FFEDD5", // Orange 100
-    backgroundDark: "rgba(249, 115, 22, 0.15)",
+    backgroundDark: "#F97316",
     text: "#9A3412", // Orange 800
-    textOnDark: "#FB923C", // Orange 400
+    textOnDark: "#FFFFFF", // White
     gradient: "linear-gradient(135deg, #EA580C 0%, #F97316 100%)",
     icon: "📤",
   },
   stage: {
-    primary: "#8B5CF6", // Violet 500
-    background: "#EDE9FE", // Violet 100
-    backgroundDark: "rgba(139, 92, 246, 0.15)",
-    text: "#5B21B6", // Violet 800
-    textOnDark: "#A78BFA", // Violet 400
+    primary: "#EF4444", // Red 500
+    background: "#FEE2E2", // Red 100
+    backgroundDark: "#EF4444",
+    text: "#991B1B", // Red 800
+    textOnDark: "#FFFFFF", // White
     gradient: "linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%)",
     icon: "📊",
   },
@@ -212,9 +212,9 @@ export const ATTRIBUTE_COLORS = {
     // Dynamic based on actual category value
     primary: "#6B7280",
     background: "#F3F4F6",
-    backgroundDark: "rgba(107, 114, 128, 0.15)",
+    backgroundDark: "#EF4444",
     text: "#374151",
-    textOnDark: "#D1D5DB",
+    textOnDark: "#FFFFFF",
     gradient: "linear-gradient(135deg, #6B7280 0%, #9CA3AF 100%)",
     icon: "🏷️",
   },

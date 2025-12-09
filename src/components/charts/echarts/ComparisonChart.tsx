@@ -32,13 +32,6 @@ interface ComparisonChartProps {
 }
 
 const ComparisonChart: React.FC<ComparisonChartProps> = ({ data }) => {
-  console.log("\n" + "=".repeat(80));
-  console.log("📊 COMPARISON CHART - 4 KEY ATTRIBUTES (WCAG Compliant)");
-  console.log(`├─ Type: ${data.comparisonType.toUpperCase()}`);
-  console.log(`├─ Year: ${data.year}`);
-  console.log(`├─ Locations: ${data.locations.length}`);
-  console.log("=".repeat(80) + "\n");
-
   const option: echarts.EChartsOption = {
     backgroundColor: "transparent",
     title: {
@@ -49,15 +42,15 @@ const ComparisonChart: React.FC<ComparisonChartProps> = ({ data }) => {
       subtext: "The 4 Key Groundwater Attributes",
       left: "center",
       top: 10,
-      textStyle: { color: "#F8FAFC", fontSize: 18, fontWeight: "bold" },
-      subtextStyle: { color: "#94A3B8", fontSize: 12 },
+      textStyle: { color: "#333333", fontSize: 16, fontWeight: 600 },
+      subtextStyle: { color: "#666666", fontSize: 11 },
     },
     tooltip: {
       trigger: "axis",
       axisPointer: { type: "shadow" },
-      backgroundColor: "rgba(15, 23, 42, 0.95)",
-      borderColor: "rgba(148, 163, 184, 0.2)",
-      textStyle: { color: "#F8FAFC" },
+      backgroundColor: "rgba(255, 255, 255, 0.95)",
+      borderColor: "#E5E5E5",
+      textStyle: { color: "#333333" },
       formatter: (params: any) => {
         if (!Array.isArray(params)) return "";
         const location = params[0].name;
@@ -66,20 +59,20 @@ const ComparisonChart: React.FC<ComparisonChartProps> = ({ data }) => {
           ? getCategoryColors(locData.category)
           : CATEGORY_COLORS.unknown;
 
-        let result = `<div style="font-weight: bold; margin-bottom: 8px;">${location}</div>`;
+        let result = `<div style="font-weight: 600; margin-bottom: 6px; color: #333333;">${location}</div>`;
         params.forEach((param: any) => {
           const unit = param.seriesName.includes("Stage") ? "%" : " ham";
-          result += `<div style="margin: 4px 0;">
-            <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${
+          result += `<div style="margin: 3px 0; font-size: 12px;">
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${
               param.color
-            };margin-right:8px;"></span>
+            };margin-right:6px;"></span>
             ${param.seriesName}: <strong>${
             param.value?.toFixed(1) || 0
           }${unit}</strong>
           </div>`;
         });
         if (locData) {
-          result += `<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #475569;">
+          result += `<div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid #E5E5E5; font-size: 11px; color: #666666;">
             Category: <strong style="color: ${
               colors.textOnDark
             }">${formatCategoryName(locData.category)}</strong>
@@ -89,90 +82,62 @@ const ComparisonChart: React.FC<ComparisonChartProps> = ({ data }) => {
       },
     },
     legend: {
-      data: ["Extractable GW (MCM)", "GW Extraction (MCM)", "Stage (%)"],
-      top: 55,
-      textStyle: { color: "#94A3B8", fontSize: 12 },
-      itemGap: 20,
+      data: ["Extractable GW (ham)", "GW Extraction (ham)", "Stage (%)"],
+      top: 48,
+      textStyle: { color: "#666666", fontSize: 11 },
+      itemGap: 16,
     },
     grid: {
-      left: "18%",
-      right: "10%",
-      bottom: "10%",
-      top: 110,
+      left: "15%",
+      right: "8%",
+      bottom: "8%",
+      top: 90,
       containLabel: true,
     },
     xAxis: {
       type: "value",
       name: "Value",
-      nameTextStyle: { color: "#94A3B8", fontSize: 12 },
-      axisLabel: { color: "#94A3B8", fontSize: 11 },
-      axisLine: { lineStyle: { color: "#475569" } },
-      splitLine: { lineStyle: { color: "#334155" } },
+      nameTextStyle: { color: "#666666", fontSize: 11 },
+      axisLabel: { color: "#666666", fontSize: 10 },
+      axisLine: { lineStyle: { color: "#E5E5E5" } },
+      splitLine: { lineStyle: { color: "#F5F5F5" } },
     },
     yAxis: {
       type: "category",
       data: data.locations.map((loc) => loc.name),
       axisLabel: {
-        color: "#F8FAFC",
-        fontSize: 14,
-        fontWeight: "bold",
-        margin: 12,
-        // Color code location names by category for blocks
-        formatter: (value: string, index: number) => {
-          const loc = data.locations[index];
-          if (data.comparisonType === "block" && loc) {
-            const colors = getCategoryColors(loc.category);
-            return `{${loc.category}|${value}}`;
-          }
-          return value;
-        },
-        rich: {
-          safe: { color: CATEGORY_COLORS.safe.textOnDark, fontWeight: "bold" },
-          semi_critical: {
-            color: CATEGORY_COLORS.semiCritical.textOnDark,
-            fontWeight: "bold",
-          },
-          critical: {
-            color: CATEGORY_COLORS.critical.textOnDark,
-            fontWeight: "bold",
-          },
-          over_exploited: {
-            color: CATEGORY_COLORS.overExploited.textOnDark,
-            fontWeight: "bold",
-          },
-          unknown: {
-            color: CATEGORY_COLORS.unknown.textOnDark,
-            fontWeight: "bold",
-          },
-        },
+        color: "#333333",
+        fontSize: 12,
+        fontWeight: 500,
+        margin: 10,
       },
-      axisLine: { lineStyle: { color: "#F8FAFC", width: 2 } },
+      axisLine: { lineStyle: { color: "#333333", width: 1 } },
       axisTick: { show: false },
     },
     series: [
       {
-        name: "Extractable GW (MCM)",
+        name: "Extractable GW (ham)",
         type: "bar",
         data: data.locations.map((loc) => (loc.extractable || 0) / 100),
         itemStyle: {
-          color: ATTRIBUTE_COLORS.extractable.primary,
-          borderRadius: [0, 4, 4, 0],
+          color: "#0055A4",
+          borderRadius: [0, 2, 2, 0],
         },
         label: {
           show: true,
           position: "right",
-          color: "#F8FAFC",
-          fontSize: 11,
-          fontWeight: "bold",
+          color: "#333333",
+          fontSize: 10,
+          fontWeight: 500,
           formatter: (params: any) => {
             const val = data.locations[params.dataIndex]?.extractable || 0;
-            return val > 1000 ? `${(val / 1000).toFixed(1)}K` : val.toFixed(0);
+            return val > 1000 ? `${(val / 1000).toFixed(1)}K` : String(val);
           },
         },
         barMaxWidth: 25,
       },
       {
-        name: "GW Extraction (MCM)",
+        name: "GW Extraction (ham)",
         type: "bar",
         data: data.locations.map((loc) => (loc.extraction || 0) / 100),
         itemStyle: {
@@ -182,15 +147,15 @@ const ComparisonChart: React.FC<ComparisonChartProps> = ({ data }) => {
         label: {
           show: true,
           position: "right",
-          color: "#F8FAFC",
-          fontSize: 11,
-          fontWeight: "bold",
+          color: "#333333",
+          fontSize: 10,
+          fontWeight: 500,
           formatter: (params: any) => {
             const val = data.locations[params.dataIndex]?.extraction || 0;
-            return val > 1000 ? `${(val / 1000).toFixed(1)}K` : val.toFixed(0);
+            return val > 1000 ? `${(val / 1000).toFixed(1)}K` : String(val);
           },
         },
-        barMaxWidth: 25,
+        barMaxWidth: 20,
       },
       {
         name: "Stage (%)",
@@ -199,17 +164,17 @@ const ComparisonChart: React.FC<ComparisonChartProps> = ({ data }) => {
         itemStyle: {
           color: (params: any) =>
             getCategoryColorsFromStage(params.value).primary,
-          borderRadius: [0, 4, 4, 0],
+          borderRadius: [0, 2, 2, 0],
         },
         label: {
           show: true,
           position: "right",
-          color: "#F8FAFC",
-          fontSize: 11,
-          fontWeight: "bold",
+          color: "#333333",
+          fontSize: 10,
+          fontWeight: 500,
           formatter: (params: any) => `${params.value?.toFixed(1) || 0}%`,
         },
-        barMaxWidth: 25,
+        barMaxWidth: 20,
       },
     ],
   };
@@ -255,35 +220,35 @@ const ComparisonChart: React.FC<ComparisonChartProps> = ({ data }) => {
   const dominantColors = CATEGORY_COLORS[dominantCategoryKey];
 
   return (
-    <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-6 shadow-2xl border border-white/10">
+    <div className="bg-white rounded-lg p-4 shadow-sm border" style={{ borderColor: "#E5E5E5" }}>
       {/* THE 4 KEY ATTRIBUTES SUMMARY CARDS */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         {/* 1. Annual Extractable GW Resources */}
         <div
-          className="rounded-xl p-4 border"
+          className="rounded p-3 border"
           style={{
-            backgroundColor: ATTRIBUTE_COLORS.extractable.backgroundDark,
-            borderColor: `${ATTRIBUTE_COLORS.extractable.primary}33`,
+            backgroundColor: "#F0F7FF",
+            borderColor: "#0055A4",
           }}
         >
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-1">
             <Droplets
-              className="w-5 h-5"
-              style={{ color: ATTRIBUTE_COLORS.extractable.textOnDark }}
+              className="w-4 h-4"
+              style={{ color: "#0055A4" }}
             />
             <span
-              className="text-xs font-medium"
-              style={{ color: ATTRIBUTE_COLORS.extractable.textOnDark }}
+              className="text-xs"
+              style={{ color: "#0055A4" }}
             >
               {FOUR_KEY_ATTRIBUTES.EXTRACTABLE.shortLabel}
             </span>
           </div>
-          <div className="text-xl font-bold text-white">
+          <div className="text-base font-semibold" style={{ color: "#333333" }}>
             {formatNumber(totalExtractable)} ham
           </div>
           <div
-            className="text-xs mt-1 opacity-60"
-            style={{ color: ATTRIBUTE_COLORS.extractable.textOnDark }}
+            className="text-xs mt-0.5"
+            style={{ color: "#666666" }}
           >
             Annual Resources
           </div>
@@ -291,30 +256,30 @@ const ComparisonChart: React.FC<ComparisonChartProps> = ({ data }) => {
 
         {/* 2. Annual GW Extraction */}
         <div
-          className="rounded-xl p-4 border"
+          className="rounded p-3 border"
           style={{
-            backgroundColor: ATTRIBUTE_COLORS.extraction.backgroundDark,
-            borderColor: `${ATTRIBUTE_COLORS.extraction.primary}33`,
+            backgroundColor: "#FFF4E6",
+            borderColor: "#FF6B00",
           }}
         >
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-1">
             <TrendingUp
-              className="w-5 h-5"
-              style={{ color: ATTRIBUTE_COLORS.extraction.textOnDark }}
+              className="w-4 h-4"
+              style={{ color: "#FF6B00" }}
             />
             <span
-              className="text-xs font-medium"
-              style={{ color: ATTRIBUTE_COLORS.extraction.textOnDark }}
+              className="text-xs"
+              style={{ color: "#FF6B00" }}
             >
               {FOUR_KEY_ATTRIBUTES.EXTRACTION.shortLabel}
             </span>
           </div>
-          <div className="text-xl font-bold text-white">
+          <div className="text-base font-semibold" style={{ color: "#333333" }}>
             {formatNumber(totalExtraction)} ham
           </div>
           <div
-            className="text-xs mt-1 opacity-60"
-            style={{ color: ATTRIBUTE_COLORS.extraction.textOnDark }}
+            className="text-xs mt-0.5"
+            style={{ color: "#666666" }}
           >
             Annual Usage
           </div>
@@ -322,34 +287,33 @@ const ComparisonChart: React.FC<ComparisonChartProps> = ({ data }) => {
 
         {/* 3. Stage of Extraction */}
         <div
-          className="rounded-xl p-4 border"
+          className="rounded p-3 border"
           style={{
-            backgroundColor:
-              getCategoryColorsFromStage(avgStage).backgroundDark,
-            borderColor: `${getCategoryColorsFromStage(avgStage).primary}33`,
+            backgroundColor: "#FFF0F0",
+            borderColor: getCategoryColorsFromStage(avgStage).primary,
           }}
         >
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-1">
             <Activity
-              className="w-5 h-5"
-              style={{ color: getCategoryColorsFromStage(avgStage).textOnDark }}
+              className="w-4 h-4"
+              style={{ color: getCategoryColorsFromStage(avgStage).primary }}
             />
             <span
-              className="text-xs font-medium"
-              style={{ color: getCategoryColorsFromStage(avgStage).textOnDark }}
+              className="text-xs"
+              style={{ color: getCategoryColorsFromStage(avgStage).primary }}
             >
               Avg {FOUR_KEY_ATTRIBUTES.STAGE.shortLabel}
             </span>
           </div>
           <div
-            className="text-xl font-bold"
-            style={{ color: getCategoryColorsFromStage(avgStage).textOnDark }}
+            className="text-base font-semibold"
+            style={{ color: "#333333" }}
           >
             {avgStage.toFixed(1)}%
           </div>
           <div
-            className="text-xs mt-1 opacity-60"
-            style={{ color: getCategoryColorsFromStage(avgStage).textOnDark }}
+            className="text-xs mt-0.5"
+            style={{ color: "#666666" }}
           >
             {getStageLabel(avgStage)}
           </div>
@@ -357,117 +321,46 @@ const ComparisonChart: React.FC<ComparisonChartProps> = ({ data }) => {
 
         {/* 4. Categorization */}
         <div
-          className="rounded-xl p-4 border"
+          className="rounded p-3 border"
           style={{
-            backgroundColor: dominantColors.backgroundDark,
-            borderColor: `${dominantColors.primary}33`,
+            backgroundColor: "#F5F5F5",
+            borderColor: dominantColors.primary,
           }}
         >
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-1">
             <Tag
-              className="w-5 h-5"
-              style={{ color: dominantColors.textOnDark }}
+              className="w-4 h-4"
+              style={{ color: dominantColors.primary }}
             />
             <span
-              className="text-xs font-medium"
-              style={{ color: dominantColors.textOnDark }}
+              className="text-xs"
+              style={{ color: dominantColors.primary }}
             >
               {FOUR_KEY_ATTRIBUTES.CATEGORY.shortLabel}
             </span>
           </div>
           <div
-            className="text-xl font-bold"
-            style={{ color: dominantColors.textOnDark }}
+            className="text-base font-semibold"
+            style={{ color: "#333333" }}
           >
-            {dominantColors.emoji} {formatCategoryName(dominantCategoryKey)}
+            {formatCategoryName(dominantCategoryKey)}
           </div>
           <div
-            className="text-xs mt-1"
-            style={{ color: dominantColors.textOnDark }}
+            className="text-xs mt-0.5"
+            style={{ color: "#666666" }}
           >
-            {CATEGORY_COLORS.overExploited.emoji} {categoryCounts.overExploited}{" "}
-            |{CATEGORY_COLORS.critical.emoji} {categoryCounts.critical} |
-            {CATEGORY_COLORS.semiCritical.emoji} {categoryCounts.semiCritical} |
-            {CATEGORY_COLORS.safe.emoji} {categoryCounts.safe}
+            {categoryCounts.overExploited} | {categoryCounts.critical} | {categoryCounts.semiCritical} | {categoryCounts.safe}
           </div>
         </div>
       </div>
 
       {/* Main Chart */}
-      <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+      <div className="bg-white rounded p-3 border" style={{ borderColor: "#E5E5E5" }}>
         <ReactECharts
           option={option}
-          style={{ height: "450px" }}
+          style={{ height: "400px" }}
           opts={{ renderer: "canvas" }}
         />
-      </div>
-
-      {/* Location Details - 4 ATTRIBUTES ONLY */}
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {data.locations.map((location, index) => {
-          const locColors = getCategoryColors(location.category);
-          return (
-            <div
-              key={index}
-              className="bg-white/5 rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-colors"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-white">{location.name}</h3>
-                <span
-                  className="px-3 py-1 rounded-full text-xs font-medium"
-                  style={{
-                    backgroundColor: locColors.backgroundDark,
-                    color: locColors.textOnDark,
-                    border: `1px solid ${locColors.primary}40`,
-                  }}
-                >
-                  {locColors.emoji} {formatCategoryName(location.category)}
-                </span>
-              </div>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">1️⃣ Extractable:</span>
-                  <span
-                    style={{ color: ATTRIBUTE_COLORS.extractable.textOnDark }}
-                    className="font-medium"
-                  >
-                    {formatNumber(location.extractable)} ham
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">2️⃣ Extraction:</span>
-                  <span
-                    style={{ color: ATTRIBUTE_COLORS.extraction.textOnDark }}
-                    className="font-medium"
-                  >
-                    {formatNumber(location.extraction)} ham
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">3️⃣ Stage:</span>
-                  <span
-                    style={{
-                      color: getCategoryColorsFromStage(location.stage)
-                        .textOnDark,
-                    }}
-                    className="font-medium"
-                  >
-                    {(location.stage || 0).toFixed(1)}%
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">4️⃣ Category:</span>
-                  <span
-                    style={{ color: locColors.textOnDark }}
-                    className="font-medium"
-                  >
-                    {formatCategoryName(location.category)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          );
-        })}
       </div>
     </div>
   );

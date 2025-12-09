@@ -152,7 +152,7 @@ const StateDeepDiveCard: React.FC<StateDeepDiveCardProps> = ({ state }) => {
       transition={{ duration: 0.45 }}
       className="w-full"
     >
-      <Card className="w-full overflow-hidden bg-white shadow-xl border border-slate-200">
+      <Card className="w-full overflow-hidden bg-white border border-slate-200">
         <div
           className={`h-2 bg-gradient-to-r ${categoryColors[state.category]}`}
         />

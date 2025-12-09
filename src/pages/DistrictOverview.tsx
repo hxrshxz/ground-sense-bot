@@ -62,7 +62,7 @@ export default function DistrictOverview() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
-        <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
       </div>
     );
   }
@@ -122,7 +122,7 @@ export default function DistrictOverview() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold text-purple-600">
+              <p className="text-2xl font-bold text-blue-600">
                 {districtData.avg_stage.toFixed(1)}%
               </p>
             </CardContent>
@@ -274,7 +274,7 @@ export default function DistrictOverview() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
                   <span className="text-slate-600">Total Blocks</span>
-                  <span className="text-xl font-bold text-purple-600">
+                  <span className="text-xl font-bold text-blue-600">
                     {districtData.total_blocks}
                   </span>
                 </div>

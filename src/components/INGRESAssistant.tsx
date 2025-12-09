@@ -96,12 +96,11 @@ const ListeningIndicator = () => {
   return (
     <div className="fixed bottom-24 right-24 z-50 flex items-center justify-center">
       <div className="relative">
-        <div className="absolute inset-0 rounded-full bg-green-500 opacity-20 animate-ping"></div>
-        <div className="relative rounded-full bg-green-600 p-4 flex items-center justify-center shadow-lg">
-          <Mic className="h-6 w-6 text-white" />
+        <div className="relative rounded-full bg-blue-600 p-3 flex items-center justify-center border border-blue-700">
+          <Mic className="h-5 w-5 text-white" />
         </div>
       </div>
-      <span className="ml-3 font-medium text-green-600 bg-white/80 px-3 py-1 rounded-full shadow-sm">
+      <span className="ml-3 font-medium text-gray-700 bg-white px-3 py-1 rounded border border-gray-300">
         Listening...
       </span>
     </div>
@@ -109,7 +108,7 @@ const ListeningIndicator = () => {
 };
 
 //================================================================================
-// --- SHIMMER EFFECT COMPONENT ---
+// --- LOADING EFFECT COMPONENT ---
 //================================================================================
 const GeminiShimmerEffect = () => {
   const thinkingPhrases = [
@@ -118,12 +117,6 @@ const GeminiShimmerEffect = () => {
     "Processing sensor data...",
     "Identifying patterns...",
     "Generating insights...",
-  ];
-  const shimmerLines = [
-    { width: "95%", delay: 0 },
-    { width: "100%", delay: 0.1 },
-    { width: "90%", delay: 0.2 },
-    { width: "75%", delay: 0.3 },
   ];
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
 
@@ -136,94 +129,30 @@ const GeminiShimmerEffect = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.15 } },
-  };
-  const lineVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0 },
-  };
-
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="flex items-start gap-3 max-w-2xl mr-auto"
-    >
-      <motion.div
-        animate={{ scale: [1, 1.05, 1], opacity: [0.8, 1, 0.8] }}
-        transition={{ duration: 2, repeat: Infinity, repeatType: "mirror" }}
-        className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center shadow-soft"
-      >
+    <div className="flex items-start gap-3 max-w-2xl mr-auto">
+      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
         <BrainCircuit className="w-5 h-5 text-white" />
-      </motion.div>
-      <div className="p-3 rounded-2xl bg-white/90 backdrop-blur-sm border border-white/60 shadow-soft space-y-3 w-full max-w-md">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="space-y-2"
-        >
-          {shimmerLines.map((line, index) => (
-            <motion.div
-              key={index}
-              variants={lineVariants}
-              className="h-3 bg-gradient-to-r from-slate-200 via-slate-300 to-slate-200 rounded animate-shimmer bg-[length:200%_100%]"
-              style={{ width: line.width, animationDelay: `${line.delay}s` }}
-            />
-          ))}
-        </motion.div>
+      </div>
+      <div className="p-3 rounded bg-gray-50 border border-gray-200 space-y-3 w-full max-w-md">
+        <div className="space-y-2">
+          <div className="h-3 bg-gray-200 rounded" style={{ width: "95%" }} />
+          <div className="h-3 bg-gray-200 rounded" style={{ width: "100%" }} />
+          <div className="h-3 bg-gray-200 rounded" style={{ width: "90%" }} />
+          <div className="h-3 bg-gray-200 rounded" style={{ width: "75%" }} />
+        </div>
         <div className="flex items-center gap-2 pt-1">
           <div className="flex space-x-1">
-            <motion.div
-              className="w-1.5 h-1.5 bg-purple-400/60 rounded-full"
-              animate={{ y: [0, -2, 0] }}
-              transition={{
-                duration: 1.2,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-            <motion.div
-              className="w-1.5 h-1.5 bg-purple-400/60 rounded-full"
-              animate={{ y: [0, -2, 0] }}
-              transition={{
-                duration: 1.2,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 0.1,
-              }}
-            />
-            <motion.div
-              className="w-1.5 h-1.5 bg-purple-400/60 rounded-full"
-              animate={{ y: [0, -2, 0] }}
-              transition={{
-                duration: 1.2,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 0.2,
-              }}
-            />
+            <div className="w-1.5 h-1.5 bg-gray-400 rounded-full" />
+            <div className="w-1.5 h-1.5 bg-gray-400 rounded-full" />
+            <div className="w-1.5 h-1.5 bg-gray-400 rounded-full" />
           </div>
-          <div className="text-xs text-slate-600 w-full overflow-hidden">
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={currentPhraseIndex}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                transition={{ duration: 0.3 }}
-                className="block"
-              >
-                {thinkingPhrases[currentPhraseIndex]}
-              </motion.span>
-            </AnimatePresence>
+          <div className="text-xs text-gray-600 w-full overflow-hidden">
+            <span className="block">{thinkingPhrases[currentPhraseIndex]}</span>
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
@@ -316,7 +245,7 @@ const Toast = ({
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: 100, opacity: 0 }}
-      className={`fixed bottom-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 p-4 rounded-lg shadow-2xl text-white ${bgColor}`}
+      className={`fixed bottom-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 p-4 rounded-lg border border-slate-200 text-white ${bgColor}`}
     >
       <Icon className="h-6 w-6" />
       <span className="text-lg font-medium">{message}</span>
@@ -384,9 +313,6 @@ const Toast = ({
 const ProactiveInsightCard = () => {
   const criticalShifts = 1;
   const regionsMonitored = Object.keys(groundwaterDB).length;
-  const delhiData = groundwaterDB.delhi;
-  const highestExtractionStage =
-    delhiData && delhiData.type === "Block" ? delhiData.stage : "N/A";
 
   return (
     <Card className="w-full max-w-lg bg-white/80 backdrop-blur-sm border-slate-200/80 shadow-lg text-slate-900">
@@ -402,21 +328,13 @@ const ProactiveInsightCard = () => {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-3 gap-3 text-center">
+        <div className="grid grid-cols-2 gap-3 text-center">
           <div className="p-3 bg-red-50 rounded-lg border border-red-100">
             <p className="text-xs font-semibold text-slate-500">
               Critical Shifts
             </p>
             <p className="text-lg font-bold text-red-800 flex items-center justify-center gap-1">
               <AlertTriangle className="h-4 w-4" /> {criticalShifts}
-            </p>
-          </div>
-          <div className="p-3 bg-purple-50 rounded-lg border border-purple-100">
-            <p className="text-xs font-semibold text-slate-500">
-              Highest Stage
-            </p>
-            <p className="text-lg font-bold text-purple-800">
-              {highestExtractionStage}
             </p>
           </div>
           <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
@@ -434,10 +352,9 @@ const ProactiveInsightCard = () => {
           </h4>
           <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
             <p className="text-xs text-slate-700">
-              The <strong>Delhi</strong> block has shown a consistent upward
-              trend in extraction, moving it into the 'Over-Exploited' category.
-              This is correlated with an increase in urban usage, industrial
-              demand, and below-average rainfall in the region.
+              Multiple regions are showing upward trends in extraction rates, 
+              moving into higher stress categories. This correlates with increased 
+              urban and industrial demand combined with below-average rainfall patterns.
             </p>
           </div>
         </div>
@@ -537,15 +454,13 @@ const INGRESCommandBar = ({
                 <button
                   onClick={onMicClick}
                   className={`absolute right-1 p-1.5 rounded transition-all duration-200 ${
-                    isListening
-                      ? "bg-[#3A7F4B]/10"
-                      : "hover:bg-[#E6E9EF]"
+                    isListening ? "bg-[#3A7F4B]/10" : "hover:bg-[#E6E9EF]"
                   }`}
                 >
                   <Mic
                     className={`h-4 w-4 ${
                       isListening
-                        ? "text-[#3A7F4B] animate-pulse"
+                        ? "text-[#3A7F4B]"
                         : "text-[#C8CED8]"
                     }`}
                   />
@@ -559,8 +474,6 @@ const INGRESCommandBar = ({
               Submit
             </Button>
           </div>
-
-
 
           <div className="flex items-center justify-between pl-2 pr-1">
             <div className="flex items-center gap-2">
@@ -656,15 +569,11 @@ const AnimatedCounter = ({
 };
 
 const MemoizedStatCard = React.memo(({ stat }: { stat: any }) => (
-  <Card className="bg-white/70 backdrop-blur-sm border border-white/40 rounded-2xl shadow-lg hover:shadow-xl transition-all h-full">
-    <CardContent className="p-5 relative">
+  <Card className="bg-white border border-slate-200 rounded h-full">
+    <CardContent className="p-4 relative">
       <div className="flex items-center gap-4">
         <div
-          className={`p-2 rounded-lg bg-gradient-to-br ${stat.iconColor
-            .replace("text-", "from-")
-            .replace("-500", "-400/20")} ${stat.iconColor
-            .replace("text-", "to-")
-            .replace("-500", "-500/20")}`}
+          className={`p-2 rounded bg-slate-100`}
         >
           <stat.icon className={`h-6 w-6 ${stat.iconColor}`} />
         </div>
@@ -823,7 +732,7 @@ const HydrogeologicalAnalysisChart = () => {
   // --- Replace the entire return statement of your HydrogeologicalAnalysisChart with this new version ---
   return (
     // --- CHANGE 1: Added `relative` and `overflow-hidden` to the main container ---
-    <div className="relative overflow-hidden w-full bg-white/80 p-6 rounded-2xl border my-4 backdrop-blur-md shadow-xl font-sans">
+    <div className="relative overflow-hidden w-full bg-white p-4 rounded border border-slate-200 my-4 font-sans">
       {/* --- CHANGE 2: Added the absolutely positioned top border --- */}
       <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-purple-500 to-purple-800"></div>
 
@@ -833,7 +742,7 @@ const HydrogeologicalAnalysisChart = () => {
           Interactive Groundwater Analysis
         </h3>
         <p className="text-sm text-slate-500 mb-4 ml-2">
-          Delhi Block – Six Month Summary (2025)
+          Regional Six Month Summary (2025)
         </p>
       </div>
 
@@ -2261,9 +2170,6 @@ Your response should sound like it's coming from a knowledgeable human analyst e
         </div>
       )}
       <div className="relative text-center max-w-4xl mx-auto">
-        {!embedded && (
-          <div className="absolute top-0 right-0 -mr-8 mt-4 w-32 h-32 bg-sky-400/30 rounded-full blur-3xl animate-pulse"></div>
-        )}
         <h1
           className={`font-bold text-slate-800 ${
             embedded ? "text-3xl" : "text-5xl md:text-7xl"
@@ -2315,7 +2221,7 @@ Your response should sound like it's coming from a knowledgeable human analyst e
       {/* CHANGED: Added more padding on larger screens */}
       {/* CHANGED: Increased max-width and adjusted height for a bigger chat window */}
       <Card
-        className={`w-full flex flex-col shadow-2xl rounded-2xl ${
+        className={`w-full flex flex-col border border-slate-200 rounded ${
           embedded
             ? "h-full max-w-none bg-slate-800/90 border-slate-700"
             : "max-w-5xl h-[calc(100vh-1rem)] bg-white/60 backdrop-blur-xl border-white/30"
@@ -2453,7 +2359,7 @@ Your response should sound like it's coming from a knowledgeable human analyst e
                         {/* Suggestion Buttons Below Text */}
                         {msg.suggestions && msg.suggestions.length > 0 && (
                           <div className="flex flex-wrap gap-2 p-3 bg-gradient-to-r from-purple-50 to-sky-50 rounded-xl border border-purple-100">
-                            <span className="w-full text-xs font-medium text-purple-600 mb-1 flex items-center gap-1">
+                            <span className="w-full text-xs font-medium text-blue-600 mb-1 flex items-center gap-1">
                               <Lightbulb className="w-3 h-3" /> 🔍 Drill-down:
                             </span>
                             {msg.suggestions.map(

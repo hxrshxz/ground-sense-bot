@@ -113,7 +113,7 @@ func runLoadMarkdown(args []string) {
 	fs.Parse(args)
 
 	fmt.Println("🚀 Starting markdown loading...")
-	
+
 	if *file == "all" || *file == "" {
 		// Load both markdown files
 		loadMarkdown(*dataDir+"/2023-2024.md", "2023-2024")

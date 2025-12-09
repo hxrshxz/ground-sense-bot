@@ -43,28 +43,28 @@ type AssessmentSummary struct {
 }
 
 type RechargeBreakdown struct {
-	ID           int       `json:"id"`
-	AssessmentID int       `json:"assessment_id"`
-	Source       string    `json:"source"`
-	Command      float64   `json:"command"`
-	NonCommand   float64   `json:"non_command"`
-	Total        float64   `json:"total"`
+	ID           int     `json:"id"`
+	AssessmentID int     `json:"assessment_id"`
+	Source       string  `json:"source"`
+	Command      float64 `json:"command"`
+	NonCommand   float64 `json:"non_command"`
+	Total        float64 `json:"total"`
 }
 
 type DischargeBreakdown struct {
-	ID           int       `json:"id"`
-	AssessmentID int       `json:"assessment_id"`
-	Source       string    `json:"source"`
-	Command      float64   `json:"command"`
-	NonCommand   float64   `json:"non_command"`
-	Total        float64   `json:"total"`
+	ID           int     `json:"id"`
+	AssessmentID int     `json:"assessment_id"`
+	Source       string  `json:"source"`
+	Command      float64 `json:"command"`
+	NonCommand   float64 `json:"non_command"`
+	Total        float64 `json:"total"`
 }
 
 type ExtractionBreakdown struct {
-	ID           int       `json:"id"`
-	AssessmentID int       `json:"assessment_id"`
-	Source       string    `json:"source"`
-	Command      float64   `json:"command"`
-	NonCommand   float64   `json:"non_command"`
-	Total        float64   `json:"total"`
+	ID           int     `json:"id"`
+	AssessmentID int     `json:"assessment_id"`
+	Source       string  `json:"source"`
+	Command      float64 `json:"command"`
+	NonCommand   float64 `json:"non_command"`
+	Total        float64 `json:"total"`
 }

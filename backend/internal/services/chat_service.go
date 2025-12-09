@@ -16,11 +16,11 @@ import (
 
 // ConversationEntry stores a single exchange in conversation history
 type ConversationEntry struct {
-	Timestamp time.Time `json:"timestamp"`
-	UserQuery string    `json:"user_query"`
-	BotResponse string  `json:"bot_response"`
-	Intent    string    `json:"intent"`
-	Locations []string  `json:"locations"`
+	Timestamp   time.Time `json:"timestamp"`
+	UserQuery   string    `json:"user_query"`
+	BotResponse string    `json:"bot_response"`
+	Intent      string    `json:"intent"`
+	Locations   []string  `json:"locations"`
 }
 
 // UserSession stores context for a user's ongoing conversation
@@ -37,7 +37,7 @@ func (s *UserSession) AddToHistory(userQuery, botResponse, intent string, locati
 	if s.MaxHistoryLength == 0 {
 		s.MaxHistoryLength = 10
 	}
-	
+
 	entry := ConversationEntry{
 		Timestamp:   time.Now(),
 		UserQuery:   userQuery,
@@ -45,9 +45,9 @@ func (s *UserSession) AddToHistory(userQuery, botResponse, intent string, locati
 		Intent:      intent,
 		Locations:   locations,
 	}
-	
+
 	s.ConversationHistory = append(s.ConversationHistory, entry)
-	
+
 	// Keep only last N entries
 	if len(s.ConversationHistory) > s.MaxHistoryLength {
 		s.ConversationHistory = s.ConversationHistory[len(s.ConversationHistory)-s.MaxHistoryLength:]
@@ -59,15 +59,15 @@ func (s *UserSession) GetRecentContext(limit int) string {
 	if len(s.ConversationHistory) == 0 {
 		return ""
 	}
-	
+
 	start := 0
 	if len(s.ConversationHistory) > limit {
 		start = len(s.ConversationHistory) - limit
 	}
-	
+
 	var builder strings.Builder
 	builder.WriteString("Recent conversation context:\n")
-	
+
 	for _, entry := range s.ConversationHistory[start:] {
 		builder.WriteString(fmt.Sprintf("USER: %s\n", entry.UserQuery))
 		if len(entry.BotResponse) > 200 {
@@ -76,14 +76,14 @@ func (s *UserSession) GetRecentContext(limit int) string {
 			builder.WriteString(fmt.Sprintf("BOT: %s\n", entry.BotResponse))
 		}
 	}
-	
+
 	return builder.String()
 }
 
 type ChatService struct {
 	nlp      *NLPService
 	ingres   *IngresService
-	rag      *RAGService // Added for RAG semantic search
+	rag      *RAGService   // Added for RAG semantic search
 	cache    *CacheService // Redis cache for low-latency access
 	sessions map[string]*UserSession
 	mu       sync.Mutex
@@ -101,9 +101,9 @@ func NewChatService(nlp *NLPService, ingres *IngresService, rag *RAGService, cac
 
 // Helper struct to parse LLM visualization JSON
 type visualizationPayload struct {
-	Type        string `json:"type"`
-	Title       string `json:"title"`
-	Explanation string `json:"explanation"`
+	Type        string      `json:"type"`
+	Title       string      `json:"title"`
+	Explanation string      `json:"explanation"`
 	XAxis       interface{} `json:"xAxis"`
 	Series      []struct {
 		Name string        `json:"name"`
@@ -129,7 +129,7 @@ type visualizationPayload struct {
 func (s *ChatService) ProcessMessage(ctx context.Context, message string, username string) (*models.ChatResponse, error) {
 	// Input validation
 	message = strings.TrimSpace(message)
-	
+
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("PANIC in ProcessMessage: %v\n", r)
@@ -147,10 +147,8 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 	fmt.Printf("📨 NEW USER MESSAGE | User: %s | Time: %s\n", username, time.Now().Format("15:04:05"))
 	fmt.Printf("💬 Query: \"%s\"\n", message)
 	fmt.Println(strings.Repeat("=", 80))
-	
-	
-	// Note: Greeting detection removed - all queries are processed directly by handlers
 
+	// Note: Greeting detection removed - all queries are processed directly by handlers
 
 	// Get or create session
 	s.mu.Lock()
@@ -161,7 +159,7 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 	if !exists {
 		fmt.Printf("🆕 Creating new session for user: %s\n", username)
 		session = &UserSession{
-			MaxHistoryLength: 10,
+			MaxHistoryLength:    10,
 			ConversationHistory: make([]ConversationEntry, 0),
 		}
 		s.sessions[username] = session
@@ -179,9 +177,9 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 	// Try NLP intent handlers first, fall back to RAG if no intent match
 	fmt.Println("\n🧠 AI PROCESSING PIPELINE")
 	fmt.Println("├─ Step 1: Intent Classification & Entity Extraction...")
-	
+
 	intent, entities, sqlQuery := s.nlp.ParseMessage(message)
-	
+
 	// Context Merging Logic
 	// If new entities are missing locations but we have them in session, and the user implies context
 	// (e.g., "what about...", "list blocks there", "trend for it")
@@ -195,7 +193,7 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 			contextUsed = true
 		}
 	}
-	
+
 	// Update session
 	s.mu.Lock()
 	if len(entities.Locations) > 0 {
@@ -206,7 +204,7 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 	s.mu.Unlock()
 
 	fmt.Printf("DEBUG: Intent=%s, Entities=%+v, SQL=%s, ContextUsed=%v\n", intent, entities, sqlQuery, contextUsed)
-	
+
 	response := &models.ChatResponse{
 		Intent: string(intent),
 	}
@@ -216,32 +214,32 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 	if sqlQuery != "" && intent != IntentTrend {
 		fmt.Printf("DEBUG: Executing SQL: %s\n", sqlQuery)
 		results, err := s.ingres.repo.RunRawQuery(ctx, sqlQuery)
-		
+
 		// Handle SQL execution errors
 		if err != nil {
 			fmt.Printf("ERROR: SQL execution failed: %v\n", err)
 			response.Text = "I encountered an error executing your query. Please try rephrasing your question."
-			
+
 			// Track in history
 			s.mu.Lock()
 			session.AddToHistory(message, response.Text, string(intent), entities.Locations)
 			s.mu.Unlock()
-			
+
 			return response, nil
 		}
-		
+
 		// Handle empty results
 		if len(results) == 0 {
 			response.Text = "No data found matching your criteria. Please try different parameters or check the location name."
-			
+
 			// Track in history
 			s.mu.Lock()
 			session.AddToHistory(message, response.Text, string(intent), entities.Locations)
 			s.mu.Unlock()
-			
+
 			return response, nil
 		}
-		
+
 		// Use LLM to pick chart shape but keep visuals hardcoded on frontend
 		response.Text = fmt.Sprintf("Here is the data you requested (%d results).", len(results))
 		response.Data = results
@@ -264,7 +262,7 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 		s.mu.Lock()
 		session.AddToHistory(message, response.Text, string(intent), entities.Locations)
 		s.mu.Unlock()
-		
+
 		// Add bot response to LLM history
 		if s.nlp.llm != nil {
 			s.nlp.llm.AddToHistory("assistant", response.Text)
@@ -272,29 +270,29 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 
 		return response, nil
 	}
-	
+
 	// KEYWORD-BASED INTENT FALLBACK
 	// When AI NLP fails (quota/errors), detect common intent patterns from query keywords
 	msgLower := strings.ToLower(message)
-	
+
 	// Detect LIST_STATES intent first (highest priority for "all states" queries)
-	if strings.Contains(msgLower, "all states") || 
+	if strings.Contains(msgLower, "all states") ||
 		strings.Contains(msgLower, "list states") ||
 		strings.Contains(msgLower, "show states") {
 		fmt.Println("├─ 🔄 Keyword fallback: Detected LIST_STATES intent")
 		intent = IntentListStates
 		entities.Locations = []string{} // No location needed for list all states
 	}
-	
+
 	// Detect LIST_DISTRICTS intent
-	if (strings.Contains(msgLower, "districts in") || 
+	if (strings.Contains(msgLower, "districts in") ||
 		strings.Contains(msgLower, "districts of") ||
 		strings.Contains(msgLower, "list districts") ||
-		strings.Contains(msgLower, "show districts")) && 
+		strings.Contains(msgLower, "show districts")) &&
 		intent != IntentListDistricts {
 		fmt.Println("├─ 🔄 Keyword fallback: Detected LIST_DISTRICTS intent")
 		intent = IntentListDistricts
-		
+
 		// Extract location from "districts in X" or "districts of X" pattern
 		if strings.Contains(msgLower, "districts in") {
 			parts := strings.Split(msgLower, "districts in")
@@ -319,21 +317,21 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 			}
 		}
 	}
-	
+
 	// Detect MAP_CATEGORY intent FIRST (e.g., "Critical blocks in Punjab", "Safe blocks in Haryana")
 	// This takes priority over LIST_BLOCKS when a category keyword is present
-	hasCategoryKeyword := strings.Contains(msgLower, "critical") || 
+	hasCategoryKeyword := strings.Contains(msgLower, "critical") ||
 		strings.Contains(msgLower, "safe") ||
-		strings.Contains(msgLower, "over-exploited") || 
+		strings.Contains(msgLower, "over-exploited") ||
 		strings.Contains(msgLower, "over exploited") ||
 		strings.Contains(msgLower, "overexploited") ||
 		strings.Contains(msgLower, "semi-critical") ||
 		strings.Contains(msgLower, "semi critical")
-	
+
 	if hasCategoryKeyword && strings.Contains(msgLower, "blocks") && intent != IntentMapCategory {
 		fmt.Println("├─ 🔄 Keyword fallback: Detected MAP_CATEGORY intent (category + blocks)")
 		intent = IntentMapCategory
-		
+
 		// Extract location - remove category keywords first
 		locationQuery := msgLower
 		for _, cat := range []string{"critical", "safe", "over-exploited", "over exploited", "overexploited", "semi-critical", "semi critical"} {
@@ -343,19 +341,19 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 		locationQuery = strings.ReplaceAll(locationQuery, "blocks of", "")
 		locationQuery = strings.ReplaceAll(locationQuery, "blocks", "")
 		locationQuery = strings.TrimSpace(locationQuery)
-		
+
 		if locationQuery != "" {
 			entities.Locations = []string{strings.ToUpper(locationQuery)}
 			fmt.Printf("├─ 🔄 Extracted location for category query: %s\n", locationQuery)
 		}
-	} else if (strings.Contains(msgLower, "blocks in") || 
+	} else if (strings.Contains(msgLower, "blocks in") ||
 		strings.Contains(msgLower, "blocks of") ||
 		strings.Contains(msgLower, "list blocks") ||
-		strings.Contains(msgLower, "show blocks")) && 
+		strings.Contains(msgLower, "show blocks")) &&
 		intent != IntentListBlocks && !hasCategoryKeyword {
 		fmt.Println("├─ 🔄 Keyword fallback: Detected LIST_BLOCKS intent")
 		intent = IntentListBlocks
-		
+
 		// Extract location from "blocks in X" or "blocks of X" pattern
 		if strings.Contains(msgLower, "blocks in") {
 			parts := strings.Split(msgLower, "blocks in")
@@ -381,17 +379,17 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 			}
 		}
 	}
-	
+
 	// Detect TOP_RANKING intent (top N critical/safe/over-exploited blocks)
 	if (strings.Contains(msgLower, "top ") || strings.Contains(msgLower, "worst ") || strings.Contains(msgLower, "most ")) &&
-		(strings.Contains(msgLower, "critical") || strings.Contains(msgLower, "over-exploited") || 
-		 strings.Contains(msgLower, "safe") || strings.Contains(msgLower, "semi-critical")) {
-		
+		(strings.Contains(msgLower, "critical") || strings.Contains(msgLower, "over-exploited") ||
+			strings.Contains(msgLower, "safe") || strings.Contains(msgLower, "semi-critical")) {
+
 		if intent != IntentTopRanking {
 			fmt.Println("├─ 🔄 Keyword fallback: Detected TOP_RANKING intent")
 			intent = IntentTopRanking
 		}
-		
+
 		// Clear locations that are actually ranking keywords (top, worst, most, etc.)
 		// This runs regardless of whether intent was already TOP_RANKING to clean up bad entities
 		var filteredLocations []string
@@ -418,13 +416,13 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 			fmt.Println("├─ 🔄 Cleared all locations (all were ranking keywords)")
 		}
 	}
-	
+
 	// Process with intent handlers
 	var handlerResult *models.ChatResponse
 	var handlerErr error
 	var shouldFallbackToRAG bool
 	var textLower string
-	
+
 	switch intent {
 	case IntentSummary:
 		// USE NEW FOCUSED 4-ATTRIBUTE HANDLER
@@ -486,14 +484,14 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 		fmt.Printf("├─ ⚠️  Unknown intent '%s', falling back to RAG search\n", intent)
 		goto RAG_FALLBACK
 	}
-	
+
 	// Handle errors from intent handlers
 	if handlerErr != nil {
 		fmt.Printf("ERROR: Intent handler failed: %v\n", handlerErr)
 		response.Text = "I encountered an error processing your request. Please try again."
 		return response, nil
 	}
-	
+
 	// Check if handler returned a "not found" or "no data" error message
 	// If so, fall back to RAG search for better results
 	shouldFallbackToRAG = false
@@ -514,7 +512,7 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 			"please check the spelling",
 			"i found only",
 		}
-		
+
 		for _, pattern := range errorPatterns {
 			if strings.Contains(textLower, pattern) {
 				shouldFallbackToRAG = true
@@ -523,21 +521,21 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 			}
 		}
 	}
-	
+
 	if shouldFallbackToRAG {
 		goto RAG_FALLBACK
 	}
-	
+
 	// Track in conversation history
 	s.mu.Lock()
 	session.AddToHistory(message, handlerResult.Text, string(intent), entities.Locations)
 	s.mu.Unlock()
-	
+
 	// Add bot response to LLM history
 	if s.nlp.llm != nil {
 		s.nlp.llm.AddToHistory("assistant", handlerResult.Text)
 	}
-	
+
 	return handlerResult, nil
 
 RAG_FALLBACK:
@@ -545,31 +543,31 @@ RAG_FALLBACK:
 	// Use RAG semantic/hybrid search when no intent matches
 	fmt.Println("\n🔍 RAG SEMANTIC SEARCH PIPELINE (Fallback)")
 	fmt.Println("├─ Using RAG Hybrid Search (Keyword + Vector Semantic Search)")
-	
+
 	// Perform RAG search
 	if s.rag != nil {
 		var searchResp *HybridSearchResponse
 		var ragErr error
-		
+
 		msgLower := strings.ToLower(message)
-		
+
 		// Detect query type
-		isComparisonQuery := strings.Contains(msgLower, "compare") || 
+		isComparisonQuery := strings.Contains(msgLower, "compare") ||
 			strings.Contains(msgLower, " vs ") ||
 			strings.Contains(msgLower, "versus")
-		
+
 		// Detect if query asks for multiple entities
 		asksForMultipleEntities := strings.Contains(msgLower, "blocks in") ||
 			strings.Contains(msgLower, "blocks of") ||
 			strings.Contains(msgLower, "districts in") ||
 			strings.Contains(msgLower, "districts of")
-		
+
 		// Check if query mentions specific locations (common district names)
 		// This helps prioritize keyword search for location-specific queries
 		hasLocationKeywords := false
-		locationKeywords := []string{"amritsar", "ludhiana", "delhi", "mumbai", "bangalore", "chennai", 
-			"kolkata", "jaipur", "punjab", "haryana", "rajasthan", "gujarat", "maharashtra", 
-			"bihar", "uttar", "pradesh", "karnataka", "kerala", "tamil", "nadu", "andhra", 
+		locationKeywords := []string{"amritsar", "ludhiana", "delhi", "mumbai", "bangalore", "chennai",
+			"kolkata", "jaipur", "punjab", "haryana", "rajasthan", "gujarat", "maharashtra",
+			"bihar", "uttar", "pradesh", "karnataka", "kerala", "tamil", "nadu", "andhra",
 			"telangana", "madhya", "pradesh", "odisha", "west", "bengal", "assam",
 			"district", "block", "state", " in ", "punjabi", "ajmer", "bikaner", "patna", "lucknow"}
 		for _, keyword := range locationKeywords {
@@ -578,11 +576,11 @@ RAG_FALLBACK:
 				break
 			}
 		}
-		
+
 		if isComparisonQuery || hasLocationKeywords {
 			// For location-specific queries, use keyword-only search for better matching
 			queryProcessed := message
-			
+
 			if isComparisonQuery {
 				// Example: "Compare Amritsar and Ludhiana" → "Amritsar OR Ludhiana"
 				queryProcessed = strings.ReplaceAll(message, " and ", " OR ")
@@ -596,7 +594,7 @@ RAG_FALLBACK:
 			} else {
 				fmt.Printf("├─ Using keyword-only search for location-specific query\n")
 			}
-			
+
 			searchReq := HybridSearchRequest{
 				Query:       queryProcessed,
 				UseKeyword:  true,
@@ -604,7 +602,7 @@ RAG_FALLBACK:
 				Limit:       30,
 			}
 			searchResp, ragErr = s.rag.HybridSearch(ctx, searchReq)
-			
+
 			// Fallback to hybrid if keyword fails
 			if ragErr != nil || len(searchResp.Results) == 0 {
 				fmt.Println("├─ Keyword-only returned no results, trying hybrid search")
@@ -621,49 +619,49 @@ RAG_FALLBACK:
 			}
 			searchResp, ragErr = s.rag.HybridSearch(ctx, searchReq)
 		}
-	if ragErr != nil {
-		fmt.Printf("❌ RAG search failed: %v\n", ragErr)
-		response := &models.ChatResponse{
-			Text: "I encountered an error searching the groundwater database. Please try again.",
+		if ragErr != nil {
+			fmt.Printf("❌ RAG search failed: %v\n", ragErr)
+			response := &models.ChatResponse{
+				Text: "I encountered an error searching the groundwater database. Please try again.",
+			}
+			return response, nil
 		}
-		return response, nil
-	}
-	
-	fmt.Printf("📊 RAG returned %d results before filtering\n", len(searchResp.Results))
-	if len(searchResp.Results) > 0 {
-		fmt.Println("🔍 Sample raw results:")
-		for i := 0; i < min(3, len(searchResp.Results)); i++ {
-			r := searchResp.Results[i]
-			fmt.Printf("  [%d] %s - %s (Score: %.2f) | Stage: %.2f, Rain: %.2f, Recharge: %.2f, Extraction: %.2f | Category: %s\n",
-				i+1, r.BlockName, r.DistrictName, r.Score, r.Stage, r.Rainfall, r.TotalRecharge, r.TotalExtraction, r.Category)
+
+		fmt.Printf("📊 RAG returned %d results before filtering\n", len(searchResp.Results))
+		if len(searchResp.Results) > 0 {
+			fmt.Println("🔍 Sample raw results:")
+			for i := 0; i < min(3, len(searchResp.Results)); i++ {
+				r := searchResp.Results[i]
+				fmt.Printf("  [%d] %s - %s (Score: %.2f) | Stage: %.2f, Rain: %.2f, Recharge: %.2f, Extraction: %.2f | Category: %s\n",
+					i+1, r.BlockName, r.DistrictName, r.Score, r.Stage, r.Rainfall, r.TotalRecharge, r.TotalExtraction, r.Category)
+			}
 		}
-	}
-	
-	if len(searchResp.Results) == 0 {
-		fmt.Println("├─ ⚠️  No results found")
-		response := &models.ChatResponse{
-			Text: s.buildNoDataFoundMessage(message),
+
+		if len(searchResp.Results) == 0 {
+			fmt.Println("├─ ⚠️  No results found")
+			response := &models.ChatResponse{
+				Text: s.buildNoDataFoundMessage(message),
+			}
+			return response, nil
 		}
-		return response, nil
-	}
-		
+
 		// Filter out blocks with zero/invalid data
 		filteredResults := make([]SearchResult, 0)
 		queryLower := strings.ToLower(message)
-		
+
 		for _, result := range searchResp.Results {
 			// Skip blocks with all zero values (incomplete data)
 			if result.Stage == 0 && result.Rainfall == 0 && result.TotalRecharge == 0 && result.TotalExtraction == 0 {
 				fmt.Printf("├─ Filtered: %s (all zeros)\n", result.BlockName)
 				continue
 			}
-			
+
 			// For location-based queries, filter out partial matches
 			// e.g., "Bihar" or "blocks in Bihar" should not match "Koch Bihar" (West Bengal)
 			if hasLocationKeywords && !asksForMultipleEntities {
 				stateNameLower := strings.ToLower(result.StateName)
 				districtNameLower := strings.ToLower(result.DistrictName)
-				
+
 				// Extract the main location name from query (remove "blocks in", "districts in", etc.)
 				mainLocation := queryLower
 				mainLocation = strings.ReplaceAll(mainLocation, "data in ", "")
@@ -675,44 +673,44 @@ RAG_FALLBACK:
 				mainLocation = strings.ReplaceAll(mainLocation, "block ", "")
 				mainLocation = strings.ReplaceAll(mainLocation, " district", "")
 				mainLocation = strings.TrimSpace(mainLocation)
-				
+
 				// STATE NAME must match exactly (prioritize state over block name)
 				// "bihar" should only match state "BIHAR", not block "BIHAR" in Uttar Pradesh
 				// Also check if mainLocation is a substring of a multi-word state name
-				stateMatches := stateNameLower == mainLocation || 
+				stateMatches := stateNameLower == mainLocation ||
 					(len(mainLocation) > 3 && strings.Contains(" "+stateNameLower+" ", " "+mainLocation+" "))
-				
+
 				// DISTRICT NAME can match as substring
 				// "patna" matches "PATNA" district
 				// But "bihar" should NOT match "KOCH BIHAR" district
-				districtMatches := districtNameLower == mainLocation || 
+				districtMatches := districtNameLower == mainLocation ||
 					(len(mainLocation) > 3 && strings.HasPrefix(districtNameLower, mainLocation))
-				
+
 				// For single-word queries, ONLY match state/district, not block names
 				// "Bihar" should match BIHAR state, not BIHAR block in Uttar Pradesh
 				if !stateMatches && !districtMatches {
-					fmt.Printf("├─ Filtered: %s - %s, %s (looking for '%s', state='%s', district='%s')\n", 
+					fmt.Printf("├─ Filtered: %s - %s, %s (looking for '%s', state='%s', district='%s')\n",
 						result.BlockName, result.DistrictName, result.StateName, mainLocation, stateNameLower, districtNameLower)
 					continue
 				}
-				
-				fmt.Printf("├─ ✅ Location match: %s in %s, %s (query='%s')\n", 
+
+				fmt.Printf("├─ ✅ Location match: %s in %s, %s (query='%s')\n",
 					result.BlockName, result.DistrictName, result.StateName, mainLocation)
 			}
-			
+
 			// For comparison queries, prioritize results matching mentioned locations
 			if isComparisonQuery {
 				// Check if this result matches any location mentioned in the query
 				resultLocationMatch := strings.Contains(queryLower, strings.ToLower(result.DistrictName)) ||
 					strings.Contains(queryLower, strings.ToLower(result.BlockName)) ||
 					strings.Contains(queryLower, strings.ToLower(result.StateName))
-				
+
 				// Skip "Hilly Area" completely for comparison queries
 				if result.Category == "Hilly Area" {
 					fmt.Printf("├─ Filtered: %s (hilly area in comparison)\n", result.BlockName)
 					continue
 				}
-				
+
 				// For comparison queries, skip results that don't match any mentioned location
 				// UNLESS we have very few results (allow some flexibility)
 				if !resultLocationMatch && len(filteredResults) >= 5 {
@@ -726,16 +724,16 @@ RAG_FALLBACK:
 					continue
 				}
 			}
-			
+
 			fmt.Printf("├─ Keeping: %s - %s (Stage: %.2f, Rain: %.2f)\n", result.BlockName, result.DistrictName, result.Stage, result.Rainfall)
 			filteredResults = append(filteredResults, result)
 			if len(filteredResults) >= 10 {
 				break
 			}
 		}
-		
+
 		fmt.Printf("✅ Filtering complete: %d results kept (from %d raw results)\n", len(filteredResults), len(searchResp.Results))
-		
+
 		if len(filteredResults) == 0 {
 			fmt.Println("├─ ⚠️  No valid results after filtering")
 			response := &models.ChatResponse{
@@ -743,44 +741,44 @@ RAG_FALLBACK:
 			}
 			return response, nil
 		}
-		
+
 		fmt.Printf("├─ ✅ Found %d relevant assessments (filtered from %d)\n", len(filteredResults), len(searchResp.Results))
-		
+
 		// HIERARCHY AGGREGATION: Detect if query is for single state/district
 		// and aggregate block-level data accordingly
 		filteredResults = s.aggregateByHierarchy(filteredResults, msgLower)
-		
+
 		// Convert RAG results to visualization-friendly format
 		ragResultsAsMap := make([]map[string]interface{}, 0, len(filteredResults))
 		for _, result := range filteredResults {
 			ragResultsAsMap = append(ragResultsAsMap, map[string]interface{}{
-				"assessment_id":      result.AssessmentID,
-				"block_uuid":         result.BlockUUID,
-				"block_name":         result.BlockName,
-				"district_name":      result.DistrictName,
-				"state_name":         result.StateName,
-				"year":               result.Year,
-				"category":           result.Category,
-				"stage":              result.Stage,
-				"rainfall":           result.Rainfall,
-				"total_recharge":     result.TotalRecharge,
-				"total_extraction":   result.TotalExtraction,
-				"score":              result.Score,
-				"search_type":        result.SearchType,
+				"assessment_id":       result.AssessmentID,
+				"block_uuid":          result.BlockUUID,
+				"block_name":          result.BlockName,
+				"district_name":       result.DistrictName,
+				"state_name":          result.StateName,
+				"year":                result.Year,
+				"category":            result.Category,
+				"stage":               result.Stage,
+				"rainfall":            result.Rainfall,
+				"total_recharge":      result.TotalRecharge,
+				"total_extraction":    result.TotalExtraction,
+				"score":               result.Score,
+				"search_type":         result.SearchType,
 				"text_representation": result.TextRepresentation,
-				"raw_data":           result.RawData,
+				"raw_data":            result.RawData,
 			})
 		}
-		
+
 		// Build text response
 		textResponse := s.buildRAGTextResponse(filteredResults)
-		
+
 		response := &models.ChatResponse{
 			Text:   textResponse,
 			Intent: "RAG_SEARCH",
 			Data:   ragResultsAsMap,
 		}
-		
+
 		// Generate chart visualization from RAG results
 		fmt.Println("├─ 📊 Generating visualization from RAG results...")
 		chartPayload := s.buildRAGChart(filteredResults, message)
@@ -788,194 +786,194 @@ RAG_FALLBACK:
 			response.Chart = chartPayload
 			fmt.Printf("├─ ✅ Chart generated: %s\n", chartPayload.Type)
 		}
-		
+
 		// Track in conversation history
 		s.mu.Lock()
 		session.AddToHistory(message, response.Text, "RAG_SEARCH", []string{})
 		s.mu.Unlock()
-		
+
 		// Add bot response to LLM history
 		if s.nlp.llm != nil {
 			s.nlp.llm.AddToHistory("assistant", response.Text)
 		}
-		
+
 		fmt.Println(strings.Repeat("=", 80) + "\n")
 		return response, nil
 	}
-	
+
 	// ========== OLD NLP APPROACH (COMMENTED OUT) ==========
 	/*
-	fmt.Println("\n🧠 AI PROCESSING PIPELINE")
-	fmt.Println("├─ Step 1: Intent Classification & Entity Extraction...")
-	intent, entities, sqlQuery := s.nlp.ParseMessage(message)
-	fmt.Printf("├─ ✅ Intent Detected: %s\n", intent)
-	fmt.Printf("├─ 📍 Locations Found: %v\n", entities.Locations)
-	fmt.Printf("├─ 📅 Year: %s\n", entities.Year)
-	if sqlQuery != "" {
-		fmt.Printf("├─ 🗄️  Dynamic SQL Generated: %s\n", sqlQuery[:min(100, len(sqlQuery))]+(func() string { if len(sqlQuery) > 100 { return "..." }; return "" })())
-	}
-	
-	// Context Merging Logic
-	contextUsed := false
-	if len(entities.Locations) == 0 && len(session.LastEntities.Locations) > 0 {
-		if intent == IntentTrend || intent == IntentCompare || intent == IntentListBlocks || intent == IntentSummary {
-			fmt.Printf("├─ 🔗 Context Merging: Using previous location %v\n", session.LastEntities.Locations)
-			entities.Locations = session.LastEntities.Locations
-			contextUsed = true
+		fmt.Println("\n🧠 AI PROCESSING PIPELINE")
+		fmt.Println("├─ Step 1: Intent Classification & Entity Extraction...")
+		intent, entities, sqlQuery := s.nlp.ParseMessage(message)
+		fmt.Printf("├─ ✅ Intent Detected: %s\n", intent)
+		fmt.Printf("├─ 📍 Locations Found: %v\n", entities.Locations)
+		fmt.Printf("├─ 📅 Year: %s\n", entities.Year)
+		if sqlQuery != "" {
+			fmt.Printf("├─ 🗄️  Dynamic SQL Generated: %s\n", sqlQuery[:min(100, len(sqlQuery))]+(func() string { if len(sqlQuery) > 100 { return "..." }; return "" })())
 		}
-	}
-	
-	s.mu.Lock()
-	if len(entities.Locations) > 0 {
-		session.LastEntities = entities
-	}
-	session.LastIntent = string(intent)
-	session.LastQuery = message
-	s.mu.Unlock()
 
-	fmt.Printf("DEBUG: Intent=%s, Entities=%+v, SQL=%s, ContextUsed=%v\n", intent, entities, sqlQuery, contextUsed)
-	
-	response := &models.ChatResponse{
-		Intent: string(intent),
-	}
+		// Context Merging Logic
+		contextUsed := false
+		if len(entities.Locations) == 0 && len(session.LastEntities.Locations) > 0 {
+			if intent == IntentTrend || intent == IntentCompare || intent == IntentListBlocks || intent == IntentSummary {
+				fmt.Printf("├─ 🔗 Context Merging: Using previous location %v\n", session.LastEntities.Locations)
+				entities.Locations = session.LastEntities.Locations
+				contextUsed = true
+			}
+		}
 
-	// OLD SQL EXECUTION PATH (COMMENTED OUT)
+		s.mu.Lock()
+		if len(entities.Locations) > 0 {
+			session.LastEntities = entities
+		}
+		session.LastIntent = string(intent)
+		session.LastQuery = message
+		s.mu.Unlock()
+
+		fmt.Printf("DEBUG: Intent=%s, Entities=%+v, SQL=%s, ContextUsed=%v\n", intent, entities, sqlQuery, contextUsed)
+
+		response := &models.ChatResponse{
+			Intent: string(intent),
+		}
+
+		// OLD SQL EXECUTION PATH (COMMENTED OUT)
+		/*
+		if sqlQuery != "" && intent != IntentTrend {
+			fmt.Printf("DEBUG: Executing SQL: %s\n", sqlQuery)
+			results, err := s.ingres.repo.RunRawQuery(ctx, sqlQuery)
+
+			// Handle SQL execution errors
+			if err != nil {
+				fmt.Printf("ERROR: SQL execution failed: %v\n", err)
+				response.Text = "I encountered an error executing your query. Please try rephrasing your question."
+
+				// Track in history
+				s.mu.Lock()
+				session.AddToHistory(message, response.Text, string(intent), entities.Locations)
+				s.mu.Unlock()
+
+				return response, nil
+			}
+
+			// Handle empty results
+			if len(results) == 0 {
+				fmt.Println("├─ ⚠️  No results found in database")
+				response.Text = "No data found matching your criteria. Please try different parameters or check the location name."
+
+				// Track in history
+				s.mu.Lock()
+				session.AddToHistory(message, response.Text, string(intent), entities.Locations)
+				s.mu.Unlock()
+
+				return response, nil
+			}
+
+			// Use LLM to pick chart shape but keep visuals hardcoded on frontend
+			fmt.Printf("├─ ✅ Retrieved %d rows from database\n", len(results))
+			fmt.Println("├─ Step 3: Chart Generation with LLM")
+			response.Text = fmt.Sprintf("Here is the data you requested (%d results).", len(results))
+			response.Data = results
+
+			chartPayload, vizText := s.buildChartWithLLM(results, sqlQuery, message)
+			if chartPayload != nil {
+				fmt.Printf("├─ 📊 Chart Type: %s\n", chartPayload.Type)
+				response.Chart = chartPayload
+				if vizText != "" {
+					response.Text = vizText
+				}
+			} else {
+				// Fallback to simple bar if LLM mapping fails
+				fallbackChart := buildSimpleChart(results)
+				if fallbackChart != nil {
+					response.Chart = fallbackChart
+				}
+			}
+
+			// Track in conversation history
+			s.mu.Lock()
+			session.AddToHistory(message, response.Text, string(intent), entities.Locations)
+			s.mu.Unlock()
+
+			// Add bot response to LLM history
+			if s.nlp.llm != nil {
+				s.nlp.llm.AddToHistory("assistant", response.Text)
+			}
+
+			return response, nil
+		}
+	*/
+
 	/*
-	if sqlQuery != "" && intent != IntentTrend {
-		fmt.Printf("DEBUG: Executing SQL: %s\n", sqlQuery)
-		results, err := s.ingres.repo.RunRawQuery(ctx, sqlQuery)
-		
-		// Handle SQL execution errors
-		if err != nil {
-			fmt.Printf("ERROR: SQL execution failed: %v\n", err)
-			response.Text = "I encountered an error executing your query. Please try rephrasing your question."
-			
-			// Track in history
-			s.mu.Lock()
-			session.AddToHistory(message, response.Text, string(intent), entities.Locations)
-			s.mu.Unlock()
-			
-			return response, nil
-		}
-		
-		// Handle empty results
-		if len(results) == 0 {
-			fmt.Println("├─ ⚠️  No results found in database")
-			response.Text = "No data found matching your criteria. Please try different parameters or check the location name."
-			
-			// Track in history
-			s.mu.Lock()
-			session.AddToHistory(message, response.Text, string(intent), entities.Locations)
-			s.mu.Unlock()
-			
-			return response, nil
-		}
-		
-		// Use LLM to pick chart shape but keep visuals hardcoded on frontend
-		fmt.Printf("├─ ✅ Retrieved %d rows from database\n", len(results))
-		fmt.Println("├─ Step 3: Chart Generation with LLM")
-		response.Text = fmt.Sprintf("Here is the data you requested (%d results).", len(results))
-		response.Data = results
+		// Process with intent handlers
+		fmt.Println("\n├─ Step 2: Intent Handler Routing")
+		fmt.Printf("├─ 🎯 Routing to handler: %s\n", intent)
+		var handlerResult *models.ChatResponse
+		var handlerErr error
 
-		chartPayload, vizText := s.buildChartWithLLM(results, sqlQuery, message)
-		if chartPayload != nil {
-			fmt.Printf("├─ 📊 Chart Type: %s\n", chartPayload.Type)
-			response.Chart = chartPayload
-			if vizText != "" {
-				response.Text = vizText
-			}
-		} else {
-			// Fallback to simple bar if LLM mapping fails
-			fallbackChart := buildSimpleChart(results)
-			if fallbackChart != nil {
-				response.Chart = fallbackChart
-			}
+		switch intent {
+		case IntentSummary:
+			fmt.Println("├─ 📋 Executing Summary Handler...")
+			handlerResult, handlerErr = s.handleSummary(ctx, entities, response)
+		case IntentTrend:
+			fmt.Println("├─ 📈 Executing Trend Analysis Handler...")
+			handlerResult, handlerErr = s.handleTrend(ctx, entities, response)
+		case IntentCompare:
+			fmt.Println("├─ ⚖️  Executing Comparison Handler...")
+			handlerResult, handlerErr = s.handleCompare(ctx, entities, response)
+		case IntentRechargeBreakdown:
+			handlerResult, handlerErr = s.handleRechargeBreakdown(ctx, entities, response)
+		case IntentExtractionBreakdown:
+			handlerResult, handlerErr = s.handleExtractionBreakdown(ctx, entities, response)
+		case IntentDischargeBreakdown:
+			handlerResult, handlerErr = s.handleDischargeBreakdown(ctx, entities, response)
+		case IntentMapCategory:
+			handlerResult, handlerErr = s.handleMapCategory(ctx, entities, response)
+		case IntentListBlocks:
+			handlerResult, handlerErr = s.handleListBlocks(ctx, entities, response)
+		case IntentListDistricts:
+			handlerResult, handlerErr = s.handleListDistricts(ctx, entities, response)
+		case IntentListStates:
+			handlerResult, handlerErr = s.handleListStates(ctx, entities, response)
+		case IntentTopRanking:
+			handlerResult, handlerErr = s.handleTopRanking(ctx, entities, response)
+		case IntentCategoryDistribution, IntentDeficitAnalysis, IntentChangeAnalysis:
+			// These intents use dynamic SQL path above
+			// If we reach here, it means dynamic SQL failed
+			response.Text = "I understand you're looking for " + string(intent) + " analysis. Please try rephrasing your question."
+			handlerResult = response
+		default:
+			response.Text = "I'm not sure what you mean. Try asking for a summary, trend, comparison, ranking, distribution, or recharge/extraction breakdowns."
+			handlerResult = response
 		}
 
 		// Track in conversation history
-		s.mu.Lock()
-		session.AddToHistory(message, response.Text, string(intent), entities.Locations)
-		s.mu.Unlock()
-		
-		// Add bot response to LLM history
-		if s.nlp.llm != nil {
-			s.nlp.llm.AddToHistory("assistant", response.Text)
+		if handlerResult != nil {
+			fmt.Println("\n📤 RESPONSE SUMMARY")
+			fmt.Printf("├─ Intent: %s\n", intent)
+			if handlerResult.Chart != nil {
+				fmt.Printf("├─ Chart Type: %s\n", handlerResult.Chart.Type)
+				fmt.Printf("├─ Chart Title: %s\n", handlerResult.Chart.Title)
+			}
+			if handlerResult.Map != nil {
+				fmt.Printf("├─ Map Title: %s\n", handlerResult.Map.Title)
+			}
+			fmt.Printf("├─ Response Length: %d characters\n", len(handlerResult.Text))
+			fmt.Println(strings.Repeat("=", 80) + "\n")
+
+			s.mu.Lock()
+			session.AddToHistory(message, handlerResult.Text, string(intent), entities.Locations)
+			s.mu.Unlock()
+
+			// Add bot response to LLM history
+			if s.nlp.llm != nil && handlerResult.Text != "" {
+				s.nlp.llm.AddToHistory("assistant", handlerResult.Text)
+			}
 		}
 
-		return response, nil
-	}
+		return handlerResult, handlerErr
 	*/
-	
-	/*
-	// Process with intent handlers
-	fmt.Println("\n├─ Step 2: Intent Handler Routing")
-	fmt.Printf("├─ 🎯 Routing to handler: %s\n", intent)
-	var handlerResult *models.ChatResponse
-	var handlerErr error
-	
-	switch intent {
-	case IntentSummary:
-		fmt.Println("├─ 📋 Executing Summary Handler...")
-		handlerResult, handlerErr = s.handleSummary(ctx, entities, response)
-	case IntentTrend:
-		fmt.Println("├─ 📈 Executing Trend Analysis Handler...")
-		handlerResult, handlerErr = s.handleTrend(ctx, entities, response)
-	case IntentCompare:
-		fmt.Println("├─ ⚖️  Executing Comparison Handler...")
-		handlerResult, handlerErr = s.handleCompare(ctx, entities, response)
-	case IntentRechargeBreakdown:
-		handlerResult, handlerErr = s.handleRechargeBreakdown(ctx, entities, response)
-	case IntentExtractionBreakdown:
-		handlerResult, handlerErr = s.handleExtractionBreakdown(ctx, entities, response)
-	case IntentDischargeBreakdown:
-		handlerResult, handlerErr = s.handleDischargeBreakdown(ctx, entities, response)
-	case IntentMapCategory:
-		handlerResult, handlerErr = s.handleMapCategory(ctx, entities, response)
-	case IntentListBlocks:
-		handlerResult, handlerErr = s.handleListBlocks(ctx, entities, response)
-	case IntentListDistricts:
-		handlerResult, handlerErr = s.handleListDistricts(ctx, entities, response)
-	case IntentListStates:
-		handlerResult, handlerErr = s.handleListStates(ctx, entities, response)
-	case IntentTopRanking:
-		handlerResult, handlerErr = s.handleTopRanking(ctx, entities, response)
-	case IntentCategoryDistribution, IntentDeficitAnalysis, IntentChangeAnalysis:
-		// These intents use dynamic SQL path above
-		// If we reach here, it means dynamic SQL failed
-		response.Text = "I understand you're looking for " + string(intent) + " analysis. Please try rephrasing your question."
-		handlerResult = response
-	default:
-		response.Text = "I'm not sure what you mean. Try asking for a summary, trend, comparison, ranking, distribution, or recharge/extraction breakdowns."
-		handlerResult = response
-	}
-	
-	// Track in conversation history
-	if handlerResult != nil {
-		fmt.Println("\n📤 RESPONSE SUMMARY")
-		fmt.Printf("├─ Intent: %s\n", intent)
-		if handlerResult.Chart != nil {
-			fmt.Printf("├─ Chart Type: %s\n", handlerResult.Chart.Type)
-			fmt.Printf("├─ Chart Title: %s\n", handlerResult.Chart.Title)
-		}
-		if handlerResult.Map != nil {
-			fmt.Printf("├─ Map Title: %s\n", handlerResult.Map.Title)
-		}
-		fmt.Printf("├─ Response Length: %d characters\n", len(handlerResult.Text))
-		fmt.Println(strings.Repeat("=", 80) + "\n")
-		
-		s.mu.Lock()
-		session.AddToHistory(message, handlerResult.Text, string(intent), entities.Locations)
-		s.mu.Unlock()
-		
-		// Add bot response to LLM history
-		if s.nlp.llm != nil && handlerResult.Text != "" {
-			s.nlp.llm.AddToHistory("assistant", handlerResult.Text)
-		}
-	}
-	
-	return handlerResult, handlerErr
-	*/
-	
+
 	// If RAG is not available, return error
 	return &models.ChatResponse{
 		Text: "RAG service is not available. Please check the configuration.",
@@ -987,7 +985,7 @@ func (s *ChatService) aggregateByHierarchy(results []SearchResult, queryLower st
 	if len(results) == 0 {
 		return results
 	}
-	
+
 	// Check if query explicitly asks for multiple entities
 	asksForMultiple := strings.Contains(queryLower, "blocks in") ||
 		strings.Contains(queryLower, "blocks of") ||
@@ -995,12 +993,12 @@ func (s *ChatService) aggregateByHierarchy(results []SearchResult, queryLower st
 		strings.Contains(queryLower, "districts of") ||
 		strings.Contains(queryLower, "compare") ||
 		strings.Contains(queryLower, " vs ")
-	
+
 	if asksForMultiple {
 		fmt.Println("├─ 🔍 Query asks for multiple entities - keeping individual results")
 		return results
 	}
-	
+
 	// Check if all results are from the same state
 	firstState := results[0].StateName
 	sameState := true
@@ -1010,7 +1008,7 @@ func (s *ChatService) aggregateByHierarchy(results []SearchResult, queryLower st
 			break
 		}
 	}
-	
+
 	// Check if all results are from the same district
 	firstDistrict := results[0].DistrictName
 	sameDistrict := true
@@ -1020,13 +1018,13 @@ func (s *ChatService) aggregateByHierarchy(results []SearchResult, queryLower st
 			break
 		}
 	}
-	
+
 	// If all from same district (and query doesn't ask for blocks), aggregate to district level
 	if sameDistrict && !strings.Contains(queryLower, "block") {
 		fmt.Printf("├─ 🔄 All results from same district (%s) - aggregating to district level\n", firstDistrict)
 		return []SearchResult{s.aggregateToDistrict(results)}
 	}
-	
+
 	// If all from same state but different districts (and query doesn't mention district/block)
 	// Check if query is simple enough to warrant state-level aggregation
 	if sameState && !sameDistrict {
@@ -1035,19 +1033,19 @@ func (s *ChatService) aggregateByHierarchy(results []SearchResult, queryLower st
 			fmt.Println("├─ ✅ Query mentions district/block - keeping individual results")
 			return results
 		}
-		
+
 		// If query is very short (likely just a state name), aggregate to state level
 		queryWords := len(strings.Fields(queryLower))
 		if queryWords <= 3 {
 			fmt.Printf("├─ 🔄 Short query (%d words) about state %s - aggregating to state level\n", queryWords, firstState)
 			return []SearchResult{s.aggregateToState(results)}
 		}
-		
+
 		// For longer queries about specific topics (extraction, recharge, etc), keep individual results
 		fmt.Printf("├─ 🔄 Topic-specific query about %s - keeping individual district results\n", firstState)
 		return results
 	}
-	
+
 	// Otherwise, return individual block results
 	fmt.Println("├─ ✅ Keeping individual block-level results (multiple states)")
 	return results
@@ -1058,15 +1056,15 @@ func (s *ChatService) aggregateToState(results []SearchResult) SearchResult {
 	if len(results) == 0 {
 		return SearchResult{}
 	}
-	
+
 	stateName := results[0].StateName
 	year := results[0].Year // Use first result's year (most relevant)
-	
+
 	// Aggregate metrics (sum for volumes, average for stage)
 	var totalRainfall, totalRecharge, totalExtraction, totalStage float64
 	var stageCount int
 	categories := make(map[string]int)
-	
+
 	for _, r := range results {
 		totalRainfall += r.Rainfall
 		totalRecharge += r.TotalRecharge
@@ -1077,12 +1075,12 @@ func (s *ChatService) aggregateToState(results []SearchResult) SearchResult {
 		}
 		categories[r.Category]++
 	}
-	
+
 	avgStage := float64(0)
 	if stageCount > 0 {
 		avgStage = totalStage / float64(stageCount)
 	}
-	
+
 	// Determine dominant category
 	dominantCategory := "N/A"
 	maxCount := 0
@@ -1092,10 +1090,10 @@ func (s *ChatService) aggregateToState(results []SearchResult) SearchResult {
 			dominantCategory = cat
 		}
 	}
-	
+
 	fmt.Printf("├─ 📊 State Aggregation: %s | %d blocks | Avg Stage: %.2f%% | Total Rain: %.2f | Recharge: %.2f | Extraction: %.2f\n",
 		stateName, len(results), avgStage, totalRainfall, totalRecharge, totalExtraction)
-	
+
 	return SearchResult{
 		AssessmentID:    results[0].AssessmentID, // Keep first ID for reference
 		BlockUUID:       results[0].BlockUUID,
@@ -1120,16 +1118,16 @@ func (s *ChatService) aggregateToDistrict(results []SearchResult) SearchResult {
 	if len(results) == 0 {
 		return SearchResult{}
 	}
-	
+
 	districtName := results[0].DistrictName
 	stateName := results[0].StateName
 	year := results[0].Year
-	
+
 	// Aggregate metrics
 	var totalRainfall, totalRecharge, totalExtraction, totalStage float64
 	var stageCount int
 	categories := make(map[string]int)
-	
+
 	for _, r := range results {
 		totalRainfall += r.Rainfall
 		totalRecharge += r.TotalRecharge
@@ -1140,12 +1138,12 @@ func (s *ChatService) aggregateToDistrict(results []SearchResult) SearchResult {
 		}
 		categories[r.Category]++
 	}
-	
+
 	avgStage := float64(0)
 	if stageCount > 0 {
 		avgStage = totalStage / float64(stageCount)
 	}
-	
+
 	// Determine dominant category
 	dominantCategory := "N/A"
 	maxCount := 0
@@ -1155,10 +1153,10 @@ func (s *ChatService) aggregateToDistrict(results []SearchResult) SearchResult {
 			dominantCategory = cat
 		}
 	}
-	
+
 	fmt.Printf("├─ 📊 District Aggregation: %s, %s | %d blocks | Avg Stage: %.2f%% | Total Rain: %.2f | Recharge: %.2f | Extraction: %.2f\n",
 		districtName, stateName, len(results), avgStage, totalRainfall, totalRecharge, totalExtraction)
-	
+
 	return SearchResult{
 		AssessmentID:    results[0].AssessmentID,
 		BlockUUID:       results[0].BlockUUID,
@@ -1181,10 +1179,10 @@ func (s *ChatService) aggregateToDistrict(results []SearchResult) SearchResult {
 // buildNoDataFoundMessage creates a contextual error message when no data is found
 func (s *ChatService) buildNoDataFoundMessage(query string) string {
 	queryLower := strings.ToLower(query)
-	
+
 	var sb strings.Builder
 	sb.WriteString("❌ **No Groundwater Data Found**\n\n")
-	
+
 	// Detect what type of query this was
 	if strings.Contains(queryLower, "compare") || strings.Contains(queryLower, " vs ") {
 		sb.WriteString("I couldn't find groundwater assessment data for the locations you mentioned.\n\n")
@@ -1199,49 +1197,49 @@ func (s *ChatService) buildNoDataFoundMessage(query string) string {
 		sb.WriteString("- Try different search terms or location names\n")
 		sb.WriteString("- Data might only be available for certain years\n\n")
 	}
-	
+
 	sb.WriteString("**📊 Available Data Coverage:**\n")
 	sb.WriteString("- **Years:** 2023-2024, 2024-2025\n")
 	sb.WriteString("- **Locations:** 38 States, 590+ Districts, 6746+ Blocks\n")
 	sb.WriteString("- **Total Assessments:** 13,492 groundwater assessments\n\n")
-	
+
 	sb.WriteString("**💡 Try asking:**\n")
 	sb.WriteString("- \"Punjab groundwater status\"\n")
 	sb.WriteString("- \"Critical blocks in Punjab\"\n")
 	sb.WriteString("- \"Compare Haryana and Rajasthan\"\n")
 	sb.WriteString("- \"Show districts in Punjab\"\n")
 	sb.WriteString("- \"Ludhiana district overview\"\n")
-	
+
 	return sb.String()
 }
 
 // buildFilteredOutMessage creates a message when results were found but filtered out
 func (s *ChatService) buildFilteredOutMessage(query string, rawResultCount int) string {
 	queryLower := strings.ToLower(query)
-	
+
 	var sb strings.Builder
 	sb.WriteString("⚠️ **Data Found But Incomplete**\n\n")
-	
+
 	sb.WriteString(fmt.Sprintf("I found %d potential matches, but they contained incomplete or invalid data.\n\n", rawResultCount))
-	
+
 	sb.WriteString("**Common reasons for filtering:**\n")
 	sb.WriteString("- Assessment data has all zero values (not yet surveyed)\n")
 	sb.WriteString("- Location is classified as 'Hilly Area' with no groundwater data\n")
-	
+
 	if strings.Contains(queryLower, "compare") || strings.Contains(queryLower, " vs ") {
 		sb.WriteString("- For comparison queries, results must match the mentioned locations\n")
 	}
-	
+
 	sb.WriteString("\n**💡 Suggestions:**\n")
 	sb.WriteString("- Try nearby districts or blocks\n")
 	sb.WriteString("- Check different years (data availability varies by year)\n")
 	sb.WriteString("- Use broader search terms (e.g., state name instead of specific block)\n\n")
-	
+
 	sb.WriteString("**Example queries that work well:**\n")
 	sb.WriteString("- \"Compare Amritsar and Ludhiana\"\n")
 	sb.WriteString("- \"Groundwater extraction in Punjab\"\n")
 	sb.WriteString("- \"Over-exploited blocks in Rajasthan\"\n")
-	
+
 	return sb.String()
 }
 
@@ -1250,16 +1248,16 @@ func (s *ChatService) buildRAGTextResponse(results []SearchResult) string {
 	if len(results) == 0 {
 		return "No results found."
 	}
-	
+
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("I found %d relevant groundwater assessments:\n\n", len(results)))
-	
+
 	for i, result := range results {
 		if i >= 5 {
 			sb.WriteString(fmt.Sprintf("\n...and %d more results", len(results)-5))
 			break
 		}
-		
+
 		sb.WriteString(fmt.Sprintf("%d. **%s** (%s, %s)\n", i+1, result.BlockName, result.DistrictName, result.StateName))
 		sb.WriteString(fmt.Sprintf("   - Year: %s\n", result.Year))
 		sb.WriteString(fmt.Sprintf("   - Category: **%s**\n", strings.ToUpper(result.Category)))
@@ -1267,7 +1265,7 @@ func (s *ChatService) buildRAGTextResponse(results []SearchResult) string {
 		sb.WriteString(fmt.Sprintf("   - Rainfall: %.2f mm\n", result.Rainfall))
 		sb.WriteString(fmt.Sprintf("   - Relevance: %.2f%%\n\n", result.Score*100))
 	}
-	
+
 	return sb.String()
 }
 
@@ -1276,17 +1274,17 @@ func (s *ChatService) buildRAGChart(results []SearchResult, query string) *model
 	if len(results) == 0 {
 		return nil
 	}
-	
+
 	// Analyze query to determine best chart type
 	queryLower := strings.ToLower(query)
-	
+
 	// Bar chart for comparisons and listings (default)
 	labels := make([]string, 0, len(results))
 	stageData := make([]float64, 0, len(results))
 	rainfallData := make([]float64, 0, len(results))
 	extractionData := make([]float64, 0, len(results))
 	rechargeData := make([]float64, 0, len(results))
-	
+
 	for i, result := range results {
 		if i >= 10 {
 			break
@@ -1297,14 +1295,14 @@ func (s *ChatService) buildRAGChart(results []SearchResult, query string) *model
 		extractionData = append(extractionData, result.TotalExtraction)
 		rechargeData = append(rechargeData, result.TotalRecharge)
 	}
-	
+
 	chart := &models.ChartPayload{
-		Type:  "bar",
-		Title: "Groundwater Assessment Results",
-		XAxis: labels,
+		Type:   "bar",
+		Title:  "Groundwater Assessment Results",
+		XAxis:  labels,
 		Series: []models.ChartSeries{},
 	}
-	
+
 	// Determine which metrics to show based on query (prioritize more specific keywords)
 	if strings.Contains(queryLower, "recharge") && (strings.Contains(queryLower, "extraction") || strings.Contains(queryLower, "comparison") || strings.Contains(queryLower, "vs")) {
 		// Recharge vs Extraction comparison
@@ -1347,7 +1345,7 @@ func (s *ChatService) buildRAGChart(results []SearchResult, query string) *model
 		})
 		chart.Title = "Groundwater Metrics"
 	}
-	
+
 	return chart
 }
 
@@ -1484,10 +1482,10 @@ func convertXAxis(x interface{}) interface{} {
 		return t
 	case map[string]interface{}:
 		if data, ok := t["data"].([]interface{}); ok {
-			return map[string]interface{}{ "data": toStringSlice(data) }
+			return map[string]interface{}{"data": toStringSlice(data)}
 		}
 		if data, ok := t["data"].([]string); ok {
-			return map[string]interface{}{ "data": data }
+			return map[string]interface{}{"data": data}
 		}
 	}
 	return nil
@@ -1540,12 +1538,12 @@ func getCategoryFromCounts(safe, semiCritical, critical, overExploited int) stri
 	if total == 0 {
 		return "Unknown"
 	}
-	
+
 	// Calculate percentages
 	overExploitedPct := float64(overExploited) / float64(total) * 100
 	criticalPct := float64(critical) / float64(total) * 100
 	semiCriticalPct := float64(semiCritical) / float64(total) * 100
-	
+
 	// Determine overall category based on predominant status
 	if overExploitedPct > 30 {
 		return "over_exploited"
@@ -1570,11 +1568,11 @@ func buildVizText(c *models.ChartPayload) string {
 
 func (s *ChatService) handleSummary(ctx context.Context, e Entities, r *models.ChatResponse) (*models.ChatResponse, error) {
 	blocks, err := s.ingres.GetBlocksByNames(ctx, e.Locations)
-	
+
 	// Fallback: Try joining names if no blocks found
 	if len(blocks) == 0 && len(e.Locations) > 0 {
 		joinedName := strings.Join(e.Locations, " ")
-		
+
 		// Try block again with joined name (e.g. "Madhya Pradesh" as a block name?)
 		moreBlocks, _ := s.ingres.GetBlocksByNames(ctx, []string{joinedName})
 		if len(moreBlocks) > 0 {
@@ -1596,10 +1594,10 @@ func (s *ChatService) handleSummary(ctx context.Context, e Entities, r *models.C
 
 					r.Text = fmt.Sprintf("Here's the groundwater assessment for **%s District** in **%s**. "+
 						"With %d blocks, the average extraction stage is %.1f%%, which is %s.",
-						districtSummary.DistrictName, e.Year, districtSummary.TotalBlocks, 
+						districtSummary.DistrictName, e.Year, districtSummary.TotalBlocks,
 						districtSummary.AvgStage, stageStatus)
 					r.Data = districtSummary
-					
+
 					// Add metrics-card for district
 					r.Chart = &models.ChartPayload{
 						Type:  "metrics-card",
@@ -1624,7 +1622,7 @@ func (s *ChatService) handleSummary(ctx context.Context, e Entities, r *models.C
 					}
 					return r, nil
 				}
-				
+
 				// Fallback to listing blocks if summary fails
 				blocksList, err := s.ingres.GetBlocks(ctx, district.DistrictUUID)
 				if err == nil && len(blocksList) > 0 {
@@ -1636,11 +1634,11 @@ func (s *ChatService) handleSummary(ctx context.Context, e Entities, r *models.C
 						}
 						blockNames = append(blockNames, b.BlockName)
 					}
-					r.Text = fmt.Sprintf("I found the District '%s'. It has %d blocks. Here are some of them: %s. Please ask for a specific Block to get detailed data.", 
+					r.Text = fmt.Sprintf("I found the District '%s'. It has %d blocks. Here are some of them: %s. Please ask for a specific Block to get detailed data.",
 						district.DistrictName, len(blocksList), strings.Join(blockNames, ", "))
 					return r, nil
 				}
-				
+
 				// No blocks found - suggest alternatives
 				r.Text = fmt.Sprintf("⚠️ **District Found: %s**\n\nUnfortunately, there are no blocks with groundwater data available for this district in our database.\n\n"+
 					"🔍 **Try these instead:**\n"+
@@ -1648,11 +1646,11 @@ func (s *ChatService) handleSummary(ctx context.Context, e Entities, r *models.C
 					"• \"What is the groundwater status of Prakasam district?\"\n"+
 					"• \"Show me Nalgonda district\"\n"+
 					"• \"List all districts in Andhra Pradesh\"\n\n"+
-					"💡 *Tip: Most block-level data is available for Andhra Pradesh, Telangana, and other major states.*", 
+					"💡 *Tip: Most block-level data is available for Andhra Pradesh, Telangana, and other major states.*",
 					district.DistrictName)
 				return r, nil
 			}
-			
+
 			// Try State - now with aggregated data!
 			state, err := s.ingres.GetStateByName(ctx, joinedName)
 			if err == nil && state != nil {
@@ -1669,10 +1667,10 @@ func (s *ChatService) handleSummary(ctx context.Context, e Entities, r *models.C
 
 					r.Text = fmt.Sprintf("Here's the groundwater assessment for **%s** in **%s**. "+
 						"With %d blocks, the average extraction stage is %.1f%%, which is %s.",
-						stateSummary.StateName, e.Year, stateSummary.TotalBlocks, 
+						stateSummary.StateName, e.Year, stateSummary.TotalBlocks,
 						stateSummary.AvgStage, stageStatus)
 					r.Data = stateSummary
-					
+
 					// Add metrics-card for state
 					r.Chart = &models.ChartPayload{
 						Type:  "metrics-card",
@@ -1697,8 +1695,8 @@ func (s *ChatService) handleSummary(ctx context.Context, e Entities, r *models.C
 					}
 					return r, nil
 				}
-				
-					// Fallback - no aggregated data available for this state
+
+				// Fallback - no aggregated data available for this state
 				districts, err := s.ingres.GetDistricts(ctx, state.StateUUID)
 				if err == nil && len(districts) > 0 {
 					var districtNames []string
@@ -1712,7 +1710,7 @@ func (s *ChatService) handleSummary(ctx context.Context, e Entities, r *models.C
 					r.Text = fmt.Sprintf("⚠️ **No groundwater assessment data available for %s (%s)**\n\n"+
 						"This state has %d districts but groundwater assessment data has not been loaded yet.\n\n"+
 						"**Available districts**: %s\n\n"+
-						"💡 **Try these states with data**: Punjab, Haryana, Uttar Pradesh, Bihar, Rajasthan, Madhya Pradesh, West Bengal, Odisha, Telangana, Andhra Pradesh", 
+						"💡 **Try these states with data**: Punjab, Haryana, Uttar Pradesh, Bihar, Rajasthan, Madhya Pradesh, West Bengal, Odisha, Telangana, Andhra Pradesh",
 						state.StateName, e.Year, len(districts), strings.Join(districtNames, ", "))
 					return r, nil
 				}
@@ -1751,7 +1749,7 @@ func (s *ChatService) handleSummary(ctx context.Context, e Entities, r *models.C
 	r.Text = fmt.Sprintf("Here's the groundwater assessment data for **%s** in **%s**. "+
 		"The extraction stage is at %.1f%%, which is %s.",
 		block.BlockName, e.Year, summary.Stage, stageStatus)
-	
+
 	// Add metrics-card visualization
 	r.Chart = &models.ChartPayload{
 		Type:  "metrics-card",
@@ -1770,7 +1768,7 @@ func (s *ChatService) handleSummary(ctx context.Context, e Entities, r *models.C
 			Availability:     summary.Availability,
 		},
 	}
-	
+
 	r.Data = summary
 	return r, nil
 }
@@ -1808,11 +1806,11 @@ func (s *ChatService) handleTrend(ctx context.Context, e Entities, r *models.Cha
 	}
 
 	blocks, err := s.ingres.GetBlocksByNames(ctx, e.Locations)
-	
+
 	var trends []models.AssessmentSummary
 	var locationName string
 	var locationType string
-	
+
 	// Fallback: Try joining names if no blocks found
 	if len(blocks) == 0 && len(e.Locations) > 0 {
 		joinedName := strings.Join(e.Locations, " ")
@@ -1829,22 +1827,22 @@ func (s *ChatService) handleTrend(ctx context.Context, e Entities, r *models.Cha
 				}
 				locationName = district.DistrictName
 				locationType = "district"
-				
+
 				r.Text = fmt.Sprintf("📈 **Groundwater Trend Analysis: %s District**\n\n"+
 					"📅 **Period**: %s → %s\n"+
 					"📊 **Data Points**: %d years of historical data\n\n"+
 					"*Analyzing recharge vs extraction patterns over time...*",
 					locationName, e.StartYear, e.EndYear, len(trends))
-				
+
 				// Build trend-card chart
 				result := s.buildTrendCard(trends, locationName, locationType, e.StartYear, e.EndYear, r)
-				
+
 				// Cache the result
 				if s.cache != nil && s.cache.IsEnabled() {
 					respJSON, _ := json.Marshal(result)
 					s.cache.SetTrendData(ctx, locationName, e.StartYear, e.EndYear, string(respJSON))
 				}
-				
+
 				return result, nil
 			}
 			// Try State
@@ -1856,22 +1854,22 @@ func (s *ChatService) handleTrend(ctx context.Context, e Entities, r *models.Cha
 				}
 				locationName = state.StateName
 				locationType = "state"
-				
+
 				r.Text = fmt.Sprintf("📈 **Groundwater Trend Analysis: %s State**\n\n"+
 					"📅 **Period**: %s → %s\n"+
 					"📊 **Data Points**: %d years of state-level data\n\n"+
 					"*Analyzing statewide recharge vs extraction patterns...*",
 					locationName, e.StartYear, e.EndYear, len(trends))
-				
+
 				// Build trend-card chart
 				result := s.buildTrendCard(trends, locationName, locationType, e.StartYear, e.EndYear, r)
-				
+
 				// Cache the result
 				if s.cache != nil && s.cache.IsEnabled() {
 					respJSON, _ := json.Marshal(result)
 					s.cache.SetTrendData(ctx, locationName, e.StartYear, e.EndYear, string(respJSON))
 				}
-				
+
 				return result, nil
 			}
 		}
@@ -1881,7 +1879,7 @@ func (s *ChatService) handleTrend(ctx context.Context, e Entities, r *models.Cha
 		r.Text = "Location not found. Please specify a valid block, district, or state name."
 		return r, nil
 	}
-	
+
 	block := blocks[0]
 	trends, err = s.ingres.GetAssessmentTrends(ctx, block.BlockUUID, e.StartYear, e.EndYear)
 	if err != nil {
@@ -1894,9 +1892,9 @@ func (s *ChatService) handleTrend(ctx context.Context, e Entities, r *models.Cha
 		"📅 **Period**: %s → %s\n\n"+
 		"*Tracking recharge and extraction patterns over time...*",
 		locationName, e.StartYear, e.EndYear)
-	
+
 	result := s.buildTrendCard(trends, locationName, locationType, e.StartYear, e.EndYear, r)
-	
+
 	// Cache the result for future requests
 	if s.cache != nil && s.cache.IsEnabled() && len(e.Locations) > 0 {
 		locationKey := strings.Join(e.Locations, "_")
@@ -1906,7 +1904,7 @@ func (s *ChatService) handleTrend(ctx context.Context, e Entities, r *models.Cha
 			fmt.Printf("├─ ⚡ Cached trend data (TTL: 1 hour)\n")
 		}
 	}
-	
+
 	return result, nil
 }
 
@@ -1917,7 +1915,7 @@ func (s *ChatService) buildTrendCard(trends []models.AssessmentSummary, location
 		r.Text = fmt.Sprintf("⚠️ No trend data available for %s. Please try a different location or time period.", locationName)
 		return r
 	}
-	
+
 	// Build data points from trends
 	dataPoints := make([]models.TrendDataPoint, 0, len(trends))
 	for _, t := range trends {
@@ -1930,13 +1928,13 @@ func (s *ChatService) buildTrendCard(trends []models.AssessmentSummary, location
 			Category:   t.Category,
 		})
 	}
-	
+
 	// Calculate percentage changes (first year to last year)
 	var rechargeChange, extractionChange, stageChange float64
 	if len(dataPoints) >= 2 {
 		first := dataPoints[0]
 		last := dataPoints[len(dataPoints)-1]
-		
+
 		if first.Recharge > 0 {
 			rechargeChange = ((last.Recharge - first.Recharge) / first.Recharge) * 100
 		}
@@ -1947,7 +1945,7 @@ func (s *ChatService) buildTrendCard(trends []models.AssessmentSummary, location
 			stageChange = ((last.Stage - first.Stage) / first.Stage) * 100
 		}
 	}
-	
+
 	// Determine overall trend
 	overallTrend := "stable"
 	// If recharge increased and extraction decreased, improving
@@ -1958,12 +1956,12 @@ func (s *ChatService) buildTrendCard(trends []models.AssessmentSummary, location
 	} else if stageChange > 10 || (rechargeChange < -10 && extractionChange > 10) {
 		overallTrend = "declining"
 	}
-	
+
 	// Update text with data count
 	if len(dataPoints) == 1 {
 		r.Text += fmt.Sprintf("\n\n📊 **Note:** Only data for %s is available.", dataPoints[0].Year)
 	}
-	
+
 	r.Chart = &models.ChartPayload{
 		Type:  "trend-card",
 		Title: fmt.Sprintf("Groundwater Trends - %s", locationName),
@@ -1979,7 +1977,7 @@ func (s *ChatService) buildTrendCard(trends []models.AssessmentSummary, location
 			OverallTrend:     overallTrend,
 		},
 	}
-	
+
 	return r
 }
 
@@ -1990,7 +1988,7 @@ func (s *ChatService) buildTrendChart(trends []models.AssessmentSummary, locatio
 		r.Text = fmt.Sprintf("⚠️ No trend data available for %s. Note: Block-level data is only available for 2024-2025 due to InGRES API limitations. Historical years (2012-2023) only have state-level aggregates which require block data to exist first.", locationName)
 		return r
 	}
-	
+
 	var years []string
 	var recharge []float64
 	var extraction []float64
@@ -2015,7 +2013,7 @@ func (s *ChatService) buildTrendChart(trends []models.AssessmentSummary, locatio
 			{Name: "Extraction (MCM)", Data: extraction, Type: "line"},
 		},
 	}
-	
+
 	return r
 }
 
@@ -2023,7 +2021,7 @@ func (s *ChatService) handleCompare(ctx context.Context, e Entities, r *models.C
 	fmt.Println("\n🔍 COMPARISON HANDLER")
 	fmt.Printf("├─ Comparing %d locations: %v\n", len(e.Locations), e.Locations)
 	fmt.Printf("├─ Year: %s\n", e.Year)
-	
+
 	// Validate minimum locations for comparison
 	if len(e.Locations) < 2 {
 		if len(e.Locations) == 1 {
@@ -2080,7 +2078,7 @@ func (s *ChatService) handleCompare(ctx context.Context, e Entities, r *models.C
 	}
 
 	fmt.Printf("├─ ✅ Found: %d states, %d districts, %d blocks\n", len(statesFound), len(districtsFound), len(blocksFound))
-	
+
 	// Handle state comparison (if 2+ states found)
 	if len(statesFound) >= 2 {
 		fmt.Println("├─ 🏛️  Routing to STATE comparison handler")
@@ -2177,7 +2175,7 @@ func (s *ChatService) compareStates(ctx context.Context, states []*models.State,
 		year, strings.Join(names, " vs "),
 		names[bestIdx], stages[bestIdx],
 		names[worstIdx], stages[worstIdx])
-	
+
 	// Build comparison data
 	comparisonPoints := make([]models.ComparisonDataPoint, 0, len(states))
 	for i, state := range states {
@@ -2208,7 +2206,7 @@ func (s *ChatService) compareStates(ctx context.Context, states []*models.State,
 			CriticalBlocks: summary.CriticalBlocks + summary.OverExploitedBlocks,
 		})
 	}
-	
+
 	r.Chart = &models.ChartPayload{
 		Type:  "comparison-card",
 		Title: fmt.Sprintf("State Comparison - %s", year),
@@ -2274,7 +2272,7 @@ func (s *ChatService) compareDistricts(ctx context.Context, districts []*models.
 
 	fmt.Printf("├─ ✅ Retrieved data for %d districts\n", len(names))
 	fmt.Printf("├─ 📊 Calculating best/worst performers...\n")
-	
+
 	// Find best and worst performers
 	bestIdx, worstIdx := 0, 0
 	for i := range stages {
@@ -2297,7 +2295,7 @@ func (s *ChatService) compareDistricts(ctx context.Context, districts []*models.
 		year, strings.Join(names, " vs "),
 		names[bestIdx], stages[bestIdx],
 		names[worstIdx], stages[worstIdx])
-	
+
 	fmt.Println("├─ 📦 Building comparison chart payload...")
 	// Build comparison data
 	comparisonPoints := make([]models.ComparisonDataPoint, 0, len(districts))
@@ -2329,7 +2327,7 @@ func (s *ChatService) compareDistricts(ctx context.Context, districts []*models.
 			CriticalBlocks: summary.CriticalBlocks + summary.OverExploitedBlocks,
 		})
 	}
-	
+
 	r.Chart = &models.ChartPayload{
 		Type:  "comparison-card",
 		Title: fmt.Sprintf("District Comparison - %s", year),
@@ -2339,9 +2337,9 @@ func (s *ChatService) compareDistricts(ctx context.Context, districts []*models.
 			ComparisonType: "district",
 		},
 	}
-	
+
 	fmt.Printf("├─ ✅ Chart created with %d locations\n", len(comparisonPoints))
-	
+
 	// Cache the complete response for next time
 	if s.cache != nil && s.cache.IsEnabled() && len(districts) >= 2 {
 		respJSON, err := json.Marshal(r)
@@ -2350,8 +2348,7 @@ func (s *ChatService) compareDistricts(ctx context.Context, districts []*models.
 			fmt.Printf("├─ ⚡ Cached response for future requests (TTL: 1 hour)\n")
 		}
 	}
-	
-	
+
 	fmt.Printf("└─ 📤 Sending response to frontend...\n\n")
 
 	// Add follow-up suggestions
@@ -2427,7 +2424,7 @@ func (s *ChatService) compareBlocks(ctx context.Context, blocks []models.Block, 
 		year, strings.Join(names, " vs "),
 		names[bestIdx], stages[bestIdx],
 		names[worstIdx], stages[worstIdx])
-	
+
 	// Build comparison data
 	comparisonPoints := make([]models.ComparisonDataPoint, 0, len(comparisons))
 	for i, c := range comparisons {
@@ -2443,7 +2440,7 @@ func (s *ChatService) compareBlocks(ctx context.Context, blocks []models.Block, 
 			Category:   c.Category,
 		})
 	}
-	
+
 	r.Chart = &models.ChartPayload{
 		Type:  "comparison-card",
 		Title: fmt.Sprintf("Block Comparison - %s", year),
@@ -2459,7 +2456,7 @@ func (s *ChatService) compareBlocks(ctx context.Context, blocks []models.Block, 
 
 func (s *ChatService) handleRechargeBreakdown(ctx context.Context, e Entities, r *models.ChatResponse) (*models.ChatResponse, error) {
 	blocks, err := s.ingres.GetBlocksByNames(ctx, e.Locations)
-	
+
 	// Fallback: Try joining names if no blocks found
 	if len(blocks) == 0 && len(e.Locations) > 0 {
 		joinedName := strings.Join(e.Locations, " ")
@@ -2468,7 +2465,7 @@ func (s *ChatService) handleRechargeBreakdown(ctx context.Context, e Entities, r
 			blocks = moreBlocks
 		}
 	}
-	
+
 	if err != nil || len(blocks) == 0 {
 		r.Text = "I couldn't find that block. Please check the spelling."
 		return r, nil
@@ -2498,13 +2495,13 @@ func (s *ChatService) handleRechargeBreakdown(ctx context.Context, e Entities, r
 			},
 		}
 	}
-	
+
 	return r, nil
 }
 
 func (s *ChatService) handleExtractionBreakdown(ctx context.Context, e Entities, r *models.ChatResponse) (*models.ChatResponse, error) {
 	blocks, err := s.ingres.GetBlocksByNames(ctx, e.Locations)
-	
+
 	// Fallback: Try joining names if no blocks found
 	if len(blocks) == 0 && len(e.Locations) > 0 {
 		joinedName := strings.Join(e.Locations, " ")
@@ -2513,11 +2510,11 @@ func (s *ChatService) handleExtractionBreakdown(ctx context.Context, e Entities,
 			blocks = moreBlocks
 		}
 	}
-	
+
 	// If still no blocks, try district or state
 	if len(blocks) == 0 && len(e.Locations) > 0 {
 		locationName := strings.Join(e.Locations, " ")
-		
+
 		// Try District
 		district, err := s.ingres.GetDistrictByName(ctx, locationName)
 		if err == nil && district != nil {
@@ -2536,7 +2533,7 @@ func (s *ChatService) handleExtractionBreakdown(ctx context.Context, e Entities,
 					summary.TotalExtraction,
 					summary.TotalRecharge,
 					summary.AvgStage)
-				
+
 				r.Chart = &models.ChartPayload{
 					Type:  "bar",
 					Title: fmt.Sprintf("Extraction vs Recharge - %s District", district.DistrictName),
@@ -2552,7 +2549,7 @@ func (s *ChatService) handleExtractionBreakdown(ctx context.Context, e Entities,
 				return r, nil
 			}
 		}
-		
+
 		// Try State
 		state, err := s.ingres.GetStateByName(ctx, locationName)
 		if err == nil && state != nil {
@@ -2568,7 +2565,7 @@ func (s *ChatService) handleExtractionBreakdown(ctx context.Context, e Entities,
 					summary.TotalExtraction,
 					summary.TotalRecharge,
 					summary.AvgStage)
-				
+
 				r.Chart = &models.ChartPayload{
 					Type:  "bar",
 					Title: fmt.Sprintf("Extraction vs Recharge - %s", state.StateName),
@@ -2584,11 +2581,11 @@ func (s *ChatService) handleExtractionBreakdown(ctx context.Context, e Entities,
 				return r, nil
 			}
 		}
-		
+
 		r.Text = fmt.Sprintf("I couldn't find extraction data for '%s'. Try a specific district or state name.", locationName)
 		return r, nil
 	}
-	
+
 	if err != nil || len(blocks) == 0 {
 		r.Text = "I couldn't find that block. Please check the spelling."
 		return r, nil
@@ -2669,7 +2666,7 @@ func (s *ChatService) handleMapCategory(ctx context.Context, e Entities, r *mode
 			e.Category = "salinity"
 		}
 	}
-	
+
 	if e.Category == "" {
 		r.Text = "Which category? (Safe, Critical, Semi-Critical, Over-Exploited)"
 		r.Suggestions = []string{"Safe blocks", "Critical blocks", "Over-exploited blocks", "Semi-critical blocks"}
@@ -2690,7 +2687,7 @@ func (s *ChatService) handleMapCategory(ctx context.Context, e Entities, r *mode
 	// Check if location is specified - with proper hierarchy: State > District > Block
 	if len(e.Locations) > 0 {
 		locationName = strings.Join(e.Locations, " ")
-		
+
 		// PRIORITY 1: Check if it's a STATE
 		state, stateErr := s.ingres.GetStateByName(ctx, locationName)
 		if stateErr == nil && state != nil {
@@ -2713,7 +2710,7 @@ func (s *ChatService) handleMapCategory(ctx context.Context, e Entities, r *mode
 				fmt.Printf("├─ 📍 Location identified as DISTRICT: %s\n", district.DistrictName)
 			}
 		}
-		
+
 		blocks, err = s.ingres.repo.GetBlocksByCategoryAndLocation(ctx, e.Category, locationName)
 	} else {
 		blocks, err = s.ingres.GetBlocksByCategory(ctx, e.Category)
@@ -2769,11 +2766,11 @@ func (s *ChatService) handleMapCategory(ctx context.Context, e Entities, r *mode
 	sb.WriteString(fmt.Sprintf("%s **%s Blocks in %s** (%s)\n", categoryEmoji, categoryDisplay, strings.ToUpper(locationName), year))
 	sb.WriteString("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n")
 	sb.WriteString(fmt.Sprintf("📊 **Total Found:** %d blocks\n\n", len(blocks)))
-	
+
 	// List blocks in table format (first 15)
 	sb.WriteString("| # | Block Name | District |\n")
 	sb.WriteString("|---|------------|----------|\n")
-	
+
 	for i, b := range blocks {
 		if i >= 15 {
 			break
@@ -2786,7 +2783,7 @@ func (s *ChatService) handleMapCategory(ctx context.Context, e Entities, r *mode
 		}
 		sb.WriteString(fmt.Sprintf("| %d | %s | %s |\n", i+1, b.BlockName, districtName))
 	}
-	
+
 	if len(blocks) > 15 {
 		sb.WriteString(fmt.Sprintf("\n... and **%d more** blocks\n", len(blocks)-15))
 	}
@@ -2801,7 +2798,7 @@ func (s *ChatService) handleMapCategory(ctx context.Context, e Entities, r *mode
 			districtCounts[district.DistrictName]++
 		}
 	}
-	
+
 	var pieData []models.PieDatum
 	for name, count := range districtCounts {
 		// Get district UUID for navigation
@@ -2838,7 +2835,7 @@ func (s *ChatService) handleMapCategory(ctx context.Context, e Entities, r *mode
 
 	// Context-aware suggestions based on location type and category
 	suggestions := []string{}
-	
+
 	switch locationType {
 	case "state":
 		suggestions = append(suggestions, fmt.Sprintf("Show all districts in %s", locationName))
@@ -2867,7 +2864,7 @@ func (s *ChatService) handleMapCategory(ctx context.Context, e Entities, r *mode
 		suggestions = append(suggestions, "Punjab groundwater status")
 		suggestions = append(suggestions, "Haryana groundwater status")
 	}
-	
+
 	r.Suggestions = suggestions
 	r.Data = blocks
 
@@ -2876,7 +2873,7 @@ func (s *ChatService) handleMapCategory(ctx context.Context, e Entities, r *mode
 
 func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *models.ChatResponse) (*models.ChatResponse, error) {
 	// List blocks based on criteria (e.g., rainfall < 500, stage > 90)
-	
+
 	// Try Redis cache first for category-based queries
 	if s.cache != nil && s.cache.IsEnabled() && e.Category != "" {
 		locationKey := strings.Join(e.Locations, "_")
@@ -2896,7 +2893,7 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 				}
 				blockNames = append(blockNames, b.BlockName)
 			}
-			
+
 			locationName := strings.Join(e.Locations, " ")
 			if locationName != "" {
 				r.Text = fmt.Sprintf("🔍 **%s Blocks in %s (%d total)**\n\n%s",
@@ -2910,28 +2907,28 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 					len(cachedBlocks),
 					strings.Join(blockNames, ", "))
 			}
-			
+
 			if len(cachedBlocks) > limit {
 				r.Text += fmt.Sprintf("\n\n... and %d more blocks", len(cachedBlocks)-limit)
 			}
-			
+
 			fmt.Printf("└─ ✅ Returning cached list (0ms DB query)\n\n")
 			return r, nil
 		} else {
 			fmt.Printf("├─ ⚠️  Cache miss for blocks list, querying database...\n")
 		}
 	}
-	
+
 	var blocks []models.Block
 	var summaries []models.AssessmentSummary
 	var err error
-	
+
 	// Extract location filter if specified
 	var locationFilter string
 	if len(e.Locations) > 0 {
 		locationFilter = strings.ToLower(strings.Join(e.Locations, " "))
 	}
-	
+
 	// Parse category from query text if not set
 	if e.Category == "" {
 		queryLower := strings.ToLower(e.OriginalQuery)
@@ -2947,14 +2944,14 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 			e.Category = "salinity"
 		}
 	}
-	
+
 	// PRIORITY: If category is specified (with or without location), handle it first
 	if e.Category != "" {
 		locationName := ""
 		if len(e.Locations) > 0 {
 			locationName = strings.Join(e.Locations, " ")
 		}
-		
+
 		// Use the repository method that handles category+location properly
 		blocks, err = s.ingres.repo.GetBlocksByCategoryAndLocation(ctx, e.Category, locationName)
 		if err == nil && len(blocks) > 0 {
@@ -2966,7 +2963,7 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 				}
 				blockNames = append(blockNames, b.BlockName)
 			}
-			
+
 			if locationName != "" {
 				r.Text = fmt.Sprintf("🔍 **%s Blocks in %s (%d total)**\n\n%s",
 					strings.Title(strings.ToLower(e.Category)),
@@ -2979,11 +2976,11 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 					len(blocks),
 					strings.Join(blockNames, ", "))
 			}
-			
+
 			if len(blocks) > limit {
 				r.Text += fmt.Sprintf("\n\n... and %d more blocks", len(blocks)-limit)
 			}
-			
+
 			// Cache the blocks for future requests
 			if s.cache != nil && s.cache.IsEnabled() {
 				locationKey := locationName
@@ -2993,7 +2990,7 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 				s.cache.SetBlocksByCategory(ctx, locationKey, e.Category, e.Year, blocks)
 				fmt.Printf("├─ ⚡ Cached %d blocks (TTL: 1 hour)\n", len(blocks))
 			}
-			
+
 			// Add chart
 			r.Chart = &models.ChartPayload{
 				Type:  "bar",
@@ -3014,7 +3011,7 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 			}
 			return r, nil
 		}
-		
+
 		// If no blocks found for category
 		if locationName != "" {
 			r.Text = fmt.Sprintf("No %s blocks found in %s.", e.Category, locationName)
@@ -3023,7 +3020,7 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 		}
 		return r, nil
 	}
-	
+
 	switch e.Metric {
 	case "rainfall":
 		summaries, err = s.ingres.repo.GetBlocksByRainfall(ctx, e.Threshold, e.Operator, e.Year)
@@ -3036,7 +3033,7 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 			for _, b := range blocks {
 				blockNames = append(blockNames, b.BlockName)
 			}
-			r.Text = fmt.Sprintf("Found %d blocks with category '%s': %s", 
+			r.Text = fmt.Sprintf("Found %d blocks with category '%s': %s",
 				len(blocks), e.Category, strings.Join(blockNames[:min(10, len(blockNames))], ", "))
 			if len(blocks) > 10 {
 				r.Text += fmt.Sprintf(" and %d more...", len(blocks)-10)
@@ -3047,7 +3044,7 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 		// Check if we have a location to list blocks for
 		if len(e.Locations) > 0 {
 			locationName := strings.Join(e.Locations, " ")
-			
+
 			// Try District
 			district, err := s.ingres.GetDistrictByName(ctx, locationName)
 			if err == nil && district != nil {
@@ -3062,8 +3059,8 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 					if len(names) > 50 {
 						displayNames = names[:50]
 					}
-					
-					r.Text = fmt.Sprintf("Here are the blocks in %s District (%d total):\n\n%s", 
+
+					r.Text = fmt.Sprintf("Here are the blocks in %s District (%d total):\n\n%s",
 						district.DistrictName, len(blocks), strings.Join(displayNames, ", "))
 					if len(names) > 50 {
 						r.Text += fmt.Sprintf("\n\n...and %d more.", len(names)-50)
@@ -3073,7 +3070,7 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 				r.Text = fmt.Sprintf("I found the District '%s', but it has no blocks listed.", district.DistrictName)
 				return r, nil
 			}
-			
+
 			// Try State - show blocks with assessments
 			state, err := s.ingres.GetStateByName(ctx, locationName)
 			if err == nil && state != nil {
@@ -3082,7 +3079,7 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 				if year == "" {
 					year = "2024-2025"
 				}
-				
+
 				sqlQuery := fmt.Sprintf(`
 					SELECT DISTINCT
 						b.block_uuid,
@@ -3100,23 +3097,23 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 					ORDER BY a.stage DESC
 					LIMIT 100
 				`, state.StateUUID, year)
-				
+
 				results, err := s.ingres.repo.RunRawQuery(ctx, sqlQuery)
 				if err == nil && len(results) > 0 {
 					// Create pie data for rose chart
 					var pieData []models.PieDatum
 					var blockNames []string
-					
+
 					for i, result := range results {
 						if i >= 50 { // Limit to 50 blocks for visualization
 							break
 						}
-						
+
 						blockName := ""
 						districtName := ""
 						blockUUID := ""
 						stage := 0.0
-						
+
 						if bn, ok := result["block_name"].(string); ok {
 							blockName = bn
 						}
@@ -3129,7 +3126,7 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 						if s, ok := result["stage"].(float64); ok {
 							stage = s
 						}
-						
+
 						if blockName != "" && stage > 0 {
 							label := fmt.Sprintf("%s, %s", blockName, districtName)
 							blockNames = append(blockNames, blockName)
@@ -3140,10 +3137,10 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 							})
 						}
 					}
-					
-					r.Text = fmt.Sprintf("Here are the blocks in %s state (%d total blocks with data):\n\nShowing top %d blocks by extraction stage.", 
+
+					r.Text = fmt.Sprintf("Here are the blocks in %s state (%d total blocks with data):\n\nShowing top %d blocks by extraction stage.",
 						state.StateName, len(results), len(pieData))
-					
+
 					// Create rose/nightingale chart
 					if len(pieData) > 0 {
 						r.Chart = &models.ChartPayload{
@@ -3152,7 +3149,7 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 							PieData: pieData,
 						}
 					}
-					
+
 					r.Data = results
 					return r, nil
 				}
@@ -3185,7 +3182,7 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 				// Get district and state info
 				district, _ := s.ingres.repo.GetDistrictByUUID(ctx, block.DistrictUUID)
 				state, _ := s.ingres.repo.GetStateByUUID(ctx, block.StateUUID)
-				
+
 				// Check if block, district, or state matches the filter
 				matchFound := strings.Contains(blockNameLower, locationFilter)
 				if !matchFound && district != nil {
@@ -3194,12 +3191,12 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 				if !matchFound && state != nil {
 					matchFound = strings.Contains(strings.ToLower(state.StateName), locationFilter)
 				}
-				
+
 				if !matchFound {
 					continue // Skip this block
 				}
 			}
-			
+
 			blockNames = append(blockNames, block.BlockName)
 			if e.Metric == "rainfall" {
 				values = append(values, summary.Rainfall)
@@ -3212,7 +3209,7 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 	r.Text = fmt.Sprintf("🔍 **Found %d blocks** where %s %s %.2f\n\n"+
 		"📊 **Top Results**: %s\n\n"+
 		"*Use the interactive chart below to explore all %d matching blocks.*",
-		len(summaries), e.Metric, e.Operator, e.Threshold, 
+		len(summaries), e.Metric, e.Operator, e.Threshold,
 		strings.Join(blockNames[:min(5, len(blockNames))], ", "),
 		len(summaries))
 
@@ -3230,7 +3227,7 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 			{Name: strings.Title(e.Metric), Data: values[:min(20, len(values))], Type: "bar"},
 		},
 	}
-	
+
 	r.Data = summaries
 	return r, nil
 }
@@ -3251,7 +3248,7 @@ func (s *ChatService) handleListDistricts(ctx context.Context, e Entities, r *mo
 			r.Text = "Sorry, I encountered an error fetching states data."
 			return r, err
 		}
-		
+
 		var targetState *models.State
 		stateName := strings.ToLower(e.Locations[0])
 		for _, state := range states {
@@ -3260,18 +3257,18 @@ func (s *ChatService) handleListDistricts(ctx context.Context, e Entities, r *mo
 				break
 			}
 		}
-		
+
 		if targetState == nil {
 			r.Text = fmt.Sprintf("I couldn't find a state matching '%s'. Please check the spelling and try again.", e.Locations[0])
 			return r, nil
 		}
-		
+
 		// Get districts with assessment data for visualization
 		year := e.Year
 		if year == "" {
 			year = "2024-2025"
 		}
-		
+
 		// Query to get districts with their average stage data for visual representation
 		sqlQuery := fmt.Sprintf(`
 			SELECT 
@@ -3289,7 +3286,7 @@ func (s *ChatService) handleListDistricts(ctx context.Context, e Entities, r *mo
 			ORDER BY avg_stage DESC NULLS LAST
 			LIMIT 50
 		`, year, targetState.StateUUID)
-		
+
 		results, err := s.ingres.repo.RunRawQuery(ctx, sqlQuery)
 		if err == nil && len(results) > 0 {
 			// Create bar chart data - only include districts with valid data
@@ -3297,12 +3294,12 @@ func (s *ChatService) handleListDistricts(ctx context.Context, e Entities, r *mo
 			var stageData []float64
 			var blockCountData []float64
 			validCount := 0
-			
+
 			for _, result := range results {
 				districtName := ""
 				avgStage := 0.0
 				blockCount := 0.0
-				
+
 				if dn, ok := result["district_name"].(string); ok {
 					districtName = dn
 				}
@@ -3312,7 +3309,7 @@ func (s *ChatService) handleListDistricts(ctx context.Context, e Entities, r *mo
 				if bc, ok := result["block_count"].(float64); ok {
 					blockCount = bc
 				}
-				
+
 				// Only add if we have meaningful data
 				if districtName != "" && blockCount > 0 {
 					xAxisData = append(xAxisData, districtName)
@@ -3321,16 +3318,16 @@ func (s *ChatService) handleListDistricts(ctx context.Context, e Entities, r *mo
 					validCount++
 				}
 			}
-			
+
 			// Only return chart if we have valid data
 			if validCount == 0 {
 				// No valid data, fall through to simple district list
 				goto SIMPLE_DISTRICT_LIST
 			}
-			
-			r.Text = fmt.Sprintf("Here are all %d districts in %s state, visualized by their average groundwater extraction stage.", 
+
+			r.Text = fmt.Sprintf("Here are all %d districts in %s state, visualized by their average groundwater extraction stage.",
 				len(results), targetState.StateName)
-			
+
 			// Create beautiful bar chart
 			r.Chart = &models.ChartPayload{
 				Type:  "brush-bar",
@@ -3349,11 +3346,11 @@ func (s *ChatService) handleListDistricts(ctx context.Context, e Entities, r *mo
 					},
 				},
 			}
-			
+
 			r.Data = results
 			return r, nil
 		}
-		
+
 	SIMPLE_DISTRICT_LIST:
 		// Fallback: if query fails or no valid data, just list district names
 		districts, err := s.ingres.repo.GetDistrictsByState(ctx, targetState.StateUUID)
@@ -3361,42 +3358,42 @@ func (s *ChatService) handleListDistricts(ctx context.Context, e Entities, r *mo
 			r.Text = "Sorry, I encountered an error fetching districts data."
 			return r, err
 		}
-		
+
 		if len(districts) == 0 {
 			r.Text = fmt.Sprintf("No districts found in %s.", targetState.StateName)
 			return r, nil
 		}
-		
+
 		// Build response text
 		var districtNames []string
 		for _, d := range districts {
 			districtNames = append(districtNames, d.DistrictName)
 		}
-		
-		r.Text = fmt.Sprintf("**Districts in %s** (%d total):\n\n%s", 
-			targetState.StateName, 
-			len(districts), 
+
+		r.Text = fmt.Sprintf("**Districts in %s** (%d total):\n\n%s",
+			targetState.StateName,
+			len(districts),
 			strings.Join(districtNames, ", "))
 		r.Data = districts
-		
+
 		return r, nil
 	}
-	
+
 	// No location specified - list all districts (might be too many, limit it)
 	states, err := s.ingres.repo.GetAllStates(ctx)
 	if err != nil {
 		r.Text = "Sorry, I encountered an error fetching data."
 		return r, err
 	}
-	
+
 	var stateNames []string
 	for _, s := range states {
 		stateNames = append(stateNames, s.StateName)
 	}
 
-	r.Text = fmt.Sprintf("Please specify a state.\n\nAvailable states: %s", 
+	r.Text = fmt.Sprintf("Please specify a state.\n\nAvailable states: %s",
 		strings.Join(stateNames, ", "))
-	
+
 	return r, nil
 }
 
@@ -3406,22 +3403,22 @@ func (s *ChatService) handleListStates(ctx context.Context, e Entities, r *model
 		r.Text = "Sorry, I encountered an error fetching states data."
 		return r, err
 	}
-	
+
 	if len(states) == 0 {
 		r.Text = "No states found in the database."
 		return r, nil
 	}
-	
+
 	var stateNames []string
 	for _, state := range states {
 		stateNames = append(stateNames, state.StateName)
 	}
-	
-	r.Text = fmt.Sprintf("**All States in India** (%d total):\n\n%s", 
-		len(states), 
+
+	r.Text = fmt.Sprintf("**All States in India** (%d total):\n\n%s",
+		len(states),
 		strings.Join(stateNames, ", "))
 	r.Data = states
-	
+
 	return r, nil
 }
 
@@ -3429,7 +3426,7 @@ func (s *ChatService) handleTopRanking(ctx context.Context, e Entities, r *model
 	// ALWAYS parse category from query text for reliability
 	queryLower := strings.ToLower(e.OriginalQuery)
 	category := ""
-	
+
 	// Check query text first (most reliable)
 	if strings.Contains(queryLower, "critical") && !strings.Contains(queryLower, "semi") {
 		category = "critical"
@@ -3448,9 +3445,9 @@ func (s *ChatService) handleTopRanking(ctx context.Context, e Entities, r *model
 		// Final default
 		category = "over_exploited"
 	}
-	
+
 	fmt.Printf("DEBUG handleTopRanking: Query='%s', Detected category='%s'\n", queryLower, category)
-	
+
 	year := e.Year
 	if year == "" {
 		year = "2024-2025"
@@ -3464,10 +3461,10 @@ func (s *ChatService) handleTopRanking(ctx context.Context, e Entities, r *model
 
 	// Determine aggregation level: blocks (default), districts, or states
 	level := "blocks"
-	
+
 	// Build SQL based on level
 	var sqlQuery string
-	
+
 	if level == "blocks" {
 		sqlQuery = fmt.Sprintf(`
 		SELECT 
@@ -3526,14 +3523,14 @@ func (s *ChatService) handleTopRanking(ctx context.Context, e Entities, r *model
 	for _, result := range results {
 		name := ""
 		value := 0.0
-		
+
 		if loc, ok := result["location"].(string); ok {
 			name = loc
 		}
 		if val, ok := result["value"].(float64); ok {
 			value = val
 		}
-		
+
 		if name != "" && value > 0 {
 			pieData = append(pieData, models.PieDatum{
 				Name:  name,

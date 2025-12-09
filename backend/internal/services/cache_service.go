@@ -21,26 +21,26 @@ type CacheService struct {
 // Cache Key Prefixes for 4 Major Attributes (Judge's Focus)
 const (
 	// Primary keys based on 4 attributes
-	CacheKeyAttribute1 = "attr:extractable:"      // Annual extractable groundwater
-	CacheKeyAttribute2 = "attr:extraction:"       // Annual GW extraction
-	CacheKeyAttribute3 = "attr:stage:"            // Stage of extraction
-	CacheKeyAttribute4 = "attr:category:"         // Categorization
-	
+	CacheKeyAttribute1 = "attr:extractable:" // Annual extractable groundwater
+	CacheKeyAttribute2 = "attr:extraction:"  // Annual GW extraction
+	CacheKeyAttribute3 = "attr:stage:"       // Stage of extraction
+	CacheKeyAttribute4 = "attr:category:"    // Categorization
+
 	// Query result caching (PERMANENT - NO TTL)
-	CacheKeyLLMQuery          = "llm:query:"              // LLM-generated SQL queries
-	CacheKeyLLMResponse       = "llm:response:"           // Full LLM responses
-	CacheKeyBlockAssessment   = "assessment:block:"        // assessment:block:{block_uuid}:{year}
-	CacheKeyDistrictData      = "district:data:"           // district:data:{district_name}:{year}
-	CacheKeyStateData         = "state:data:"              // state:data:{state_name}:{year}
-	CacheKeyBlocksbyCategory  = "blocks:category:"         // blocks:category:{state}:{category}:{year}
-	CacheKeyDistrictsByState  = "districts:state:"         // districts:state:{state_name}
-	CacheKeyAllBlocks         = "blocks:all:"              // blocks:all:{state_name}
-	CacheKeyBlockDetails      = "block:details:"           // block:details:{block_uuid}
-	CacheKeyComparison        = "comparison:locations:"    // comparison:locations:{location1}:{location2}:{year}
-	CacheKeyTrendData         = "trend:data:"              // trend:data:{location}:{start_year}:{end_year}
-	CacheKeyTopBlocks         = "top:blocks:"              // top:blocks:{state}:{category}:{limit}:{year}
-	CacheKeyStateStats        = "state:stats:"             // state:stats:{state_name}:{year}
-	CacheKeyDistrictStats     = "district:stats:"          // district:stats:{district_name}:{year}
+	CacheKeyLLMQuery         = "llm:query:"            // LLM-generated SQL queries
+	CacheKeyLLMResponse      = "llm:response:"         // Full LLM responses
+	CacheKeyBlockAssessment  = "assessment:block:"     // assessment:block:{block_uuid}:{year}
+	CacheKeyDistrictData     = "district:data:"        // district:data:{district_name}:{year}
+	CacheKeyStateData        = "state:data:"           // state:data:{state_name}:{year}
+	CacheKeyBlocksbyCategory = "blocks:category:"      // blocks:category:{state}:{category}:{year}
+	CacheKeyDistrictsByState = "districts:state:"      // districts:state:{state_name}
+	CacheKeyAllBlocks        = "blocks:all:"           // blocks:all:{state_name}
+	CacheKeyBlockDetails     = "block:details:"        // block:details:{block_uuid}
+	CacheKeyComparison       = "comparison:locations:" // comparison:locations:{location1}:{location2}:{year}
+	CacheKeyTrendData        = "trend:data:"           // trend:data:{location}:{start_year}:{end_year}
+	CacheKeyTopBlocks        = "top:blocks:"           // top:blocks:{state}:{category}:{limit}:{year}
+	CacheKeyStateStats       = "state:stats:"          // state:stats:{state_name}:{year}
+	CacheKeyDistrictStats    = "district:stats:"       // district:stats:{district_name}:{year}
 )
 
 // truncateKey safely truncates a key for logging, avoiding slice bounds panic
@@ -54,14 +54,14 @@ func truncateKey(key string) string {
 // ⚡ PERMANENT CACHING STRATEGY (as per judge feedback)
 // Since groundwater assessment data is CONSTANT (historical data never changes),
 // we cache ALL results PERMANENTLY with NO TTL.
-// 
+//
 // Benefits:
 // - First query: 5-10s (LLM generates SQL)
 // - All subsequent queries: <10ms (Redis cache hit)
 // - Infinite scalability: LLM runs once per unique query ever
 const (
-	PermanentCache = 0 // NO TTL - cache forever (data is constant)
-	StaticDataTTL  = 0 // Was 24h, now permanent
+	PermanentCache   = 0 // NO TTL - cache forever (data is constant)
+	StaticDataTTL    = 0 // Was 24h, now permanent
 	AggregateDataTTL = 0 // Was 1h, now permanent
 )
 

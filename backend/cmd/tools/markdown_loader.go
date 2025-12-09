@@ -38,7 +38,7 @@ func loadMarkdown(filepath, year string) {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	
+
 	// Skip header line
 	if scanner.Scan() {
 		// Header skipped
@@ -110,34 +110,34 @@ func loadMarkdown(filepath, year string) {
 
 func parseMarkdownLine(line string) map[string]interface{} {
 	fields := strings.Split(strings.TrimSpace(line), "\t")
-	
+
 	if len(fields) < 22 {
 		return nil
 	}
 
 	return map[string]interface{}{
-		"sl_no":                          parseIntField(fields[0]),
-		"state":                          strings.TrimSpace(fields[1]),
-		"district":                       strings.TrimSpace(fields[2]),
-		"assessment_unit_name":           strings.TrimSpace(fields[3]),
-		"assessment_unit_type":           strings.TrimSpace(fields[4]),
-		"total_area":                     parseFloatField(fields[5]),
-		"recharge_worthy_area":           parseFloatField(fields[6]),
-		"recharge_rainfall_monsoon":      parseFloatField(fields[7]),
-		"recharge_other_monsoon":         parseFloatField(fields[8]),
-		"recharge_rainfall_non_monsoon":  parseFloatField(fields[9]),
-		"recharge_other_non_monsoon":     parseFloatField(fields[10]),
-		"total_annual_recharge":          parseFloatField(fields[11]),
-		"total_natural_discharge":        parseFloatField(fields[12]),
-		"annual_extractable":             parseFloatField(fields[13]),  // total_extractable
-		"extraction_irrigation":          parseFloatField(fields[14]),
-		"extraction_industrial":          parseFloatField(fields[15]),
-		"extraction_domestic":            parseFloatField(fields[16]),
-		"total_extraction":               parseFloatField(fields[17]),  // total_extraction
-		"annual_gw_allocation_domestic":  parseFloatField(fields[18]),
-		"net_availability_future":        parseFloatField(fields[19]),
-		"stage_extraction":               parseFloatField(fields[20]),  // stage
-		"category":                       strings.ToLower(strings.TrimSpace(fields[21])),
+		"sl_no":                         parseIntField(fields[0]),
+		"state":                         strings.TrimSpace(fields[1]),
+		"district":                      strings.TrimSpace(fields[2]),
+		"assessment_unit_name":          strings.TrimSpace(fields[3]),
+		"assessment_unit_type":          strings.TrimSpace(fields[4]),
+		"total_area":                    parseFloatField(fields[5]),
+		"recharge_worthy_area":          parseFloatField(fields[6]),
+		"recharge_rainfall_monsoon":     parseFloatField(fields[7]),
+		"recharge_other_monsoon":        parseFloatField(fields[8]),
+		"recharge_rainfall_non_monsoon": parseFloatField(fields[9]),
+		"recharge_other_non_monsoon":    parseFloatField(fields[10]),
+		"total_annual_recharge":         parseFloatField(fields[11]),
+		"total_natural_discharge":       parseFloatField(fields[12]),
+		"annual_extractable":            parseFloatField(fields[13]), // total_extractable
+		"extraction_irrigation":         parseFloatField(fields[14]),
+		"extraction_industrial":         parseFloatField(fields[15]),
+		"extraction_domestic":           parseFloatField(fields[16]),
+		"total_extraction":              parseFloatField(fields[17]), // total_extraction
+		"annual_gw_allocation_domestic": parseFloatField(fields[18]),
+		"net_availability_future":       parseFloatField(fields[19]),
+		"stage_extraction":              parseFloatField(fields[20]), // stage
+		"category":                      strings.ToLower(strings.TrimSpace(fields[21])),
 	}
 }
 
@@ -168,7 +168,7 @@ func parseIntField(s string) *int {
 func getOrCreateState(db *sql.DB, stateName string) (string, error) {
 	var stateUUID string
 	err := db.QueryRow("SELECT state_uuid FROM states WHERE state_name = $1", stateName).Scan(&stateUUID)
-	
+
 	if err == sql.ErrNoRows {
 		stateUUID = uuid.New().String()
 		_, err = db.Exec("INSERT INTO states (state_uuid, state_name) VALUES ($1, $2)",
@@ -179,7 +179,7 @@ func getOrCreateState(db *sql.DB, stateName string) (string, error) {
 	} else if err != nil {
 		return "", err
 	}
-	
+
 	return stateUUID, nil
 }
 
@@ -187,7 +187,7 @@ func getOrCreateDistrict(db *sql.DB, districtName, stateUUID string) (string, er
 	var districtUUID string
 	err := db.QueryRow("SELECT district_uuid FROM districts WHERE district_name = $1 AND state_uuid = $2",
 		districtName, stateUUID).Scan(&districtUUID)
-	
+
 	if err == sql.ErrNoRows {
 		districtUUID = uuid.New().String()
 		_, err = db.Exec("INSERT INTO districts (district_uuid, district_name, state_uuid) VALUES ($1, $2, $3)",
@@ -198,7 +198,7 @@ func getOrCreateDistrict(db *sql.DB, districtName, stateUUID string) (string, er
 	} else if err != nil {
 		return "", err
 	}
-	
+
 	return districtUUID, nil
 }
 
@@ -206,7 +206,7 @@ func getOrCreateBlock(db *sql.DB, blockName, districtUUID, stateUUID string) (st
 	var blockUUID string
 	err := db.QueryRow("SELECT block_uuid FROM blocks WHERE block_name = $1 AND district_uuid = $2",
 		blockName, districtUUID).Scan(&blockUUID)
-	
+
 	if err == sql.ErrNoRows {
 		blockUUID = uuid.New().String()
 		_, err = db.Exec("INSERT INTO blocks (block_uuid, block_name, district_uuid, state_uuid) VALUES ($1, $2, $3, $4)",
@@ -217,7 +217,7 @@ func getOrCreateBlock(db *sql.DB, blockName, districtUUID, stateUUID string) (st
 	} else if err != nil {
 		return "", err
 	}
-	
+
 	return blockUUID, nil
 }
 

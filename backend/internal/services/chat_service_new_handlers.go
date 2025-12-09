@@ -20,7 +20,7 @@ func (s *ChatService) handleYearlyComparison(ctx context.Context, e Entities, r 
 	}
 
 	locationName := e.Locations[0]
-	
+
 	// Try to find the location (state, district, or block)
 	state, _ := s.ingres.GetStateByName(ctx, locationName)
 	if state != nil {
@@ -29,7 +29,7 @@ func (s *ChatService) handleYearlyComparison(ctx context.Context, e Entities, r 
 
 	// Get data for multiple years
 	years := []string{"2021-2022", "2023-2024", "2024-2025"}
-	
+
 	sqlQuery := fmt.Sprintf(`
 		SELECT 
 			a.year,
@@ -87,7 +87,7 @@ func (s *ChatService) handleYearlyComparison(ctx context.Context, e Entities, r 
 	}
 
 	r.Text = fmt.Sprintf("Here's a year-over-year comparison of %s showing extraction stage, recharge, and extraction trends.", locationName)
-	
+
 	r.Chart = &models.ChartPayload{
 		Type:  "gradient-area",
 		Title: fmt.Sprintf("%s - Yearly Comparison", locationName),
@@ -175,7 +175,7 @@ func (s *ChatService) handleCategorySummary(ctx context.Context, e Entities, r *
 			// Format category names
 			displayCategory := strings.ReplaceAll(category, "_", " ")
 			displayCategory = strings.Title(strings.ToLower(displayCategory))
-			
+
 			pieData = append(pieData, models.PieDatum{
 				Name:  displayCategory,
 				Value: count,
@@ -185,7 +185,7 @@ func (s *ChatService) handleCategorySummary(ctx context.Context, e Entities, r *
 	}
 
 	r.Text = fmt.Sprintf("Category distribution for %s (%s): %d total blocks analyzed.", state.StateName, year, int(totalBlocks))
-	
+
 	r.Chart = &models.ChartPayload{
 		Type:    "rose-pie",
 		Title:   fmt.Sprintf("%s - Groundwater Category Distribution", state.StateName),
@@ -200,7 +200,7 @@ func (s *ChatService) handleCategorySummary(ctx context.Context, e Entities, r *
 func (s *ChatService) handleCriticalAlerts(ctx context.Context, e Entities, r *models.ChatResponse) (*models.ChatResponse, error) {
 	locationFilter := ""
 	locationName := "India"
-	
+
 	if len(e.Locations) > 0 {
 		state, _ := s.ingres.GetStateByName(ctx, e.Locations[0])
 		if state != nil {
@@ -280,7 +280,7 @@ func (s *ChatService) handleCriticalAlerts(ctx context.Context, e Entities, r *m
 	}
 
 	r.Text = fmt.Sprintf("⚠️ Critical Alerts: Found %d blocks in %s that need urgent attention (extraction stage > 80%%).", len(results), locationName)
-	
+
 	r.Chart = &models.ChartPayload{
 		Type:  "brush-bar",
 		Title: fmt.Sprintf("%s - Critical Groundwater Blocks Needing Attention", locationName),
@@ -376,7 +376,7 @@ func (s *ChatService) handleWaterBalance(ctx context.Context, e Entities, r *mod
 	}
 
 	r.Text = fmt.Sprintf("Water balance analysis for %s (%s): Comparing recharge vs extraction across districts.", state.StateName, year)
-	
+
 	r.Chart = &models.ChartPayload{
 		Type:  "brush-bar",
 		Title: fmt.Sprintf("%s - Water Balance Analysis (Recharge vs Extraction)", state.StateName),
@@ -489,7 +489,7 @@ func (s *ChatService) handleStateOverview(ctx context.Context, e Entities, r *mo
 		if category != "" {
 			displayCategory := strings.ReplaceAll(category, "_", " ")
 			displayCategory = strings.Title(strings.ToLower(displayCategory))
-			
+
 			xAxisData = append(xAxisData, displayCategory)
 			stageData = append(stageData, stage)
 			rechargeData = append(rechargeData, recharge)
@@ -499,9 +499,9 @@ func (s *ChatService) handleStateOverview(ctx context.Context, e Entities, r *mo
 		}
 	}
 
-	r.Text = fmt.Sprintf("📊 Complete Overview of %s (%s):\n\nTotal Blocks Analyzed: %d\n\nShowing category-wise breakdown of extraction stage, recharge, and extraction levels.", 
+	r.Text = fmt.Sprintf("📊 Complete Overview of %s (%s):\n\nTotal Blocks Analyzed: %d\n\nShowing category-wise breakdown of extraction stage, recharge, and extraction levels.",
 		state.StateName, year, int(totalBlocks))
-	
+
 	r.Chart = &models.ChartPayload{
 		Type:  "brush-bar",
 		Title: fmt.Sprintf("%s - Complete Groundwater Overview Dashboard", state.StateName),

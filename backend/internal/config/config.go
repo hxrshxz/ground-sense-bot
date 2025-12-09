@@ -58,12 +58,12 @@ type RedisConfig struct {
 }
 
 type EmailConfig struct {
-	SMTPHost     string
-	SMTPPort     int
-	Username     string
-	Password     string
-	FromEmail    string
-	FromName     string
+	SMTPHost  string
+	SMTPPort  int
+	Username  string
+	Password  string
+	FromEmail string
+	FromName  string
 }
 
 type StorageConfig struct {

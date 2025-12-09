@@ -1,6 +1,7 @@
 # 🤖 Ground Sense Bot - Complete Codebase Analysis & AI Prompts
 
 ## 📋 Table of Contents
+
 1. [System Architecture](#system-architecture)
 2. [How It Works (Full Flow)](#how-it-works-full-flow)
 3. [AI System Prompts](#ai-system-prompts)
@@ -75,6 +76,7 @@
 ## 🔄 How It Works (Full Flow)
 
 ### Step 1: User Input
+
 ```
 User types: "Show me over-exploited blocks in Punjab"
                          ↓
@@ -83,40 +85,46 @@ User types: "Show me over-exploited blocks in Punjab"
 ```
 
 ### Step 2: Frontend → Backend (WebSocket)
+
 **File**: `src/components/INGRESAssistant.tsx`
+
 ```tsx
 // User message handling
 const onSubmit = async () => {
   // 1. Display message in chat
-  const userMessage = { 
-    id: Date.now().toString(), 
-    content: input, 
-    sender: "user" 
+  const userMessage = {
+    id: Date.now().toString(),
+    content: input,
+    sender: "user",
   };
   setMessages([...messages, userMessage]);
 
   // 2. Send to backend via WebSocket
-  sendMessage(input);  // Opens WS connection to ws://localhost:8080/api/v1/chat
+  sendMessage(input); // Opens WS connection to ws://localhost:8080/api/v1/chat
   setInput("");
 };
 ```
 
 ### Step 3: Backend Receives & Routes
+
 **File**: `backend/cmd/server/main.go`
+
 ```go
 // WebSocket handler
 ws.OnMessage(func(msg []byte) {
   // Unmarshal user query
   var userInput UserInput
   json.Unmarshal(msg, &userInput)
-  
+
   // Route to chat service
   chatService.ProcessMessage(userInput.Query, username)
 })
 ```
 
 ### Step 4: NLP Service - Intent Detection & Entity Extraction
+
 **File**: `backend/internal/services/nlp_service.go`
+
 ```go
 intent, entities, _ := nlpService.ParseMessage("Show me over-exploited blocks in Punjab")
 
@@ -130,6 +138,7 @@ intent, entities, _ := nlpService.ParseMessage("Show me over-exploited blocks in
 ```
 
 **Intent Detection Logic** (RULE-BASED):
+
 - `SUMMARY` - "Show me data for [location]" (single location status)
 - `TREND` - "Trend for...", "over years", "historical" (time-series)
 - `COMPARE` - "Compare", "versus", "vs" (multiple locations)
@@ -144,9 +153,11 @@ intent, entities, _ := nlpService.ParseMessage("Show me over-exploited blocks in
 - And more... (19 total intents)
 
 ### Step 5: LLM Service - Dynamic SQL Generation
+
 **File**: `backend/internal/services/llm_service.go` + `ollama_client.go`
 
 The system sends a **massive prompt** to Ollama (local LLM) with:
+
 - Database schema (tables, columns, constraints)
 - 20+ example SQL queries
 - Critical rules and column names
@@ -174,12 +185,15 @@ sqlQuery, _ := llmService.GenerateSQL(
 ```
 
 **Key Features**:
+
 - ✅ **Caching**: Same query always returns cached SQL (saves 5-10s)
 - ✅ **Validation**: Checks for SELECT, blocks DROP/DELETE/INSERT
 - ✅ **Error Handling**: Falls back to predefined queries if LLM fails
 
 ### Step 6: Database Query Execution
+
 **File**: `backend/internal/repositories/assessment_repository.go`
+
 ```go
 // Execute the generated SQL
 results, err := ingresService.QueryDatabase(sqlQuery)
@@ -194,9 +208,11 @@ results, err := ingresService.QueryDatabase(sqlQuery)
 ```
 
 ### Step 7: LLM Service - Visualization Selection
+
 **File**: `backend/internal/services/llm_service.go`
 
 The system sends another prompt to Ollama:
+
 - Query results (first 50 rows as JSON)
 - User's original query
 - SQL that was executed
@@ -231,6 +247,7 @@ visualizationJSON, _ := llmService.GenerateVisualization(
 ```
 
 ### Step 8: Backend → Frontend (WebSocket Response)
+
 ```go
 // Send back to user
 response := {
@@ -249,12 +266,14 @@ ws.Send(json.Marshal(response))
 ```
 
 ### Step 9: Frontend Renders Visualization
+
 **File**: `src/components/INGRESAssistant.tsx`
+
 ```tsx
 // Handle bot response
 socket.onmessage = (event) => {
   const data = JSON.parse(event.data);
-  
+
   // Render appropriate component based on visualization type
   if (data.payload.visualization.type === "rose-pie") {
     return <NightingaleChart data={data.payload.visualization.pieData} />;
@@ -308,6 +327,7 @@ NOW GENERATE THE SQL QUERY FOR THE USER'S REQUEST:
 ```
 
 **Examples Provided to LLM**:
+
 ```sql
 🎯 EXAMPLE 1 - "List over-exploited blocks in Punjab":
 SELECT b.block_name, d.district_name, a.stage, a.category
@@ -426,14 +446,14 @@ Return ONLY valid JSON (no markdown):
   "xAxis": { "data": ["label1", "label2", ...], "type": "category|value" },
   "yAxis": { "data": ["label1", "label2", ...], "type": "category|value" },
   "series": [
-    { 
-      "name": "Series Name", 
-      "data": [val1, val2, ...], 
+    {
+      "name": "Series Name",
+      "data": [val1, val2, ...],
       "type": "bar|line",
       "stack": "total",
       "itemStyle": { "color": "#hex" },
       "label": { "show": true, "position": "inside" },
-      "highlight": true/false 
+      "highlight": true/false
     }
   ],
   "pieData": [{"name": "Category", "value": 123}],
@@ -492,8 +512,8 @@ CATEGORY VALUES (EXACT - lowercase):
 - 'Hilly Area' (not assessed)
 - 'none' (no category)
 
-5. RECHARGE_BREAKDOWN - source: 'rainfall', 'canal', 'gw_irrigation', 'surface_irrigation', 
-                                'water_body', 'artificial_structure', 'sewage', 'pipeline', 
+5. RECHARGE_BREAKDOWN - source: 'rainfall', 'canal', 'gw_irrigation', 'surface_irrigation',
+                                'water_body', 'artificial_structure', 'sewage', 'pipeline',
                                 'streamRecharge', 'agriculture', 'Total'
 
 6. EXTRACTION_BREAKDOWN - source: 'agriculture', 'domestic', 'industry', 'Total'
@@ -525,6 +545,7 @@ Provide classification with confidence score and extracted entities.
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **Framework**: React + TypeScript
 - **Build Tool**: Vite
 - **Styling**: Tailwind CSS
@@ -534,6 +555,7 @@ Provide classification with confidence score and extracted entities.
 - **State Management**: React Hooks + Context API
 
 ### Backend
+
 - **Language**: Go 1.21+
 - **Framework**: Gin (HTTP routing)
 - **Database**: PostgreSQL + PostGIS (spatial queries)
@@ -544,14 +566,16 @@ Provide classification with confidence score and extracted entities.
 - **Logging**: Structured logging
 
 ### Data & Services
+
 - **InGRES API**: India's Groundwater Data (7 years, 5,796 blocks, state/district/block level)
-- **Database Schema**: 
+- **Database Schema**:
   - assessments_summary (main groundwater data)
   - blocks, districts, states (location hierarchy)
   - assessments_recharge_breakdown (10+ recharge sources)
   - assessments_extraction_breakdown (3 extraction sectors)
 
 ### Key Features
+
 - ✅ **Real-time WebSocket Chat**
 - ✅ **Dynamic SQL Generation** (LLM-powered)
 - ✅ **Automatic Visualization Selection** (LLM-powered)
@@ -566,6 +590,7 @@ Provide classification with confidence score and extracted entities.
 ## 📊 Data Layer Details
 
 ### assessments_summary (Main Table)
+
 ```sql
 CREATE TABLE assessments_summary (
     assessment_id SERIAL PRIMARY KEY,
@@ -583,6 +608,7 @@ CREATE TABLE assessments_summary (
 ```
 
 ### Breakdown Tables
+
 ```sql
 -- Recharge sources
 CREATE TABLE assessments_recharge_breakdown (
@@ -608,7 +634,9 @@ CREATE TABLE assessments_extraction_breakdown (
 ## 🎯 Key Implementation Details
 
 ### 1. Intent Detection (19 Types)
+
 Rule-based pattern matching + optional AI fallback:
+
 - `SUMMARY`: "Show", "status", "information"
 - `TREND`: "Trend", "over years", "historical"
 - `COMPARE`: "Compare", "vs", "versus"
@@ -617,6 +645,7 @@ Rule-based pattern matching + optional AI fallback:
 - And 14 more...
 
 ### 2. SQL Generation Strategy
+
 1. **Intent Detection** → Extract entities
 2. **Build Prompt** with:
    - Full database schema
@@ -629,6 +658,7 @@ Rule-based pattern matching + optional AI fallback:
 6. **Execute** on PostgreSQL
 
 ### 3. Visualization Strategy
+
 1. **Get Query Results** (50 rows max)
 2. **Send to LLM** with:
    - Data as JSON
@@ -643,6 +673,7 @@ Rule-based pattern matching + optional AI fallback:
 5. **Send to Frontend** via WebSocket
 
 ### 4. Real-time Communication
+
 - **WebSocket URL**: `ws://localhost:8080/api/v1/chat?username={username}`
 - **Message Format**: JSON with user query
 - **Response Format**: JSON with visualization payload

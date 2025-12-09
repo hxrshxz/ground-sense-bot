@@ -2480,19 +2480,22 @@ Your response should sound like it's coming from a knowledgeable human analyst e
                         {msg.suggestions && msg.suggestions.length > 0 && (
                           <div className="flex flex-wrap gap-2 mt-4 p-3 bg-slate-50 rounded-xl border border-slate-200">
                             <span className="w-full text-xs font-medium text-slate-500 mb-1 flex items-center gap-1">
-                              <Lightbulb className="w-3 h-3" /> Follow-up queries:
+                              <Lightbulb className="w-3 h-3" /> Follow-up
+                              queries:
                             </span>
-                            {msg.suggestions.map((suggestion: string, i: number) => (
-                              <Button
-                                key={i}
-                                variant="outline"
-                                size="sm"
-                                className="text-xs bg-white hover:bg-purple-50 hover:text-purple-700 hover:border-purple-300 transition-colors"
-                                onClick={() => handleChatSubmit(suggestion)}
-                              >
-                                {suggestion}
-                              </Button>
-                            ))}
+                            {msg.suggestions.map(
+                              (suggestion: string, i: number) => (
+                                <Button
+                                  key={i}
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-xs bg-white hover:bg-purple-50 hover:text-purple-700 hover:border-purple-300 transition-colors"
+                                  onClick={() => handleChatSubmit(suggestion)}
+                                >
+                                  {suggestion}
+                                </Button>
+                              )
+                            )}
                           </div>
                         )}
                       </div>
@@ -2520,17 +2523,19 @@ Your response should sound like it's coming from a knowledgeable human analyst e
                             <span className="w-full text-xs font-medium text-purple-600 mb-1 flex items-center gap-1">
                               <Lightbulb className="w-3 h-3" /> 🔍 Drill-down:
                             </span>
-                            {msg.suggestions.map((suggestion: string, i: number) => (
-                              <Button
-                                key={i}
-                                variant="outline"
-                                size="sm"
-                                className="text-xs bg-white hover:bg-purple-100 hover:text-purple-800 hover:border-purple-400 border-purple-200 transition-all shadow-sm"
-                                onClick={() => handleChatSubmit(suggestion)}
-                              >
-                                {suggestion}
-                              </Button>
-                            ))}
+                            {msg.suggestions.map(
+                              (suggestion: string, i: number) => (
+                                <Button
+                                  key={i}
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-xs bg-white hover:bg-purple-100 hover:text-purple-800 hover:border-purple-400 border-purple-200 transition-all shadow-sm"
+                                  onClick={() => handleChatSubmit(suggestion)}
+                                >
+                                  {suggestion}
+                                </Button>
+                              )
+                            )}
                           </div>
                         )}
                       </div>

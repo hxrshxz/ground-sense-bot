@@ -326,20 +326,20 @@ func (s *ChatService) generateFollowUpSuggestions(query string, results []map[st
 	// Based on query type, suggest relevant follow-ups
 	if strings.Contains(queryLower, "compare") || strings.Contains(queryLower, " vs ") {
 		suggestions = []string{
-			"📊 \"Show graph of this comparison\"",
-			"🔍 \"Blocks in " + location + "\" for detailed breakdown",
-			"📈 \"Comparison of districts in " + location + "\"",
+			"📊 \"Show groundwater graph of this comparison\"",
+			"🔍 \"List blocks in " + location + " with status\"",
+			"📈 \"Compare districts in " + location + "\"",
 		}
 	} else if strings.Contains(queryLower, "blocks") || strings.Contains(queryLower, "list") {
 		if location != "" {
 			suggestions = []string{
-				fmt.Sprintf("📊 \"Graph of extraction in %s\"", location),
-				fmt.Sprintf("📈 \"Compare %s vs [another state]\"", location),
-				"🔍 \"Show mostly critical blocks\"",
+				fmt.Sprintf("📊 \"Show groundwater graph of %s\"", location),
+				fmt.Sprintf("📈 \"Compare %s with neighboring states\"", location),
+				"🔍 \"Show critical blocks in " + location + "\"",
 			}
 		} else {
              suggestions = []string{
-				"📊 \"Show graph of these blocks\"",
+				"📊 \"Show graph for these blocks\"",
 				"📈 \"Compare extraction vs recharge\"",
 				"🔍 \"Details of first block\"",
 			}
@@ -347,16 +347,16 @@ func (s *ChatService) generateFollowUpSuggestions(query string, results []map[st
 	} else if strings.Contains(queryLower, "districts") {
 		if location != "" {
 			suggestions = []string{
-				fmt.Sprintf("📊 \"Graph of districts in %s\"", location),
-				fmt.Sprintf("🔍 \"Show blocks in %s\"", location),
+				fmt.Sprintf("📊 \"Show groundwater graph of %s\"", location),
+				fmt.Sprintf("🔍 \"Show all blocks in %s\"", location),
 				fmt.Sprintf("📈 \"Trend analysis of %s\"", location),
 			}
 		}
 	} else if strings.Contains(queryLower, "status") || strings.Contains(queryLower, "show") || strings.Contains(queryLower, "data for") {
 		if location != "" {
 			suggestions = []string{
-				fmt.Sprintf("📊 \"Graph of %s\"", location),
-				fmt.Sprintf("🔍 \"Districts in %s\"", location),
+				fmt.Sprintf("📊 \"Show groundwater graph of %s\"", location),
+				fmt.Sprintf("🔍 \"List districts in %s\"", location),
 				fmt.Sprintf("📈 \"Compare %s vs [another state]\"", location),
 			}
 		} else {
@@ -369,8 +369,8 @@ func (s *ChatService) generateFollowUpSuggestions(query string, results []map[st
 	} else {
 		// Default suggestions
 		suggestions = []string{
-			"📊 \"Show graph for this\"",
-			"🔍 \"List critical blocks here\"",
+			"📊 \"Show groundwater graph\"",
+			"🔍 \"List critical blocks in this area\"",
 			"📈 \"Compare extraction vs recharge\"",
 		}
 	}
@@ -546,6 +546,7 @@ func (s *ChatService) isGroundwaterQuery(query string) bool {
 		"extraction", "recharge", "extractable", "ground",
 		"over-exploited", "overexploited", "semi-critical",
 		"blocks", "districts", "block", "district",
+		"graph", "chart", "trend", "visual",
 		
 		// All Indian state names
 		"punjab", "haryana", "rajasthan", "gujarat", "maharashtra",

@@ -63,15 +63,15 @@ SQL GENERATION RULES:
 1. ALWAYS join tables for human-readable names
 2. STATE matching: WHERE UPPER(s.state_name) = UPPER('punjab')
 3. DISTRICT matching: WHERE LOWER(d.district_name) ILIKE '%ludhiana%'
-4. Default year: WHERE a.year = '2024-2025'
+4. Years available: '2024-2025' or '2023-2024' (Default: 2024-2025)
 5. DO NOT round values - keep full precision
 6. Unit is ham (hectare-meters) for all water values
 
-FOCUS ON 4 KEY ATTRIBUTES:
-- total_extractable (Annual Extractable GW Resources in ham)
-- total_extraction (Annual GW Extraction in ham)
+7. MANDATORY COLUMNS FOR EVERY LOCATION QUERY:
+- total_extractable (Annual Extractable GW Resources)
+- total_extraction (Annual GW Extraction)
 - stage (Stage of Extraction %)
-- category (safe/semi_critical/critical/over_exploited/saline/hilly_area)
+- category (safe/critical/over_exploited)
 `
 }
 

@@ -5,6 +5,7 @@
 The Gemini-based RAG (Retrieval-Augmented Generation) system described in this document is **no longer in use**.
 
 The system now uses:
+
 - ✅ **Ollama** for local SQL generation
 - ✅ **PostgreSQL** for direct database queries
 - ✅ **No external AI APIs** required
@@ -18,6 +19,7 @@ This file is kept for reference only.
 This document previously described a hybrid RAG system with Gemini AI embeddings. That implementation has been replaced with a simpler, faster approach using Ollama for SQL generation directly from natural language queries.
 
 For current system architecture, refer to:
+
 - `EVERYTHING.md` - Complete system documentation
 - `OLLAMA_STATUS.md` - Current LLM implementation
 - `CODE_WALKTHROUGH.md` - How the system works today
@@ -177,6 +179,7 @@ ports: ["5434:5432"]  # Use 5434 instead
 ### Gemini API key not found?
 
 ```bash
+
 ```
 
 ### Docker not installed?

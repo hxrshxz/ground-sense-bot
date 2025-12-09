@@ -153,3 +153,19 @@ func (s *IngresService) GetStateSummary(ctx context.Context, stateUUID uuid.UUID
 func (s *IngresService) GetDistrictSummary(ctx context.Context, districtUUID uuid.UUID, year string) (*repositories.DistrictSummary, error) {
 	return s.repo.GetDistrictSummary(ctx, districtUUID, year)
 }
+
+func (s *IngresService) GetDistrictByUUID(ctx context.Context, districtUUID uuid.UUID) (*models.District, error) {
+	return s.repo.GetDistrictByUUID(ctx, districtUUID)
+}
+
+func (s *IngresService) GetStateByUUID(ctx context.Context, stateUUID uuid.UUID) (*models.State, error) {
+	return s.repo.GetStateByUUID(ctx, stateUUID)
+}
+
+func (s *IngresService) GetAssessmentByBlockAndYear(ctx context.Context, blockUUID uuid.UUID, year string) (*models.AssessmentSummary, error) {
+	return s.repo.GetAssessmentByBlockAndYear(ctx, blockUUID, year)
+}
+
+func (s *IngresService) GetRepository() *repositories.IngresRepository {
+	return s.repo
+}

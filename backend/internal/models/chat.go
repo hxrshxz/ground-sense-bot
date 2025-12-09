@@ -122,9 +122,18 @@ type ChartSeries struct {
 	Type    string        `json:"type,omitempty"`    // Override type per series
 }
 
+// XAxisDataItem represents an xAxis label with optional navigation UUID
+type XAxisDataItem struct {
+	Value        string `json:"value"`                  // Display name
+	BlockUUID    string `json:"blockUuid,omitempty"`    // For block navigation
+	DistrictUUID string `json:"districtUuid,omitempty"` // For district navigation
+}
+
 type PieDatum struct {
-	Name  string  `json:"name"`
-	Value float64 `json:"value"`
+	Name         string  `json:"name"`
+	Value        float64 `json:"value"`
+	BlockUUID    string  `json:"blockUuid,omitempty"`     // For clickable navigation to block overview
+	DistrictUUID string  `json:"districtUuid,omitempty"`  // For clickable navigation to district overview
 }
 
 type TimelinePayload struct {

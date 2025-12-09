@@ -170,7 +170,7 @@ Click "Analyze Map" button
 - Playwright opens INGRES website
 - Performs 11 link clicks automatically
 - Downloads live map image
-- AI analyzes using Gemini Vision
+- AI analyzes using Ollama Vision
 - Returns comprehensive groundwater insights
 
 **Alternative if automation down:**
@@ -196,7 +196,7 @@ Click "Analyze Map" button
 
 ### 2. **AI-Powered NLP** 🧠
 
-- Google Gemini 2.5 Flash integration
+- Google Ollama 2.5 Flash integration
 - 20+ intent types recognized
 - Context-aware conversations (remembers previous 10 exchanges)
 - Handles typos, abbreviations, Hindi+English mix
@@ -205,7 +205,7 @@ Click "Analyze Map" button
 ### 3. **RAG Semantic Search** 🔍
 
 - 40,000+ assessment embeddings stored
-- Gemini embeddings (768 dimensions)
+- Ollama embeddings (768 dimensions)
 - Finds relevant data even without exact matches
 - "Show blocks with high agriculture extraction" → Finds semantically similar
 
@@ -223,7 +223,7 @@ Click "Analyze Map" button
 - Playwright browser automation
 - Live INGRES map interaction
 - Automatic data extraction
-- AI vision analysis with Gemini
+- AI vision analysis with Ollama
 - Serverless deployment (Vercel functions)
 
 ---
@@ -240,7 +240,7 @@ Click "Analyze Map" button
 
 **Answer:**
 
-> "We use a hybrid approach: Gemini 2.5 Flash for NLP + RAG semantic search with 40,000 embeddings + rule-based fallbacks. This gives 95%+ intent classification accuracy. Our AI also maintains conversation context for 10 exchanges, so you can ask follow-up questions naturally."
+> "We use a hybrid approach: Ollama 2.5 Flash for NLP + RAG semantic search with 40,000 embeddings + rule-based fallbacks. This gives 95%+ intent classification accuracy. Our AI also maintains conversation context for 10 exchanges, so you can ask follow-up questions naturally."
 
 ### Q3: "Can it handle real-time queries?"
 
@@ -276,7 +276,7 @@ Click "Analyze Map" button
 
 **Answer:**
 
-> "Our NLP layer uses Gemini AI which is multilingual. It handles typos through fuzzy matching and semantic understanding. We also have location normalization that maps 'punjab' = 'PUNJAB' = 'panjab'. For Hindi queries, Gemini translates internally and we show results in English with Hindi support coming soon."
+> "Our NLP layer uses Ollama AI which is multilingual. It handles typos through fuzzy matching and semantic understanding. We also have location normalization that maps 'punjab' = 'PUNJAB' = 'panjab'. For Hindi queries, Ollama translates internally and we show results in English with Hindi support coming soon."
 
 ### Q9: "What about missing data or errors?"
 
@@ -377,7 +377,7 @@ Click "Analyze Map" button
 >
 > **The Problem:** CGWB publishes groundwater assessments for 5,796 blocks, but analyzing this data requires technical expertise. Farmers, policymakers, and researchers struggle to extract actionable insights.
 >
-> **Our Solution:** Natural language interface powered by Google Gemini AI. Ask questions in plain English or Hindi, get instant answers with stunning visualizations. We've processed 7 years of data covering all 38 states.
+> **Our Solution:** Natural language interface powered by Google Ollama AI. Ask questions in plain English or Hindi, get instant answers with stunning visualizations. We've processed 7 years of data covering all 38 states.
 >
 > **Impact:** We're making complex hydrogeological data accessible to everyone - from CGWB officials monitoring national water security to farmers planning their irrigation.
 >
@@ -456,7 +456,7 @@ Explain: "Playwright automation opening INGRES website..."
 Point out: "It's performing 11 precise clicks to navigate the official map"
 Wait: Screenshot appears
 Show: AI analysis appears
-Explain: "Gemini Vision analyzed the live map and provided insights"
+Explain: "Ollama Vision analyzed the live map and provided insights"
 ```
 
 ### **Minute 11-12: Closing**
@@ -475,7 +475,7 @@ Mention: "Complete CI/CD pipeline, RAG semantic search, 95% intent accuracy"
 ### 1. **Only AI Chatbot for CGWB Data**
 
 - No competitor has natural language interface for INGRES data
-- First to integrate Gemini AI with groundwater analytics
+- First to integrate Ollama AI with groundwater analytics
 
 ### 2. **Production-Ready CI/CD**
 
@@ -491,7 +491,7 @@ Mention: "Complete CI/CD pipeline, RAG semantic search, 95% intent accuracy"
 
 ### 4. **Hybrid Intelligence**
 
-- Gemini AI + RAG semantic search + Rule-based fallbacks
+- Ollama AI + RAG semantic search + Rule-based fallbacks
 - 95%+ accuracy even when AI quota hits
 - Context-aware for 10 message history
 
@@ -515,7 +515,7 @@ Mention: "Complete CI/CD pipeline, RAG semantic search, 95% intent accuracy"
 1. **Backend:** Go 1.22 (concurrency, performance, type safety)
 2. **Frontend:** React 18 + TypeScript (modern, maintainable)
 3. **Database:** PostgreSQL 15 (ACID compliance, 40K+ records)
-4. **AI:** Google Gemini 2.5 Flash (latest model, multimodal)
+4. **AI:** Google Ollama 2.5 Flash (latest model, multimodal)
 5. **Search:** RAG with 768-dim embeddings (semantic understanding)
 6. **Visualization:** ECharts (production-grade, interactive)
 7. **Automation:** Playwright (headless browser, reliable)
@@ -630,7 +630,7 @@ If automation or database fails, use these safe queries:
 4. **Show Confidence:** "Watch this..." before impressive features
 5. **Acknowledge Gaps:** "We have 13 working intents, 7 planned for next sprint"
 6. **Compare:** "Unlike Excel or Tableau, users just type questions"
-7. **Emphasize AI:** "Gemini understands typos, context, follow-ups"
+7. **Emphasize AI:** "Ollama understands typos, context, follow-ups"
 8. **Highlight Automation:** "This is actually opening a real browser right now"
 
 ---

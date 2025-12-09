@@ -352,9 +352,10 @@ const ProactiveInsightCard = () => {
           </h4>
           <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
             <p className="text-xs text-slate-700">
-              Multiple regions are showing upward trends in extraction rates, 
-              moving into higher stress categories. This correlates with increased 
-              urban and industrial demand combined with below-average rainfall patterns.
+              Multiple regions are showing upward trends in extraction rates,
+              moving into higher stress categories. This correlates with
+              increased urban and industrial demand combined with below-average
+              rainfall patterns.
             </p>
           </div>
         </div>
@@ -459,9 +460,7 @@ const INGRESCommandBar = ({
                 >
                   <Mic
                     className={`h-4 w-4 ${
-                      isListening
-                        ? "text-[#3A7F4B]"
-                        : "text-[#C8CED8]"
+                      isListening ? "text-[#3A7F4B]" : "text-[#C8CED8]"
                     }`}
                   />
                 </button>
@@ -572,9 +571,7 @@ const MemoizedStatCard = React.memo(({ stat }: { stat: any }) => (
   <Card className="bg-white border border-slate-200 rounded h-full">
     <CardContent className="p-4 relative">
       <div className="flex items-center gap-4">
-        <div
-          className={`p-2 rounded bg-slate-100`}
-        >
+        <div className={`p-2 rounded bg-slate-100`}>
           <stat.icon className={`h-6 w-6 ${stat.iconColor}`} />
         </div>
         <div>

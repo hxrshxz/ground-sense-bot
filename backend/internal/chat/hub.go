@@ -78,7 +78,7 @@ func (h *Hub) Run() {
 			// If the message is from a user, generate a bot response
 			if message.Type == "text" && message.Username != "Bot" {
 				go func(msg models.Message) {
-					response, err := h.chatService.ProcessMessage(context.Background(), msg.Content, msg.Username)
+					response, err := h.chatService.ProcessMessageDirect(context.Background(), msg.Content, msg.Username)
 					if err != nil {
 						log.Printf("Error processing message: %v", err)
 						return

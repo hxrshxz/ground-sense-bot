@@ -162,6 +162,20 @@ export const CATEGORY_COLORS = {
     label: "Saline",
   },
 
+  // Hilly Area (special category)
+  hillyArea: {
+    primary: "#795548", // Brown 500
+    background: "#EFEBE9", // Brown 50
+    backgroundDark: "rgba(121, 85, 72, 0.2)",
+    border: "#6D4C41", // Brown 700
+    text: "#4E342E", // Brown 900
+    textOnDark: "#A1887F", // Brown 300
+    gradient: "linear-gradient(135deg, #795548 0%, #6D4C41 100%)",
+    emoji: "🟤",
+    stage: { min: 0, max: Infinity },
+    label: "Hilly Area",
+  },
+
   // Unknown/Default
   unknown: {
     primary: "#616161", // Grey 700
@@ -245,6 +259,9 @@ export function getCategoryColors(category: string) {
   if (normalized.includes("saline")) {
     return CATEGORY_COLORS.saline;
   }
+  if (normalized.includes("hilly") || normalized.includes("hill")) {
+    return CATEGORY_COLORS.hillyArea;
+  }
   return CATEGORY_COLORS.unknown;
 }
 
@@ -288,6 +305,9 @@ export function formatCategoryName(category: string): string {
   }
   if (normalized.includes("saline")) {
     return "Saline";
+  }
+  if (normalized.includes("hilly") || normalized.includes("hill")) {
+    return "Hilly Area";
   }
   return category || "Unknown";
 }

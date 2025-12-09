@@ -43,13 +43,15 @@ THE 4 KEY ATTRIBUTES (ALL VALUES IN ham - hectare-meters):
 1. total_extractable (FLOAT) - Annual Extractable GW Resources in ham
 2. total_extraction (FLOAT) - Annual GW Extraction in ham
 3. stage (FLOAT) - Stage of Extraction as percentage
-4. category (VARCHAR) - 'safe', 'semi_critical', 'critical', 'over_exploited'
+4. category (VARCHAR) - 'safe', 'semi_critical', 'critical', 'over_exploited', 'saline', 'hilly_area'
 
 CATEGORY DEFINITIONS:
 - 'safe' = Stage < 70%
 - 'semi_critical' = Stage 70-90%
 - 'critical' = Stage 90-100%
 - 'over_exploited' = Stage > 100%
+- 'saline' = Saline areas (special category)
+- 'hilly_area' = Hilly terrain areas (special category)
 `
 }
 
@@ -69,7 +71,7 @@ FOCUS ON 4 KEY ATTRIBUTES:
 - total_extractable (Annual Extractable GW Resources in ham)
 - total_extraction (Annual GW Extraction in ham)
 - stage (Stage of Extraction %)
-- category (safe/semi_critical/critical/over_exploited)
+- category (safe/semi_critical/critical/over_exploited/saline/hilly_area)
 `
 }
 

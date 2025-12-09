@@ -27,26 +27,6 @@ const rainfallData = {
         },
       ],
     },
-    {
-      name: "Delhi",
-      total: 120.5,
-      components: [
-        { label: "Rainfall", value: 90.5, percentage: 75, color: "#3b82f6" },
-        {
-          label: "Natural Seepage",
-          value: 15.4,
-          percentage: 13,
-          color: "#0ea5e9",
-        },
-        { label: "Canal/River", value: 9.4, percentage: 8, color: "#6366f1" },
-        {
-          label: "Artificial Recharge",
-          value: 5.2,
-          percentage: 4,
-          color: "#10b981",
-        },
-      ],
-    },
   ],
 };
 
@@ -180,14 +160,10 @@ const RainfallImpactCard: React.FC = () => {
           ))}
 
           {/* Rainfall Dependency Summary */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <div className="text-center p-3 bg-blue-50 rounded-lg">
               <div className="text-lg font-bold text-blue-700">79%</div>
-              <div className="text-xs text-blue-600">Chaksu Dependency</div>
-            </div>
-            <div className="text-center p-3 bg-cyan-50 rounded-lg">
-              <div className="text-lg font-bold text-cyan-700">75%</div>
-              <div className="text-xs text-cyan-600">Delhi Dependency</div>
+              <div className="text-xs text-blue-600">Rainfall Dependency</div>
             </div>
           </div>
 

@@ -1305,6 +1305,9 @@ func (s *NLPService) extractEntities(msg string) Entities {
 		// New visualization keywords
 		"risk": true, "profile": true, "sector": true, "usage": true, "sustainability": true, "vulnerability": true,
 		"threat": true, "analysis": true, "consumption": true, "overview": true,
+		// Category keywords - prevent them from being extracted as locations
+		"critical": true, "safe": true, "over-exploited": true, "overexploited": true, 
+		"semi-critical": true, "semicritical": true, "semi": true, "exploited": true, "areas": true,
 	}
 	
 	var potentialLocations []string

@@ -1,6 +1,7 @@
 import React, { useCallback } from "react";
 import ReactECharts from "echarts-for-react";
 import * as echarts from "echarts";
+import { useNavigate } from "react-router-dom";
 import GroundwaterMetricsCard, { MetricsData } from "./GroundwaterMetricsCard";
 import TrendAnalysisCard, { TrendData } from "./TrendAnalysisCard";
 import ComparisonCard, { ComparisonData } from "./ComparisonCard";
@@ -66,7 +67,12 @@ export interface ChartData {
     title: string;
     series: { data: AnyData[] }[];
   }[];
-  pieData?: { name: string; value: number }[];
+  pieData?: {
+    name: string;
+    value: number;
+    blockUuid?: string;
+    districtUuid?: string;
+  }[];
   echarts_option?: AnyData;
   // New metrics data for the metrics-card type
   metricsData?: MetricsData;
@@ -120,6 +126,48 @@ const ChartRenderer: React.FC<ChartRendererProps> = ({
   chart,
   height = "480px",
 }) => {
+  const navigate = useNavigate();
+
+  // Handle click events on chart elements (for navigation to detail pages)
+  const handleChartClick = useCallback(
+    (params: AnyData) => {
+      console.log("Chart clicked:", params);
+
+      // Check if this is a series element (pie, bar, etc.)
+      if (params.componentType === "series") {
+        // Try to get UUID from the data point
+        let blockUuid = null;
+        let districtUuid = null;
+
+        // For pie/rose charts, UUIDs are directly in params.data
+        if (params.data) {
+          blockUuid = params.data.blockUuid;
+          districtUuid = params.data.districtUuid;
+        }
+
+        // Navigate to block overview if blockUuid exists
+        if (blockUuid) {
+          console.log("Navigating to block:", blockUuid);
+          navigate(`/block/${blockUuid}`);
+          return;
+        }
+
+        // Navigate to district overview if districtUuid exists
+        if (districtUuid) {
+          console.log("Navigating to district:", districtUuid);
+          navigate(`/district/${districtUuid}`);
+          return;
+        }
+
+        // Log if no UUID found
+        if (!blockUuid && !districtUuid) {
+          console.log("No UUID found in clicked element. Data:", params.data);
+        }
+      }
+    },
+    [navigate]
+  );
+
   // Handle metrics-card type separately (it's a React component, not ECharts)
   if (chart.type === "metrics-card" && chart.metricsData) {
     return <GroundwaterMetricsCard data={chart.metricsData} />;
@@ -174,7 +222,7 @@ const ChartRenderer: React.FC<ChartRendererProps> = ({
         return createSectorGradientChart(title, chart.sectorData || []);
       }
       case "risk-radar":
-          return createRiskRadarChart(title, chart.riskData || []);
+        return createRiskRadarChart(title, chart.riskData || []);
 
       case "stacked-bar":
         return createStackedBarChart(title, series, xAxis);
@@ -234,6 +282,9 @@ const ChartRenderer: React.FC<ChartRendererProps> = ({
         opts={{ renderer: "canvas" }}
         notMerge={true}
         lazyUpdate={true}
+        onEvents={{
+          click: handleChartClick,
+        }}
       />
     </div>
   );
@@ -594,7 +645,9 @@ const createRosePieChart = (
                   }</div>
                   <div style="display: flex; align-items: center; gap: 8px;">
                     <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);"></span>
-                    <span style="font-size: 15px;">🏘️ Blocks: <strong style="color: #43e97b;">${Math.round(params.value)}</strong></span>
+                    <span style="font-size: 15px;">🏘️ Blocks: <strong style="color: #43e97b;">${Math.round(
+                      params.value
+                    )}</strong></span>
                   </div>
                 </div>`;
       },
@@ -662,7 +715,11 @@ const createRosePieChart = (
         animationEasing: "elasticOut",
         animationDelay: (idx: number) => idx * 50,
         data: pieData.map((item, index) => ({
-          ...item,
+          name: item.name,
+          value: item.value,
+          // Preserve UUIDs for clickable navigation
+          blockUuid: item.blockUuid,
+          districtUuid: item.districtUuid,
           itemStyle: {
             color: roseColors[index % roseColors.length],
             borderColor: "rgba(255, 255, 255, 0.3)",
@@ -975,7 +1032,7 @@ const createBrushBarChart = (
     series: series.map((s, idx) => {
       // Use dataAny if present (has individual item colors), otherwise use gradient
       const hasStyledData = s.dataAny && s.dataAny.length > 0;
-      
+
       return {
         name: s.name,
         type: s.type || "bar",
@@ -991,28 +1048,30 @@ const createBrushBarChart = (
                 shadowBlur: 10,
               }
             : undefined,
-        itemStyle: hasStyledData ? {
-          borderRadius: [8, 8, 0, 0],
-          borderColor: "rgba(255, 255, 255, 0.2)",
-          borderWidth: 2,
-          shadowBlur: 15,
-          shadowColor: "rgba(0, 0, 0, 0.3)",
-          shadowOffsetY: 3,
-        } : {
-          color: new echarts.graphic.LinearGradient(
-            0,
-            0,
-            0,
-            1,
-            barGradients[idx % 5]
-          ),
-          borderRadius: [8, 8, 0, 0],
-          borderColor: "rgba(255, 255, 255, 0.2)",
-          borderWidth: 2,
-          shadowBlur: 15,
-          shadowColor: "rgba(0, 0, 0, 0.3)",
-          shadowOffsetY: 3,
-        },
+        itemStyle: hasStyledData
+          ? {
+              borderRadius: [8, 8, 0, 0],
+              borderColor: "rgba(255, 255, 255, 0.2)",
+              borderWidth: 2,
+              shadowBlur: 15,
+              shadowColor: "rgba(0, 0, 0, 0.3)",
+              shadowOffsetY: 3,
+            }
+          : {
+              color: new echarts.graphic.LinearGradient(
+                0,
+                0,
+                0,
+                1,
+                barGradients[idx % 5]
+              ),
+              borderRadius: [8, 8, 0, 0],
+              borderColor: "rgba(255, 255, 255, 0.2)",
+              borderWidth: 2,
+              shadowBlur: 15,
+              shadowColor: "rgba(0, 0, 0, 0.3)",
+              shadowOffsetY: 3,
+            },
         animationType: "scale",
         animationEasing: "elasticOut",
         animationDelay: (idx: number) => idx * 30,
@@ -1374,20 +1433,20 @@ const createRiskRadarChart = (title: string, data: RiskData[]) => {
   // Vibrant gradient colors for each risk factor
   const colors = [
     new echarts.graphic.LinearGradient(0, 0, 1, 0, [
-      { offset: 0, color: '#667eea' },
-      { offset: 1, color: '#764ba2' }
+      { offset: 0, color: "#667eea" },
+      { offset: 1, color: "#764ba2" },
     ]),
     new echarts.graphic.LinearGradient(0, 0, 1, 0, [
-      { offset: 0, color: '#f093fb' },
-      { offset: 1, color: '#f5576c' }
+      { offset: 0, color: "#f093fb" },
+      { offset: 1, color: "#f5576c" },
     ]),
     new echarts.graphic.LinearGradient(0, 0, 1, 0, [
-      { offset: 0, color: '#4facfe' },
-      { offset: 1, color: '#00f2fe' }
+      { offset: 0, color: "#4facfe" },
+      { offset: 1, color: "#00f2fe" },
     ]),
     new echarts.graphic.LinearGradient(0, 0, 1, 0, [
-      { offset: 0, color: '#43e97b' },
-      { offset: 1, color: '#38f9d7' }
+      { offset: 0, color: "#43e97b" },
+      { offset: 1, color: "#38f9d7" },
     ]),
   ];
 
@@ -1405,85 +1464,89 @@ const createRiskRadarChart = (title: string, data: RiskData[]) => {
       },
     },
     polar: {
-      radius: [40, '75%'],
+      radius: [40, "75%"],
     },
     radiusAxis: {
       max: 100,
       axisLine: { show: false },
       axisTick: { show: false },
-      axisLabel: { 
-        color: 'rgba(255,255,255,0.6)',
+      axisLabel: {
+        color: "rgba(255,255,255,0.6)",
         fontSize: 10,
       },
       splitLine: {
         lineStyle: {
-          color: 'rgba(255,255,255,0.15)',
-          type: 'dashed'
-        }
-      }
+          color: "rgba(255,255,255,0.15)",
+          type: "dashed",
+        },
+      },
     },
     angleAxis: {
-      type: 'category',
-      data: data.map(d => d.factor),
+      type: "category",
+      data: data.map((d) => d.factor),
       startAngle: 90,
-      axisLine: { 
-        lineStyle: { color: 'rgba(255,255,255,0.3)' } 
+      axisLine: {
+        lineStyle: { color: "rgba(255,255,255,0.3)" },
       },
       axisTick: { show: false },
       axisLabel: {
-        color: '#fff',
+        color: "#fff",
         fontSize: 11,
         fontWeight: 600,
         padding: [0, 0, 0, 0],
       },
       splitLine: {
         lineStyle: {
-          color: 'rgba(255,255,255,0.1)'
-        }
-      }
+          color: "rgba(255,255,255,0.1)",
+        },
+      },
     },
     tooltip: {
-      trigger: 'item',
-      backgroundColor: 'rgba(10, 15, 30, 0.95)',
-      borderColor: 'rgba(102, 126, 234, 0.6)',
+      trigger: "item",
+      backgroundColor: "rgba(10, 15, 30, 0.95)",
+      borderColor: "rgba(102, 126, 234, 0.6)",
       borderWidth: 2,
-      textStyle: { color: '#fff', fontSize: 13 },
+      textStyle: { color: "#fff", fontSize: 13 },
       formatter: (params: AnyData) => {
-        return `<b>${params.name}</b><br/>Risk Score: <span style="color:#f5576c;font-weight:bold">${params.value.toFixed(1)}%</span>`;
-      }
+        return `<b>${
+          params.name
+        }</b><br/>Risk Score: <span style="color:#f5576c;font-weight:bold">${params.value.toFixed(
+          1
+        )}%</span>`;
+      },
     },
     series: {
-      type: 'bar',
+      type: "bar",
       data: data.map((d, idx) => ({
         value: d.score,
         itemStyle: {
           color: colors[idx % colors.length],
           borderRadius: [4, 4, 0, 0],
           shadowBlur: 15,
-          shadowColor: 'rgba(0,0,0,0.3)',
-        }
+          shadowColor: "rgba(0,0,0,0.3)",
+        },
       })),
-      coordinateSystem: 'polar',
+      coordinateSystem: "polar",
       barWidth: 25,
       label: {
         show: true,
-        position: 'middle',
-        formatter: '{c}%',
-        color: '#fff',
+        position: "middle",
+        formatter: "{c}%",
+        color: "#fff",
         fontSize: 11,
-        fontWeight: 'bold',
-        textShadowColor: 'rgba(0,0,0,0.5)',
+        fontWeight: "bold",
+        textShadowColor: "rgba(0,0,0,0.5)",
         textShadowBlur: 3,
       },
       emphasis: {
         itemStyle: {
           shadowBlur: 25,
-          shadowColor: 'rgba(102, 126, 234, 0.8)',
-        }
-      }
+          shadowColor: "rgba(102, 126, 234, 0.8)",
+        },
+      },
     },
     animationDuration: 1500,
-    animationEasing: 'elasticOut',
+    animationEasing: "elasticOut",
   };
 };
 
@@ -1494,110 +1557,149 @@ const createRiskRadarChart = (title: string, data: RiskData[]) => {
 const createSectorGradientChart = (title: string, data: SectorData[]) => {
   // Gradient color configurations for each sector
   const gradientConfigs = [
-    [{ offset: 0, color: 'rgb(128, 255, 165)' }, { offset: 1, color: 'rgb(1, 191, 236)' }],
-    [{ offset: 0, color: 'rgb(0, 221, 255)' }, { offset: 1, color: 'rgb(77, 119, 255)' }],
-    [{ offset: 0, color: 'rgb(255, 0, 135)' }, { offset: 1, color: 'rgb(135, 0, 157)' }],
-    [{ offset: 0, color: 'rgb(255, 191, 0)' }, { offset: 1, color: 'rgb(224, 62, 76)' }],
-    [{ offset: 0, color: 'rgb(55, 162, 255)' }, { offset: 1, color: 'rgb(116, 21, 219)' }],
+    [
+      { offset: 0, color: "rgb(128, 255, 165)" },
+      { offset: 1, color: "rgb(1, 191, 236)" },
+    ],
+    [
+      { offset: 0, color: "rgb(0, 221, 255)" },
+      { offset: 1, color: "rgb(77, 119, 255)" },
+    ],
+    [
+      { offset: 0, color: "rgb(255, 0, 135)" },
+      { offset: 1, color: "rgb(135, 0, 157)" },
+    ],
+    [
+      { offset: 0, color: "rgb(255, 191, 0)" },
+      { offset: 1, color: "rgb(224, 62, 76)" },
+    ],
+    [
+      { offset: 0, color: "rgb(55, 162, 255)" },
+      { offset: 1, color: "rgb(116, 21, 219)" },
+    ],
   ];
 
   // Calculate total and percentages
   const total = data.reduce((sum, d) => sum + d.value, 0);
 
   return {
-    color: ['#80FFA5', '#00DDFF', '#FF0087', '#FFBF00', '#37A2FF'],
+    color: ["#80FFA5", "#00DDFF", "#FF0087", "#FFBF00", "#37A2FF"],
     title: {
       text: title,
-      left: 'center',
+      left: "center",
       top: 15,
       textStyle: {
-        color: '#ffffff',
+        color: "#ffffff",
         fontSize: 20,
         fontWeight: 700,
-        textShadowColor: 'rgba(0, 0, 0, 0.5)',
+        textShadowColor: "rgba(0, 0, 0, 0.5)",
         textShadowBlur: 8,
-      }
+      },
     },
     tooltip: {
-      trigger: 'axis',
+      trigger: "axis",
       axisPointer: {
-        type: 'cross',
-        lineStyle: { color: 'rgba(138, 43, 226, 0.6)', width: 2, type: 'dashed' },
+        type: "cross",
+        lineStyle: {
+          color: "rgba(138, 43, 226, 0.6)",
+          width: 2,
+          type: "dashed",
+        },
         label: {
-          backgroundColor: 'rgba(99, 102, 241, 0.9)',
-          borderColor: 'rgba(138, 43, 226, 0.8)',
-          color: '#fff',
-        }
+          backgroundColor: "rgba(99, 102, 241, 0.9)",
+          borderColor: "rgba(138, 43, 226, 0.8)",
+          color: "#fff",
+        },
       },
-      backgroundColor: 'rgba(10, 15, 30, 0.98)',
-      borderColor: 'rgba(138, 43, 226, 0.6)',
+      backgroundColor: "rgba(10, 15, 30, 0.98)",
+      borderColor: "rgba(138, 43, 226, 0.6)",
       borderWidth: 2,
-      textStyle: { color: '#ffffff', fontSize: 13 },
+      textStyle: { color: "#ffffff", fontSize: 13 },
       formatter: (params: AnyData) => {
-        if (!Array.isArray(params)) return '';
+        if (!Array.isArray(params)) return "";
         let result = `<div style="padding: 4px;"><b>Sector Distribution</b><br/>`;
         params.forEach((p: AnyData) => {
           const pct = ((p.value / total) * 100).toFixed(1);
-          result += `${p.marker} ${p.seriesName}: <b>${pct}%</b> (${(p.value/1000).toFixed(0)}K ham)<br/>`;
+          result += `${p.marker} ${p.seriesName}: <b>${pct}%</b> (${(
+            p.value / 1000
+          ).toFixed(0)}K ham)<br/>`;
         });
-        return result + '</div>';
-      }
+        return result + "</div>";
+      },
     },
     legend: {
-      data: data.map(d => d.sector),
+      data: data.map((d) => d.sector),
       bottom: 10,
-      textStyle: { color: 'rgba(255, 255, 255, 0.85)', fontSize: 12, fontWeight: 500 },
+      textStyle: {
+        color: "rgba(255, 255, 255, 0.85)",
+        fontSize: 12,
+        fontWeight: 500,
+      },
       itemWidth: 20,
       itemHeight: 12,
     },
     grid: {
-      left: '5%',
-      right: '5%',
-      bottom: '15%',
-      top: '18%',
-      containLabel: true
+      left: "5%",
+      right: "5%",
+      bottom: "15%",
+      top: "18%",
+      containLabel: true,
     },
-    xAxis: [{
-      type: 'category',
-      boundaryGap: false,
-      data: ['Share'],
-      axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.2)' } },
-      axisLabel: { color: 'rgba(255, 255, 255, 0.7)', fontSize: 12 },
-    }],
-    yAxis: [{
-      type: 'value',
-      axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.2)' } },
-      axisLabel: { 
-        color: 'rgba(255, 255, 255, 0.7)', 
-        fontSize: 11,
-        formatter: (val: number) => `${(val/1000000).toFixed(1)}M`
+    xAxis: [
+      {
+        type: "category",
+        boundaryGap: false,
+        data: ["Share"],
+        axisLine: { lineStyle: { color: "rgba(255, 255, 255, 0.2)" } },
+        axisLabel: { color: "rgba(255, 255, 255, 0.7)", fontSize: 12 },
       },
-      splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.08)' } },
-    }],
+    ],
+    yAxis: [
+      {
+        type: "value",
+        axisLine: { lineStyle: { color: "rgba(255, 255, 255, 0.2)" } },
+        axisLabel: {
+          color: "rgba(255, 255, 255, 0.7)",
+          fontSize: 11,
+          formatter: (val: number) => `${(val / 1000000).toFixed(1)}M`,
+        },
+        splitLine: { lineStyle: { color: "rgba(255, 255, 255, 0.08)" } },
+      },
+    ],
     series: data.map((sector, idx) => ({
       name: sector.sector,
-      type: 'line',
-      stack: 'Total',
+      type: "line",
+      stack: "Total",
       smooth: true,
       lineStyle: { width: 0 },
       showSymbol: false,
       areaStyle: {
         opacity: 0.85,
-        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, gradientConfigs[idx % gradientConfigs.length])
+        color: new echarts.graphic.LinearGradient(
+          0,
+          0,
+          0,
+          1,
+          gradientConfigs[idx % gradientConfigs.length]
+        ),
       },
-      emphasis: { focus: 'series' },
-      label: idx === data.length - 1 ? {
-        show: true,
-        position: 'top',
-        formatter: (params: AnyData) => `${((params.value / total) * 100).toFixed(0)}%`,
-        color: '#fff',
-        fontSize: 14,
-        fontWeight: 'bold',
-      } : undefined,
+      emphasis: { focus: "series" },
+      label:
+        idx === data.length - 1
+          ? {
+              show: true,
+              position: "top",
+              formatter: (params: AnyData) =>
+                `${((params.value / total) * 100).toFixed(0)}%`,
+              color: "#fff",
+              fontSize: 14,
+              fontWeight: "bold",
+            }
+          : undefined,
       data: [sector.value],
     })),
     animationDuration: 1500,
-    animationEasing: 'cubicOut',
+    animationEasing: "cubicOut",
   };
 };
 export default ChartRenderer;

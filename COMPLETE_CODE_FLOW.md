@@ -515,7 +515,7 @@ func (s *NLPService) generateDynamicSQL(message string, intent Intent, entities 
     prompt := fmt.Sprintf(schema, message)
 
     // Use LLMService to generate SQL
-    // Routes to Ollama (SQLCoder:7b) first, falls back to Gemini
+    // Routes to Ollama (SQLCoder:7b) first, falls back to Ollama
     sqlText, err := s.llm.GenerateSQL(message, prompt)
     if err != nil {
         return "", fmt.Errorf("AI SQL generation failed: %w", err)
@@ -530,7 +530,7 @@ func (s *NLPService) generateDynamicSQL(message string, intent Intent, entities 
 }
 ```
 
-**Ollama/Gemini Integration** (`llm_service.go`):
+**Ollama/Ollama Integration** (`llm_service.go`):
 
 ```go
 func (s *LLMService) GenerateSQL(query string, schema string) (string, error) {
@@ -540,20 +540,20 @@ func (s *LLMService) GenerateSQL(query string, schema string) (string, error) {
         if err == nil {
             return sql, nil  // Success with local LLM!
         }
-        // Log error and fall through to Gemini
-        log.Printf("Ollama failed: %v, falling back to Gemini", err)
+        // Log error and fall through to Ollama
+        log.Printf("Ollama failed: %v, falling back to Ollama", err)
     }
 
-    // Fallback to Gemini API
-    return s.generateSQLWithGemini(ctx, query, schema)
+    // Fallback to Ollama API
+    return s.generateSQLWithOllama(ctx, query, schema)
 }
 ```
 
 **Why this approach**:
 
 - **Ollama SQLCoder** = Free, local, fast (~400ms)
-- **Gemini** = Paid, remote, fast (~200ms) but costs money
-- Ollama tries first, Gemini is backup
+- **Ollama** = Paid, remote, fast (~200ms) but costs money
+- Ollama tries first, Ollama is backup
 - No data leaves your server unless Ollama fails
 
 ---
@@ -826,7 +826,7 @@ const ComparisonChart: React.FC<Props> = ({ data }) => {
 
 - Only used for unknown queries
 - Ollama (local) tries first
-- Gemini (API) is backup
+- Ollama (API) is backup
 
 ### 4. **Data Structure Optimization**
 
@@ -848,7 +848,7 @@ const ComparisonChart: React.FC<Props> = ({ data }) => {
 
 1. `backend/internal/services/nlp_service.go` - Intent detection & entity extraction
 2. `backend/internal/services/chat_service.go` - Message processing & handlers
-3. `backend/internal/services/llm_service.go` - Ollama & Gemini integration
+3. `backend/internal/services/llm_service.go` - Ollama & Ollama integration
 4. `backend/internal/models/chat.go` - Data structures
 5. `backend/pkg/websocket/handler.go` - WebSocket communication
 
@@ -872,7 +872,7 @@ const ComparisonChart: React.FC<Props> = ({ data }) => {
 
 **Layer 2**: Specialized database handlers execute optimized SQL queries. For example, 'Compare Amritsar and Ludhiana' routes to our `compareDistricts()` function which aggregates rainfall, blocks, and recharge data.
 
-**Layer 3**: For unknown queries, we use **SQLCoder:7b running locally via Ollama** to generate custom SQL. This converts natural language like 'show blocks with rainfall < 500mm' into executable SQL. If Ollama fails, we fall back to Gemini API.
+**Layer 3**: For unknown queries, we use **SQLCoder:7b running locally via Ollama** to generate custom SQL. This converts natural language like 'show blocks with rainfall < 500mm' into executable SQL. If Ollama fails, we fall back to Ollama API.
 
 The results are packaged as structured JSON with chart type, data points, and metadata. Our frontend detects the chart type and renders it as an interactive horizontal bar chart using ECharts. The entire pipeline takes 200-400ms from query to visualization."
 

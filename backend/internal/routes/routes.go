@@ -84,6 +84,11 @@ func RegisterRoutes(mux *http.ServeMux, cfg *config.Config, db *database.Service
 	mux.HandleFunc("/api/assessment", ingresController.GetBlockAssessment)
 	mux.HandleFunc("/api/search", ingresController.SearchBlocks)
 
+	// Register Overview routes
+	overviewController := controllers.NewOverviewController(ingresService, logger)
+	mux.HandleFunc("/api/blocks/", overviewController.GetBlockOverview)
+	mux.HandleFunc("/api/districts/", overviewController.GetDistrictOverview)
+
 	// Register RAG routes
 	mux.HandleFunc("/api/v1/rag/search", ragController.HybridSearch)
 	mux.HandleFunc("/api/v1/rag/assessment", ragController.GetAssessment)

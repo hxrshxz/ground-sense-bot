@@ -130,29 +130,65 @@ const GeminiShimmerEffect = () => {
   }, []);
 
   return (
-    <div className="flex items-start gap-3 max-w-2xl mr-auto">
-      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
-        <BrainCircuit className="w-5 h-5 text-white" />
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex items-start gap-3 max-w-2xl mr-auto"
+    >
+      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-sky-100 to-purple-100 flex items-center justify-center">
+        <Bot className="w-5 h-5 text-sky-600 animate-pulse" />
       </div>
-      <div className="p-3 rounded bg-gray-50 border border-gray-200 space-y-3 w-full max-w-md">
+      <div className="p-4 rounded-2xl rounded-bl-lg bg-white border border-slate-200 shadow-sm space-y-3 w-full max-w-md">
         <div className="space-y-2">
-          <div className="h-3 bg-gray-200 rounded" style={{ width: "95%" }} />
-          <div className="h-3 bg-gray-200 rounded" style={{ width: "100%" }} />
-          <div className="h-3 bg-gray-200 rounded" style={{ width: "90%" }} />
-          <div className="h-3 bg-gray-200 rounded" style={{ width: "75%" }} />
+          {[95, 100, 90, 75].map((width, index) => (
+            <div
+              key={index}
+              className="h-3 bg-slate-300 rounded-full relative overflow-hidden"
+              style={{ width: `${width}%` }}
+            >
+              <motion.div
+                className="absolute inset-0 bg-blue-400"
+                animate={{
+                  x: ["-100%", "100%"],
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+              />
+            </div>
+          ))}
         </div>
         <div className="flex items-center gap-2 pt-1">
           <div className="flex space-x-1">
-            <div className="w-1.5 h-1.5 bg-gray-400 rounded-full" />
-            <div className="w-1.5 h-1.5 bg-gray-400 rounded-full" />
-            <div className="w-1.5 h-1.5 bg-gray-400 rounded-full" />
+            {[0, 1, 2].map((i) => (
+              <motion.div
+                key={i}
+                className="w-1.5 h-1.5 bg-sky-500 rounded-full"
+                animate={{
+                  scale: [1, 1.3, 1],
+                  opacity: [0.5, 1, 0.5],
+                }}
+                transition={{
+                  duration: 1.2,
+                  repeat: Infinity,
+                  delay: i * 0.2,
+                }}
+              />
+            ))}
           </div>
-          <div className="text-xs text-gray-600 w-full overflow-hidden">
+          <motion.div
+            className="text-xs text-slate-600 font-medium w-full overflow-hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            key={currentPhraseIndex}
+          >
             <span className="block">{thinkingPhrases[currentPhraseIndex]}</span>
-          </div>
+          </motion.div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -731,7 +767,7 @@ const HydrogeologicalAnalysisChart = () => {
     // --- CHANGE 1: Added `relative` and `overflow-hidden` to the main container ---
     <div className="relative overflow-hidden w-full bg-white p-4 rounded border border-slate-200 my-4 font-sans">
       {/* --- CHANGE 2: Added the absolutely positioned top border --- */}
-      <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-purple-500 to-purple-800"></div>
+      <div className="absolute top-0 left-0 right-0 h-2 bg-[#0055A4]"></div>
 
       {/* Title and Subtitle Section (no changes here) */}
       <div>
@@ -1410,6 +1446,9 @@ Your response should sound like it's coming from a knowledgeable human analyst e
           return [...prev, newMsg];
         });
 
+        // Hide shimmer effect when response arrives
+        setIsThinking(false);
+
         // Speak if Co-Pilot is on
         if (isCoPilotMode && lastMsg.content) {
           speakText(lastMsg.content);
@@ -2071,7 +2110,7 @@ Your response should sound like it's coming from a knowledgeable human analyst e
       sendMessage(text);
 
       // The response will be handled by the useEffect hook listening to wsMessages
-      setIsThinking(false);
+      // Keep isThinking=true until response arrives
       return;
 
       /* Legacy Gemini Implementation Removed */
@@ -2294,8 +2333,8 @@ Your response should sound like it's coming from a knowledgeable human analyst e
                   } w-full`} // The outer container is now full-width
                 >
                   {msg.type === "ai" && (
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-sky-100 to-purple-100 flex items-center justify-center">
-                      <Bot className="w-5 h-5 text-sky-600" />
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 border-2 border-blue-600 flex items-center justify-center">
+                      <Bot className="w-5 h-5 text-blue-700" />
                     </div>
                   )}
 
@@ -2305,8 +2344,8 @@ Your response should sound like it's coming from a knowledgeable human analyst e
             */}
                   <div className={isGraphMessage ? "w-full" : "max-w-2xl"}>
                     {msg.type === "user" ? (
-                      <div className="bg-purple-500 text-white p-3 rounded-2xl rounded-br-lg shadow-sm">
-                        <p className="text-base">{msg.text}</p>
+                      <div className="bg-blue-600 text-white p-3 rounded-2xl rounded-br-lg shadow-md border-2 border-blue-700">
+                        <p className="text-base font-medium">{msg.text}</p>
                       </div>
                     ) : msg.component ? (
                       // If it's a graph component, render it directly without extra styling
@@ -2355,7 +2394,7 @@ Your response should sound like it's coming from a knowledgeable human analyst e
                         </div>
                         {/* Suggestion Buttons Below Text */}
                         {msg.suggestions && msg.suggestions.length > 0 && (
-                          <div className="flex flex-wrap gap-2 p-3 bg-gradient-to-r from-purple-50 to-sky-50 rounded-xl border border-purple-100">
+                          <div className="flex flex-wrap gap-2 p-3 bg-blue-50 rounded-xl border-2 border-blue-200">
                             <span className="w-full text-xs font-medium text-blue-600 mb-1 flex items-center gap-1">
                               <Lightbulb className="w-3 h-3" /> 🔍 Drill-down:
                             </span>
@@ -2365,7 +2404,7 @@ Your response should sound like it's coming from a knowledgeable human analyst e
                                   key={i}
                                   variant="outline"
                                   size="sm"
-                                  className="text-xs bg-white hover:bg-purple-100 hover:text-purple-800 hover:border-purple-400 border-purple-200 transition-all shadow-sm"
+                                  className="text-xs font-semibold bg-white hover:bg-blue-100 text-blue-800 hover:text-blue-900 border-2 border-blue-300 hover:border-blue-500 transition-all shadow-sm"
                                   onClick={() => handleChatSubmit(suggestion)}
                                 >
                                   {suggestion}

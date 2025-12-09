@@ -92,57 +92,57 @@ export const HIERARCHY_LEVELS = {
 // ============================================================================
 
 export const CATEGORY_COLORS = {
-  // Safe: White - Stage < 70%
+  // Safe: Green - Stage < 70%
   safe: {
-    primary: "#FFFFFF", // White as per INGRES specification
-    background: "#F8F9FA", // Very light grey for contrast
-    backgroundDark: "rgba(255, 255, 255, 0.2)",
-    border: "#E0E0E0", // Light grey border for visibility
-    text: "#424242", // Dark grey for text on white
+    primary: "#2E7D32", // Government Green 800
+    background: "#E8F5E9", // Green 50
+    backgroundDark: "#2E7D32",
+    border: "#1B5E20", // Green 900
+    text: "#1B5E20", // Green 900
     textOnDark: "#FFFFFF", // White for dark backgrounds
-    gradient: "linear-gradient(135deg, #FFFFFF 0%, #F5F5F5 100%)",
-    emoji: "⚪",
+    gradient: "linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%)",
+    emoji: "🟢",
     stage: { min: 0, max: 70 },
     label: "Safe",
   },
 
   // Semi-Critical: Blue - Stage 70-90%
   semiCritical: {
-    primary: "#1976D2", // Material Blue 700
+    primary: "#1565C0", // Government Blue 800
     background: "#E3F2FD", // Blue 50
-    backgroundDark: "rgba(25, 118, 210, 0.2)",
-    border: "#1565C0", // Blue 800
+    backgroundDark: "#1565C0",
+    border: "#0D47A1", // Blue 900
     text: "#0D47A1", // Blue 900
-    textOnDark: "#64B5F6", // Blue 300
-    gradient: "linear-gradient(135deg, #1976D2 0%, #1565C0 100%)",
+    textOnDark: "#FFFFFF", // White
+    gradient: "linear-gradient(135deg, #1565C0 0%, #0D47A1 100%)",
     emoji: "🔵",
     stage: { min: 70, max: 90 },
     label: "Semi-Critical",
   },
 
-  // Critical: Yellow - Stage 90-100%
+  // Critical: Orange - Stage 90-100%
   critical: {
-    primary: "#FBC02D", // Material Yellow 700 (darker for readability)
-    background: "#FFFDE7", // Yellow 50
-    backgroundDark: "rgba(251, 192, 45, 0.2)",
-    border: "#F9A825", // Yellow 800
-    text: "#F57F17", // Yellow 900
-    textOnDark: "#FFF176", // Yellow 300
-    gradient: "linear-gradient(135deg, #FBC02D 0%, #F9A825 100%)",
-    emoji: "🟡",
+    primary: "#E65100", // Orange 900 - visible and bold
+    background: "#FFF3E0", // Orange 50
+    backgroundDark: "#E65100",
+    border: "#BF360C", // Deep Orange 900
+    text: "#BF360C", // Deep Orange 900
+    textOnDark: "#FFFFFF", // White
+    gradient: "linear-gradient(135deg, #E65100 0%, #BF360C 100%)",
+    emoji: "🟠",
     stage: { min: 90, max: 100 },
     label: "Critical",
   },
 
   // Over-Exploited: Red - Stage > 100%
   overExploited: {
-    primary: "#D32F2F", // Material Red 700
+    primary: "#C62828", // Government Red 800
     background: "#FFEBEE", // Red 50
-    backgroundDark: "rgba(211, 47, 47, 0.2)",
-    border: "#C62828", // Red 800
+    backgroundDark: "#C62828",
+    border: "#B71C1C", // Red 900
     text: "#B71C1C", // Red 900
-    textOnDark: "#E57373", // Red 300
-    gradient: "linear-gradient(135deg, #D32F2F 0%, #C62828 100%)",
+    textOnDark: "#FFFFFF", // White
+    gradient: "linear-gradient(135deg, #C62828 0%, #B71C1C 100%)",
     emoji: "🔴",
     stage: { min: 100, max: Infinity },
     label: "Over-Exploited",
@@ -150,13 +150,13 @@ export const CATEGORY_COLORS = {
 
   // Saline (special category)
   saline: {
-    primary: "#7B1FA2", // Purple 700
+    primary: "#6A1B9A", // Purple 800
     background: "#F3E5F5", // Purple 50
-    backgroundDark: "rgba(123, 31, 162, 0.2)",
-    border: "#6A1B9A", // Purple 800
+    backgroundDark: "#6A1B9A",
+    border: "#4A148C", // Purple 900
     text: "#4A148C", // Purple 900
-    textOnDark: "#BA68C8", // Purple 300
-    gradient: "linear-gradient(135deg, #7B1FA2 0%, #6A1B9A 100%)",
+    textOnDark: "#FFFFFF", // White
+    gradient: "linear-gradient(135deg, #6A1B9A 0%, #4A148C 100%)",
     emoji: "🟣",
     stage: { min: 0, max: Infinity },
     label: "Saline",
@@ -164,13 +164,13 @@ export const CATEGORY_COLORS = {
 
   // Hilly Area (special category)
   hillyArea: {
-    primary: "#795548", // Brown 500
+    primary: "#6D4C41", // Brown 700
     background: "#EFEBE9", // Brown 50
-    backgroundDark: "rgba(121, 85, 72, 0.2)",
-    border: "#6D4C41", // Brown 700
+    backgroundDark: "#6D4C41",
+    border: "#4E342E", // Brown 900
     text: "#4E342E", // Brown 900
-    textOnDark: "#A1887F", // Brown 300
-    gradient: "linear-gradient(135deg, #795548 0%, #6D4C41 100%)",
+    textOnDark: "#FFFFFF", // White
+    gradient: "linear-gradient(135deg, #6D4C41 0%, #4E342E 100%)",
     emoji: "🟤",
     stage: { min: 0, max: Infinity },
     label: "Hilly Area",
@@ -178,13 +178,13 @@ export const CATEGORY_COLORS = {
 
   // Unknown/Default
   unknown: {
-    primary: "#616161", // Grey 700
-    background: "#FAFAFA", // Grey 50
-    backgroundDark: "rgba(97, 97, 97, 0.2)",
-    border: "#424242", // Grey 800
-    text: "#212121", // Grey 900
-    textOnDark: "#E0E0E0", // Grey 300
-    gradient: "linear-gradient(135deg, #616161 0%, #424242 100%)",
+    primary: "#546E7A", // Blue Grey 600
+    background: "#ECEFF1", // Blue Grey 50
+    backgroundDark: "#546E7A",
+    border: "#37474F", // Blue Grey 800
+    text: "#263238", // Blue Grey 900
+    textOnDark: "#FFFFFF", // White
+    gradient: "linear-gradient(135deg, #546E7A 0%, #37474F 100%)",
     emoji: "⚪",
     stage: { min: 0, max: Infinity },
     label: "Unknown",

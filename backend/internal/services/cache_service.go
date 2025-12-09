@@ -43,6 +43,14 @@ const (
 	CacheKeyDistrictStats     = "district:stats:"          // district:stats:{district_name}:{year}
 )
 
+// truncateKey safely truncates a key for logging, avoiding slice bounds panic
+func truncateKey(key string) string {
+	if len(key) > 50 {
+		return key[:50] + "..."
+	}
+	return key
+}
+
 // ⚡ PERMANENT CACHING STRATEGY (as per judge feedback)
 // Since groundwater assessment data is CONSTANT (historical data never changes),
 // we cache ALL results PERMANENTLY with NO TTL.
@@ -468,7 +476,7 @@ func (c *CacheService) GetLLMQuery(ctx context.Context, userQuery string) (strin
 		return "", err
 	}
 
-	log.Printf("✅ LLM Cache HIT: %s (saved 5-10s LLM generation time!)", key[:50]+"...")
+	log.Printf("✅ LLM Cache HIT: %s (saved 5-10s LLM generation time!)", truncateKey(key))
 	return sql, nil
 }
 
@@ -486,7 +494,7 @@ func (c *CacheService) SetLLMQuery(ctx context.Context, userQuery, generatedSQL 
 		return err
 	}
 
-	log.Printf("✅ LLM Query CACHED PERMANENTLY: %s", key[:50]+"...")
+	log.Printf("✅ LLM Query CACHED PERMANENTLY: %s", truncateKey(key))
 	return nil
 }
 
@@ -505,7 +513,7 @@ func (c *CacheService) GetLLMResponse(ctx context.Context, userQuery string) (st
 		return "", err
 	}
 
-	log.Printf("✅ LLM Response Cache HIT: %s (instant response!)", key[:50]+"...")
+	log.Printf("✅ LLM Response Cache HIT: %s (instant response!)", truncateKey(key))
 	return response, nil
 }
 
@@ -527,7 +535,7 @@ func (c *CacheService) SetLLMResponse(ctx context.Context, userQuery string, ful
 		return err
 	}
 
-	log.Printf("✅ LLM Response CACHED PERMANENTLY: %s", key[:50]+"...")
+	log.Printf("✅ LLM Response CACHED PERMANENTLY: %s", truncateKey(key))
 	return nil
 }
 
@@ -548,7 +556,7 @@ func (c *CacheService) GetQueryResult(ctx context.Context, queryHash string) (st
 		return "", err
 	}
 
-	log.Printf("✅ DB Query Cache HIT: %s (saved database query!)", key[:50]+"...")
+	log.Printf("✅ DB Query Cache HIT: %s (saved database query!)", truncateKey(key))
 	return result, nil
 }
 
@@ -570,7 +578,7 @@ func (c *CacheService) SetQueryResult(ctx context.Context, queryHash string, res
 		return err
 	}
 
-	log.Printf("✅ DB Query Result CACHED PERMANENTLY: %s", key[:50]+"...")
+	log.Printf("✅ DB Query Result CACHED PERMANENTLY: %s", truncateKey(key))
 	return nil
 }
 

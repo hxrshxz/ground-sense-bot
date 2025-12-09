@@ -366,11 +366,11 @@ Pipeline uses these environment variables:
 
 ### Data Volume
 
-| Entity             | Approximate Count     |
-| ------------------ | --------------------- |
-| States             | 38                    |
-| Districts          | 800+                  |
-| Blocks             | 6,750+                |
+| Entity             | Approximate Count        |
+| ------------------ | ------------------------ |
+| States             | 38                       |
+| Districts          | 800+                     |
+| Blocks             | 6,750+                   |
 | Assessment Records | 21,000+ (total, 6 years) |
 
 ## 🔄 Maintenance

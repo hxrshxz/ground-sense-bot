@@ -151,11 +151,17 @@ func (s *ChatService) handleStateQuery(ctx context.Context, stateName string, ye
 	}
 	
 	// Context-aware suggestions
+	otherState := "Haryana"
+	if state.StateName == "Haryana" {
+		otherState = "Punjab"
+	}
 	r.Suggestions = []string{
 		fmt.Sprintf("Show districts in %s", state.StateName),
 		fmt.Sprintf("Critical blocks in %s", state.StateName),
-		fmt.Sprintf("Over-exploited blocks in %s", state.StateName),
-		fmt.Sprintf("Compare %s with Haryana", state.StateName),
+		fmt.Sprintf("Over-exploited areas in %s", state.StateName),
+		fmt.Sprintf("Compare %s with %s", state.StateName, otherState),
+		fmt.Sprintf("Safe blocks in %s", state.StateName),
+		fmt.Sprintf("%s groundwater trends", otherState),
 	}
 	
 	// Set structured data for API consumers
@@ -311,11 +317,22 @@ func (s *ChatService) handleDistrictQuery(ctx context.Context, districtName stri
 	}
 	
 	// Add follow-up suggestions using actual category
+	// Select a different district for comparison (avoid self-comparison)
+	comparisonDistricts := []string{"Amritsar", "Patiala", "Gurdaspur", "Jalandhar", "Bathinda"}
+	otherDistrict := "Amritsar"
+	for _, d := range comparisonDistricts {
+		if !strings.EqualFold(d, district.DistrictName) {
+			otherDistrict = d
+			break
+		}
+	}
 	r.Suggestions = []string{
 		fmt.Sprintf("Show blocks in %s", district.DistrictName),
 		fmt.Sprintf("%s blocks in %s", formatCategory(category), district.DistrictName),
-		fmt.Sprintf("Compare %s with Amritsar", district.DistrictName),
+		fmt.Sprintf("Compare %s with %s", district.DistrictName, otherDistrict),
 		fmt.Sprintf("%s state overview", stateName),
+		fmt.Sprintf("Critical areas in %s", stateName),
+		fmt.Sprintf("%s district groundwater", otherDistrict),
 	}
 	
 	// Use metrics-card for district (same as state) - shows all 4 key attributes properly
@@ -421,6 +438,9 @@ func (s *ChatService) handleBlockQuery(ctx context.Context, blockName string, ye
 	r.Suggestions = []string{
 		fmt.Sprintf("Show blocks in %s", districtName),
 		fmt.Sprintf("%s district overview", districtName),
+		fmt.Sprintf("%s state groundwater", stateName),
+		fmt.Sprintf("Critical blocks in %s", districtName),
+		fmt.Sprintf("%s areas in %s", formatCategory(category), districtName),
 	}
 	
 	return r, nil
@@ -514,9 +534,17 @@ func (s *ChatService) handleListDistrictsFocused(ctx context.Context, stateName 
 		DrillDownHint: "Show blocks in [District Name]",
 	}
 	
+	otherState := "Haryana"
+	if state.StateName == "Haryana" {
+		otherState = "Punjab"
+	}
 	r.Suggestions = []string{
 		fmt.Sprintf("Show blocks in %s", items[0].Name),
 		fmt.Sprintf("%s groundwater status", state.StateName),
+		fmt.Sprintf("%s district overview", items[len(items)-1].Name),
+		fmt.Sprintf("Critical blocks in %s", state.StateName),
+		fmt.Sprintf("%s groundwater trends", otherState),
+		fmt.Sprintf("Compare %s with %s", state.StateName, otherState),
 	}
 	
 	// Build bar data with category-based colors
@@ -590,7 +618,7 @@ func (s *ChatService) handleListBlocksFocused(ctx context.Context, districtName 
 	
 	items := make([]models.HierarchyItem, 0, len(results))
 	xAxisData := make([]string, 0, len(results))
-	stageData := make([]float64, 0, len(results))
+	barData := make([]map[string]interface{}, 0, len(results))
 	
 	for i, row := range results {
 		name := getString(row, "block_name")
@@ -612,7 +640,14 @@ func (s *ChatService) handleListBlocksFocused(ctx context.Context, districtName 
 		
 		if i < 20 {
 			xAxisData = append(xAxisData, name)
-			stageData = append(stageData, stage)
+			// Add category-based color for each bar
+			color := getCategoryColor(category)
+			barData = append(barData, map[string]interface{}{
+				"value": stage,
+				"itemStyle": map[string]interface{}{
+					"color": color,
+				},
+			})
 		}
 	}
 	
@@ -630,9 +665,21 @@ func (s *ChatService) handleListBlocksFocused(ctx context.Context, districtName 
 		TotalCount: len(items),
 	}
 	
+	// Select a different district for comparison (avoid self-comparison)
+	comparisonDistricts := []string{"Ludhiana", "Patiala", "Amritsar", "Jalandhar", "Gurdaspur"}
+	otherDistrict := "Ludhiana"
+	for _, d := range comparisonDistricts {
+		if !strings.EqualFold(d, district.DistrictName) {
+			otherDistrict = d
+			break
+		}
+	}
 	r.Suggestions = []string{
 		fmt.Sprintf("%s district overview", district.DistrictName),
 		fmt.Sprintf("%s state overview", stateName),
+		fmt.Sprintf("Compare %s with %s", district.DistrictName, otherDistrict),
+		fmt.Sprintf("Critical blocks in %s", district.DistrictName),
+		fmt.Sprintf("Show districts in %s", stateName),
 	}
 	
 	r.Chart = &models.ChartPayload{
@@ -640,7 +687,7 @@ func (s *ChatService) handleListBlocksFocused(ctx context.Context, districtName 
 		Title: fmt.Sprintf("%s District - Block-wise Extraction Stage", district.DistrictName),
 		XAxis: map[string]interface{}{"data": xAxisData},
 		Series: []models.ChartSeries{
-			{Name: "Extraction Stage (%)", Data: stageData, Type: "bar"},
+			{Name: "Extraction Stage (%)", DataAny: toInterfaceSlice(barData), Type: "bar"},
 		},
 	}
 	
@@ -712,6 +759,10 @@ func (s *ChatService) handleListAllStates(ctx context.Context, year string) (*mo
 	r.Suggestions = []string{
 		fmt.Sprintf("%s groundwater status", items[0].Name),
 		fmt.Sprintf("Show districts in %s", items[0].Name),
+		fmt.Sprintf("%s groundwater overview", items[1].Name),
+		fmt.Sprintf("Critical areas in %s", items[0].Name),
+		fmt.Sprintf("Compare %s with %s", items[0].Name, items[1].Name),
+		fmt.Sprintf("Safe blocks in %s", items[1].Name),
 	}
 	
 	return r, nil
@@ -871,7 +922,10 @@ I help you explore groundwater data focused on **The 4 Key Attributes:**
 		"Show all states",
 		"Punjab groundwater status",
 		"Haryana groundwater status",
-		"Critical blocks in India",
+		"Show districts in Punjab",
+		"Compare Punjab with Haryana",
+		"Critical blocks in Punjab",
+		"Ludhiana district overview",
 	}
 	
 	return r, nil
@@ -901,7 +955,10 @@ Let me help you find the right information! I specialize in **The 4 Key Groundwa
 		"Show all states",
 		"Punjab groundwater status",
 		"Show districts in Haryana",
+		"Ludhiana district overview",
+		"Compare Punjab with Haryana",
 		"Critical blocks in Punjab",
+		"Safe areas in Haryana",
 	}
 	
 	return r, nil

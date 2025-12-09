@@ -277,6 +277,15 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 	// When AI NLP fails (quota/errors), detect common intent patterns from query keywords
 	msgLower := strings.ToLower(message)
 	
+	// Detect LIST_STATES intent first (highest priority for "all states" queries)
+	if strings.Contains(msgLower, "all states") || 
+		strings.Contains(msgLower, "list states") ||
+		strings.Contains(msgLower, "show states") {
+		fmt.Println("├─ 🔄 Keyword fallback: Detected LIST_STATES intent")
+		intent = IntentListStates
+		entities.Locations = []string{} // No location needed for list all states
+	}
+	
 	// Detect LIST_DISTRICTS intent
 	if (strings.Contains(msgLower, "districts in") || 
 		strings.Contains(msgLower, "districts of") ||
@@ -2795,7 +2804,17 @@ func (s *ChatService) handleMapCategory(ctx context.Context, e Entities, r *mode
 	
 	var pieData []models.PieDatum
 	for name, count := range districtCounts {
-		pieData = append(pieData, models.PieDatum{Name: name, Value: count})
+		// Get district UUID for navigation
+		district, _ := s.ingres.GetDistrictByName(ctx, name)
+		districtUUID := ""
+		if district != nil {
+			districtUUID = district.DistrictUUID.String()
+		}
+		pieData = append(pieData, models.PieDatum{
+			Name:         name,
+			Value:        count,
+			DistrictUUID: districtUUID,
+		})
 	}
 
 	// If we have district breakdown, use rose-pie, otherwise use brush-bar
@@ -2831,6 +2850,8 @@ func (s *ChatService) handleMapCategory(ctx context.Context, e Entities, r *mode
 		if e.Category != "over_exploited" {
 			suggestions = append(suggestions, fmt.Sprintf("Over-exploited blocks in %s", locationName))
 		}
+		// Add escape option to explore other regions
+		suggestions = append(suggestions, "Show all states")
 	case "district":
 		suggestions = append(suggestions, fmt.Sprintf("All blocks in %s", locationName))
 		suggestions = append(suggestions, fmt.Sprintf("%s district overview", locationName))
@@ -3064,6 +3085,7 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 				
 				sqlQuery := fmt.Sprintf(`
 					SELECT DISTINCT
+						b.block_uuid,
 						b.block_name,
 						d.district_name,
 						a.stage,
@@ -3092,6 +3114,7 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 						
 						blockName := ""
 						districtName := ""
+						blockUUID := ""
 						stage := 0.0
 						
 						if bn, ok := result["block_name"].(string); ok {
@@ -3099,6 +3122,9 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 						}
 						if dn, ok := result["district_name"].(string); ok {
 							districtName = dn
+						}
+						if bu, ok := result["block_uuid"].(string); ok {
+							blockUUID = bu
 						}
 						if s, ok := result["stage"].(float64); ok {
 							stage = s
@@ -3108,8 +3134,9 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 							label := fmt.Sprintf("%s, %s", blockName, districtName)
 							blockNames = append(blockNames, blockName)
 							pieData = append(pieData, models.PieDatum{
-								Name:  label,
-								Value: stage,
+								Name:      label,
+								Value:     stage,
+								BlockUUID: blockUUID,
 							})
 						}
 					}

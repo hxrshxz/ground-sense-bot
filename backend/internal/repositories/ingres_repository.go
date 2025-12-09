@@ -447,6 +447,28 @@ func (r *IngresRepository) GetDistrictByUUID(ctx context.Context, districtUUID u
 	return &d, nil
 }
 
+func (r *IngresRepository) GetAssessmentByBlockAndYear(ctx context.Context, blockUUID uuid.UUID, year string) (*models.AssessmentSummary, error) {
+	query := `
+		SELECT 
+			assessment_id, block_uuid, year, category, stage, rainfall, 
+			total_recharge, total_extraction, total_extractable, total_discharge, availability
+		FROM assessments_summary 
+		WHERE block_uuid = $1 AND year = $2
+	`
+	row := r.DB.QueryRowContext(ctx, query, blockUUID, year)
+	
+	var a models.AssessmentSummary
+	err := row.Scan(
+		&a.AssessmentID, &a.BlockUUID, &a.Year, &a.Category, &a.Stage, &a.Rainfall,
+		&a.TotalRecharge, &a.TotalExtraction, &a.TotalExtractable, &a.TotalDischarge, &a.Availability,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &a, nil
+}
+
+
 // ValidateSQL performs hybrid validation on SQL queries
 // Level 1: Security check (block DROP, DELETE, UPDATE, INSERT, TRUNCATE)
 // Level 2: EXPLAIN dry-run (catches column/table typos)

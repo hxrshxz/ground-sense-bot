@@ -203,24 +203,23 @@ Insights:
 ### Example 2: Policy Analysis
 
 ```
-User: "How has Punjab changed over 4 years?"
+User: "How has Punjab changed over time?"
 
 AI Response:
-📈 Punjab 4-Year Groundwater Change Analysis
+📈 Punjab Groundwater Trend Analysis
 
 Year-over-Year Trends:
 2021-2022: Avg Stage 182.60%
-2022-2023: Avg Stage 183.66% (+1.06%)
-2023-2024: Avg Stage 179.79% (-3.87%)
+2023-2024: Avg Stage 179.79% (-2.81%)
 2024-2025: Avg Stage 179.15% (-0.64%)
 
 [Timeline Bar Chart with Animation]
 
 Insights:
-- Stage peaked in 2022-2023 at 183.66%
-- Significant improvement in 2023-2024 (-3.87%)
-- Trend stabilizing in 2024-2025
-- Overall decline of 3.45% from peak suggests policy interventions working
+- Steady improvement from 2021-2022 to 2024-2025
+- Overall decline of 3.45% suggests policy interventions working
+- Trend stabilizing in recent years
+- Continue monitoring for sustained improvement
 ```
 
 ### Example 3: Crisis Identification

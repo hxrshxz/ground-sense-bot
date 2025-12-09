@@ -1,38 +1,38 @@
-import React, { useState } from "react";
+import React from "react";
 import ReactECharts from "echarts-for-react";
 import * as echarts from "echarts";
 import {
-  ChevronDown,
-  ChevronUp,
   Droplets,
-  CloudRain,
-  Gauge,
+  TrendingUp,
   Activity,
-  AlertTriangle,
-  CheckCircle2,
+  Tag,
 } from "lucide-react";
+import {
+  CATEGORY_COLORS,
+  ATTRIBUTE_COLORS,
+  getCategoryColors,
+  getCategoryColorsFromStage,
+  formatCategoryName,
+  getStageLabel,
+  formatNumber,
+  FOUR_KEY_ATTRIBUTES,
+} from "@/lib/designSystem";
 
-// ============================================
+// ============================================================================
 // GROUNDWATER METRICS CARD COMPONENT
-// Displays key groundwater metrics like the INGRES portal
-// ============================================
+// Displays THE 4 KEY GROUNDWATER ATTRIBUTES with WCAG-compliant colors
+// ============================================================================
 
 export interface MetricsData {
   locationName: string;
   locationType: "block" | "district" | "state";
   year: string;
-  category: string;
-  rainfall: number;
-  totalRecharge: number;
-  totalExtraction: number;
+  // THE 4 KEY ATTRIBUTES
   totalExtractable: number;
-  naturalDischarge: number;
+  totalExtraction: number;
   stage: number;
-  availability?: number;
-  // Breakdown data (optional)
-  rechargeBreakdown?: Array<{ source: string; value: number }>;
-  extractionBreakdown?: Array<{ source: string; value: number }>;
-  // For aggregated data (district/state)
+  category: string;
+  // For aggregated data
   totalBlocks?: number;
   safeBlocks?: number;
   semiCriticalBlocks?: number;
@@ -45,128 +45,9 @@ interface GroundwaterMetricsCardProps {
   height?: string;
 }
 
-// Helper to get category styling
-const getCategoryStyle = (category: string) => {
-  switch (category?.toLowerCase().replace(/[_-]/g, " ")) {
-    case "safe":
-      return {
-        color: "#10B981",
-        bg: "rgba(16, 185, 129, 0.15)",
-        icon: CheckCircle2,
-        label: "Safe",
-      };
-    case "semi critical":
-      return {
-        color: "#F59E0B",
-        bg: "rgba(245, 158, 11, 0.15)",
-        icon: AlertTriangle,
-        label: "Semi-Critical",
-      };
-    case "critical":
-      return {
-        color: "#F97316",
-        bg: "rgba(249, 115, 22, 0.15)",
-        icon: AlertTriangle,
-        label: "Critical",
-      };
-    case "over exploited":
-      return {
-        color: "#EF4444",
-        bg: "rgba(239, 68, 68, 0.15)",
-        icon: AlertTriangle,
-        label: "Over-Exploited",
-      };
-    case "salinity":
-      return {
-        color: "#8B5CF6",
-        bg: "rgba(139, 92, 246, 0.15)",
-        icon: Droplets,
-        label: "Salinity",
-      };
-    default:
-      return {
-        color: "#6B7280",
-        bg: "rgba(107, 114, 128, 0.15)",
-        icon: Gauge,
-        label: category || "Unknown",
-      };
-  }
-};
-
-// Format number with 2 decimal places
-const formatNumber = (num: number | undefined | null): string => {
-  if (num === undefined || num === null || isNaN(num)) return "N/A";
-  return num.toFixed(2);
-};
-
-// Expandable metric row component
-const MetricRow: React.FC<{
-  label: string;
-  value: string;
-  unit: string;
-  color: string;
-  icon?: React.ReactNode;
-  expandable?: boolean;
-  breakdownData?: Array<{ source: string; value: number }>;
-}> = ({
-  label,
-  value,
-  unit,
-  color,
-  icon,
-  expandable = false,
-  breakdownData,
-}) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  return (
-    <div className="border-b border-white/10 last:border-b-0">
-      <div
-        className={`flex items-center justify-between py-3 px-4 ${
-          expandable ? "cursor-pointer hover:bg-white/5" : ""
-        }`}
-        onClick={() => expandable && setIsExpanded(!isExpanded)}
-      >
-        <div className="flex items-center gap-3">
-          {icon && <span className="text-slate-400">{icon}</span>}
-          <span className="text-slate-300 text-sm">{label}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="font-semibold" style={{ color }}>
-            {value}
-          </span>
-          <span className="text-slate-500 text-sm">{unit}</span>
-          {expandable && (
-            <span className="text-slate-500 ml-2">
-              {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-            </span>
-          )}
-        </div>
-      </div>
-      {expandable && isExpanded && breakdownData && (
-        <div className="bg-slate-900/50 px-4 py-2">
-          {breakdownData.map((item, idx) => (
-            <div key={idx} className="flex justify-between py-1.5 text-sm">
-              <span className="text-slate-400 pl-8">{item.source}</span>
-              <span className="text-slate-300">
-                {formatNumber(item.value)} MCM
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Mini gauge chart for stage
+// Stage gauge chart
 const StageGauge: React.FC<{ stage: number }> = ({ stage }) => {
-  const getStageColor = (value: number) => {
-    if (value > 100) return "#EF4444";
-    if (value > 90) return "#F97316";
-    if (value > 70) return "#F59E0B";
-    return "#10B981";
-  };
+  const colors = getCategoryColorsFromStage(stage);
 
   const option = {
     series: [
@@ -183,10 +64,10 @@ const StageGauge: React.FC<{ stage: number }> = ({ stage }) => {
           lineStyle: {
             width: 12,
             color: [
-              [0.47, "#10B981"], // Safe: 0-70%
-              [0.6, "#F59E0B"], // Semi-critical: 70-90%
-              [0.67, "#F97316"], // Critical: 90-100%
-              [1, "#EF4444"], // Over-exploited: >100%
+              [0.47, CATEGORY_COLORS.safe.primary],
+              [0.60, CATEGORY_COLORS.semiCritical.primary],
+              [0.67, CATEGORY_COLORS.critical.primary],
+              [1, CATEGORY_COLORS.overExploited.primary],
             ],
           },
         },
@@ -195,9 +76,7 @@ const StageGauge: React.FC<{ stage: number }> = ({ stage }) => {
           length: "75%",
           width: 8,
           offsetCenter: [0, "-45%"],
-          itemStyle: {
-            color: getStageColor(stage),
-          },
+          itemStyle: { color: colors.primary },
         },
         axisTick: { show: false },
         splitLine: { show: false },
@@ -215,7 +94,7 @@ const StageGauge: React.FC<{ stage: number }> = ({ stage }) => {
         detail: {
           fontSize: 24,
           fontWeight: "bold",
-          color: getStageColor(stage),
+          color: colors.textOnDark,
           offsetCenter: [0, "10%"],
           formatter: "{value}%",
         },
@@ -233,8 +112,8 @@ const StageGauge: React.FC<{ stage: number }> = ({ stage }) => {
   );
 };
 
-// Block distribution pie chart (for district/state)
-const BlockDistributionChart: React.FC<{
+// Category distribution pie chart
+const CategoryDistributionChart: React.FC<{
   safe: number;
   semiCritical: number;
   critical: number;
@@ -245,8 +124,8 @@ const BlockDistributionChart: React.FC<{
       trigger: "item",
       formatter: "{b}: {c} blocks ({d}%)",
       backgroundColor: "rgba(15, 23, 42, 0.95)",
-      borderColor: "rgba(99, 102, 241, 0.3)",
-      textStyle: { color: "#e2e8f0" },
+      borderColor: "rgba(148, 163, 184, 0.2)",
+      textStyle: { color: "#F8FAFC" },
     },
     series: [
       {
@@ -265,26 +144,12 @@ const BlockDistributionChart: React.FC<{
           color: "rgba(255,255,255,0.8)",
           fontSize: 11,
         },
-        labelLine: {
-          lineStyle: { color: "rgba(255,255,255,0.3)" },
-        },
+        labelLine: { lineStyle: { color: "rgba(255,255,255,0.3)" } },
         data: [
-          { value: safe, name: "Safe", itemStyle: { color: "#10B981" } },
-          {
-            value: semiCritical,
-            name: "Semi-Critical",
-            itemStyle: { color: "#F59E0B" },
-          },
-          {
-            value: critical,
-            name: "Critical",
-            itemStyle: { color: "#F97316" },
-          },
-          {
-            value: overExploited,
-            name: "Over-Exploited",
-            itemStyle: { color: "#EF4444" },
-          },
+          { value: safe, name: "Safe", itemStyle: { color: CATEGORY_COLORS.safe.primary } },
+          { value: semiCritical, name: "Semi-Critical", itemStyle: { color: CATEGORY_COLORS.semiCritical.primary } },
+          { value: critical, name: "Critical", itemStyle: { color: CATEGORY_COLORS.critical.primary } },
+          { value: overExploited, name: "Over-Exploited", itemStyle: { color: CATEGORY_COLORS.overExploited.primary } },
         ].filter((d) => d.value > 0),
       },
     ],
@@ -301,47 +166,34 @@ const BlockDistributionChart: React.FC<{
 
 // Water balance bar chart
 const WaterBalanceChart: React.FC<{
-  recharge: number;
-  extraction: number;
   extractable: number;
-}> = ({ recharge, extraction, extractable }) => {
+  extraction: number;
+}> = ({ extractable, extraction }) => {
   const option = {
     tooltip: {
       trigger: "axis",
       backgroundColor: "rgba(15, 23, 42, 0.95)",
-      borderColor: "rgba(99, 102, 241, 0.3)",
-      textStyle: { color: "#e2e8f0" },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      formatter: (params: { seriesName: string; value: number }[]) => {
-        return params
-          .map((p) => `${p.seriesName}: ${p.value.toFixed(2)} BCM`)
-          .join("<br/>");
-      },
+      borderColor: "rgba(148, 163, 184, 0.2)",
+      textStyle: { color: "#F8FAFC" },
+      formatter: (params: { seriesName: string; value: number }[]) =>
+        params.map((p) => `${p.seriesName}: ${formatNumber(p.value)} ham`).join("<br/>"),
     },
     grid: {
-      left: "3%",
-      right: "4%",
-      bottom: "3%",
+      left: "5%",
+      right: "5%",
+      bottom: "5%",
       top: "15%",
       containLabel: true,
     },
     xAxis: {
       type: "category",
-      data: [
-        "Ground Water\nRecharge",
-        "Extractable\nResources",
-        "Ground Water\nExtraction",
-      ],
-      axisLabel: {
-        color: "rgba(255,255,255,0.7)",
-        fontSize: 10,
-        interval: 0,
-      },
+      data: ["Extractable\nGW Resources", "GW\nExtraction"],
+      axisLabel: { color: "rgba(255,255,255,0.7)", fontSize: 11, interval: 0 },
       axisLine: { lineStyle: { color: "rgba(255,255,255,0.2)" } },
     },
     yAxis: {
       type: "value",
-      name: "BCM",
+      name: "MCM",
       nameTextStyle: { color: "rgba(255,255,255,0.5)", fontSize: 10 },
       axisLabel: { color: "rgba(255,255,255,0.7)", fontSize: 10 },
       axisLine: { lineStyle: { color: "rgba(255,255,255,0.2)" } },
@@ -357,26 +209,22 @@ const WaterBalanceChart: React.FC<{
           color: (params: { dataIndex: number }) => {
             const colors = [
               new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                { offset: 0, color: "#00DDFF" },
-                { offset: 1, color: "#37A2FF" },
+                { offset: 0, color: ATTRIBUTE_COLORS.extractable.primary },
+                { offset: 1, color: "#1D4ED8" },
               ]),
               new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                { offset: 0, color: "#80FFA5" },
-                { offset: 1, color: "#01BF8C" },
-              ]),
-              new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                { offset: 0, color: "#FF6B6B" },
-                { offset: 1, color: "#EF4444" },
+                { offset: 0, color: ATTRIBUTE_COLORS.extraction.primary },
+                { offset: 1, color: "#EA580C" },
               ]),
             ];
             return colors[params.dataIndex];
           },
         },
-        data: [recharge, extractable, extraction],
+        data: [extractable, extraction],
         label: {
           show: true,
           position: "top",
-          formatter: "{c}",
+          formatter: (params: { value: number }) => formatNumber(params.value),
           color: "rgba(255,255,255,0.8)",
           fontSize: 12,
         },
@@ -394,23 +242,18 @@ const WaterBalanceChart: React.FC<{
 };
 
 // Main component
-const GroundwaterMetricsCard: React.FC<GroundwaterMetricsCardProps> = ({
-  data,
-}) => {
-  const categoryStyle = getCategoryStyle(data.category);
-  const CategoryIcon = categoryStyle.icon;
-  const isAggregated =
-    data.locationType === "district" || data.locationType === "state";
+const GroundwaterMetricsCard: React.FC<GroundwaterMetricsCardProps> = ({ data }) => {
+  const categoryColors = getCategoryColors(data.category);
+  const stageColors = getCategoryColorsFromStage(data.stage);
+  const isAggregated = data.locationType === "district" || data.locationType === "state";
   const hasBlockDistribution = isAggregated && (data.totalBlocks ?? 0) > 0;
 
   return (
     <div
       className="w-full rounded-2xl overflow-hidden"
       style={{
-        background:
-          "linear-gradient(145deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.92) 100%)",
-        boxShadow:
-          "0 20px 40px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08)",
+        background: "linear-gradient(145deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.92) 100%)",
+        boxShadow: "0 20px 40px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08)",
         backdropFilter: "blur(16px)",
       }}
     >
@@ -418,166 +261,168 @@ const GroundwaterMetricsCard: React.FC<GroundwaterMetricsCardProps> = ({
       <div className="px-6 py-4 border-b border-white/10">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-white text-lg font-semibold">
-              {data.locationName}
-            </h2>
+            <h2 className="text-white text-lg font-semibold">{data.locationName}</h2>
             <p className="text-slate-400 text-sm capitalize">
               {data.locationType} • {data.year}
             </p>
           </div>
           <div
             className="px-3 py-1.5 rounded-full flex items-center gap-2"
-            style={{ backgroundColor: categoryStyle.bg }}
+            style={{ backgroundColor: categoryColors.backgroundDark }}
           >
-            <CategoryIcon size={16} style={{ color: categoryStyle.color }} />
-            <span
-              style={{ color: categoryStyle.color }}
-              className="text-sm font-medium"
-            >
-              {categoryStyle.label}
+            <span style={{ color: categoryColors.textOnDark }} className="text-sm font-medium">
+              {categoryColors.emoji} {formatCategoryName(data.category)}
             </span>
           </div>
         </div>
       </div>
 
-      {/* Main metrics grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-0.5 bg-white/5">
-        {/* Left column - Primary metrics */}
-        <div className="bg-slate-900/40">
-          <div className="px-4 py-3 border-b border-white/10">
-            <h3 className="text-slate-400 text-xs uppercase tracking-wider">
-              Key Metrics
-            </h3>
+      {/* THE 4 KEY ATTRIBUTES CARDS */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-4">
+        {/* 1. Extractable GW Resources */}
+        <div 
+          className="rounded-xl p-4 border"
+          style={{ 
+            backgroundColor: ATTRIBUTE_COLORS.extractable.backgroundDark,
+            borderColor: `${ATTRIBUTE_COLORS.extractable.primary}33`,
+          }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <Droplets className="w-4 h-4" style={{ color: ATTRIBUTE_COLORS.extractable.textOnDark }} />
+            <span className="text-xs" style={{ color: ATTRIBUTE_COLORS.extractable.textOnDark }}>
+              {FOUR_KEY_ATTRIBUTES.EXTRACTABLE.shortLabel}
+            </span>
           </div>
-
-          <MetricRow
-            label="Annual Extractable Ground Water Resources (BCM)"
-            value={formatNumber(data.totalExtractable)}
-            unit=""
-            color="#00DDFF"
-            icon={<Droplets size={18} />}
-          />
-
-          <MetricRow
-            label="Ground Water Extraction for all uses (BCM)"
-            value={formatNumber(data.totalExtraction)}
-            unit=""
-            color="#FF6B6B"
-            icon={<Activity size={18} />}
-          />
-
-          <MetricRow
-            label="Rainfall (mm)"
-            value={formatNumber(data.rainfall)}
-            unit=""
-            color="#37A2FF"
-            icon={<CloudRain size={18} />}
-            expandable={false}
-          />
-
-          <MetricRow
-            label="Ground Water Recharge (BCM)"
-            value={formatNumber(data.totalRecharge)}
-            unit=""
-            color="#80FFA5"
-            icon={<Droplets size={18} />}
-            expandable={!!data.rechargeBreakdown?.length}
-            breakdownData={data.rechargeBreakdown}
-          />
-
-          <MetricRow
-            label="Natural Discharges (BCM)"
-            value={formatNumber(data.naturalDischarge)}
-            unit=""
-            color="#FFBF00"
-            icon={<Activity size={18} />}
-          />
-
-          <MetricRow
-            label="Ground Water Extraction (BCM)"
-            value={formatNumber(data.totalExtraction)}
-            unit=""
-            color="#FF6B6B"
-            icon={<Activity size={18} />}
-            expandable={!!data.extractionBreakdown?.length}
-            breakdownData={data.extractionBreakdown}
-          />
+          <div className="text-lg font-bold text-white">
+            {formatNumber(data.totalExtractable)} ham
+          </div>
+          <div className="text-xs opacity-60" style={{ color: ATTRIBUTE_COLORS.extractable.textOnDark }}>
+            Annual Resources
+          </div>
         </div>
 
-        {/* Right column - Visualizations */}
-        <div className="bg-slate-900/40">
-          {/* Stage gauge */}
-          <div className="px-4 py-3 border-b border-white/10">
-            <h3 className="text-slate-400 text-xs uppercase tracking-wider">
-              Stage of Extraction
-            </h3>
+        {/* 2. GW Extraction */}
+        <div 
+          className="rounded-xl p-4 border"
+          style={{ 
+            backgroundColor: ATTRIBUTE_COLORS.extraction.backgroundDark,
+            borderColor: `${ATTRIBUTE_COLORS.extraction.primary}33`,
+          }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <TrendingUp className="w-4 h-4" style={{ color: ATTRIBUTE_COLORS.extraction.textOnDark }} />
+            <span className="text-xs" style={{ color: ATTRIBUTE_COLORS.extraction.textOnDark }}>
+              {FOUR_KEY_ATTRIBUTES.EXTRACTION.shortLabel}
+            </span>
           </div>
-          <div className="px-4">
-            <StageGauge stage={data.stage || 0} />
-            <p className="text-center text-slate-400 text-xs pb-3">
-              {data.stage > 100
-                ? "⚠️ Over-extraction detected"
-                : data.stage > 70
-                ? "⚡ Approaching critical levels"
-                : "✅ Sustainable extraction"}
-            </p>
+          <div className="text-lg font-bold text-white">
+            {formatNumber(data.totalExtraction)} ham
           </div>
+          <div className="text-xs opacity-60" style={{ color: ATTRIBUTE_COLORS.extraction.textOnDark }}>
+            Annual Usage
+          </div>
+        </div>
 
-          {/* Block distribution or water balance */}
+        {/* 3. Stage of Extraction */}
+        <div 
+          className="rounded-xl p-4 border"
+          style={{ 
+            backgroundColor: stageColors.backgroundDark,
+            borderColor: `${stageColors.primary}33`,
+          }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <Activity className="w-4 h-4" style={{ color: stageColors.textOnDark }} />
+            <span className="text-xs" style={{ color: stageColors.textOnDark }}>
+              {FOUR_KEY_ATTRIBUTES.STAGE.shortLabel}
+            </span>
+          </div>
+          <div className="text-lg font-bold" style={{ color: stageColors.textOnDark }}>
+            {data.stage?.toFixed(1) || 0}%
+          </div>
+          <div className="text-xs opacity-60" style={{ color: stageColors.textOnDark }}>
+            {getStageLabel(data.stage)}
+          </div>
+        </div>
+
+        {/* 4. Category */}
+        <div 
+          className="rounded-xl p-4 border"
+          style={{ 
+            backgroundColor: categoryColors.backgroundDark,
+            borderColor: `${categoryColors.primary}33`,
+          }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <Tag className="w-4 h-4" style={{ color: categoryColors.textOnDark }} />
+            <span className="text-xs" style={{ color: categoryColors.textOnDark }}>
+              {FOUR_KEY_ATTRIBUTES.CATEGORY.shortLabel}
+            </span>
+          </div>
+          <div className="text-lg font-bold" style={{ color: categoryColors.textOnDark }}>
+            {categoryColors.emoji} {formatCategoryName(data.category)}
+          </div>
+        </div>
+      </div>
+
+      {/* Visualizations */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-0.5 bg-white/5">
+        {/* Stage Gauge */}
+        <div className="bg-slate-900/40 p-4">
+          <h3 className="text-slate-400 text-xs uppercase tracking-wider mb-2">
+            Stage of Extraction
+          </h3>
+          <StageGauge stage={data.stage || 0} />
+          <p className="text-center text-xs mt-2" style={{ color: stageColors.textOnDark }}>
+            {data.stage > 100 ? "⚠️ Over-extraction detected" :
+             data.stage > 90 ? "⚡ Approaching critical levels" :
+             data.stage > 70 ? "📊 Monitor closely" :
+             "✅ Sustainable extraction"}
+          </p>
+        </div>
+
+        {/* Block distribution OR Water balance */}
+        <div className="bg-slate-900/40 p-4">
           {hasBlockDistribution ? (
             <>
-              <div className="px-4 py-3 border-t border-white/10">
-                <h3 className="text-slate-400 text-xs uppercase tracking-wider">
-                  Block Distribution ({data.totalBlocks} blocks)
-                </h3>
-              </div>
-              <div className="px-4 pb-4">
-                <BlockDistributionChart
-                  safe={data.safeBlocks || 0}
-                  semiCritical={data.semiCriticalBlocks || 0}
-                  critical={data.criticalBlocks || 0}
-                  overExploited={data.overExploitedBlocks || 0}
-                />
-              </div>
+              <h3 className="text-slate-400 text-xs uppercase tracking-wider mb-2">
+                Category Distribution ({data.totalBlocks} blocks)
+              </h3>
+              <CategoryDistributionChart
+                safe={data.safeBlocks || 0}
+                semiCritical={data.semiCriticalBlocks || 0}
+                critical={data.criticalBlocks || 0}
+                overExploited={data.overExploitedBlocks || 0}
+              />
             </>
           ) : (
             <>
-              <div className="px-4 py-3 border-t border-white/10">
-                <h3 className="text-slate-400 text-xs uppercase tracking-wider">
-                  Water Balance
-                </h3>
-              </div>
-              <div className="px-4 pb-4">
-                <WaterBalanceChart
-                  recharge={data.totalRecharge || 0}
-                  extraction={data.totalExtraction || 0}
-                  extractable={data.totalExtractable || 0}
-                />
-              </div>
+              <h3 className="text-slate-400 text-xs uppercase tracking-wider mb-2">
+                Extractable vs Extraction
+              </h3>
+              <WaterBalanceChart
+                extractable={data.totalExtractable || 0}
+                extraction={data.totalExtraction || 0}
+              />
             </>
           )}
         </div>
       </div>
 
-      {/* Footer with insights */}
+      {/* Footer */}
       <div className="px-6 py-4 border-t border-white/10 bg-slate-900/30">
         <div className="flex items-start gap-3">
-          <div className="text-2xl">💡</div>
+          <div className="text-2xl">📊</div>
           <div>
-            <p className="text-slate-300 text-sm">
+            <p className="text-slate-300 text-sm font-medium mb-1">
+              The 4 Key Groundwater Attributes
+            </p>
+            <p className="text-slate-400 text-xs">
               {data.stage > 100
-                ? `This ${data.locationType} is extracting ${(
-                    data.stage - 100
-                  ).toFixed(
-                    1
-                  )}% more groundwater than the natural recharge rate. Immediate conservation measures are recommended.`
+                ? `${data.locationName} is extracting ${(data.stage - 100).toFixed(1)}% more than available. Category: ${formatCategoryName(data.category)}.`
                 : data.stage > 70
-                ? `Groundwater extraction is at ${data.stage.toFixed(
-                    1
-                  )}% of recharge capacity. Consider monitoring closely and implementing water-saving practices.`
-                : `Groundwater situation is sustainable with extraction at ${data.stage.toFixed(
-                    1
-                  )}% of recharge. Continue current practices to maintain this balance.`}
+                ? `Extraction at ${data.stage.toFixed(1)}% of available resources. Close monitoring recommended.`
+                : `Sustainable extraction at ${data.stage.toFixed(1)}% of available resources.`}
             </p>
           </div>
         </div>

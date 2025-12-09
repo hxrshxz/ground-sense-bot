@@ -36,9 +36,9 @@ I couldn't find groundwater assessment data for the locations you mentioned.
 - Try using district names instead of city names
 
 **📊 Available Data Coverage:**
-- Years: 2012-2013, 2016-2017, 2019-2020, 2021-2022, 2022-2023, 2023-2024, 2024-2025
-- Locations: 38 States, 590+ Districts, 5950+ Blocks
-- Total Assessments: 24,682 groundwater assessments
+- Years: 2012-2013, 2016-2017, 2019-2020, 2021-2022, 2023-2024, 2024-2025
+- Locations: 38 States, 590+ Districts, 6750+ Blocks
+- Total Assessments: 21,063 groundwater assessments
 
 **💡 Try asking:**
 - "Show me groundwater data for [district name]"
@@ -160,24 +160,22 @@ Created migration to enhance `text_representation` with breakdown data:
 === INGRES GROUNDWATER DATA ===
 
 Year: 2024-2025
-  States: 38 | Districts: 590 | Blocks: 5950 | Files: 5988 | Size: 2.0G
+  States: 26 | Districts: ~590 | Blocks: 6746 | Status: ✅ Complete Official Data
 
 Year: 2023-2024
-  States: 38 | Districts: 556 | Blocks: 5790 | Files: 5828 | Size: 2.0G
-
-Year: 2022-2023
-  States: 38 | Districts: 306 | Blocks: 2652 | Files: 2690 | Size: 215M
+  States: 26 | Districts: ~590 | Blocks: 6746 | Status: ✅ Complete Official Data
 
 Year: 2021-2022
-  States: 38 | Districts: 459 | Blocks: 4972 | Files: 5010 | Size: 1.8G
+  States: 16 | Districts: ~459 | Blocks: 4824 | Status: ✅ Good Coverage
 
 Year: 2019-2020
-  States: 38 | Districts: 422 | Blocks: 3844 | Files: 3882 | Size: 272M
+  States: 13 | Districts: ~422 | Blocks: 2811 | Status: ⚠️ Moderate Coverage
 
 Year: 2016-2017
-  States: 34 | Districts: 405 | Blocks: 3276 | Files: 3310 | Size: 31M
+  States: 12 | Districts: ~405 | Blocks: 2738 | Status: ⚠️ Moderate Coverage
 
 Year: 2012-2013
+  States: 1 | Districts: ~20 | Blocks: 160 | Status: ⚠️ Minimal (West Bengal Only)
   States: 2  | Districts: 20  | Blocks: 344  | Files: 346  | Size: 18M
 
 === TOTALS ===

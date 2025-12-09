@@ -8,15 +8,14 @@ An intelligent AI-powered chatbot for India's groundwater data analytics, featur
 
 The InGRES (India-Water Resources Information System) API has **limited historical block-level data**:
 
-| Assessment Year | State-Level Data | Block-Level Data            | Status                       |
-| --------------- | ---------------- | --------------------------- | ---------------------------- |
-| 2024-2025       | ✅ Available     | ✅ Complete (5,950 blocks)  | **Current Year - Full Data** |
-| 2023-2024       | ✅ Available     | ⚠️ Partial (58 blocks only) | Limited                      |
-| 2022-2023       | ✅ Available     | ❌ None (API returns empty) | State aggregates only        |
-| 2021-2022       | ✅ Available     | ❌ None (API returns empty) | State aggregates only        |
-| 2019-2020       | ✅ Available     | ❌ None (API returns empty) | State aggregates only        |
-| 2016-2017       | ✅ Available     | ❌ None (API returns empty) | State aggregates only        |
-| 2012-2013       | ✅ Available     | ❌ None (API returns empty) | State aggregates only        |
+| Assessment Year | State-Level Data | Block-Level Data           | Status                       |
+| --------------- | ---------------- | -------------------------- | ---------------------------- |
+| 2024-2025       | ✅ Available     | ✅ Complete (6,746 blocks) | **Official Data - Complete** |
+| 2023-2024       | ✅ Available     | ✅ Complete (6,746 blocks) | **Official Data - Complete** |
+| 2021-2022       | ✅ Available     | ✅ Good (4,824 blocks)     | Wide coverage                |
+| 2019-2020       | ✅ Available     | ⚠️ Moderate (2,811 blocks) | Limited coverage             |
+| 2016-2017       | ✅ Available     | ⚠️ Moderate (2,738 blocks) | Limited coverage             |
+| 2012-2013       | ✅ Available     | ⚠️ Minimal (160 blocks)    | Only West Bengal             |
 
 **Important Notes:**
 

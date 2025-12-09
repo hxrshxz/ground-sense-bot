@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS states (
     state_uuid UUID PRIMARY KEY,
     state_name TEXT NOT NULL
 );
-
+0
 -- Districts Table
 CREATE TABLE IF NOT EXISTS districts (
     district_uuid UUID PRIMARY KEY,

@@ -95,7 +95,7 @@ CRITICAL THRESHOLDS:
 - Stage < 70%: Safe (LOW RISK)
 
 INDIA GROUNDWATER STATISTICS (2024-2025):
-- Total Assessment Units: 5,796 blocks
+- Total Assessment Units: 6,746 blocks
 - Over-Exploited: ~17% of blocks
 - Critical: ~5% of blocks
 - Semi-Critical: ~10% of blocks
@@ -178,7 +178,7 @@ ${this.DOMAIN_KNOWLEDGE}
 ${historyContext}
 
 Key capabilities:
-- Analyze 5,796 groundwater assessment blocks across India
+- Analyze 6,746 groundwater assessment blocks across India
 - Categories: safe, semi_critical, critical, over_exploited, salinity
 - Provide data-driven insights with specific numbers
 - Understand both English and Hindi queries

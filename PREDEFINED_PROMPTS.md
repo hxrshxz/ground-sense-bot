@@ -331,7 +331,7 @@ Current implementation:
 - User can change via year selector
 - Applied to ALL queries
 
-Data available: 2022-2023, 2023-2024, 2024-2025
+Data available: 2023-2024, 2024-2025
 ```
 
 ---

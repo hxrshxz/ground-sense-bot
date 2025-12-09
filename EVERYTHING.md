@@ -9,6 +9,7 @@
 **Ground Sense Bot** is an AI-powered groundwater data analytics platform for India's INGRES (Integrated National Geophysical Research portal) GEC (Groundwater Estimation Committee) data.
 
 ### Core Stats
+
 - **Language:** TypeScript (Frontend) + Go (Backend)
 - **Users:** 10,000+ blocks across India
 - **Data Points:** 238,000+ rows covering 2022-2025
@@ -21,12 +22,14 @@
 ## 📊 COMPLETE DATABASE SCHEMA
 
 ### Table 1: `states`
+
 ```sql
 CREATE TABLE states (
     state_uuid UUID PRIMARY KEY,
     state_name TEXT NOT NULL
 );
 ```
+
 **Purpose:** Store all Indian states  
 **Relationships:** Parent table for districts  
 **Example Data:** Punjab, Haryana, Rajasthan, Gujarat, etc.  
@@ -35,6 +38,7 @@ CREATE TABLE states (
 ---
 
 ### Table 2: `districts`
+
 ```sql
 CREATE TABLE districts (
     district_uuid UUID PRIMARY KEY,
@@ -42,6 +46,7 @@ CREATE TABLE districts (
     state_uuid UUID REFERENCES states(state_uuid)
 );
 ```
+
 **Purpose:** Store districts under each state  
 **Relationships:** Child of states, Parent of blocks  
 **Example Data:** Amritsar (Punjab), Hisar (Haryana)  
@@ -50,6 +55,7 @@ CREATE TABLE districts (
 ---
 
 ### Table 3: `blocks`
+
 ```sql
 CREATE TABLE blocks (
     block_uuid UUID PRIMARY KEY,
@@ -59,6 +65,7 @@ CREATE TABLE blocks (
     geometry JSONB
 );
 ```
+
 **Purpose:** Store groundwater blocks (smallest administrative unit)  
 **Relationships:** Child of districts, Parent of assessments  
 **Geometry:** GeoJSON for map rendering  
@@ -67,6 +74,7 @@ CREATE TABLE blocks (
 ---
 
 ### Table 4: `assessments_summary` ⭐ MAIN TABLE
+
 ```sql
 CREATE TABLE assessments_summary (
     assessment_id SERIAL PRIMARY KEY,
@@ -88,6 +96,7 @@ CREATE TABLE assessments_summary (
 
 **Purpose:** Contains all groundwater metrics for each block-year combination  
 **Key Fields Explained:**
+
 - `year`: Assessment year (e.g., "2024-2025", "2023-2024")
 - `rainfall`: Total annual rainfall in mm
 - `total_recharge`: Water replenishing groundwater (mm)
@@ -99,7 +108,7 @@ CREATE TABLE assessments_summary (
   - 0-50%: Safe
   - 50-75%: Semi-Critical
   - 75-100%: Critical
-  - >100%: Over-Exploited
+  - > 100%: Over-Exploited
 - `availability`: Available groundwater (mm)
 - `raw`: Original JSON from INGRES API
 
@@ -109,6 +118,7 @@ CREATE TABLE assessments_summary (
 ---
 
 ### Table 5: `assessments_recharge_breakdown`
+
 ```sql
 CREATE TABLE assessments_recharge_breakdown (
     id SERIAL PRIMARY KEY,
@@ -119,15 +129,18 @@ CREATE TABLE assessments_recharge_breakdown (
     total DOUBLE PRECISION
 );
 ```
+
 **Purpose:** Detailed breakdown of water recharge sources  
 **Sources:** Rainfall (direct infiltration), canal irrigation, tube wells, etc.  
 **Command vs Non-Command:**
+
 - Command: Irrigated land
 - Non-Command: Rainfed land
 
 ---
 
 ### Table 6: `assessments_discharge_breakdown`
+
 ```sql
 CREATE TABLE assessments_discharge_breakdown (
     id SERIAL PRIMARY KEY,
@@ -138,12 +151,14 @@ CREATE TABLE assessments_discharge_breakdown (
     total DOUBLE PRECISION
 );
 ```
+
 **Purpose:** Breakdown of water discharge/outflow  
 **Sources:** Rivers, springs, natural drainage, evapotranspiration
 
 ---
 
 ### Table 7: `assessments_extraction_breakdown`
+
 ```sql
 CREATE TABLE assessments_extraction_breakdown (
     id SERIAL PRIMARY KEY,
@@ -154,6 +169,7 @@ CREATE TABLE assessments_extraction_breakdown (
     total DOUBLE PRECISION
 );
 ```
+
 **Purpose:** Breakdown of water extraction by sector  
 **Sources:** Agriculture, drinking water, industrial use, livestock
 
@@ -182,6 +198,7 @@ assessments_summary (238,000+)
 ## 🏗️ BACKEND ARCHITECTURE
 
 ### Tech Stack
+
 - **Language:** Go 1.25.5
 - **Database:** PostgreSQL (port 5433)
 - **Cache:** Redis (port 6379, configured)
@@ -190,6 +207,7 @@ assessments_summary (238,000+)
 - **Build Tool:** Hot reload with Air v1.63.4
 
 ### Directory Structure
+
 ```
 backend/
 ├── cmd/
@@ -236,6 +254,7 @@ backend/
 ## 🧠 3-LAYER AI PIPELINE
 
 ### Layer 1: Intent Detection (Local, ~1ms)
+
 **File:** `backend/internal/services/nlp_service.go` | **Line:** 76  
 **Function:** `ParseMessage()`
 
@@ -248,6 +267,7 @@ func (s *NLPService) ParseMessage(message string) (*ParsedMessage, error) {
 ```
 
 **Supported Intents (18+):**
+
 1. `IntentSummary` - "Tell me about Punjab"
 2. `IntentTrend` - "Show trend for X"
 3. `IntentCompare` - "Compare Amritsar and Ludhiana"
@@ -290,15 +310,16 @@ default:
 ```
 
 **Example: Compare Handler**
+
 ```go
 func (s *ChatService) handleCompare(ctx context.Context, entities *ParsedEntities, response *ChatResponse) (*ChatResponse, error) {
     // Line 2237 in chat_service.go
-    
+
     locations := entities.Locations  // ["Amritsar", "Ludhiana"]
     year := entities.Year            // "2024-2025"
-    
+
     results := s.compareDistricts(ctx, locations, year)  // SQL query at line 2750
-    
+
     // Build response with ChartData
     response.Chart = &ChartData{
         Type: "comparison-card",
@@ -311,10 +332,12 @@ func (s *ChatService) handleCompare(ctx context.Context, entities *ParsedEntitie
 ---
 
 ### Layer 3: Dynamic SQL Generation (400-800ms)
+
 **File:** `backend/internal/services/nlp_service.go` | **Line:** 725  
 **Function:** `generateDynamicSQL()`
 
 **Flow:**
+
 1. Try Local Ollama (SQLCoder:7b) → **~400ms**
 2. If fails → Try Gemini 2.5 Flash API → **~1-2s**
 3. Execute SQL on PostgreSQL → **~50-150ms**
@@ -322,7 +345,7 @@ func (s *ChatService) handleCompare(ctx context.Context, entities *ParsedEntitie
 ```go
 func (s *LLMService) GenerateSQL(ctx context.Context, query string, schema string) (string, error) {
     // Line 350 in llm_service.go
-    
+
     // Try local Ollama first
     if s.useLocalLLM && s.ollamaClient != nil {
         sql, err := s.ollamaClient.GenerateSQL(ctx, query, schema)
@@ -331,7 +354,7 @@ func (s *LLMService) GenerateSQL(ctx context.Context, query string, schema strin
         }
         log.Printf("Ollama failed: %v, falling back to Gemini", err)
     }
-    
+
     // Fallback to Gemini API
     return s.generateSQLWithGemini(ctx, query, schema)
 }
@@ -342,34 +365,38 @@ func (s *LLMService) GenerateSQL(ctx context.Context, query string, schema strin
 ## 🎯 MESSAGE FLOW (Complete Path)
 
 ### Step 1: User Input
+
 **File:** `src/components/INGRESAssistant.tsx` | **Line:** 300  
 **Function:** `onSubmit()`
 
 ```tsx
 const onSubmit = async (value: string) => {
-    setMessages(prev => [...prev, {role: "user", content: value}])
-    
-    socket.send(JSON.stringify({
-        type: "chat",
-        message: value,
-        session_id: sessionId,
-        timestamp: new Date()
-    }))
-}
+  setMessages((prev) => [...prev, { role: "user", content: value }]);
+
+  socket.send(
+    JSON.stringify({
+      type: "chat",
+      message: value,
+      session_id: sessionId,
+      timestamp: new Date(),
+    })
+  );
+};
 ```
 
 ---
 
 ### Step 2: WebSocket Reception (Backend)
+
 **File:** `backend/pkg/websocket/handler.go`
 
 ```go
 func (h *Handler) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
     ws, _ := h.upgrader.Upgrade(w, r, nil)
-    
+
     var msg map[string]interface{}
     ws.ReadJSON(&msg)  // Parse incoming JSON
-    
+
     response := h.chatService.ProcessMessage(ctx, msg["message"].(string))
     ws.WriteJSON(response)  // Send back
 }
@@ -378,6 +405,7 @@ func (h *Handler) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 ---
 
 ### Step 3: Intent Detection
+
 **File:** `backend/internal/services/nlp_service.go` | **Lines:** 76-120
 
 ```go
@@ -388,13 +416,14 @@ parsed := s.nlpService.ParseMessage(message)
 ---
 
 ### Step 4: Route to Handler
+
 **File:** `backend/internal/services/chat_service.go` | **Lines:** 127-430
 
 ```go
 func (s *ChatService) ProcessMessage(ctx context.Context, message string) (*ChatResponse, error) {
     // Parse with NLP
     parsed, _ := s.ParseMessage(message)
-    
+
     // Route based on intent
     switch parsed.Intent {
     case IntentCompare:
@@ -407,12 +436,13 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string) (*Chat
 ---
 
 ### Step 5: Database Query
+
 **File:** `backend/internal/services/chat_service.go` | **Lines:** 2750-2770
 
 ```go
 func (s *ChatService) compareDistricts(ctx context.Context, locations []string, year string) (*ComparisonData, error) {
     query := `
-        SELECT 
+        SELECT
             b.block_name,
             AVG(a.stage) as stage,
             AVG(a.rainfall) as rainfall,
@@ -424,7 +454,7 @@ func (s *ChatService) compareDistricts(ctx context.Context, locations []string, 
         AND a.year = $3
         GROUP BY b.block_name
     `
-    
+
     rows, _ := s.db.QueryContext(ctx, query, locations..., year)
     // Process rows into ComparisonData
     return data, nil
@@ -434,50 +464,55 @@ func (s *ChatService) compareDistricts(ctx context.Context, locations []string, 
 ---
 
 ### Step 6: Chart Rendering
+
 **File:** `src/components/charts/echarts/ChartRenderer.tsx` | **Line:** 115
 
 ```tsx
-export const ChartRenderer: React.FC<ChartRendererProps> = ({ data, payload }) => {
-    // Detect chart type
-    if (payload.comparisonType === "comparison-card") {
-        return <ComparisonChart data={data} />;
-    }
-    if (payload.comparisonType === "trend-card") {
-        return <TrendAnalysisCard data={data} />;
-    }
-    // ... more types
-}
+export const ChartRenderer: React.FC<ChartRendererProps> = ({
+  data,
+  payload,
+}) => {
+  // Detect chart type
+  if (payload.comparisonType === "comparison-card") {
+    return <ComparisonChart data={data} />;
+  }
+  if (payload.comparisonType === "trend-card") {
+    return <TrendAnalysisCard data={data} />;
+  }
+  // ... more types
+};
 ```
 
 ---
 
 ### Step 7: Horizontal Bar Chart
+
 **File:** `src/components/charts/echarts/ComparisonChart.tsx` | **Lines:** 100-200
 
 ```tsx
 const option = {
-    xAxis: {
-        type: "value"  // Numeric values (rainfall, extraction, etc.)
+  xAxis: {
+    type: "value", // Numeric values (rainfall, extraction, etc.)
+  },
+  yAxis: {
+    type: "category", // Location names
+    data: ["Amritsar", "Ludhiana", "Patiala"],
+  },
+  series: [
+    {
+      name: "Rainfall",
+      type: "bar",
+      data: [245, 312, 198],
+      itemStyle: { color: "#007BFF" },
     },
-    yAxis: {
-        type: "category",  // Location names
-        data: ["Amritsar", "Ludhiana", "Patiala"]
+    {
+      name: "Stage",
+      type: "bar",
+      data: [67, 82, 45],
+      itemStyle: { color: "#FFA500" },
     },
-    series: [
-        {
-            name: "Rainfall",
-            type: "bar",
-            data: [245, 312, 198],
-            itemStyle: { color: "#007BFF" }
-        },
-        {
-            name: "Stage",
-            type: "bar",
-            data: [67, 82, 45],
-            itemStyle: { color: "#FFA500" }
-        },
-        // ... more series
-    ]
+    // ... more series
+  ],
 };
 ```
 
@@ -486,6 +521,7 @@ const option = {
 ## 📱 FRONTEND STRUCTURE
 
 ### Tech Stack
+
 - **Framework:** React 18 + TypeScript
 - **Build Tool:** Vite (ultra-fast)
 - **UI Library:** Shadcn/ui (Radix components)
@@ -495,6 +531,7 @@ const option = {
 - **Styling:** Tailwind CSS
 
 ### Component Tree
+
 ```
 src/
 ├── App.tsx                              # Root component
@@ -555,46 +592,50 @@ src/
 ## 🔌 API ENDPOINTS
 
 ### WebSocket
+
 ```
 ws://localhost:8081/ws
 ```
+
 **Message Format:**
+
 ```json
 {
-    "type": "chat",
-    "message": "Compare Amritsar and Ludhiana",
-    "session_id": "user-123",
-    "timestamp": "2025-12-08T10:00:00Z"
+  "type": "chat",
+  "message": "Compare Amritsar and Ludhiana",
+  "session_id": "user-123",
+  "timestamp": "2025-12-08T10:00:00Z"
 }
 ```
 
 **Response Format:**
+
 ```json
 {
-    "text": "Here's the comparison...",
-    "chart": {
-        "type": "comparison-card",
-        "comparisonType": "districts",
-        "data": {
-            "locations": [
-                {
-                    "name": "Amritsar",
-                    "rainfall": 245,
-                    "stage": 67,
-                    "safe_blocks": 45,
-                    "critical_blocks": 12
-                },
-                {
-                    "name": "Ludhiana",
-                    "rainfall": 312,
-                    "stage": 82,
-                    "safe_blocks": 32,
-                    "critical_blocks": 28
-                }
-            ]
+  "text": "Here's the comparison...",
+  "chart": {
+    "type": "comparison-card",
+    "comparisonType": "districts",
+    "data": {
+      "locations": [
+        {
+          "name": "Amritsar",
+          "rainfall": 245,
+          "stage": 67,
+          "safe_blocks": 45,
+          "critical_blocks": 12
+        },
+        {
+          "name": "Ludhiana",
+          "rainfall": 312,
+          "stage": 82,
+          "safe_blocks": 32,
+          "critical_blocks": 28
         }
-    },
-    "session_id": "user-123"
+      ]
+    }
+  },
+  "session_id": "user-123"
 }
 ```
 
@@ -603,6 +644,7 @@ ws://localhost:8081/ws
 ## 🤖 LLM MODELS & CONFIGURATION
 
 ### Local Model: Ollama SQLCoder:7b
+
 **Location:** `localhost:11434`  
 **Model:** `sqlcoder:7b`  
 **Size:** 7 billion parameters  
@@ -612,6 +654,7 @@ ws://localhost:8081/ws
 **Purpose:** SQL generation only
 
 **Advantages:**
+
 - ✅ Fast (local, no network latency)
 - ✅ Specialized for SQL (better than general models)
 - ✅ Free (no API calls)
@@ -619,6 +662,7 @@ ws://localhost:8081/ws
 - ✅ Reliable (deterministic)
 
 **Example Use:**
+
 ```go
 prompt := `Given this schema and question, generate a PostgreSQL query:
 Schema:
@@ -636,6 +680,7 @@ response := ollama.GenerateSQL(context.Background(), prompt)
 ---
 
 ### Remote Model: Gemini 2.5 Flash (Fallback)
+
 **API:** Google Cloud Generative AI  
 **Model:** `gemini-2.5-flash`  
 **Cost:** ~$0.075 per 1M input tokens, $0.30 per 1M output tokens  
@@ -643,12 +688,14 @@ response := ollama.GenerateSQL(context.Background(), prompt)
 **Usage Rate:** <5% (only when Ollama unavailable)
 
 **Advantages:**
+
 - ✅ Text generation (not just SQL)
 - ✅ Better for complex reasoning
 - ✅ Multilingual support
 - ✅ Longer context window
 
 **Configuration:**
+
 ```go
 // backend/.env
 GEMINI_API_KEY=AIza...
@@ -657,6 +704,7 @@ GEMINI_API_KEY_3=AIza...
 ```
 
 **Why Multiple Keys?**
+
 - Rate limiting protection
 - Load balancing
 - Key rotation for security
@@ -666,15 +714,16 @@ GEMINI_API_KEY_3=AIza...
 ## 📊 DATA COVERAGE
 
 ### Years Available
-- **2024-2025:** ✅ Full block-level data (5,796 blocks)
-- **2023-2024:** ⚠️ Partial (58 blocks only)
-- **2022-2023:** ❌ State-level only
-- **2021-2022:** ❌ State-level only
-- **2019-2020:** ❌ State-level only
-- **2016-2017:** ❌ State-level only
-- **2012-2013:** ❌ State-level only
+
+- **2024-2025:** ✅ Full block-level data (6,746 blocks)
+- **2023-2024:** ✅ Full block-level data (6,746 blocks)
+- **2021-2022:** ✅ Good coverage (4,824 blocks)
+- **2019-2020:** ⚠️ Moderate coverage (2,811 blocks)
+- **2016-2017:** ⚠️ Moderate coverage (2,738 blocks)
+- **2012-2013:** ⚠️ Minimal coverage (160 blocks)
 
 ### Categories
+
 ```
 Safe (0-50% stage)
 Semi-Critical (50-75%)
@@ -683,9 +732,11 @@ Over-Exploited (>100%)
 ```
 
 ### States Covered
+
 All 28 states + 8 union territories = ~36 administrative units
 
 ### Metrics per Block
+
 - Rainfall (mm/year)
 - Total Recharge (mm/year)
 - Total Discharge (mm/year)
@@ -700,19 +751,23 @@ All 28 states + 8 union territories = ~36 administrative units
 ## 🚀 DEPLOYMENT
 
 ### Docker Deployment
+
 ```bash
 cd backend
 docker-compose up -d
 ```
 
 **Services:**
+
 - **PostgreSQL** (port 5433)
 - **Redis** (port 6379)
 - **Backend App** (port 8080)
 - **Ollama** (port 11434) - Uses host Ollama via host.docker.internal
 
 ### Environment Variables
+
 **backend/.env**
+
 ```
 DB_HOST=localhost
 DB_PORT=5433
@@ -734,6 +789,7 @@ PORT=8080
 ```
 
 ### Frontend Build
+
 ```bash
 npm run build         # Production bundle
 npm run dev          # Development server
@@ -786,36 +842,42 @@ User sees visualization (t=250ms TOTAL)
 ## 🧪 TESTING QUERIES
 
 ### Test 1: Simple Compare
+
 ```
 "Compare Amritsar and Ludhiana"
 Expected: Horizontal bar chart with 2 locations, 4 metrics each
 ```
 
 ### Test 2: Trend Analysis
+
 ```
 "Show trend for Punjab 2022-2025"
 Expected: Line/area chart with years on X-axis
 ```
 
 ### Test 3: List Blocks
+
 ```
 "List all critical blocks in Punjab"
 Expected: Table of critical blocks with stage values
 ```
 
 ### Test 4: Top Ranking
+
 ```
 "Top 10 most over-exploited blocks"
 Expected: Bar chart with block names and stage %
 ```
 
 ### Test 5: Category Breakdown
+
 ```
 "How many safe vs critical blocks in Haryana"
 Expected: Pie/donut chart showing distribution
 ```
 
 ### Test 6: Dynamic Query (Uses Ollama/Gemini)
+
 ```
 "What's the average rainfall in blocks where stage > 80%"
 Expected: Generated SQL → Result
@@ -825,32 +887,35 @@ Expected: Generated SQL → Result
 
 ## 📈 PERFORMANCE METRICS
 
-| Operation | Time | Notes |
-|-----------|------|-------|
-| Intent Detection | 1ms | Local keyword matching |
-| Simple Query (Pre-optimized) | 50-150ms | Compare, Trend, List |
-| Database Query | 50-200ms | Depends on result set size |
-| Dynamic SQL Generation | 400-800ms | Ollama local |
-| Dynamic SQL Fallback | 1-2s | Gemini API |
-| Chart Rendering | 50-100ms | ECharts |
-| **Total (Pre-optimized)** | **200-400ms** | Most common queries |
-| **Total (Dynamic SQL)** | **600-1000ms** | Custom queries |
+| Operation                    | Time           | Notes                      |
+| ---------------------------- | -------------- | -------------------------- |
+| Intent Detection             | 1ms            | Local keyword matching     |
+| Simple Query (Pre-optimized) | 50-150ms       | Compare, Trend, List       |
+| Database Query               | 50-200ms       | Depends on result set size |
+| Dynamic SQL Generation       | 400-800ms      | Ollama local               |
+| Dynamic SQL Fallback         | 1-2s           | Gemini API                 |
+| Chart Rendering              | 50-100ms       | ECharts                    |
+| **Total (Pre-optimized)**    | **200-400ms**  | Most common queries        |
+| **Total (Dynamic SQL)**      | **600-1000ms** | Custom queries             |
 
 ---
 
 ## 🔒 SECURITY
 
 ### API Keys
+
 - **Gemini API Keys** rotated automatically (3 fallback keys)
 - Environment variables stored in `.env` (not in code)
 - Docker secrets for production deployment
 
 ### Database
+
 - PostgreSQL connection over localhost (not exposed)
 - SQL prepared statements (prevents SQL injection)
 - UUID primary keys (not sequential integers)
 
 ### WebSocket
+
 - Session IDs for user tracking
 - Message validation before processing
 - Rate limiting (can be added)
@@ -867,44 +932,49 @@ Expected: Generated SQL → Result
 **IntentMapCategory:** "map", "show map", "visualize", "overlay"  
 **IntentRainfallAnalysis:** "rainfall", "rain", "precipitation"  
 **IntentCropRecommendation:** "crop", "grow", "plant", "agriculture"  
-**IntentPolicyRecharge:** "policy", "recharge", "conservation"  
+**IntentPolicyRecharge:** "policy", "recharge", "conservation"
 
 ---
 
 ## 📁 KEY FILES QUICK REFERENCE
 
-| File | Lines | Purpose |
-|------|-------|---------|
-| `backend/internal/services/chat_service.go` | 3210 | Main orchestrator & handlers |
-| `backend/internal/services/nlp_service.go` | 1304 | Intent detection & entity extraction |
-| `backend/internal/services/llm_service.go` | 521 | Ollama & Gemini integration |
-| `src/components/INGRESAssistant.tsx` | 2585 | Chat UI & message handling |
-| `src/components/charts/echarts/ChartRenderer.tsx` | 1595 | Chart type router |
-| `src/components/charts/echarts/ComparisonChart.tsx` | 340 | Horizontal bar chart |
-| `backend/internal/models/chat.go` | - | Data structures |
-| `backend/pkg/websocket/handler.go` | - | WebSocket handler |
-| `schema.sql` | 80 | Database schema |
-| `src/hooks/useChatWebSocket.ts` | - | WebSocket client |
+| File                                                | Lines | Purpose                              |
+| --------------------------------------------------- | ----- | ------------------------------------ |
+| `backend/internal/services/chat_service.go`         | 3210  | Main orchestrator & handlers         |
+| `backend/internal/services/nlp_service.go`          | 1304  | Intent detection & entity extraction |
+| `backend/internal/services/llm_service.go`          | 521   | Ollama & Gemini integration          |
+| `src/components/INGRESAssistant.tsx`                | 2585  | Chat UI & message handling           |
+| `src/components/charts/echarts/ChartRenderer.tsx`   | 1595  | Chart type router                    |
+| `src/components/charts/echarts/ComparisonChart.tsx` | 340   | Horizontal bar chart                 |
+| `backend/internal/models/chat.go`                   | -     | Data structures                      |
+| `backend/pkg/websocket/handler.go`                  | -     | WebSocket handler                    |
+| `schema.sql`                                        | 80    | Database schema                      |
+| `src/hooks/useChatWebSocket.ts`                     | -     | WebSocket client                     |
 
 ---
 
 ## 🎤 DEMO SCRIPT
 
 ### Opening (30 seconds)
+
 "Ground Sense Bot is an AI-powered groundwater analytics platform for India. We use a 3-layer AI pipeline: Layer 1 is local keyword intent detection in NLP Service—instant and free. Layer 2 routes to specialized handlers with optimized SQL queries. Layer 3 uses SQLCoder 7B via Ollama for unknown queries. This gives us 200-400ms response times for most queries."
 
 ### Feature Demo (3 minutes)
+
 1. **Compare Two Locations**
+
    - Say: "Compare Amritsar and Ludhiana"
    - Show: Horizontal bar chart, 4 metrics each
    - Explain: Using handleCompare() at line 2237, compareDistricts() at line 2750
 
 2. **Trend Analysis**
+
    - Say: "Show trend for Punjab 2022-2025"
    - Show: Line chart with 4 years
    - Explain: handleTrend() at line 2052, year-over-year aggregation
 
 3. **List Critical Blocks**
+
    - Say: "List all critical blocks in Haryana"
    - Show: Table with stage percentages
    - Explain: Category filtering in handleListBlocks()
@@ -915,6 +985,7 @@ Expected: Generated SQL → Result
    - Explain: Uses Ollama SQLCoder:7b locally
 
 ### Architecture Explanation (2 minutes)
+
 - **Database:** PostgreSQL with 5,796 blocks, 238,000 assessment rows
 - **Backend:** Go with 3 main services (Chat, NLP, LLM)
 - **Frontend:** React with ECharts for visualization
@@ -922,6 +993,7 @@ Expected: Generated SQL → Result
 - **Scalability:** Goroutines handle 1000+ concurrent users
 
 ### Closing (30 seconds)
+
 "Our system costs $0 for 95% of queries using local Ollama, scales to 10,000+ users, and provides instant insights into India's groundwater health. All code is modular and extensible."
 
 ---
@@ -1004,6 +1076,6 @@ curl http://localhost:11434/api/tags
 
 **PRINT THIS AND KEEP IT HANDY FOR DEMO! 🎯**
 
-*Last Updated: December 8, 2025*  
-*Project: Ground Sense Bot*  
-*Branch: qwen-2.5-coder*
+_Last Updated: December 8, 2025_  
+_Project: Ground Sense Bot_  
+_Branch: qwen-2.5-coder_

@@ -1,14 +1,24 @@
 import React from "react";
 import ReactECharts from "echarts-for-react";
-import { TrendingUp, TrendingDown, Droplets, Activity } from "lucide-react";
+import { Droplets, TrendingUp, Activity, Tag } from "lucide-react";
+import {
+  CATEGORY_COLORS,
+  ATTRIBUTE_COLORS,
+  getCategoryColors,
+  getCategoryColorsFromStage,
+  formatCategoryName,
+  getStageLabel,
+  formatNumber,
+  FOUR_KEY_ATTRIBUTES,
+} from "@/lib/designSystem";
 
+// THE 4 KEY GROUNDWATER ATTRIBUTES ONLY
 export interface ComparisonDataPoint {
   name: string;
-  recharge: number;
-  extraction: number;
-  stage: number;
-  rainfall: number;
-  category: string;
+  extractable: number;    // Annual Extractable GW Resources (MCM)
+  extraction: number;     // Annual GW Extraction (MCM)
+  stage: number;          // Stage of Extraction (%)
+  category: string;       // Categorization (safe/critical/over_exploited)
 }
 
 export interface ComparisonData {
@@ -23,268 +33,246 @@ interface ComparisonChartProps {
 
 const ComparisonChart: React.FC<ComparisonChartProps> = ({ data }) => {
   console.log("\n" + "=".repeat(80));
-  console.log("📊 COMPARISON CHART RENDERING");
+  console.log("📊 COMPARISON CHART - 4 KEY ATTRIBUTES (WCAG Compliant)");
   console.log(`├─ Type: ${data.comparisonType.toUpperCase()}`);
   console.log(`├─ Year: ${data.year}`);
   console.log(`├─ Locations: ${data.locations.length}`);
-  data.locations.forEach((loc, idx) => {
-    console.log(`├─ [${idx + 1}] ${loc.name}:`);
-    console.log(`│  ├─ Rainfall: ${loc.rainfall.toFixed(0)}mm`);
-    console.log(`│  ├─ Recharge: ${loc.recharge.toFixed(1)} MCM`);
-    console.log(`│  ├─ Stage: ${loc.stage.toFixed(1)}%`);
-    console.log(`│  └─ Category: ${loc.category}`);
-  });
-  console.log("└─ Rendering horizontal bar chart...");
   console.log("=".repeat(80) + "\n");
-
-  const getCategoryColor = (category: string) => {
-    const colors: Record<string, string> = {
-      safe: "#10b981",
-      semicritical: "#3b82f6",
-      critical: "#f59e0b",
-      overcritical: "#ef4444",
-      saline: "#8b5cf6",
-    };
-    return colors[category.toLowerCase().replace(/[_\s-]/g, "")] || "#6b7280";
-  };
 
   const option: echarts.EChartsOption = {
     backgroundColor: "transparent",
     title: {
-      text: `${
-        data.comparisonType.charAt(0).toUpperCase() +
-        data.comparisonType.slice(1)
-      } Comparison - ${data.year}`,
+      text: `${data.comparisonType.charAt(0).toUpperCase() + data.comparisonType.slice(1)} Comparison - ${data.year}`,
+      subtext: "The 4 Key Groundwater Attributes",
       left: "center",
-      top: 20,
-      textStyle: {
-        color: "#fff",
-        fontSize: 20,
-        fontWeight: "bold",
-      },
+      top: 10,
+      textStyle: { color: "#F8FAFC", fontSize: 18, fontWeight: "bold" },
+      subtextStyle: { color: "#94A3B8", fontSize: 12 },
     },
     tooltip: {
       trigger: "axis",
-      axisPointer: {
-        type: "shadow",
-      },
-      backgroundColor: "rgba(17, 24, 39, 0.95)",
-      borderColor: "rgba(255, 255, 255, 0.1)",
-      textStyle: {
-        color: "#fff",
-      },
+      axisPointer: { type: "shadow" },
+      backgroundColor: "rgba(15, 23, 42, 0.95)",
+      borderColor: "rgba(148, 163, 184, 0.2)",
+      textStyle: { color: "#F8FAFC" },
       formatter: (params: any) => {
         if (!Array.isArray(params)) return "";
         const location = params[0].name;
+        const locData = data.locations.find(l => l.name === location);
+        const colors = locData ? getCategoryColors(locData.category) : CATEGORY_COLORS.unknown;
+        
         let result = `<div style="font-weight: bold; margin-bottom: 8px;">${location}</div>`;
         params.forEach((param: any) => {
-          const unit =
-            param.seriesName === "Recharge" || param.seriesName === "Extraction"
-              ? " MCM"
-              : param.seriesName === "Stage"
-              ? "%"
-              : "mm";
+          const unit = param.seriesName.includes("Stage") ? "%" : " ham";
           result += `<div style="margin: 4px 0;">
             <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${param.color};margin-right:8px;"></span>
-            ${param.seriesName}: <strong>${param.value}${unit}</strong>
+            ${param.seriesName}: <strong>${param.value?.toFixed(1) || 0}${unit}</strong>
           </div>`;
         });
+        if (locData) {
+          result += `<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #475569;">
+            Category: <strong style="color: ${colors.textOnDark}">${formatCategoryName(locData.category)}</strong>
+          </div>`;
+        }
         return result;
       },
     },
     legend: {
-      data: [
-        "Rainfall (mm)",
-        "Safe Blocks",
-        "Critical Blocks",
-        "Recharge (100 MCM)",
-      ],
-      top: 60,
-      textStyle: {
-        color: "#94a3b8",
-        fontSize: 13,
-      },
+      data: ["Extractable GW (MCM)", "GW Extraction (MCM)", "Stage (%)"],
+      top: 55,
+      textStyle: { color: "#94A3B8", fontSize: 12 },
       itemGap: 20,
     },
     grid: {
-      left: "20%",
+      left: "18%",
       right: "10%",
       bottom: "10%",
-      top: 120,
+      top: 110,
       containLabel: true,
     },
     xAxis: {
       type: "value",
       name: "Value",
-      nameTextStyle: {
-        color: "#94a3b8",
-        fontSize: 13,
-      },
-      axisLabel: {
-        color: "#94a3b8",
-        fontSize: 12,
-      },
-      axisLine: {
-        lineStyle: {
-          color: "#475569",
-        },
-      },
-      splitLine: {
-        lineStyle: {
-          color: "#334155",
-        },
-      },
+      nameTextStyle: { color: "#94A3B8", fontSize: 12 },
+      axisLabel: { color: "#94A3B8", fontSize: 11 },
+      axisLine: { lineStyle: { color: "#475569" } },
+      splitLine: { lineStyle: { color: "#334155" } },
     },
     yAxis: {
       type: "category",
       data: data.locations.map((loc) => loc.name),
-      axisLabel: {
-        color: "#ffffff",
-        fontSize: 16,
-        fontWeight: "bold",
-        margin: 12,
-      },
-      axisLine: {
-        lineStyle: {
-          color: "#ffffff",
-          width: 2,
-        },
-      },
-      axisTick: {
-        show: false,
-      },
+      axisLabel: { color: "#F8FAFC", fontSize: 14, fontWeight: "bold", margin: 12 },
+      axisLine: { lineStyle: { color: "#F8FAFC", width: 2 } },
+      axisTick: { show: false },
     },
     series: [
       {
-        name: "Rainfall (mm)",
+        name: "Extractable GW (MCM)",
         type: "bar",
-        data: data.locations.map((loc) => loc.rainfall),
-        itemStyle: {
-          color: "#007BFF",
-          borderRadius: [0, 4, 4, 0],
-        },
+        data: data.locations.map((loc) => (loc.extractable || 0) / 100),
+        itemStyle: { color: ATTRIBUTE_COLORS.extractable.primary, borderRadius: [0, 4, 4, 0] },
         label: {
           show: true,
           position: "right",
-          color: "#fff",
-          fontSize: 12,
+          color: "#F8FAFC",
+          fontSize: 11,
           fontWeight: "bold",
-          formatter: (params: any) => params.value.toFixed(0),
+          formatter: (params: any) => {
+            const val = data.locations[params.dataIndex]?.extractable || 0;
+            return val > 1000 ? `${(val/1000).toFixed(1)}K` : val.toFixed(0);
+          },
         },
-        barMaxWidth: 30,
+        barMaxWidth: 25,
       },
       {
-        name: "Safe Blocks",
+        name: "GW Extraction (MCM)",
         type: "bar",
-        data: data.locations.map((loc) => loc.safeBlocks || 0),
-        itemStyle: {
-          color: "#FFA500",
-          borderRadius: [0, 4, 4, 0],
-        },
+        data: data.locations.map((loc) => (loc.extraction || 0) / 100),
+        itemStyle: { color: ATTRIBUTE_COLORS.extraction.primary, borderRadius: [0, 4, 4, 0] },
         label: {
           show: true,
           position: "right",
-          color: "#fff",
-          fontSize: 12,
+          color: "#F8FAFC",
+          fontSize: 11,
           fontWeight: "bold",
+          formatter: (params: any) => {
+            const val = data.locations[params.dataIndex]?.extraction || 0;
+            return val > 1000 ? `${(val/1000).toFixed(1)}K` : val.toFixed(0);
+          },
         },
-        barMaxWidth: 30,
+        barMaxWidth: 25,
       },
       {
-        name: "Critical Blocks",
+        name: "Stage (%)",
         type: "bar",
-        data: data.locations.map((loc) => loc.criticalBlocks || 0),
+        data: data.locations.map((loc) => loc.stage || 0),
         itemStyle: {
-          color: "#9ACD32",
+          color: (params: any) => getCategoryColorsFromStage(params.value).primary,
           borderRadius: [0, 4, 4, 0],
         },
         label: {
           show: true,
           position: "right",
-          color: "#fff",
-          fontSize: 12,
+          color: "#F8FAFC",
+          fontSize: 11,
           fontWeight: "bold",
+          formatter: (params: any) => `${params.value?.toFixed(1) || 0}%`,
         },
-        barMaxWidth: 30,
-      },
-      {
-        name: "Recharge (100 MCM)",
-        type: "bar",
-        data: data.locations.map((loc) => (loc.recharge || 0) / 100),
-        itemStyle: {
-          color: "#4F5868",
-          borderRadius: [0, 4, 4, 0],
-        },
-        label: {
-          show: true,
-          position: "right",
-          color: "#fff",
-          fontSize: 12,
-          fontWeight: "bold",
-          formatter: (params: any) => params.value.toFixed(1),
-        },
-        barMaxWidth: 30,
+        barMaxWidth: 25,
       },
     ],
   };
 
   // Calculate summary metrics
-  const totalRecharge = data.locations.reduce(
-    (sum, loc) => sum + loc.recharge,
-    0
-  );
-  const totalExtraction = data.locations.reduce(
-    (sum, loc) => sum + loc.extraction,
-    0
-  );
-  const avgStage =
-    data.locations.reduce((sum, loc) => sum + loc.stage, 0) /
-    data.locations.length;
-  const avgRainfall =
-    data.locations.reduce((sum, loc) => sum + loc.rainfall, 0) /
-    data.locations.length;
+  const totalExtractable = data.locations.reduce((sum, loc) => sum + (loc.extractable || 0), 0);
+  const totalExtraction = data.locations.reduce((sum, loc) => sum + (loc.extraction || 0), 0);
+  const avgStage = data.locations.reduce((sum, loc) => sum + (loc.stage || 0), 0) / data.locations.length;
+  
+  // Count categories
+  const categoryCounts = data.locations.reduce((acc, loc) => {
+    const cat = loc.category?.toLowerCase().replace(/[_\s-]/g, "") || "unknown";
+    if (cat.includes("over") || cat.includes("exploited")) acc.overExploited++;
+    else if (cat.includes("critical") && !cat.includes("semi")) acc.critical++;
+    else if (cat.includes("semi")) acc.semiCritical++;
+    else acc.safe++;
+    return acc;
+  }, { safe: 0, semiCritical: 0, critical: 0, overExploited: 0 });
+
+  const dominantCategoryKey = 
+    categoryCounts.overExploited > 0 ? "overExploited" :
+    categoryCounts.critical > 0 ? "critical" :
+    categoryCounts.semiCritical > 0 ? "semiCritical" : "safe";
+  
+  const dominantColors = CATEGORY_COLORS[dominantCategoryKey];
 
   return (
     <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-6 shadow-2xl border border-white/10">
-      {/* Summary Cards */}
+      {/* THE 4 KEY ATTRIBUTES SUMMARY CARDS */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+        {/* 1. Annual Extractable GW Resources */}
+        <div 
+          className="rounded-xl p-4 border"
+          style={{ 
+            backgroundColor: ATTRIBUTE_COLORS.extractable.backgroundDark,
+            borderColor: `${ATTRIBUTE_COLORS.extractable.primary}33`,
+          }}
+        >
           <div className="flex items-center gap-2 mb-2">
-            <Droplets className="w-5 h-5 text-blue-400" />
-            <span className="text-sm text-blue-300">Total Recharge</span>
+            <Droplets className="w-5 h-5" style={{ color: ATTRIBUTE_COLORS.extractable.textOnDark }} />
+            <span className="text-xs font-medium" style={{ color: ATTRIBUTE_COLORS.extractable.textOnDark }}>
+              {FOUR_KEY_ATTRIBUTES.EXTRACTABLE.shortLabel}
+            </span>
           </div>
-          <div className="text-2xl font-bold text-white">
-            {totalRecharge.toFixed(1)} MCM
+          <div className="text-xl font-bold text-white">{formatNumber(totalExtractable)} ham</div>
+          <div className="text-xs mt-1 opacity-60" style={{ color: ATTRIBUTE_COLORS.extractable.textOnDark }}>
+            Annual Resources
           </div>
         </div>
 
-        <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl p-4">
+        {/* 2. Annual GW Extraction */}
+        <div 
+          className="rounded-xl p-4 border"
+          style={{ 
+            backgroundColor: ATTRIBUTE_COLORS.extraction.backgroundDark,
+            borderColor: `${ATTRIBUTE_COLORS.extraction.primary}33`,
+          }}
+        >
           <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-5 h-5 text-orange-400" />
-            <span className="text-sm text-orange-300">Total Extraction</span>
+            <TrendingUp className="w-5 h-5" style={{ color: ATTRIBUTE_COLORS.extraction.textOnDark }} />
+            <span className="text-xs font-medium" style={{ color: ATTRIBUTE_COLORS.extraction.textOnDark }}>
+              {FOUR_KEY_ATTRIBUTES.EXTRACTION.shortLabel}
+            </span>
           </div>
-          <div className="text-2xl font-bold text-white">
-            {totalExtraction.toFixed(1)} MCM
+          <div className="text-xl font-bold text-white">{formatNumber(totalExtraction)} ham</div>
+          <div className="text-xs mt-1 opacity-60" style={{ color: ATTRIBUTE_COLORS.extraction.textOnDark }}>
+            Annual Usage
           </div>
         </div>
 
-        <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-4">
+        {/* 3. Stage of Extraction */}
+        <div 
+          className="rounded-xl p-4 border"
+          style={{ 
+            backgroundColor: getCategoryColorsFromStage(avgStage).backgroundDark,
+            borderColor: `${getCategoryColorsFromStage(avgStage).primary}33`,
+          }}
+        >
           <div className="flex items-center gap-2 mb-2">
-            <Activity className="w-5 h-5 text-purple-400" />
-            <span className="text-sm text-purple-300">Avg Stage</span>
+            <Activity className="w-5 h-5" style={{ color: getCategoryColorsFromStage(avgStage).textOnDark }} />
+            <span className="text-xs font-medium" style={{ color: getCategoryColorsFromStage(avgStage).textOnDark }}>
+              Avg {FOUR_KEY_ATTRIBUTES.STAGE.shortLabel}
+            </span>
           </div>
-          <div className="text-2xl font-bold text-white">
+          <div className="text-xl font-bold" style={{ color: getCategoryColorsFromStage(avgStage).textOnDark }}>
             {avgStage.toFixed(1)}%
           </div>
+          <div className="text-xs mt-1 opacity-60" style={{ color: getCategoryColorsFromStage(avgStage).textOnDark }}>
+            {getStageLabel(avgStage)}
+          </div>
         </div>
 
-        <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4">
+        {/* 4. Categorization */}
+        <div 
+          className="rounded-xl p-4 border"
+          style={{ 
+            backgroundColor: dominantColors.backgroundDark,
+            borderColor: `${dominantColors.primary}33`,
+          }}
+        >
           <div className="flex items-center gap-2 mb-2">
-            <TrendingDown className="w-5 h-5 text-green-400" />
-            <span className="text-sm text-green-300">Avg Rainfall</span>
+            <Tag className="w-5 h-5" style={{ color: dominantColors.textOnDark }} />
+            <span className="text-xs font-medium" style={{ color: dominantColors.textOnDark }}>
+              {FOUR_KEY_ATTRIBUTES.CATEGORY.shortLabel}
+            </span>
           </div>
-          <div className="text-2xl font-bold text-white">
-            {avgRainfall.toFixed(0)}mm
+          <div className="text-xl font-bold" style={{ color: dominantColors.textOnDark }}>
+            {dominantColors.emoji} {formatCategoryName(dominantCategoryKey)}
+          </div>
+          <div className="text-xs mt-1" style={{ color: dominantColors.textOnDark }}>
+            {CATEGORY_COLORS.overExploited.emoji} {categoryCounts.overExploited} | 
+            {CATEGORY_COLORS.critical.emoji} {categoryCounts.critical} | 
+            {CATEGORY_COLORS.semiCritical.emoji} {categoryCounts.semiCritical} | 
+            {CATEGORY_COLORS.safe.emoji} {categoryCounts.safe}
           </div>
         </div>
       </div>
@@ -293,59 +281,62 @@ const ComparisonChart: React.FC<ComparisonChartProps> = ({ data }) => {
       <div className="bg-white/5 rounded-xl p-4 border border-white/10">
         <ReactECharts
           option={option}
-          style={{ height: "500px" }}
+          style={{ height: "450px" }}
           opts={{ renderer: "canvas" }}
         />
       </div>
 
-      {/* Location Details */}
+      {/* Location Details - 4 ATTRIBUTES ONLY */}
       <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {data.locations.map((location, index) => (
-          <div
-            key={index}
-            className="bg-white/5 rounded-xl p-4 border border-white/10"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-white">{location.name}</h3>
-              <span
-                className="px-3 py-1 rounded-full text-xs font-medium"
-                style={{
-                  backgroundColor: getCategoryColor(location.category) + "20",
-                  color: getCategoryColor(location.category),
-                  border: `1px solid ${getCategoryColor(location.category)}40`,
-                }}
-              >
-                {location.category}
-              </span>
+        {data.locations.map((location, index) => {
+          const locColors = getCategoryColors(location.category);
+          return (
+            <div
+              key={index}
+              className="bg-white/5 rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-colors"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-white">{location.name}</h3>
+                <span
+                  className="px-3 py-1 rounded-full text-xs font-medium"
+                  style={{
+                    backgroundColor: locColors.backgroundDark,
+                    color: locColors.textOnDark,
+                    border: `1px solid ${locColors.primary}40`,
+                  }}
+                >
+                  {locColors.emoji} {formatCategoryName(location.category)}
+                </span>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">1️⃣ Extractable:</span>
+                  <span style={{ color: ATTRIBUTE_COLORS.extractable.textOnDark }} className="font-medium">
+                    {formatNumber(location.extractable)} ham
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">2️⃣ Extraction:</span>
+                  <span style={{ color: ATTRIBUTE_COLORS.extraction.textOnDark }} className="font-medium">
+                    {formatNumber(location.extraction)} ham
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">3️⃣ Stage:</span>
+                  <span style={{ color: getCategoryColorsFromStage(location.stage).textOnDark }} className="font-medium">
+                    {(location.stage || 0).toFixed(1)}%
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">4️⃣ Category:</span>
+                  <span style={{ color: locColors.textOnDark }} className="font-medium">
+                    {formatCategoryName(location.category)}
+                  </span>
+                </div>
+              </div>
             </div>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-400">Recharge:</span>
-                <span className="text-blue-400 font-medium">
-                  {location.recharge.toFixed(1)} MCM
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Extraction:</span>
-                <span className="text-orange-400 font-medium">
-                  {location.extraction.toFixed(1)} MCM
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Stage:</span>
-                <span className="text-purple-400 font-medium">
-                  {location.stage.toFixed(1)}%
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Rainfall:</span>
-                <span className="text-green-400 font-medium">
-                  {location.rainfall.toFixed(0)}mm
-                </span>
-              </div>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

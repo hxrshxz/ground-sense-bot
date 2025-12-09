@@ -1529,7 +1529,7 @@ const createSectorGradientChart = (title: string, data: SectorData[]) => {
         let result = `<div style="padding: 4px;"><b>Sector Distribution</b><br/>`;
         params.forEach((p: AnyData) => {
           const pct = ((p.value / total) * 100).toFixed(1);
-          result += `${p.marker} ${p.seriesName}: <b>${pct}%</b> (${(p.value/1000).toFixed(0)}K MCM)<br/>`;
+          result += `${p.marker} ${p.seriesName}: <b>${pct}%</b> (${(p.value/1000).toFixed(0)}K ham)<br/>`;
         });
         return result + '</div>';
       }

@@ -10,11 +10,15 @@ import (
 )
 
 type NLPService struct{
-	llm *LLMService
+	llm   *LLMService
+	cache *CacheService // Redis cache for permanent LLM query storage
 }
 
-func NewNLPService(llm *LLMService) *NLPService {
-	return &NLPService{llm: llm}
+func NewNLPService(llm *LLMService, cache *CacheService) *NLPService {
+	return &NLPService{
+		llm:   llm,
+		cache: cache,
+	}
 }
 
 type Intent string
@@ -183,11 +187,10 @@ func (s *NLPService) generateDynamicSQL(message string, intent Intent, entities 
 ┌─────────────┬──────────────┬─────────┬──────────────────────────────────────┐
 │ Year        │ Block Count  │ States  │ Data Quality                         │
 ├─────────────┼──────────────┼─────────┼──────────────────────────────────────┤
-│ 2024-2025   │ 5,796 blocks │ 26      │ ✅ COMPLETE - Most comprehensive    │
-│ 2023-2024   │ 5,734 blocks │ 25      │ ✅ EXCELLENT - Near complete         │
+│ 2024-2025   │ 6,746 blocks │ 26      │ ✅ COMPLETE - Official data          │
+│ 2023-2024   │ 6,746 blocks │ 26      │ ✅ COMPLETE - Official data          │
 │ 2021-2022   │ 4,824 blocks │ 16      │ ✅ GOOD - Wide coverage              │
 │ 2019-2020   │ 2,811 blocks │ 13      │ ⚠️ MODERATE - Limited coverage       │
-│ 2022-2023   │ 2,619 blocks │ 12      │ ⚠️ MODERATE - Limited coverage       │
 │ 2016-2017   │ 2,738 blocks │ 12      │ ⚠️ MODERATE - Limited coverage       │
 │ 2012-2013   │   160 blocks │  1      │ ⚠️ MINIMAL - Only West Bengal        │
 └─────────────┴──────────────┴─────────┴──────────────────────────────────────┘
@@ -720,7 +723,19 @@ WHERE a.category = 'Over-Exploited'         ❌ WRONG
 
 NOW GENERATE THE SQL QUERY FOR THE USER'S REQUEST:`
 
-	// Use LLMService.GenerateSQL which routes to local Ollama (SQLCoder)
+	// ⚡ PERMANENT CACHING: Check if we've generated SQL for this query before
+	// Since data is constant, same query always produces same SQL - cache forever!
+	ctx := context.Background()
+	if s.cache != nil {
+		cachedSQL, err := s.cache.GetLLMQuery(ctx, message)
+		if err == nil && cachedSQL != "" {
+			fmt.Printf("⚡ CACHE HIT: Using cached SQL (saved 5-10s LLM time!)\n")
+			return cachedSQL, nil
+		}
+	}
+
+	// Cache miss - generate SQL using LLMService (routes to local Ollama/SQLCoder)
+	fmt.Printf("🔄 CACHE MISS: Generating SQL with LLM (first time for this query)...\n")
 	sqlText, err := s.llm.GenerateSQL(message, prompt)
 	if err != nil {
 		return "", fmt.Errorf("AI SQL generation failed: %w", err)
@@ -729,6 +744,14 @@ NOW GENERATE THE SQL QUERY FOR THE USER'S REQUEST:`
 	// Basic validation - must contain SELECT
 	if !strings.Contains(strings.ToUpper(sqlText), "SELECT") {
 		return "", fmt.Errorf("invalid SQL generated: %s", sqlText)
+	}
+
+	// ⚡ PERMANENT CACHE: Store generated SQL forever (NO TTL)
+	// Next time same query comes, instant response!
+	if s.cache != nil {
+		if err := s.cache.SetLLMQuery(ctx, message, sqlText); err != nil {
+			fmt.Printf("⚠️  Warning: Failed to cache SQL query: %v\n", err)
+		}
 	}
 
 	return sqlText, nil
@@ -757,8 +780,8 @@ BLOCKS IN 2024-2025: 5,796 | DATA AVAILABILITY: 7 years (2012-2025)
    - block_name (VARCHAR): Mixed case (some UPPERCASE, some Title Case)
 
 4. ASSESSMENTS_SUMMARY TABLE (Main groundwater data):
-   - year (VARCHAR): 7 years available: '2012-2013', '2016-2017', '2019-2020', 
-                     '2021-2022', '2022-2023', '2023-2024', '2024-2025'
+   - year (VARCHAR): 6 years available: '2012-2013', '2016-2017', '2019-2020', 
+                     '2021-2022', '2023-2024', '2024-2025'
    - Block coverage varies by year (see table above)
    - rainfall (FLOAT): Rainfall in mm (range: 0-3000)
    - total_recharge (FLOAT): Total groundwater recharge in MCM
@@ -953,7 +976,7 @@ LOCATIONS:
 
 YEAR:
 - Format: "YYYY-YYYY" (e.g., "2024-2025")
-- Available: 2012-2013, 2016-2017, 2019-2020, 2021-2022, 2022-2023, 2023-2024, 2024-2025
+- Available: 2012-2013, 2016-2017, 2019-2020, 2021-2022, 2023-2024, 2024-2025
 - Default for single query: "2024-2025" (most complete data)
 - Default for trend query: 2021-2025 period (best multi-year coverage)
 

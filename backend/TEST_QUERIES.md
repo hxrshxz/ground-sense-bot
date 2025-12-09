@@ -36,7 +36,7 @@ GROUP BY s.state_name;
 
 - Intent: TREND
 - Year Filter: NONE or `a.year >= '2021-2022'`
-- Returns: 4 rows (2021-2022, 2022-2023, 2023-2024, 2024-2025)
+- Returns: 3 rows (2021-2022, 2023-2024, 2024-2025)
 
 **Expected SQL Pattern**:
 
@@ -60,7 +60,6 @@ ORDER BY a.year;
    year    | avg_stage | avg_rainfall | total_blocks
 -----------+-----------+--------------+-------------
  2021-2022 |    182.60 |      550.00  |         153
- 2022-2023 |    183.66 |      575.00  |         153
  2023-2024 |    179.79 |      600.00  |         153
  2024-2025 |    179.15 |      620.00  |         153
 ```
@@ -238,7 +237,7 @@ ORDER BY a.year, a.category;
 - [ ] Test category filters use correct values (lowercase, underscores)
 - [ ] Test state name matching uses UPPER() function
 - [ ] Test block/district matching uses LOWER() and ILIKE
-- [ ] Verify Punjab shows 4 years: 2021-2022, 2022-2023, 2023-2024, 2024-2025
+- [ ] Verify Punjab shows 3 recent years: 2021-2022, 2023-2024, 2024-2025
 - [ ] Verify West Bengal shows 6 years of data
 - [ ] Test extraction/recharge breakdown queries
 - [ ] Verify stage calculations exclude salinity (-100000) values

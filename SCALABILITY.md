@@ -80,12 +80,12 @@ Assessments_Summary (fact table - ~21,000 rows)
 ```
 States:        30 records
 Districts:     ~700 records
-Blocks:        ~7,000 records
-Assessments:   ~21,000 records (3 years × ~7000 blocks)
-Breakdown:     ~210,000 records (10× assessments)
+Blocks:        ~6,750 records
+Assessments:   ~21,000 records (6 years, varying coverage)
+Breakdown:     ~150,000 records (7-8× assessments)
 
-Total:         ~238,000 rows
-Size:          ~50-100 MB (easily fits in memory)
+Total:         ~178,000 rows
+Size:          ~80-120 MB (easily fits in memory)
 ```
 
 ### Query Performance Optimizations

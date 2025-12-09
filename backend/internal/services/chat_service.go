@@ -1192,16 +1192,16 @@ func (s *ChatService) buildNoDataFoundMessage(query string) string {
 	}
 	
 	sb.WriteString("**📊 Available Data Coverage:**\n")
-	sb.WriteString("- **Years:** 2012-2013, 2016-2017, 2019-2020, 2021-2022, 2023-2024, 2024-2025\n")
-	sb.WriteString("- **Locations:** 38 States, 590+ Districts, 6750+ Blocks\n")
-	sb.WriteString("- **Total Assessments:** 21,063 groundwater assessments\n\n")
+	sb.WriteString("- **Years:** 2023-2024, 2024-2025\n")
+	sb.WriteString("- **Locations:** 38 States, 590+ Districts, 6746+ Blocks\n")
+	sb.WriteString("- **Total Assessments:** 13,492 groundwater assessments\n\n")
 	
 	sb.WriteString("**💡 Try asking:**\n")
-	sb.WriteString("- \"Show me groundwater data for [district name]\"\n")
-	sb.WriteString("- \"Compare [district A] and [district B]\"\n")
-	sb.WriteString("- \"High groundwater extraction areas\"\n")
-	sb.WriteString("- \"Rainfall patterns in [state name]\"\n")
-	sb.WriteString("- \"Irrigation water usage in [district name]\"\n")
+	sb.WriteString("- \"Punjab groundwater status\"\n")
+	sb.WriteString("- \"Critical blocks in Punjab\"\n")
+	sb.WriteString("- \"Compare Haryana and Rajasthan\"\n")
+	sb.WriteString("- \"Show districts in Punjab\"\n")
+	sb.WriteString("- \"Ludhiana district overview\"\n")
 	
 	return sb.String()
 }
@@ -2210,6 +2210,14 @@ func (s *ChatService) compareStates(ctx context.Context, states []*models.State,
 		},
 	}
 
+	// Add follow-up suggestions
+	r.Suggestions = []string{
+		fmt.Sprintf("%s groundwater status", names[0]),
+		fmt.Sprintf("%s groundwater status", names[1]),
+		fmt.Sprintf("Critical blocks in %s", names[worstIdx]),
+		fmt.Sprintf("Show districts in %s", names[0]),
+	}
+
 	return r, nil
 }
 
@@ -2334,7 +2342,16 @@ func (s *ChatService) compareDistricts(ctx context.Context, districts []*models.
 		}
 	}
 	
+	
 	fmt.Printf("└─ 📤 Sending response to frontend...\n\n")
+
+	// Add follow-up suggestions
+	r.Suggestions = []string{
+		fmt.Sprintf("%s district overview", names[0]),
+		fmt.Sprintf("%s district overview", names[1]),
+		fmt.Sprintf("Show blocks in %s", names[worstIdx]),
+		fmt.Sprintf("Critical blocks in %s", names[worstIdx]),
+	}
 
 	return r, nil
 }

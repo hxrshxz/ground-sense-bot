@@ -24,8 +24,8 @@ export const TextGenerateEffect = ({
         "span",
         { opacity: 1 },
         {
-          duration: 0.5, // Adjust duration of each word animation
-          delay: stagger(0.1), // Adjust delay between words
+          duration: 0.2, // Faster duration
+          delay: stagger(0.01), // Much faster delay between words
         }
       );
       // --- FIX: Call the callback when animation is done ---

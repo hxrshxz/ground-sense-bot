@@ -125,7 +125,7 @@ func (s *ChatService) ProcessMessageDirect(ctx context.Context, message string, 
 		if msgLower == g || strings.HasPrefix(msgLower, g+" ") {
 			fmt.Println("├─ 👋 Greeting detected - skipping SQL")
 			return &models.ChatResponse{
-				Text: "👋 Hello! I'm the **INGRES Groundwater Assistant**.\n\nI can help you with groundwater data for any state, district, or block in India.\n\n**Try asking:**\n- \"Show data for Punjab\"\n- \"Compare Tamil Nadu and Haryana\"\n- \"Blocks in Ludhiana district\"\n- \"Give me a graph of extraction in Rajasthan\"\n\n💡 *Tip: Add 'graph' to your query to see a visualization!*",
+				Text: "👋 Hello! I'm the **INGRES Groundwater Assistant**.\n\nI can help you with groundwater data for any state, district, or block in India.\n\nJust type your question about groundwater levels, extraction, recharge, or any location you want to know about!\n\n💡 *Tip: Add 'graph' to your query to see a visualization!*",
 			}, nil
 		}
 	}
@@ -166,9 +166,27 @@ func (s *ChatService) ProcessMessageDirect(ctx context.Context, message string, 
 		if strings.Contains(msgLower, h) {
 			fmt.Println("├─ ❓ Help request detected - skipping SQL")
 			return &models.ChatResponse{
-				Text: "📚 **INGRES Groundwater Assistant - Help**\n\n**I can answer questions about:**\n• Groundwater status of any Indian state, district, or block\n• Extraction & recharge data\n• Category distribution (safe/critical/over-exploited)\n• Comparisons between locations\n\n**Example queries:**\n1. \"Show data for Punjab\" - Get state summary\n2. \"Compare Punjab vs Haryana\" - Side-by-side comparison\n3. \"Blocks in Ludhiana\" - List blocks in a district\n4. \"Districts in Rajasthan\" - List districts with stats\n5. \"Graph of extraction in...\" - Get visualization\n\n**Units used:**\n• (ham) = Hectare-meters (water volume)\n• (%) = Percentage\n\n💡 *Add 'graph' or 'chart' to any query for visualization!*",
+				Text: "📚 **INGRES Groundwater Assistant - Help**\n\n**I can answer questions about:**\n• Groundwater status of any Indian state, district, or block\n• Extraction & recharge data\n• Category distribution (safe/critical/over-exploited)\n• Comparisons between locations\n\n**Units used:**\n• (ham) = Hectare-meters (water volume)\n• (%) = Percentage\n\n💡 *Add 'graph' or 'chart' to any query for visualization!*",
 			}, nil
 		}
+	}
+	
+	// Pattern 5: Check if query is about groundwater/water/India locations
+	// If not, return off-topic response
+	// Pattern 5: Check if query is about groundwater/water/India locations
+	// If not, return off-topic response
+	isGroundwaterRelated := s.isGroundwaterQuery(msgLower)
+	if !isGroundwaterRelated {
+		fmt.Println("├─ ⚠️ Off-topic query detected - skipping SQL")
+		return &models.ChatResponse{
+			Text: "🤔 I'm specialized in **Indian groundwater data** only.\n\nI can help you with:\n• Groundwater levels for any Indian state, district, or block\n• Extraction and recharge information\n• Water stress categories and comparisons\n\nPlease ask me something about groundwater in India!",
+		}, nil
+	}
+	
+	// Pattern 6: Clarification check for ambiguous queries
+	if clarification := s.needsClarification(msgLower); clarification != nil {
+		fmt.Println("├─ ❓ Ambiguous query - asking for clarification")
+		return clarification, nil
 	}
 	
 	// Detect if user wants a graph/chart
@@ -270,39 +288,68 @@ func (s *ChatService) ProcessMessageDirect(ctx context.Context, message string, 
 func (s *ChatService) generateFollowUpSuggestions(query string, results []map[string]interface{}) string {
 	queryLower := strings.ToLower(query)
 	
-	// Extract location from results if available
+	// Extract location from results or query
 	location := ""
 	if len(results) > 0 {
+		// Try to find location in results first
 		if stateName, ok := results[0]["state_name"].(string); ok {
 			location = stateName
 		} else if distName, ok := results[0]["district_name"].(string); ok {
 			location = distName
+		} else if blockName, ok := results[0]["block_name"].(string); ok {
+			// If result is a block, try to find district/state
+			if d, ok := results[0]["district_name"].(string); ok {
+				location = d
+			} else {
+				location = blockName
+			}
 		}
 	}
 	
+	// If location not in results, try to extract from query
+	if location == "" {
+		if strings.Contains(queryLower, " in ") {
+			parts := strings.Split(queryLower, " in ")
+			if len(parts) > 1 {
+				location = strings.TrimSpace(parts[1])
+				// Clean up year if present
+				if idx := strings.Index(location, " 20"); idx > 0 {
+					location = strings.TrimSpace(location[:idx])
+				}
+			}
+		}
+	}
+	
+	location = strings.Title(location)
 	var suggestions []string
 	
 	// Based on query type, suggest relevant follow-ups
 	if strings.Contains(queryLower, "compare") || strings.Contains(queryLower, " vs ") {
 		suggestions = []string{
 			"📊 \"Show graph of this comparison\"",
-			"🔍 \"Blocks in [state name]\" for detailed breakdown",
-			"📈 \"Districts in [state name]\" for district-level data",
+			"🔍 \"Blocks in " + location + "\" for detailed breakdown",
+			"📈 \"Comparison of districts in " + location + "\"",
 		}
-	} else if strings.Contains(queryLower, "blocks in") || strings.Contains(queryLower, "blocks of") {
+	} else if strings.Contains(queryLower, "blocks") || strings.Contains(queryLower, "list") {
 		if location != "" {
 			suggestions = []string{
-				fmt.Sprintf("📊 \"Graph of blocks in %s\"", location),
-				fmt.Sprintf("📈 \"Compare %s with another state\"", location),
-				"🔍 \"Show over-exploited blocks\" for critical areas",
+				fmt.Sprintf("📊 \"Graph of extraction in %s\"", location),
+				fmt.Sprintf("📈 \"Compare %s vs [another state]\"", location),
+				"🔍 \"Show mostly critical blocks\"",
 			}
-		}
-	} else if strings.Contains(queryLower, "districts in") || strings.Contains(queryLower, "districts of") {
+		} else {
+             suggestions = []string{
+				"📊 \"Show graph of these blocks\"",
+				"📈 \"Compare extraction vs recharge\"",
+				"🔍 \"Details of first block\"",
+			}
+        }
+	} else if strings.Contains(queryLower, "districts") {
 		if location != "" {
 			suggestions = []string{
 				fmt.Sprintf("📊 \"Graph of districts in %s\"", location),
-				fmt.Sprintf("🔍 \"Blocks in [district name]\" for block-level data"),
-				fmt.Sprintf("📈 \"Compare %s with another state\"", location),
+				fmt.Sprintf("🔍 \"Show blocks in %s\"", location),
+				fmt.Sprintf("📈 \"Trend analysis of %s\"", location),
 			}
 		}
 	} else if strings.Contains(queryLower, "status") || strings.Contains(queryLower, "show") || strings.Contains(queryLower, "data for") {
@@ -312,18 +359,24 @@ func (s *ChatService) generateFollowUpSuggestions(query string, results []map[st
 				fmt.Sprintf("🔍 \"Districts in %s\"", location),
 				fmt.Sprintf("📈 \"Compare %s vs [another state]\"", location),
 			}
-		}
+		} else {
+            suggestions = []string{
+				"📊 \"Graph of this data\"",
+				"🔍 \"Show more details\"",
+				"📈 \"Compare with other locations\"",
+			}
+        }
 	} else {
 		// Default suggestions
 		suggestions = []string{
-			"📊 Add 'graph' to see visualization",
-			"🔍 Try \"blocks in [location]\" for details",
-			"📈 Try \"compare [A] vs [B]\" for comparison",
+			"📊 \"Show graph for this\"",
+			"🔍 \"List critical blocks here\"",
+			"📈 \"Compare extraction vs recharge\"",
 		}
 	}
 	
 	if len(suggestions) > 0 {
-		return "💡 **What would you like to explore next?**\n" + strings.Join(suggestions, "\n")
+		return "💡 **Suggested Follow-us:**\n" + strings.Join(suggestions, "\n")
 	}
 	return ""
 }
@@ -481,6 +534,154 @@ func (s *ChatService) buildSimpleChartFromResults(results []map[string]interface
 	}
 }
 
+// isGroundwaterQuery checks if a query is related to groundwater/water/India locations
+// Returns true if the query seems to be about groundwater topics
+func (s *ChatService) isGroundwaterQuery(query string) bool {
+	queryLower := strings.ToLower(query)
+	
+	// STRONG keywords - if any of these are present, definitely groundwater related
+	strongKeywords := []string{
+		// Water-specific terms
+		"groundwater", "ground water", "ground watere", "aquifer", "borewell", "bore well",
+		"extraction", "recharge", "extractable", "ground",
+		"over-exploited", "overexploited", "semi-critical",
+		"blocks", "districts", "block", "district",
+		
+		// All Indian state names
+		"punjab", "haryana", "rajasthan", "gujarat", "maharashtra",
+		"karnataka", "kerala", "odisha", "jharkhand", "chhattisgarh",
+		"uttarakhand", "himachal", "meghalaya", "tripura", "sikkim",
+		"bihar", "assam", "manipur", "mizoram", "nagaland", "arunachal",
+		"telangana", "andhra", "tamil", "bengal", "goa",
+		"madhya pradesh", "uttar pradesh",
+		
+		// Major cities/districts
+		"ludhiana", "amritsar", "jaipur", "chandigarh", "kurukshetra",
+		"bhopal", "lucknow", "patna", "mumbai", "chennai", "kolkata",
+		"hyderabad", "bangalore", "ahmedabad", "indore", "nagpur",
+		"ramgarh", "ranchi", "dhanbad", "raipur", "guwahati",
+	}
+	
+	for _, keyword := range strongKeywords {
+		if strings.Contains(queryLower, keyword) {
+			return true
+		}
+	}
+	
+	// Check for combined patterns that indicate groundwater context
+	// e.g., "water level", "water status", "water in", "data for"
+	waterPatterns := []string{
+		"water level", "water status", "water data", "water in ",
+		"data for ", "status of ", "show data",
+		"compare ", " vs ",
+	}
+	
+	for _, pattern := range waterPatterns {
+		if strings.Contains(queryLower, pattern) {
+			return true
+		}
+	}
+	
+	// If query mentions "water" along with location prepositions, it's likely groundwater
+	if strings.Contains(queryLower, "water") {
+		if strings.Contains(queryLower, " in ") || strings.Contains(queryLower, " of ") || strings.Contains(queryLower, " for ") {
+			return true
+		}
+	}
+	
+	// Otherwise, it's NOT a groundwater query
+	return false
+}
+
+// needsClarification checks if the query is too ambiguous and returns a clarification response
+// Returns nil if query is clear enough to proceed to SQL generation
+func (s *ChatService) needsClarification(query string) *models.ChatResponse {
+	queryLower := strings.ToLower(query)
+	words := strings.Fields(queryLower)
+	
+	// Case 1: "Compare" without targets
+	// e.g. "compare", "compare data", "comparison"
+	if strings.Contains(queryLower, "compare") || strings.Contains(queryLower, "comparison") {
+		// If it doesn't contain "vs", "and", "between" or is very short
+		if (!strings.Contains(queryLower, " vs ") && 
+		    !strings.Contains(queryLower, " and ") && 
+		    !strings.Contains(queryLower, " between ")) || len(words) <= 2 {
+			return &models.ChatResponse{
+				Text: "I can compare groundwater data for you! 📊\n\nPlease tell me **which two locations** you'd like to compare.\n\nExample:\n• *\"Compare Punjab and Haryana\"*\n• *\"Ludhiana vs Amritsar\"*",
+				Suggestions: []string{"Compare Punjab vs Haryana", "Compare Jaipur vs Jodhpur"},
+			}
+		}
+	}
+
+	// Case 2: Vague "Show data" or "status" without location
+	// Check if any location keyword is present
+	hasLocation := false
+	
+	// Check explicit location keywords from our list
+	locationKeywords := []string{
+		"punjab", "haryana", "rajasthan", "gujarat", "maharashtra",
+		"karnataka", "kerala", "odisha", "jharkhand", "chhattisgarh",
+		"uttarakhand", "himachal", "meghalaya", "tripura", "sikkim",
+		"bihar", "assam", "manipur", "mizoram", "nagaland", "arunachal",
+		"telangana", "andhra", "tamil", "bengal", "goa",
+		"madhya pradesh", "uttar pradesh",
+		"ludhiana", "amritsar", "jaipur", "chandigarh", "kurukshetra",
+		"bhopal", "lucknow", "patna", "mumbai", "chennai", "kolkata",
+		"hyderabad", "bangalore", "ahmedabad", "indore", "nagpur",
+		"ramgarh", "ranchi", "dhanbad", "raipur", "guwahati",
+		"delhi",
+		// Generic location indicators
+		"district", "state", "block", "region", "area", "india",
+	}
+	
+	for _, loc := range locationKeywords {
+		if strings.Contains(queryLower, loc) {
+			hasLocation = true
+			break
+		}
+	}
+	
+	// Also check for "in [something]" or "of [something]" pattern
+	if !hasLocation {
+		if strings.Contains(queryLower, " in ") || strings.Contains(queryLower, " of ") || strings.Contains(queryLower, " for ") {
+			hasLocation = true
+		}
+	}
+
+	// If no location found and query is vague/short
+	if !hasLocation {
+		// Vague phrases
+		vaguePhrases := []string{
+			"show data", "show me data", "give me data", 
+			"groundwater status", "water level", "water status",
+			"tell me about groundwater", "extraction rate",
+			"what is the status", "how is the water",
+		}
+		
+		isVague := false
+		for _, phrase := range vaguePhrases {
+			if strings.Contains(queryLower, phrase) && len(words) < 6 {
+				isVague = true
+				break
+			}
+		}
+		
+		// Or just very short queries that passed isGroundwaterQuery (like "groundwater", "extraction")
+		if len(words) <= 2 {
+			isVague = true
+		}
+		
+		if isVague {
+			return &models.ChatResponse{
+				Text: "I'd be happy to help! 🌊\n\nCould you please specify **which location** you're interested in?\n\nYou can ask about a **State**, **District**, or **Block**.",
+				Suggestions: []string{"Data for Punjab", "Status of Ludhiana", "Show all states"},
+			}
+		}
+	}
+	
+	return nil
+}
+
 // getFallbackSQL returns a predefined SQL template based on query patterns
 // Used as fallback when Qwen-generated SQL fails
 func (s *ChatService) getFallbackSQL(message string) string {
@@ -583,10 +784,10 @@ func (s *ChatService) getFallbackSQL(message string) string {
 			fmt.Printf("├─ 📋 Using blocks template for: %s\n", location)
 			return fmt.Sprintf(`
 				SELECT b.block_name, d.district_name, s.state_name,
-				       ROUND(a.stage::numeric, 2) as "stage(%%)", 
+				       a.stage as "stage(%%)", 
 				       a.category,
-				       ROUND(a.total_extractable::numeric, 2) as "extractable(ham)",
-				       ROUND(a.total_extraction::numeric, 2) as "extraction(ham)"
+				       a.total_extractable as "extractable(ham)",
+				       a.total_extraction as "extraction(ham)"
 				FROM assessments_summary a
 				JOIN blocks b ON a.block_uuid = b.block_uuid
 				JOIN districts d ON b.district_uuid = d.district_uuid
@@ -615,8 +816,8 @@ func (s *ChatService) getFallbackSQL(message string) string {
 			return fmt.Sprintf(`
 				SELECT d.district_name, s.state_name,
 				       COUNT(*) as total_blocks,
-				       ROUND(AVG(CASE WHEN a.stage > 0 THEN a.stage END)::numeric, 2) as "avg_stage(%%)",
-				       ROUND(SUM(a.total_extraction)::numeric, 2) as "extraction(ham)"
+				       AVG(CASE WHEN a.stage > 0 THEN a.stage END) as "avg_stage(%%)",
+				       SUM(a.total_extraction) as "extraction(ham)"
 				FROM assessments_summary a
 				JOIN blocks b ON a.block_uuid = b.block_uuid
 				JOIN districts d ON b.district_uuid = d.district_uuid
@@ -629,6 +830,46 @@ func (s *ChatService) getFallbackSQL(message string) string {
 		}
 	}
 	
+	// Pattern 5: General "in [location]" - Search by district or state
+	// Catches queries like "extractable water in kurukshetra"
+	if strings.Contains(msgLower, " in ") {
+		// Extract location after "in"
+		location := ""
+		if idx := strings.LastIndex(msgLower, " in "); idx >= 0 {
+			location = strings.TrimSpace(msgLower[idx+4:])
+			// Clean up common suffixes
+			location = strings.TrimSuffix(location, " district")
+			location = strings.TrimSuffix(location, " state")
+			location = strings.TrimSuffix(location, "?")
+		}
+		
+		if location != "" && len(location) > 2 {
+			fmt.Printf("├─ 📋 Using general location template for: %s\n", location)
+			// Search both state and district
+			return fmt.Sprintf(`
+				SELECT 
+				       COALESCE(d.district_name, 'All Districts') as district_name,
+				       s.state_name,
+				       COUNT(*) as total_blocks,
+				       AVG(CASE WHEN a.stage > 0 THEN a.stage END) as "avg_stage(%%)",
+				       SUM(a.total_extractable) as "extractable(ham)",
+				       SUM(a.total_extraction) as "extraction(ham)",
+				       SUM(CASE WHEN a.category = 'safe' THEN 1 ELSE 0 END) as safe,
+				       SUM(CASE WHEN a.category = 'over_exploited' THEN 1 ELSE 0 END) as overexploited
+				FROM assessments_summary a
+				JOIN blocks b ON a.block_uuid = b.block_uuid
+				JOIN districts d ON b.district_uuid = d.district_uuid
+				JOIN states s ON b.state_uuid = s.state_uuid
+				WHERE (UPPER(REPLACE(d.district_name, ' ', '')) LIKE UPPER('%%' || REPLACE('%s', ' ', '') || '%%')
+				       OR UPPER(REPLACE(s.state_name, ' ', '')) LIKE UPPER('%%' || REPLACE('%s', ' ', '') || '%%'))
+				AND a.year = '2024-2025'
+				GROUP BY d.district_name, s.state_name
+				ORDER BY "extractable(ham)" DESC
+				LIMIT 20
+			`, location, location)
+		}
+	}
+	
 	// No matching pattern
 	return ""
 }
@@ -636,12 +877,19 @@ func (s *ChatService) getFallbackSQL(message string) string {
 // formatNumberWithCommas formats a float64 with comma separators (Indian style: 9,30,116.00)
 func formatNumberWithCommas(n float64) string {
 	// Format with 2 decimal places first
+	// Format with up to 2 decimal places, but don't force .00 if integer
 	str := fmt.Sprintf("%.2f", n)
+	if strings.HasSuffix(str, ".00") {
+		str = strings.TrimSuffix(str, ".00")
+	}
 	
 	// Split integer and decimal parts
 	parts := strings.Split(str, ".")
 	intPart := parts[0]
-	decPart := parts[1]
+	decPart := ""
+	if len(parts) > 1 {
+		decPart = parts[1]
+	}
 	
 	// Add comma separators to integer part (Indian numbering: 12,34,567)
 	var result strings.Builder
@@ -666,7 +914,10 @@ func formatNumberWithCommas(n float64) string {
 		result.WriteByte(intPart[i])
 	}
 	
-	return result.String() + "." + decPart
+	if decPart != "" {
+		return result.String() + "." + decPart
+	}
+	return result.String()
 }
 
 // formatResultsAsTable formats query results as markdown table
@@ -676,7 +927,8 @@ func (s *ChatService) formatResultsAsTable(results []map[string]interface{}, que
 	}
 	
 	var builder strings.Builder
-	builder.WriteString(fmt.Sprintf("📊 **Query Results** (%d rows)\n\n", len(results)))
+	// Removed redundant "Query Results" title as per UI feedback
+	// builder.WriteString(fmt.Sprintf("📊 **Query Results** (%d rows)\n\n", len(results)))
 	
 	// Get column headers from first row
 	headers := make([]string, 0)

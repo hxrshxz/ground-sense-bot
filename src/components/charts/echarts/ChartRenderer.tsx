@@ -267,13 +267,11 @@ const ChartRenderer: React.FC<ChartRendererProps> = ({
 
   return (
     <div
-      className="w-full rounded-2xl overflow-hidden relative"
+      className="w-full rounded-xl overflow-hidden relative"
       style={{
-        background:
-          "linear-gradient(145deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.92) 100%)",
-        boxShadow:
-          "0 20px 40px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08)",
-        backdropFilter: "blur(16px)",
+        background: "#FFFFFF",
+        boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05)",
+        border: "1px solid #E5E5E5",
       }}
     >
       <ReactECharts
@@ -352,164 +350,117 @@ const createGradientAreaChart = (
   title: string,
   series: SeriesData[],
   xAxis: { data: string[]; name?: string }
-) => ({
-  backgroundColor: "transparent",
-  color: ["#80FFA5", "#00DDFF", "#37A2FF", "#FF0087", "#FFBF00"],
-  title: {
-    text: title,
-    left: "center",
-    top: 10,
-    textStyle: {
-      color: "#ffffff",
-      fontSize: 22,
-      fontWeight: 700,
-      textShadowColor: "rgba(0, 0, 0, 0.5)",
-      textShadowBlur: 10,
-      textShadowOffsetX: 2,
-      textShadowOffsetY: 2,
-    },
-  },
-  tooltip: {
-    trigger: "axis",
-    axisPointer: {
-      type: "cross",
-      lineStyle: {
-        color: "rgba(138, 43, 226, 0.6)",
-        width: 2,
-        type: "dashed",
-      },
-      crossStyle: {
-        color: "rgba(138, 43, 226, 0.6)",
-      },
-      label: {
-        backgroundColor: "rgba(99, 102, 241, 0.9)",
-        borderColor: "rgba(138, 43, 226, 0.8)",
-        borderWidth: 2,
-        color: "#fff",
+) => {
+  // Neutral color palette - professional grays and muted blues
+  const neutralColors = ["#0055A4", "#6B7280", "#9CA3AF", "#D1D5DB", "#374151"];
+
+  return {
+    backgroundColor: "transparent",
+    color: neutralColors,
+    title: {
+      text: title,
+      left: "center",
+      top: 10,
+      textStyle: {
+        color: "#333333",
+        fontSize: 16,
         fontWeight: 600,
       },
     },
-    backgroundColor: "rgba(10, 15, 30, 0.98)",
-    borderColor: "rgba(138, 43, 226, 0.6)",
-    borderWidth: 2,
-    textStyle: { color: "#ffffff", fontSize: 13 },
-    padding: 12,
-    extraCssText: "box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);",
-  },
-  legend: {
-    data: series.map((s) => s.name),
-    bottom: 5,
-    textStyle: { color: "rgba(255, 255, 255, 0.8)", fontSize: 11 },
-  },
-  toolbox: {
-    feature: {
-      saveAsImage: {
-        iconStyle: { borderColor: "rgba(255,255,255,0.5)" },
-      },
-    },
-    right: 20,
-    top: 10,
-  },
-  grid: {
-    left: "3%",
-    right: "4%",
-    bottom: "15%",
-    top: "15%",
-    containLabel: true,
-  },
-  xAxis: [
-    {
-      type: "category",
-      boundaryGap: false,
-      data: xAxis.data,
-      axisLine: { lineStyle: { color: "rgba(255, 255, 255, 0.2)" } },
-      axisLabel: { color: "rgba(255, 255, 255, 0.7)", fontSize: 11 },
-    },
-  ],
-  yAxis: [
-    {
-      type: "value",
-      axisLine: { lineStyle: { color: "rgba(255, 255, 255, 0.2)" } },
-      axisLabel: { color: "rgba(255, 255, 255, 0.7)", fontSize: 11 },
-      splitLine: { lineStyle: { color: "rgba(255, 255, 255, 0.08)" } },
-    },
-  ],
-  series: series.map((s, idx) => {
-    // Gradient colors exactly from ECharts example
-    const gradientConfigs = [
-      [
-        { offset: 0, color: "rgb(128, 255, 165)" },
-        { offset: 1, color: "rgb(1, 191, 236)" },
-      ],
-      [
-        { offset: 0, color: "rgb(0, 221, 255)" },
-        { offset: 1, color: "rgb(77, 119, 255)" },
-      ],
-      [
-        { offset: 0, color: "rgb(55, 162, 255)" },
-        { offset: 1, color: "rgb(116, 21, 219)" },
-      ],
-      [
-        { offset: 0, color: "rgb(255, 0, 135)" },
-        { offset: 1, color: "rgb(135, 0, 157)" },
-      ],
-      [
-        { offset: 0, color: "rgb(255, 191, 0)" },
-        { offset: 1, color: "rgb(224, 62, 76)" },
-      ],
-    ];
-
-    return {
-      name: s.name,
-      type: "line",
-      stack: "Total",
-      smooth: true,
-      smoothMonotone: "x",
-      lineStyle: {
-        width: 3,
-        shadowColor: gradientConfigs[idx % 5][0].color,
-        shadowBlur: 10,
-        shadowOffsetY: 2,
-      },
-      showSymbol: true,
-      symbol: "circle",
-      symbolSize: 8,
-      itemStyle: {
-        borderColor: "#fff",
-        borderWidth: 2,
-        shadowBlur: 10,
-        shadowColor: gradientConfigs[idx % 5][0].color,
-      },
-      areaStyle: {
-        opacity: 0.85,
-        color: new echarts.graphic.LinearGradient(
-          0,
-          0,
-          0,
-          1,
-          gradientConfigs[idx % 5]
-        ),
-        shadowColor: "rgba(0, 0, 0, 0.3)",
-        shadowBlur: 20,
-      },
-      emphasis: {
-        focus: "series",
+    tooltip: {
+      trigger: "axis",
+      axisPointer: {
+        type: "cross",
         lineStyle: {
-          width: 5,
-          shadowBlur: 20,
+          color: "#9CA3AF",
+          width: 1,
+          type: "dashed",
         },
-        itemStyle: {
-          borderWidth: 3,
-          shadowBlur: 15,
+        crossStyle: {
+          color: "#9CA3AF",
         },
-        scale: true,
+        label: {
+          backgroundColor: "#0055A4",
+          color: "#fff",
+        },
       },
-      animationEasing: "elasticOut",
-      animationDelay: (idx: number) => idx * 10,
-      data: s.data,
-    };
-  }),
-});
+      backgroundColor: "#FFFFFF",
+      borderColor: "#E5E5E5",
+      borderWidth: 1,
+      textStyle: { color: "#333333", fontSize: 12 },
+      padding: 10,
+    },
+    legend: {
+      data: series.map((s) => s.name),
+      bottom: 5,
+      textStyle: { color: "#333333", fontSize: 11 },
+    },
+    toolbox: {
+      feature: {
+        saveAsImage: {
+          iconStyle: { borderColor: "#9CA3AF" },
+        },
+      },
+      right: 20,
+      top: 10,
+    },
+    grid: {
+      left: "3%",
+      right: "4%",
+      bottom: "15%",
+      top: "15%",
+      containLabel: true,
+    },
+    xAxis: [
+      {
+        type: "category",
+        boundaryGap: false,
+        data: xAxis.data,
+        axisLine: { lineStyle: { color: "#E5E5E5" } },
+        axisLabel: { color: "#666666", fontSize: 11 },
+      },
+    ],
+    yAxis: [
+      {
+        type: "value",
+        axisLine: { lineStyle: { color: "#E5E5E5" } },
+        axisLabel: { color: "#666666", fontSize: 11 },
+        splitLine: { lineStyle: { color: "#F3F4F6" } },
+      },
+    ],
+    series: series.map((s, idx) => {
+      const color = neutralColors[idx % neutralColors.length];
+
+      return {
+        name: s.name,
+        type: "line",
+        stack: "Total",
+        smooth: true,
+        smoothMonotone: "x",
+        lineStyle: {
+          width: 2,
+          color: color,
+        },
+        showSymbol: true,
+        symbol: "circle",
+        symbolSize: 6,
+        itemStyle: {
+          color: color,
+          borderColor: "#fff",
+          borderWidth: 1,
+        },
+        areaStyle: {
+          opacity: 0.15,
+          color: color,
+        },
+        emphasis: {
+          focus: "series",
+        },
+        data: s.data,
+      };
+    }),
+  };
+};
 
 // ============================================
 // 3️⃣ ROSE PIE CHART (Nightingale - God-Level Graphics)
@@ -519,96 +470,16 @@ const createRosePieChart = (
   title: string,
   pieData: { name: string; value: number }[]
 ) => {
-  // Stunning gradient color palette with depth
-  const roseColors = [
-    {
-      type: "linear",
-      x: 0,
-      y: 0,
-      x2: 0,
-      y2: 1,
-      colorStops: [
-        { offset: 0, color: "#667eea" },
-        { offset: 1, color: "#764ba2" },
-      ],
-    },
-    {
-      type: "linear",
-      x: 0,
-      y: 0,
-      x2: 0,
-      y2: 1,
-      colorStops: [
-        { offset: 0, color: "#f093fb" },
-        { offset: 1, color: "#f5576c" },
-      ],
-    },
-    {
-      type: "linear",
-      x: 0,
-      y: 0,
-      x2: 0,
-      y2: 1,
-      colorStops: [
-        { offset: 0, color: "#4facfe" },
-        { offset: 1, color: "#00f2fe" },
-      ],
-    },
-    {
-      type: "linear",
-      x: 0,
-      y: 0,
-      x2: 0,
-      y2: 1,
-      colorStops: [
-        { offset: 0, color: "#43e97b" },
-        { offset: 1, color: "#38f9d7" },
-      ],
-    },
-    {
-      type: "linear",
-      x: 0,
-      y: 0,
-      x2: 0,
-      y2: 1,
-      colorStops: [
-        { offset: 0, color: "#fa709a" },
-        { offset: 1, color: "#fee140" },
-      ],
-    },
-    {
-      type: "linear",
-      x: 0,
-      y: 0,
-      x2: 0,
-      y2: 1,
-      colorStops: [
-        { offset: 0, color: "#30cfd0" },
-        { offset: 1, color: "#330867" },
-      ],
-    },
-    {
-      type: "linear",
-      x: 0,
-      y: 0,
-      x2: 0,
-      y2: 1,
-      colorStops: [
-        { offset: 0, color: "#a8edea" },
-        { offset: 1, color: "#fed6e3" },
-      ],
-    },
-    {
-      type: "linear",
-      x: 0,
-      y: 0,
-      x2: 0,
-      y2: 1,
-      colorStops: [
-        { offset: 0, color: "#ff9a56" },
-        { offset: 1, color: "#ff6a88" },
-      ],
-    },
+  // Neutral solid colors - professional palette
+  const neutralColors = [
+    "#0055A4", // Deep Blue
+    "#6B7280", // Gray
+    "#9CA3AF", // Light Gray
+    "#4B5563", // Dark Gray
+    "#374151", // Charcoal
+    "#D1D5DB", // Silver
+    "#1F2937", // Near Black
+    "#E5E7EB", // Light Silver
   ];
 
   return {
@@ -617,115 +488,87 @@ const createRosePieChart = (
       left: "center",
       top: 20,
       textStyle: {
-        color: "#ffffff",
-        fontSize: 24,
-        fontWeight: "700",
-        textShadowColor: "rgba(0, 0, 0, 0.5)",
-        textShadowBlur: 10,
-        textShadowOffsetX: 2,
-        textShadowOffsetY: 2,
+        color: "#333333",
+        fontSize: 16,
+        fontWeight: "600",
       },
     },
     legend: {
-      show: false, // Hide legend for cleaner look with many items
+      show: false,
     },
     tooltip: {
       trigger: "item",
-      backgroundColor: "rgba(10, 15, 30, 0.98)",
-      borderColor: "rgba(138, 43, 226, 0.5)",
-      borderWidth: 2,
+      backgroundColor: "#FFFFFF",
+      borderColor: "#E5E5E5",
+      borderWidth: 1,
       textStyle: {
-        color: "#ffffff",
-        fontSize: 14,
+        color: "#333333",
+        fontSize: 12,
       },
       formatter: (params: AnyData) => {
-        return `<div style="padding: 8px;">
-                  <div style="font-weight: 700; font-size: 16px; margin-bottom: 8px; color: #667eea;">📍 ${
-                    params.name
-                  }</div>
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);"></span>
-                    <span style="font-size: 15px;">🏘️ Blocks: <strong style="color: #43e97b;">${Math.round(
-                      params.value
-                    )}</strong></span>
-                  </div>
+        return `<div style="padding: 6px;">
+                  <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px; color: #333333;">${params.name}</div>
+                  <div style="font-size: 13px;">Blocks: <strong>${Math.round(params.value)}</strong></div>
                 </div>`;
       },
     },
     series: [
       {
-        name: title || "Nightingale Chart",
+        name: title || "Distribution Chart",
         type: "pie",
-        radius: [80, 240],
+        radius: [60, 180],
         center: ["50%", "52%"],
         roseType: "area",
         itemStyle: {
-          borderRadius: 12,
-          borderColor: "rgba(255, 255, 255, 0.2)",
-          borderWidth: 3,
-          shadowBlur: 25,
-          shadowColor: "rgba(0, 0, 0, 0.4)",
-          shadowOffsetX: 0,
-          shadowOffsetY: 5,
+          borderRadius: 4,
+          borderColor: "#FFFFFF",
+          borderWidth: 2,
         },
         label: {
           show: true,
-          color: "#ffffff",
-          fontSize: 13,
-          fontWeight: "600",
-          textShadowColor: "rgba(0, 0, 0, 0.8)",
-          textShadowBlur: 4,
+          color: "#333333",
+          fontSize: 11,
+          fontWeight: "500",
           formatter: (params: AnyData) => {
-            // Show top 8 labels to avoid clutter
             if (params.dataIndex < 8) {
-              return `${params.name}\n${Math.round(params.value)} blocks`;
+              return `${params.name}\n${Math.round(params.value)}`;
             }
             return "";
           },
           position: "outside",
           alignTo: "edge",
-          margin: 20,
+          margin: 15,
         },
         labelLine: {
           show: true,
-          length: 30,
-          length2: 20,
+          length: 20,
+          length2: 15,
           lineStyle: {
-            color: "rgba(255, 255, 255, 0.3)",
-            width: 2,
+            color: "#9CA3AF",
+            width: 1,
           },
         },
         emphasis: {
           label: {
             show: true,
-            fontSize: 16,
+            fontSize: 13,
             fontWeight: "bold",
-            color: "#ffffff",
+            color: "#333333",
           },
           itemStyle: {
-            shadowBlur: 40,
-            shadowColor: "rgba(138, 43, 226, 0.8)",
-            borderWidth: 4,
-            borderColor: "rgba(255, 255, 255, 0.5)",
+            shadowBlur: 8,
+            shadowColor: "rgba(0, 0, 0, 0.2)",
           },
-          scale: true,
-          scaleSize: 15,
         },
         animationType: "scale",
-        animationEasing: "elasticOut",
-        animationDelay: (idx: number) => idx * 50,
+        animationEasing: "cubicOut",
         data: pieData.map((item, index) => ({
           name: item.name,
           value: item.value,
-          // Preserve UUIDs for clickable navigation
           blockUuid: item.blockUuid,
           districtUuid: item.districtUuid,
           itemStyle: {
-            color: roseColors[index % roseColors.length],
-            borderColor: "rgba(255, 255, 255, 0.3)",
-            borderWidth: 3,
-            shadowBlur: 20,
-            shadowColor: "rgba(0, 0, 0, 0.3)",
+            color: neutralColors[index % neutralColors.length],
           },
         })),
       },
@@ -746,6 +589,9 @@ const createTimelineBarChart = (chart: ChartData) => {
     return createBrushBarChart(title, series, xAxis);
   }
 
+  // Neutral color palette
+  const neutralColors = ["#0055A4", "#6B7280", "#9CA3AF", "#374151", "#4B5563"];
+
   return {
     baseOption: {
       backgroundColor: "transparent",
@@ -756,47 +602,40 @@ const createTimelineBarChart = (chart: ChartData) => {
         data: timeline.data,
         bottom: 10,
         label: {
-          color: "rgba(255, 255, 255, 0.9)",
-          fontSize: 12,
-          fontWeight: 600,
+          color: "#333333",
+          fontSize: 11,
+          fontWeight: 500,
         },
         lineStyle: {
-          color: "rgba(138, 43, 226, 0.5)",
-          width: 2,
+          color: "#E5E5E5",
+          width: 1,
         },
         itemStyle: {
-          color: "rgba(138, 43, 226, 0.3)",
-          borderColor: "rgba(138, 43, 226, 0.8)",
-          borderWidth: 2,
+          color: "#E5E5E5",
+          borderColor: "#9CA3AF",
+          borderWidth: 1,
         },
         controlStyle: {
-          color: "#667eea",
-          borderColor: "#667eea",
-          borderWidth: 2,
-          shadowBlur: 10,
-          shadowColor: "rgba(102, 126, 234, 0.5)",
+          color: "#0055A4",
+          borderColor: "#0055A4",
+          borderWidth: 1,
         },
         emphasis: {
           controlStyle: {
-            color: "#f093fb",
-            borderColor: "#f093fb",
-            shadowBlur: 15,
-            shadowColor: "rgba(240, 147, 251, 0.8)",
+            color: "#004488",
+            borderColor: "#004488",
           },
           itemStyle: {
-            color: "rgba(138, 43, 226, 0.6)",
-            borderColor: "rgba(240, 116, 245, 1)",
-            shadowBlur: 10,
+            color: "#D1D5DB",
+            borderColor: "#0055A4",
           },
         },
         checkpointStyle: {
-          color: "#667eea",
-          borderColor: "#f093fb",
-          borderWidth: 3,
-          shadowBlur: 15,
-          shadowColor: "rgba(102, 126, 234, 0.8)",
+          color: "#0055A4",
+          borderColor: "#0055A4",
+          borderWidth: 2,
           animation: true,
-          animationDuration: 300,
+          animationDuration: 200,
         },
       },
       title: {
@@ -804,28 +643,23 @@ const createTimelineBarChart = (chart: ChartData) => {
         left: "center",
         top: 10,
         textStyle: {
-          color: "#ffffff",
-          fontSize: 22,
-          fontWeight: 700,
-          textShadowColor: "rgba(0, 0, 0, 0.5)",
-          textShadowBlur: 10,
-          textShadowOffsetX: 2,
-          textShadowOffsetY: 2,
+          color: "#333333",
+          fontSize: 16,
+          fontWeight: 600,
         },
       },
       tooltip: {
         trigger: "axis",
-        backgroundColor: "rgba(10, 15, 30, 0.98)",
-        borderColor: "rgba(138, 43, 226, 0.6)",
-        borderWidth: 2,
-        textStyle: { color: "#ffffff", fontSize: 13 },
-        padding: 12,
-        extraCssText: "box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);",
+        backgroundColor: "#FFFFFF",
+        borderColor: "#E5E5E5",
+        borderWidth: 1,
+        textStyle: { color: "#333333", fontSize: 12 },
+        padding: 10,
       },
       legend: {
         left: "right",
         top: 40,
-        textStyle: { color: "rgba(255, 255, 255, 0.8)", fontSize: 11 },
+        textStyle: { color: "#333333", fontSize: 11 },
       },
       grid: {
         top: 80,
@@ -838,45 +672,28 @@ const createTimelineBarChart = (chart: ChartData) => {
           type: "category",
           data: xAxis.data,
           axisLabel: {
-            color: "rgba(255, 255, 255, 0.7)",
+            color: "#666666",
             fontSize: 10,
             interval: 0,
             rotate: 30,
           },
-          axisLine: { lineStyle: { color: "rgba(255, 255, 255, 0.2)" } },
+          axisLine: { lineStyle: { color: "#E5E5E5" } },
           splitLine: { show: false },
         },
       ],
       yAxis: [
         {
           type: "value",
-          axisLabel: { color: "rgba(255, 255, 255, 0.7)", fontSize: 11 },
-          axisLine: { lineStyle: { color: "rgba(255, 255, 255, 0.2)" } },
-          splitLine: { lineStyle: { color: "rgba(255, 255, 255, 0.08)" } },
+          axisLabel: { color: "#666666", fontSize: 11 },
+          axisLine: { lineStyle: { color: "#E5E5E5" } },
+          splitLine: { lineStyle: { color: "#F3F4F6" } },
         },
       ],
       series: series.map((s, idx) => ({
         name: s.name,
         type: "bar",
         itemStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            {
-              offset: 0,
-              color: ["#80FFA5", "#00DDFF", "#37A2FF", "#FF0087", "#FFBF00"][
-                idx % 5
-              ],
-            },
-            {
-              offset: 1,
-              color: [
-                "rgba(128,255,165,0.3)",
-                "rgba(0,221,255,0.3)",
-                "rgba(55,162,255,0.3)",
-                "rgba(255,0,135,0.3)",
-                "rgba(255,191,0,0.3)",
-              ][idx % 5],
-            },
-          ]),
+          color: neutralColors[idx % neutralColors.length],
           borderRadius: [4, 4, 0, 0],
         },
       })),
@@ -897,39 +714,16 @@ const createBrushBarChart = (
   series: SeriesData[],
   xAxis: { data: string[]; name?: string }
 ) => {
+  // Neutral color palette
+  const neutralColors = ["#0055A4", "#6B7280", "#9CA3AF", "#374151", "#4B5563"];
+
   const emphasisStyle = {
     itemStyle: {
-      shadowBlur: 30,
-      shadowColor: "rgba(138, 43, 226, 0.8)",
-      shadowOffsetY: 5,
+      shadowBlur: 8,
+      shadowColor: "rgba(0, 0, 0, 0.2)",
+      shadowOffsetY: 2,
     },
-    scale: true,
-    scaleSize: 10,
   };
-
-  // Stunning gradient colors for bars
-  const barGradients = [
-    [
-      { offset: 0, color: "#667eea" },
-      { offset: 1, color: "#764ba2" },
-    ],
-    [
-      { offset: 0, color: "#f093fb" },
-      { offset: 1, color: "#f5576c" },
-    ],
-    [
-      { offset: 0, color: "#4facfe" },
-      { offset: 1, color: "#00f2fe" },
-    ],
-    [
-      { offset: 0, color: "#43e97b" },
-      { offset: 1, color: "#38f9d7" },
-    ],
-    [
-      { offset: 0, color: "#fa709a" },
-      { offset: 1, color: "#fee140" },
-    ],
-  ];
 
   return {
     backgroundColor: "transparent",
@@ -938,13 +732,9 @@ const createBrushBarChart = (
       left: "center",
       top: 10,
       textStyle: {
-        color: "#ffffff",
-        fontSize: 22,
-        fontWeight: 700,
-        textShadowColor: "rgba(0, 0, 0, 0.5)",
-        textShadowBlur: 10,
-        textShadowOffsetX: 2,
-        textShadowOffsetY: 2,
+        color: "#333333",
+        fontSize: 16,
+        fontWeight: 600,
       },
     },
     legend: {
@@ -952,35 +742,35 @@ const createBrushBarChart = (
       left: "10%",
       top: 45,
       textStyle: {
-        color: "rgba(255, 255, 255, 0.9)",
-        fontSize: 12,
+        color: "#333333",
+        fontSize: 11,
         fontWeight: 500,
       },
-      itemWidth: 25,
-      itemHeight: 14,
+      itemWidth: 20,
+      itemHeight: 12,
     },
     brush: {
       toolbox: ["rect", "polygon", "lineX", "lineY", "keep", "clear"],
       xAxisIndex: 0,
       brushStyle: {
         borderWidth: 1,
-        color: "rgba(99, 102, 241, 0.2)",
-        borderColor: "rgba(99, 102, 241, 0.8)",
+        color: "rgba(0, 85, 164, 0.1)",
+        borderColor: "#0055A4",
       },
     },
     toolbox: {
       feature: {
         magicType: {
           type: ["stack"],
-          iconStyle: { borderColor: "rgba(255,255,255,0.5)" },
+          iconStyle: { borderColor: "#9CA3AF" },
         },
         dataView: {
-          backgroundColor: "#1e293b",
-          textColor: "#fff",
-          iconStyle: { borderColor: "rgba(255,255,255,0.5)" },
+          backgroundColor: "#FFFFFF",
+          textColor: "#333333",
+          iconStyle: { borderColor: "#9CA3AF" },
         },
         saveAsImage: {
-          iconStyle: { borderColor: "rgba(255,255,255,0.5)" },
+          iconStyle: { borderColor: "#9CA3AF" },
         },
       },
       right: 20,
@@ -988,16 +778,15 @@ const createBrushBarChart = (
     },
     tooltip: {
       trigger: "axis",
-      backgroundColor: "rgba(10, 15, 30, 0.98)",
-      borderColor: "rgba(138, 43, 226, 0.6)",
-      borderWidth: 2,
-      textStyle: { color: "#ffffff", fontSize: 13 },
-      padding: 12,
-      extraCssText: "box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);",
+      backgroundColor: "#FFFFFF",
+      borderColor: "#E5E5E5",
+      borderWidth: 1,
+      textStyle: { color: "#333333", fontSize: 12 },
+      padding: 10,
       axisPointer: {
         type: "shadow",
         shadowStyle: {
-          color: "rgba(138, 43, 226, 0.15)",
+          color: "rgba(0, 85, 164, 0.08)",
         },
       },
     },
@@ -1006,10 +795,10 @@ const createBrushBarChart = (
       name: xAxis.name || "",
       axisLine: {
         onZero: true,
-        lineStyle: { color: "rgba(255, 255, 255, 0.2)" },
+        lineStyle: { color: "#E5E5E5" },
       },
       axisLabel: {
-        color: "rgba(255, 255, 255, 0.7)",
+        color: "#666666",
         fontSize: 10,
         interval: 0,
         rotate: xAxis.data.length > 6 ? 30 : 0,
@@ -1018,9 +807,9 @@ const createBrushBarChart = (
       splitArea: { show: false },
     },
     yAxis: {
-      axisLine: { lineStyle: { color: "rgba(255, 255, 255, 0.2)" } },
-      axisLabel: { color: "rgba(255, 255, 255, 0.7)", fontSize: 11 },
-      splitLine: { lineStyle: { color: "rgba(255, 255, 255, 0.08)" } },
+      axisLine: { lineStyle: { color: "#E5E5E5" } },
+      axisLabel: { color: "#666666", fontSize: 11 },
+      splitLine: { lineStyle: { color: "#F3F4F6" } },
     },
     grid: {
       left: "3%",
@@ -1030,8 +819,8 @@ const createBrushBarChart = (
       containLabel: true,
     },
     series: series.map((s, idx) => {
-      // Use dataAny if present (has individual item colors), otherwise use gradient
       const hasStyledData = s.dataAny && s.dataAny.length > 0;
+      const color = neutralColors[idx % neutralColors.length];
 
       return {
         name: s.name,
@@ -1043,38 +832,24 @@ const createBrushBarChart = (
         lineStyle:
           s.type === "line"
             ? {
-                width: 3,
-                shadowColor: barGradients[idx % 5][0].color,
-                shadowBlur: 10,
+                width: 2,
+                color: color,
               }
             : undefined,
         itemStyle: hasStyledData
           ? {
-              borderRadius: [8, 8, 0, 0],
-              borderColor: "rgba(255, 255, 255, 0.2)",
-              borderWidth: 2,
-              shadowBlur: 15,
-              shadowColor: "rgba(0, 0, 0, 0.3)",
-              shadowOffsetY: 3,
+              borderRadius: [4, 4, 0, 0],
+              borderColor: "#FFFFFF",
+              borderWidth: 1,
             }
           : {
-              color: new echarts.graphic.LinearGradient(
-                0,
-                0,
-                0,
-                1,
-                barGradients[idx % 5]
-              ),
-              borderRadius: [8, 8, 0, 0],
-              borderColor: "rgba(255, 255, 255, 0.2)",
-              borderWidth: 2,
-              shadowBlur: 15,
-              shadowColor: "rgba(0, 0, 0, 0.3)",
-              shadowOffsetY: 3,
+              color: color,
+              borderRadius: [4, 4, 0, 0],
+              borderColor: "#FFFFFF",
+              borderWidth: 1,
             },
         animationType: "scale",
-        animationEasing: "elasticOut",
-        animationDelay: (idx: number) => idx * 30,
+        animationEasing: "cubicOut",
       };
     }),
   };
@@ -1088,169 +863,139 @@ const createLargeAreaChart = (
   title: string,
   series: SeriesData[],
   xAxis: { data: string[]; name?: string }
-) => ({
-  backgroundColor: "transparent",
-  title: {
-    left: "center",
-    text: title,
-    top: 10,
-    textStyle: {
-      color: "#ffffff",
-      fontSize: 22,
-      fontWeight: 700,
-      textShadowColor: "rgba(0, 0, 0, 0.5)",
-      textShadowBlur: 10,
-      textShadowOffsetX: 2,
-      textShadowOffsetY: 2,
-    },
-  },
-  tooltip: {
-    trigger: "axis",
-    position: function (pt: number[]) {
-      return [pt[0], "10%"];
-    },
-    backgroundColor: "rgba(10, 15, 30, 0.98)",
-    borderColor: "rgba(138, 43, 226, 0.6)",
-    borderWidth: 2,
-    textStyle: { color: "#ffffff", fontSize: 13 },
-    padding: 12,
-    extraCssText: "box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);",
-  },
-  toolbox: {
-    feature: {
-      dataZoom: {
-        yAxisIndex: "none",
-        iconStyle: {
-          borderColor: "rgba(138, 43, 226, 0.8)",
-          borderWidth: 2,
-        },
-      },
-      restore: {
-        iconStyle: {
-          borderColor: "rgba(138, 43, 226, 0.8)",
-          borderWidth: 2,
-        },
-      },
-      saveAsImage: {
-        iconStyle: {
-          borderColor: "rgba(138, 43, 226, 0.8)",
-          borderWidth: 2,
-        },
-      },
-    },
-    right: 20,
-    top: 10,
-    emphasis: {
-      iconStyle: {
-        borderColor: "rgba(240, 116, 245, 1)",
-      },
-    },
-  },
-  xAxis: {
-    type: "category",
-    boundaryGap: false,
-    data: xAxis.data,
-    axisLine: { lineStyle: { color: "rgba(255, 255, 255, 0.2)" } },
-    axisLabel: { color: "rgba(255, 255, 255, 0.7)", fontSize: 10 },
-  },
-  yAxis: {
-    type: "value",
-    boundaryGap: [0, "100%"],
-    axisLine: { lineStyle: { color: "rgba(255, 255, 255, 0.2)" } },
-    axisLabel: { color: "rgba(255, 255, 255, 0.7)", fontSize: 11 },
-    splitLine: { lineStyle: { color: "rgba(255, 255, 255, 0.08)" } },
-  },
-  dataZoom: [
-    {
-      type: "inside",
-      start: 0,
-      end: 50,
-    },
-    {
-      start: 0,
-      end: 50,
-      handleSize: "100%",
-      handleStyle: {
-        color: "#80FFA5",
-      },
+) => {
+  // Neutral color palette
+  const neutralColors = ["#0055A4", "#6B7280", "#9CA3AF", "#374151", "#4B5563"];
+
+  return {
+    backgroundColor: "transparent",
+    title: {
+      left: "center",
+      text: title,
+      top: 10,
       textStyle: {
-        color: "rgba(255, 255, 255, 0.7)",
-      },
-      borderColor: "rgba(255, 255, 255, 0.2)",
-      backgroundColor: "rgba(30, 41, 59, 0.8)",
-      dataBackground: {
-        lineStyle: { color: "rgba(128, 255, 165, 0.5)" },
-        areaStyle: { color: "rgba(128, 255, 165, 0.2)" },
-      },
-      selectedDataBackground: {
-        lineStyle: { color: "#80FFA5" },
-        areaStyle: { color: "rgba(128, 255, 165, 0.4)" },
+        color: "#333333",
+        fontSize: 16,
+        fontWeight: 600,
       },
     },
-  ],
-  grid: {
-    left: "3%",
-    right: "4%",
-    bottom: "18%",
-    top: "15%",
-    containLabel: true,
-  },
-  series: series.map((s, idx) => ({
-    name: s.name,
-    type: "line",
-    symbol: "circle",
-    symbolSize: 6,
-    sampling: "lttb",
-    smooth: true,
-    lineStyle: {
-      width: 2,
-      shadowColor: [
-        "rgb(255, 70, 131)",
-        "rgb(128, 255, 165)",
-        "rgb(0, 221, 255)",
-        "rgb(55, 162, 255)",
-        "rgb(255, 191, 0)",
-      ][idx % 5],
-      shadowBlur: 10,
+    tooltip: {
+      trigger: "axis",
+      position: function (pt: number[]) {
+        return [pt[0], "10%"];
+      },
+      backgroundColor: "#FFFFFF",
+      borderColor: "#E5E5E5",
+      borderWidth: 1,
+      textStyle: { color: "#333333", fontSize: 12 },
+      padding: 10,
     },
-    itemStyle: {
-      color: [
-        "rgb(255, 70, 131)",
-        "rgb(128, 255, 165)",
-        "rgb(0, 221, 255)",
-        "rgb(55, 162, 255)",
-        "rgb(255, 191, 0)",
-      ][idx % 5],
-      borderColor: "#fff",
-      borderWidth: 2,
-    },
-    areaStyle: {
-      color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-        {
-          offset: 0,
-          color: [
-            "rgb(255, 158, 68)",
-            "rgb(128, 255, 165)",
-            "rgb(0, 221, 255)",
-            "rgb(55, 162, 255)",
-            "rgb(255, 191, 0)",
-          ][idx % 5],
+    toolbox: {
+      feature: {
+        dataZoom: {
+          yAxisIndex: "none",
+          iconStyle: {
+            borderColor: "#9CA3AF",
+            borderWidth: 1,
+          },
         },
-        {
-          offset: 1,
-          color: [
-            "rgb(255, 70, 131)",
-            "rgb(1, 191, 236)",
-            "rgb(77, 119, 255)",
-            "rgb(116, 21, 219)",
-            "rgb(224, 62, 76)",
-          ][idx % 5],
+        restore: {
+          iconStyle: {
+            borderColor: "#9CA3AF",
+            borderWidth: 1,
+          },
         },
-      ]),
+        saveAsImage: {
+          iconStyle: {
+            borderColor: "#9CA3AF",
+            borderWidth: 1,
+          },
+        },
+      },
+      right: 20,
+      top: 10,
+      emphasis: {
+        iconStyle: {
+          borderColor: "#0055A4",
+        },
+      },
     },
-    data: s.data,
-  })),
-});
+    xAxis: {
+      type: "category",
+      boundaryGap: false,
+      data: xAxis.data,
+      axisLine: { lineStyle: { color: "#E5E5E5" } },
+      axisLabel: { color: "#666666", fontSize: 10 },
+    },
+    yAxis: {
+      type: "value",
+      boundaryGap: [0, "100%"],
+      axisLine: { lineStyle: { color: "#E5E5E5" } },
+      axisLabel: { color: "#666666", fontSize: 11 },
+      splitLine: { lineStyle: { color: "#F3F4F6" } },
+    },
+    dataZoom: [
+      {
+        type: "inside",
+        start: 0,
+        end: 50,
+      },
+      {
+        start: 0,
+        end: 50,
+        handleSize: "100%",
+        handleStyle: {
+          color: "#0055A4",
+        },
+        textStyle: {
+          color: "#666666",
+        },
+        borderColor: "#E5E5E5",
+        backgroundColor: "#F9FAFB",
+        dataBackground: {
+          lineStyle: { color: "#9CA3AF" },
+          areaStyle: { color: "rgba(156, 163, 175, 0.2)" },
+        },
+        selectedDataBackground: {
+          lineStyle: { color: "#0055A4" },
+          areaStyle: { color: "rgba(0, 85, 164, 0.2)" },
+        },
+      },
+    ],
+    grid: {
+      left: "3%",
+      right: "4%",
+      bottom: "18%",
+      top: "15%",
+      containLabel: true,
+    },
+    series: series.map((s, idx) => {
+      const color = neutralColors[idx % neutralColors.length];
+      return {
+        name: s.name,
+        type: "line",
+        symbol: "circle",
+        symbolSize: 5,
+        sampling: "lttb",
+        smooth: true,
+        lineStyle: {
+          width: 2,
+          color: color,
+        },
+        itemStyle: {
+          color: color,
+          borderColor: "#fff",
+          borderWidth: 1,
+        },
+        areaStyle: {
+          opacity: 0.15,
+          color: color,
+        },
+        data: s.data,
+      };
+    }),
+  };
+};
 
 // ============================================
 // 🎯 HORIZONTAL STACKED BAR CHART (For Rankings)
@@ -1261,35 +1006,28 @@ const createStackedBarChart = (
   series: SeriesData[],
   xAxis: { data: string[]; name?: string }
 ) => {
-  // Professional color palette from ECharts example - highly distinct colors
+  // Neutral professional color palette
   const colorPalette = [
-    "#007BFF", // Vivid Blue
-    "#FFA500", // Standard Orange
-    "#4F5868", // Dark Slate Gray
-    "#9ACD32", // Yellow Green
-    "#4169E1", // Royal Blue
-    "#FF6B6B", // Coral Red
-    "#20C997", // Teal
-    "#6F42C1", // Purple
+    "#0055A4", // Deep Blue
+    "#6B7280", // Gray
+    "#374151", // Dark Gray
+    "#9CA3AF", // Light Gray
+    "#4B5563", // Charcoal
   ];
 
-  // Color mapping for groundwater metrics with distinct colors from the example
   const getColor = (name: string, index: number) => {
     const nameLower = name.toLowerCase();
     if (nameLower.includes("stage")) {
-      return "#FF6B6B"; // Coral Red for stage (critical metric)
+      return "#DC2626"; // Red for stage (critical metric)
     }
     if (nameLower.includes("deficit")) {
-      return "#FFA500"; // Orange for deficit
+      return "#D97706"; // Amber for deficit
     }
     if (nameLower.includes("extraction")) {
-      return "#007BFF"; // Vivid Blue for extraction
+      return "#0055A4"; // Deep Blue for extraction
     }
     if (nameLower.includes("recharge")) {
-      return "#4169E1"; // Royal Blue for recharge
-    }
-    if (nameLower.includes("rainfall")) {
-      return "#9ACD32"; // Yellow Green for rainfall
+      return "#0284C7"; // Sky Blue for recharge
     }
     return colorPalette[index % colorPalette.length];
   };
@@ -1300,8 +1038,8 @@ const createStackedBarChart = (
       left: "center",
       top: 20,
       textStyle: {
-        color: "#e2e8f0",
-        fontSize: 18,
+        color: "#333333",
+        fontSize: 16,
         fontWeight: "600",
       },
     },
@@ -1310,16 +1048,16 @@ const createStackedBarChart = (
       axisPointer: {
         type: "shadow",
       },
-      backgroundColor: "rgba(15, 23, 42, 0.95)",
-      borderColor: "rgba(255, 255, 255, 0.1)",
+      backgroundColor: "#FFFFFF",
+      borderColor: "#E5E5E5",
       borderWidth: 1,
       textStyle: {
-        color: "#e2e8f0",
+        color: "#333333",
       },
       formatter: (params: AnyData) => {
         if (!Array.isArray(params)) return "";
         const locationName = params[0]?.name || "";
-        let tooltip = `<div style="font-weight: 600; margin-bottom: 8px;">${locationName}</div>`;
+        let tooltip = `<div style="font-weight: 600; margin-bottom: 8px; color: #333;">${locationName}</div>`;
         params.forEach((param: AnyData) => {
           const marker = `<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background-color:${param.color};margin-right:6px;"></span>`;
           tooltip += `<div>${marker}${
@@ -1333,12 +1071,12 @@ const createStackedBarChart = (
       data: series.map((s) => s.name),
       top: 60,
       textStyle: {
-        color: "#cbd5e1",
-        fontSize: 13,
+        color: "#333333",
+        fontSize: 12,
       },
-      itemWidth: 24,
-      itemHeight: 16,
-      itemGap: 16,
+      itemWidth: 20,
+      itemHeight: 14,
+      itemGap: 12,
     },
     grid: {
       left: "20%",
@@ -1352,16 +1090,16 @@ const createStackedBarChart = (
       axisLine: {
         show: true,
         lineStyle: {
-          color: "rgba(148, 163, 184, 0.3)",
+          color: "#E5E5E5",
         },
       },
       axisLabel: {
-        color: "#94a3b8",
-        fontSize: 12,
+        color: "#666666",
+        fontSize: 11,
       },
       splitLine: {
         lineStyle: {
-          color: "rgba(148, 163, 184, 0.15)",
+          color: "#F3F4F6",
           type: "dashed",
         },
       },
@@ -1372,12 +1110,12 @@ const createStackedBarChart = (
       axisLine: {
         show: true,
         lineStyle: {
-          color: "rgba(148, 163, 184, 0.3)",
+          color: "#E5E5E5",
         },
       },
       axisLabel: {
-        color: "#f1f5f9",
-        fontSize: 13,
+        color: "#333333",
+        fontSize: 12,
         fontWeight: "500",
         width: 180,
         overflow: "truncate",
@@ -1395,19 +1133,17 @@ const createStackedBarChart = (
       type: "bar",
       stack: "total",
       data: s.data,
-      barMaxWidth: 35,
+      barMaxWidth: 30,
       itemStyle: {
         color: getColor(s.name, idx),
         borderRadius: [0, 4, 4, 0],
-        borderWidth: 1,
-        borderColor: "rgba(255, 255, 255, 0.1)",
+        borderWidth: 0,
       },
       emphasis: {
         focus: "series",
         itemStyle: {
-          shadowBlur: 10,
-          shadowColor: "rgba(0, 0, 0, 0.5)",
-          borderColor: "rgba(255, 255, 255, 0.3)",
+          shadowBlur: 4,
+          shadowColor: "rgba(0, 0, 0, 0.15)",
         },
       },
       label: {
@@ -1415,11 +1151,11 @@ const createStackedBarChart = (
         position: "inside",
         formatter: (params: AnyData) => {
           const val = params.value as number;
-          return val > 30 ? val.toFixed(0) : ""; // Show label if value is large enough
+          return val > 30 ? val.toFixed(0) : "";
         },
         color: "#fff",
-        fontSize: 11,
-        fontWeight: "600",
+        fontSize: 10,
+        fontWeight: "500",
       },
     })),
   };
@@ -1430,25 +1166,8 @@ const createStackedBarChart = (
 // ============================================
 
 const createRiskRadarChart = (title: string, data: RiskData[]) => {
-  // Vibrant gradient colors for each risk factor
-  const colors = [
-    new echarts.graphic.LinearGradient(0, 0, 1, 0, [
-      { offset: 0, color: "#667eea" },
-      { offset: 1, color: "#764ba2" },
-    ]),
-    new echarts.graphic.LinearGradient(0, 0, 1, 0, [
-      { offset: 0, color: "#f093fb" },
-      { offset: 1, color: "#f5576c" },
-    ]),
-    new echarts.graphic.LinearGradient(0, 0, 1, 0, [
-      { offset: 0, color: "#4facfe" },
-      { offset: 1, color: "#00f2fe" },
-    ]),
-    new echarts.graphic.LinearGradient(0, 0, 1, 0, [
-      { offset: 0, color: "#43e97b" },
-      { offset: 1, color: "#38f9d7" },
-    ]),
-  ];
+  // Neutral color palette
+  const neutralColors = ["#0055A4", "#6B7280", "#9CA3AF", "#374151"];
 
   return {
     title: {
@@ -1456,11 +1175,9 @@ const createRiskRadarChart = (title: string, data: RiskData[]) => {
       left: "center",
       top: 15,
       textStyle: {
-        color: "#ffffff",
-        fontSize: 20,
-        fontWeight: 700,
-        textShadowColor: "rgba(0, 0, 0, 0.5)",
-        textShadowBlur: 8,
+        color: "#333333",
+        fontSize: 16,
+        fontWeight: 600,
       },
     },
     polar: {
@@ -1471,12 +1188,12 @@ const createRiskRadarChart = (title: string, data: RiskData[]) => {
       axisLine: { show: false },
       axisTick: { show: false },
       axisLabel: {
-        color: "rgba(255,255,255,0.6)",
+        color: "#666666",
         fontSize: 10,
       },
       splitLine: {
         lineStyle: {
-          color: "rgba(255,255,255,0.15)",
+          color: "#E5E5E5",
           type: "dashed",
         },
       },
@@ -1486,33 +1203,29 @@ const createRiskRadarChart = (title: string, data: RiskData[]) => {
       data: data.map((d) => d.factor),
       startAngle: 90,
       axisLine: {
-        lineStyle: { color: "rgba(255,255,255,0.3)" },
+        lineStyle: { color: "#E5E5E5" },
       },
       axisTick: { show: false },
       axisLabel: {
-        color: "#fff",
+        color: "#333333",
         fontSize: 11,
-        fontWeight: 600,
+        fontWeight: 500,
         padding: [0, 0, 0, 0],
       },
       splitLine: {
         lineStyle: {
-          color: "rgba(255,255,255,0.1)",
+          color: "#F3F4F6",
         },
       },
     },
     tooltip: {
       trigger: "item",
-      backgroundColor: "rgba(10, 15, 30, 0.95)",
-      borderColor: "rgba(102, 126, 234, 0.6)",
-      borderWidth: 2,
-      textStyle: { color: "#fff", fontSize: 13 },
+      backgroundColor: "#FFFFFF",
+      borderColor: "#E5E5E5",
+      borderWidth: 1,
+      textStyle: { color: "#333333", fontSize: 12 },
       formatter: (params: AnyData) => {
-        return `<b>${
-          params.name
-        }</b><br/>Risk Score: <span style="color:#f5576c;font-weight:bold">${params.value.toFixed(
-          1
-        )}%</span>`;
+        return `<b>${params.name}</b><br/>Risk Score: <span style="color:#DC2626;font-weight:bold">${params.value.toFixed(1)}%</span>`;
       },
     },
     series: {
@@ -1520,10 +1233,8 @@ const createRiskRadarChart = (title: string, data: RiskData[]) => {
       data: data.map((d, idx) => ({
         value: d.score,
         itemStyle: {
-          color: colors[idx % colors.length],
+          color: neutralColors[idx % neutralColors.length],
           borderRadius: [4, 4, 0, 0],
-          shadowBlur: 15,
-          shadowColor: "rgba(0,0,0,0.3)",
         },
       })),
       coordinateSystem: "polar",
@@ -1533,20 +1244,18 @@ const createRiskRadarChart = (title: string, data: RiskData[]) => {
         position: "middle",
         formatter: "{c}%",
         color: "#fff",
-        fontSize: 11,
+        fontSize: 10,
         fontWeight: "bold",
-        textShadowColor: "rgba(0,0,0,0.5)",
-        textShadowBlur: 3,
       },
       emphasis: {
         itemStyle: {
-          shadowBlur: 25,
-          shadowColor: "rgba(102, 126, 234, 0.8)",
+          shadowBlur: 8,
+          shadowColor: "rgba(0, 0, 0, 0.2)",
         },
       },
     },
-    animationDuration: 1500,
-    animationEasing: "elasticOut",
+    animationDuration: 1000,
+    animationEasing: "cubicOut",
   };
 };
 
@@ -1555,45 +1264,22 @@ const createRiskRadarChart = (title: string, data: RiskData[]) => {
 // ============================================
 
 const createSectorGradientChart = (title: string, data: SectorData[]) => {
-  // Gradient color configurations for each sector
-  const gradientConfigs = [
-    [
-      { offset: 0, color: "rgb(128, 255, 165)" },
-      { offset: 1, color: "rgb(1, 191, 236)" },
-    ],
-    [
-      { offset: 0, color: "rgb(0, 221, 255)" },
-      { offset: 1, color: "rgb(77, 119, 255)" },
-    ],
-    [
-      { offset: 0, color: "rgb(255, 0, 135)" },
-      { offset: 1, color: "rgb(135, 0, 157)" },
-    ],
-    [
-      { offset: 0, color: "rgb(255, 191, 0)" },
-      { offset: 1, color: "rgb(224, 62, 76)" },
-    ],
-    [
-      { offset: 0, color: "rgb(55, 162, 255)" },
-      { offset: 1, color: "rgb(116, 21, 219)" },
-    ],
-  ];
+  // Neutral color palette
+  const neutralColors = ["#0055A4", "#6B7280", "#9CA3AF", "#374151", "#4B5563"];
 
   // Calculate total and percentages
   const total = data.reduce((sum, d) => sum + d.value, 0);
 
   return {
-    color: ["#80FFA5", "#00DDFF", "#FF0087", "#FFBF00", "#37A2FF"],
+    color: neutralColors,
     title: {
       text: title,
       left: "center",
       top: 15,
       textStyle: {
-        color: "#ffffff",
-        fontSize: 20,
-        fontWeight: 700,
-        textShadowColor: "rgba(0, 0, 0, 0.5)",
-        textShadowBlur: 8,
+        color: "#333333",
+        fontSize: 16,
+        fontWeight: 600,
       },
     },
     tooltip: {
@@ -1601,20 +1287,19 @@ const createSectorGradientChart = (title: string, data: SectorData[]) => {
       axisPointer: {
         type: "cross",
         lineStyle: {
-          color: "rgba(138, 43, 226, 0.6)",
-          width: 2,
+          color: "#9CA3AF",
+          width: 1,
           type: "dashed",
         },
         label: {
-          backgroundColor: "rgba(99, 102, 241, 0.9)",
-          borderColor: "rgba(138, 43, 226, 0.8)",
+          backgroundColor: "#0055A4",
           color: "#fff",
         },
       },
-      backgroundColor: "rgba(10, 15, 30, 0.98)",
-      borderColor: "rgba(138, 43, 226, 0.6)",
-      borderWidth: 2,
-      textStyle: { color: "#ffffff", fontSize: 13 },
+      backgroundColor: "#FFFFFF",
+      borderColor: "#E5E5E5",
+      borderWidth: 1,
+      textStyle: { color: "#333333", fontSize: 12 },
       formatter: (params: AnyData) => {
         if (!Array.isArray(params)) return "";
         let result = `<div style="padding: 4px;"><b>Sector Distribution</b><br/>`;
@@ -1631,12 +1316,12 @@ const createSectorGradientChart = (title: string, data: SectorData[]) => {
       data: data.map((d) => d.sector),
       bottom: 10,
       textStyle: {
-        color: "rgba(255, 255, 255, 0.85)",
-        fontSize: 12,
+        color: "#333333",
+        fontSize: 11,
         fontWeight: 500,
       },
-      itemWidth: 20,
-      itemHeight: 12,
+      itemWidth: 16,
+      itemHeight: 10,
     },
     grid: {
       left: "5%",
@@ -1650,20 +1335,20 @@ const createSectorGradientChart = (title: string, data: SectorData[]) => {
         type: "category",
         boundaryGap: false,
         data: ["Share"],
-        axisLine: { lineStyle: { color: "rgba(255, 255, 255, 0.2)" } },
-        axisLabel: { color: "rgba(255, 255, 255, 0.7)", fontSize: 12 },
+        axisLine: { lineStyle: { color: "#E5E5E5" } },
+        axisLabel: { color: "#666666", fontSize: 11 },
       },
     ],
     yAxis: [
       {
         type: "value",
-        axisLine: { lineStyle: { color: "rgba(255, 255, 255, 0.2)" } },
+        axisLine: { lineStyle: { color: "#E5E5E5" } },
         axisLabel: {
-          color: "rgba(255, 255, 255, 0.7)",
+          color: "#666666",
           fontSize: 11,
           formatter: (val: number) => `${(val / 1000000).toFixed(1)}M`,
         },
-        splitLine: { lineStyle: { color: "rgba(255, 255, 255, 0.08)" } },
+        splitLine: { lineStyle: { color: "#F3F4F6" } },
       },
     ],
     series: data.map((sector, idx) => ({
@@ -1674,14 +1359,8 @@ const createSectorGradientChart = (title: string, data: SectorData[]) => {
       lineStyle: { width: 0 },
       showSymbol: false,
       areaStyle: {
-        opacity: 0.85,
-        color: new echarts.graphic.LinearGradient(
-          0,
-          0,
-          0,
-          1,
-          gradientConfigs[idx % gradientConfigs.length]
-        ),
+        opacity: 0.6,
+        color: neutralColors[idx % neutralColors.length],
       },
       emphasis: { focus: "series" },
       label:
@@ -1691,15 +1370,16 @@ const createSectorGradientChart = (title: string, data: SectorData[]) => {
               position: "top",
               formatter: (params: AnyData) =>
                 `${((params.value / total) * 100).toFixed(0)}%`,
-              color: "#fff",
-              fontSize: 14,
+              color: "#333333",
+              fontSize: 12,
               fontWeight: "bold",
             }
           : undefined,
       data: [sector.value],
     })),
-    animationDuration: 1500,
+    animationDuration: 1000,
     animationEasing: "cubicOut",
   };
 };
 export default ChartRenderer;
+

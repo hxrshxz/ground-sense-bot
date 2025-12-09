@@ -326,7 +326,7 @@ export const MapAnalysisDialog: React.FC<MapAnalysisDialogProps> = ({
           >
             <div className="flex justify-center">
               <div className="p-4 rounded-full bg-purple-100">
-                <ImageIcon className="h-8 w-8 text-purple-600" />
+                <ImageIcon className="h-8 w-8 text-blue-600" />
               </div>
             </div>
 
@@ -356,7 +356,7 @@ export const MapAnalysisDialog: React.FC<MapAnalysisDialogProps> = ({
               <div className="space-y-3">
                 <div className="flex justify-center">
                   {isUploading ? (
-                    <Loader2 className="h-12 w-12 text-purple-600 animate-spin" />
+                    <Loader2 className="h-12 w-12 text-blue-600 animate-spin" />
                   ) : (
                     <Upload className="h-12 w-12 text-slate-400" />
                   )}

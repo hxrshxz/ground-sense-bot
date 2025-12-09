@@ -576,7 +576,7 @@ export const RainfallImpactCard: React.FC<Props> = ({
                         <foreignObject x="40%" y="40%" width="20%" height="20%">
                           <div className="w-full h-full flex items-center justify-center">
                             <div className="relative w-full h-full">
-                              <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_50%_50%,#0ea5e9AA,#0ea5e900_70%)] animate-pulse" />
+                              <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_50%_50%,#0ea5e9AA,#0ea5e900_70%)]" />
                             </div>
                           </div>
                         </foreignObject>
@@ -585,7 +585,7 @@ export const RainfallImpactCard: React.FC<Props> = ({
                             if (!active || !payload?.[0]) return null;
                             const data = payload[0].payload;
                             return (
-                              <div className="rounded-md border bg-white/80 backdrop-blur-xl shadow-xl px-4 py-3 text-[11px] text-slate-700 min-w-[170px]">
+                              <div className="rounded border bg-white px-4 py-3 text-xs text-slate-700 min-w-[170px]">
                                 <div className="font-semibold text-slate-800 text-xs mb-1 tracking-wide">
                                   {data.label}
                                 </div>

@@ -306,14 +306,13 @@ export const GroundwaterExtractionVisualization: React.FC<
 
   return (
     <div className={className || "space-y-6"}>
-      <div className="p-6 border rounded-xl bg-gradient-to-br from-white to-slate-50 dark:bg-neutral-900 shadow-xl border-slate-200/50 relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_80%_20%,rgba(14,165,233,0.15),transparent_60%)]" />
+      <div className="p-4 border rounded-lg bg-white dark:bg-neutral-900 border-slate-200 relative">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-3">
             <h3 className="font-bold text-lg text-slate-800">
               Extraction Trajectory
             </h3>
-            <span className="text-xs px-3 py-1.5 rounded-full bg-gradient-to-r from-red-100 to-red-200 text-red-700 font-semibold border border-red-300/50">
+            <span className="text-xs px-3 py-1.5 rounded bg-red-100 text-red-700 font-medium border border-red-300">
               Over-Exploited
             </span>
             {enableScenarios && (
@@ -382,7 +381,7 @@ export const GroundwaterExtractionVisualization: React.FC<
           />
         </div>
         <div
-          className="h-80 bg-gradient-to-br from-slate-50 to-white rounded-lg p-4 shadow-inner border border-slate-200/50 relative"
+          className="h-80 bg-slate-50 rounded p-4 border border-slate-200 relative"
           ref={chartRef}
         >
           <ReactChartJS type="line" data={lineData} options={lineOptions} />
@@ -405,7 +404,7 @@ export const GroundwaterExtractionVisualization: React.FC<
             <span>Over-Exploited (&gt; 180%)</span>
           </div>
         </div>
-        <div className="mt-4 p-3 bg-gradient-to-r from-cyan-50 to-sky-50 rounded-lg border border-cyan-200 text-xs leading-relaxed">
+        <div className="mt-4 p-3 bg-slate-50 rounded border border-slate-200 text-xs leading-relaxed">
           <strong>Scenario:</strong> {scenario}.{" "}
           {scenario === "baseline" &&
             "Baseline continues current abstraction pattern."}
@@ -417,11 +416,11 @@ export const GroundwaterExtractionVisualization: React.FC<
       </div>
 
       {radarVisible && (
-        <div className="p-6 border rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:bg-neutral-900 shadow-xl border-green-200/50">
+        <div className="p-4 border rounded-lg bg-white dark:bg-neutral-900 border-slate-200">
           <h4 className="font-bold text-lg text-slate-800 mb-3">
             Primary Drivers (Relative Weight)
           </h4>
-          <div className="h-72 bg-gradient-to-br from-white to-green-50/50 rounded-lg p-4 shadow-inner border border-green-200/50">
+          <div className="h-72 bg-slate-50 rounded p-4 border border-slate-200">
             <ReactChartJS
               type="radar"
               data={radarData}
@@ -446,17 +445,17 @@ interface IndicatorProps {
 }
 const Indicator = ({ label, value, color }: IndicatorProps) => {
   const palette: Record<string, string> = {
-    red: "from-red-50 to-red-100 border-red-200 text-red-700",
-    blue: "from-blue-50 to-blue-100 border-blue-200 text-blue-700",
-    green: "from-green-50 to-green-100 border-green-200 text-green-700",
-    purple: "from-purple-50 to-purple-100 border-purple-200 text-purple-700",
+    red: "bg-red-50 border-red-200 text-red-700",
+    blue: "bg-blue-50 border-blue-200 text-blue-700",
+    green: "bg-green-50 border-green-200 text-green-700",
+    purple: "bg-blue-50 border-blue-200 text-blue-700",
   };
   return (
     <div
-      className={`p-3 bg-gradient-to-br rounded-lg border ${
+      className={`p-3 rounded border ${
         palette[color] ||
-        "from-slate-50 to-slate-100 border-slate-200 text-slate-700"
-      } relative overflow-hidden shadow-sm`}
+        "bg-slate-50 border-slate-200 text-slate-700"
+      } relative overflow-hidden`}
     >
       <div className="text-[10px] font-semibold uppercase tracking-wide opacity-70 mb-1">
         {label}

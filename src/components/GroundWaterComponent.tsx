@@ -218,11 +218,11 @@ export const GroundwaterComparisonChart: React.FC<any> = ({
     >
       <Card className="w-full overflow-hidden bg-white shadow-lg" ref={cardRef}>
         {/* Add a decorative header gradient band */}
-        <div className="h-2 bg-gradient-to-r from-purple-500 to-indigo-600"></div>
+        <div className="h-2 bg-blue-600"></div>
         <CardHeader>
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-purple-100/70">
-              <TrendingUp className="h-6 w-6 text-purple-600" />
+              <TrendingUp className="h-6 w-6 text-blue-600" />
             </div>
             <div>
               <CardTitle className="text-xl md:text-2xl font-bold text-slate-800">
@@ -294,7 +294,7 @@ export const GroundwaterComparisonChart: React.FC<any> = ({
               className="bg-slate-50 border border-slate-200/80 rounded-lg p-4 text-sm text-slate-700 mt-6"
             >
               <h4 className="font-semibold text-slate-800 mb-1 flex items-center gap-2">
-                <Info className="h-4 w-4 text-purple-600" /> AI Insight for{" "}
+                <Info className="h-4 w-4 text-blue-600" /> AI Insight for{" "}
                 {METRIC_CONFIGS[activeMetric].label}
               </h4>
               <p>{summaryText[activeMetric]}</p>

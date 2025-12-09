@@ -254,7 +254,7 @@ const ComparisonCard: React.FC<ComparisonCardProps> = ({ data }) => {
   }, [data]);
 
   return (
-    <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-6 shadow-2xl border border-white/10">
+    <div className="bg-white rounded border border-slate-200 p-4">
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div className="flex items-center gap-3">

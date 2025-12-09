@@ -70,7 +70,7 @@ export default function BlockOverview() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
-        <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
       </div>
     );
   }
@@ -132,7 +132,7 @@ export default function BlockOverview() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold text-purple-600">
+              <p className="text-2xl font-bold text-blue-600">
                 {blockData.stage.toFixed(1)}%
               </p>
             </CardContent>
@@ -233,7 +233,7 @@ export default function BlockOverview() {
                   <div className="flex items-center gap-2">
                     <div className="flex-1 bg-slate-200 rounded-full h-2">
                       <div
-                        className="bg-purple-600 h-2 rounded-full transition-all"
+                        className="bg-blue-600 h-2 rounded-full transition-all"
                         style={{
                           width: `${Math.min(
                             (blockData.total_extraction /

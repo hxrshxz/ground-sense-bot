@@ -56,12 +56,12 @@ const PolicyRechargeCard: React.FC = () => {
       className="w-full"
     >
       <Card className="w-full overflow-hidden bg-white shadow-lg">
-        <div className="h-2 bg-gradient-to-r from-purple-500 to-indigo-600"></div>
+        <div className="h-2 bg-blue-600"></div>
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-purple-100/70">
-                <Scale className="h-6 w-6 text-purple-600" />
+                <Scale className="h-6 w-6 text-blue-600" />
               </div>
               <div>
                 <CardTitle className="text-xl font-bold text-slate-800">
@@ -130,7 +130,6 @@ const PolicyRechargeCard: React.FC = () => {
                         transition: { duration: 0.2 },
                       }}
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent animate-pulse" />
                       <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent" />
                     </motion.div>
                   </div>
@@ -179,7 +178,6 @@ const PolicyRechargeCard: React.FC = () => {
                           transition: { duration: 0.2 },
                         }}
                       >
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse" />
                         <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent" />
                       </motion.div>
                     </div>
@@ -206,7 +204,7 @@ const PolicyRechargeCard: React.FC = () => {
               </div>
             </div>
             <div className="text-center p-2 bg-purple-50 rounded-lg">
-              <Users className="h-4 w-4 mx-auto text-purple-600 mb-1" />
+              <Users className="h-4 w-4 mx-auto text-blue-600 mb-1" />
               <div className="text-xs font-medium text-purple-700">
                 Water Auth
               </div>

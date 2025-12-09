@@ -507,7 +507,6 @@ const StateComparisonCard: React.FC = () => {
                                     {sector.value}%
                                   </span>
                                 </div>
-                                <div className="absolute inset-0 opacity-0 animate-pulse group-hover:opacity-40 transition-opacity bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.9),transparent_70%)]" />
                               </div>
                             </div>
                           );

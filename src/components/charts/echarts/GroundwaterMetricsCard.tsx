@@ -1,12 +1,7 @@
 import React from "react";
 import ReactECharts from "echarts-for-react";
 import * as echarts from "echarts";
-import {
-  Droplets,
-  TrendingUp,
-  Activity,
-  Tag,
-} from "lucide-react";
+import { Droplets, TrendingUp, Activity, Tag } from "lucide-react";
 import {
   CATEGORY_COLORS,
   ATTRIBUTE_COLORS,
@@ -65,7 +60,7 @@ const StageGauge: React.FC<{ stage: number }> = ({ stage }) => {
             width: 12,
             color: [
               [0.47, CATEGORY_COLORS.safe.primary],
-              [0.60, CATEGORY_COLORS.semiCritical.primary],
+              [0.6, CATEGORY_COLORS.semiCritical.primary],
               [0.67, CATEGORY_COLORS.critical.primary],
               [1, CATEGORY_COLORS.overExploited.primary],
             ],
@@ -146,10 +141,26 @@ const CategoryDistributionChart: React.FC<{
         },
         labelLine: { lineStyle: { color: "rgba(255,255,255,0.3)" } },
         data: [
-          { value: safe, name: "Safe", itemStyle: { color: CATEGORY_COLORS.safe.primary } },
-          { value: semiCritical, name: "Semi-Critical", itemStyle: { color: CATEGORY_COLORS.semiCritical.primary } },
-          { value: critical, name: "Critical", itemStyle: { color: CATEGORY_COLORS.critical.primary } },
-          { value: overExploited, name: "Over-Exploited", itemStyle: { color: CATEGORY_COLORS.overExploited.primary } },
+          {
+            value: safe,
+            name: "Safe",
+            itemStyle: { color: CATEGORY_COLORS.safe.primary },
+          },
+          {
+            value: semiCritical,
+            name: "Semi-Critical",
+            itemStyle: { color: CATEGORY_COLORS.semiCritical.primary },
+          },
+          {
+            value: critical,
+            name: "Critical",
+            itemStyle: { color: CATEGORY_COLORS.critical.primary },
+          },
+          {
+            value: overExploited,
+            name: "Over-Exploited",
+            itemStyle: { color: CATEGORY_COLORS.overExploited.primary },
+          },
         ].filter((d) => d.value > 0),
       },
     ],
@@ -176,7 +187,9 @@ const WaterBalanceChart: React.FC<{
       borderColor: "rgba(148, 163, 184, 0.2)",
       textStyle: { color: "#F8FAFC" },
       formatter: (params: { seriesName: string; value: number }[]) =>
-        params.map((p) => `${p.seriesName}: ${formatNumber(p.value)} ham`).join("<br/>"),
+        params
+          .map((p) => `${p.seriesName}: ${formatNumber(p.value)} ham`)
+          .join("<br/>"),
     },
     grid: {
       left: "5%",
@@ -242,26 +255,31 @@ const WaterBalanceChart: React.FC<{
 };
 
 // Main component
-const GroundwaterMetricsCard: React.FC<GroundwaterMetricsCardProps> = ({ data }) => {
+const GroundwaterMetricsCard: React.FC<GroundwaterMetricsCardProps> = ({
+  data,
+}) => {
   const categoryColors = getCategoryColors(data.category);
   const stageColors = getCategoryColorsFromStage(data.stage);
-  const isAggregated = data.locationType === "district" || data.locationType === "state";
+  const isAggregated =
+    data.locationType === "district" || data.locationType === "state";
   const hasBlockDistribution = isAggregated && (data.totalBlocks ?? 0) > 0;
 
   return (
     <div
-      className="w-full rounded-2xl overflow-hidden"
+      className="w-full rounded-xl overflow-hidden"
       style={{
-        background: "linear-gradient(145deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.92) 100%)",
-        boxShadow: "0 20px 40px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08)",
-        backdropFilter: "blur(16px)",
+        background: "#FFFFFF",
+        boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05)",
+        border: "1px solid #E5E5E5",
       }}
     >
       {/* Header */}
       <div className="px-6 py-4 border-b border-white/10">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-white text-lg font-semibold">{data.locationName}</h2>
+            <h2 className="text-white text-lg font-semibold">
+              {data.locationName}
+            </h2>
             <p className="text-slate-400 text-sm capitalize">
               {data.locationType} • {data.year}
             </p>
@@ -270,7 +288,10 @@ const GroundwaterMetricsCard: React.FC<GroundwaterMetricsCardProps> = ({ data })
             className="px-3 py-1.5 rounded-full flex items-center gap-2"
             style={{ backgroundColor: categoryColors.backgroundDark }}
           >
-            <span style={{ color: categoryColors.textOnDark }} className="text-sm font-medium">
+            <span
+              style={{ color: categoryColors.textOnDark }}
+              className="text-sm font-medium"
+            >
               {categoryColors.emoji} {formatCategoryName(data.category)}
             </span>
           </div>
@@ -280,86 +301,122 @@ const GroundwaterMetricsCard: React.FC<GroundwaterMetricsCardProps> = ({ data })
       {/* THE 4 KEY ATTRIBUTES CARDS */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-4">
         {/* 1. Extractable GW Resources */}
-        <div 
+        <div
           className="rounded-xl p-4 border"
-          style={{ 
+          style={{
             backgroundColor: ATTRIBUTE_COLORS.extractable.backgroundDark,
             borderColor: `${ATTRIBUTE_COLORS.extractable.primary}33`,
           }}
         >
           <div className="flex items-center gap-2 mb-2">
-            <Droplets className="w-4 h-4" style={{ color: ATTRIBUTE_COLORS.extractable.textOnDark }} />
-            <span className="text-xs" style={{ color: ATTRIBUTE_COLORS.extractable.textOnDark }}>
+            <Droplets
+              className="w-4 h-4"
+              style={{ color: ATTRIBUTE_COLORS.extractable.textOnDark }}
+            />
+            <span
+              className="text-xs"
+              style={{ color: ATTRIBUTE_COLORS.extractable.textOnDark }}
+            >
               {FOUR_KEY_ATTRIBUTES.EXTRACTABLE.shortLabel}
             </span>
           </div>
           <div className="text-lg font-bold text-white">
             {formatNumber(data.totalExtractable)} ham
           </div>
-          <div className="text-xs opacity-60" style={{ color: ATTRIBUTE_COLORS.extractable.textOnDark }}>
+          <div
+            className="text-xs opacity-60"
+            style={{ color: ATTRIBUTE_COLORS.extractable.textOnDark }}
+          >
             Annual Resources
           </div>
         </div>
 
         {/* 2. GW Extraction */}
-        <div 
+        <div
           className="rounded-xl p-4 border"
-          style={{ 
+          style={{
             backgroundColor: ATTRIBUTE_COLORS.extraction.backgroundDark,
             borderColor: `${ATTRIBUTE_COLORS.extraction.primary}33`,
           }}
         >
           <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-4 h-4" style={{ color: ATTRIBUTE_COLORS.extraction.textOnDark }} />
-            <span className="text-xs" style={{ color: ATTRIBUTE_COLORS.extraction.textOnDark }}>
+            <TrendingUp
+              className="w-4 h-4"
+              style={{ color: ATTRIBUTE_COLORS.extraction.textOnDark }}
+            />
+            <span
+              className="text-xs"
+              style={{ color: ATTRIBUTE_COLORS.extraction.textOnDark }}
+            >
               {FOUR_KEY_ATTRIBUTES.EXTRACTION.shortLabel}
             </span>
           </div>
           <div className="text-lg font-bold text-white">
             {formatNumber(data.totalExtraction)} ham
           </div>
-          <div className="text-xs opacity-60" style={{ color: ATTRIBUTE_COLORS.extraction.textOnDark }}>
+          <div
+            className="text-xs opacity-60"
+            style={{ color: ATTRIBUTE_COLORS.extraction.textOnDark }}
+          >
             Annual Usage
           </div>
         </div>
 
         {/* 3. Stage of Extraction */}
-        <div 
+        <div
           className="rounded-xl p-4 border"
-          style={{ 
+          style={{
             backgroundColor: stageColors.backgroundDark,
             borderColor: `${stageColors.primary}33`,
           }}
         >
           <div className="flex items-center gap-2 mb-2">
-            <Activity className="w-4 h-4" style={{ color: stageColors.textOnDark }} />
+            <Activity
+              className="w-4 h-4"
+              style={{ color: stageColors.textOnDark }}
+            />
             <span className="text-xs" style={{ color: stageColors.textOnDark }}>
               {FOUR_KEY_ATTRIBUTES.STAGE.shortLabel}
             </span>
           </div>
-          <div className="text-lg font-bold" style={{ color: stageColors.textOnDark }}>
+          <div
+            className="text-lg font-bold"
+            style={{ color: stageColors.textOnDark }}
+          >
             {data.stage?.toFixed(1) || 0}%
           </div>
-          <div className="text-xs opacity-60" style={{ color: stageColors.textOnDark }}>
+          <div
+            className="text-xs opacity-60"
+            style={{ color: stageColors.textOnDark }}
+          >
             {getStageLabel(data.stage)}
           </div>
         </div>
 
         {/* 4. Category */}
-        <div 
+        <div
           className="rounded-xl p-4 border"
-          style={{ 
+          style={{
             backgroundColor: categoryColors.backgroundDark,
             borderColor: `${categoryColors.primary}33`,
           }}
         >
           <div className="flex items-center gap-2 mb-2">
-            <Tag className="w-4 h-4" style={{ color: categoryColors.textOnDark }} />
-            <span className="text-xs" style={{ color: categoryColors.textOnDark }}>
+            <Tag
+              className="w-4 h-4"
+              style={{ color: categoryColors.textOnDark }}
+            />
+            <span
+              className="text-xs"
+              style={{ color: categoryColors.textOnDark }}
+            >
               {FOUR_KEY_ATTRIBUTES.CATEGORY.shortLabel}
             </span>
           </div>
-          <div className="text-lg font-bold" style={{ color: categoryColors.textOnDark }}>
+          <div
+            className="text-lg font-bold"
+            style={{ color: categoryColors.textOnDark }}
+          >
             {categoryColors.emoji} {formatCategoryName(data.category)}
           </div>
         </div>
@@ -373,11 +430,17 @@ const GroundwaterMetricsCard: React.FC<GroundwaterMetricsCardProps> = ({ data })
             Stage of Extraction
           </h3>
           <StageGauge stage={data.stage || 0} />
-          <p className="text-center text-xs mt-2" style={{ color: stageColors.textOnDark }}>
-            {data.stage > 100 ? "⚠️ Over-extraction detected" :
-             data.stage > 90 ? "⚡ Approaching critical levels" :
-             data.stage > 70 ? "📊 Monitor closely" :
-             "✅ Sustainable extraction"}
+          <p
+            className="text-center text-xs mt-2"
+            style={{ color: stageColors.textOnDark }}
+          >
+            {data.stage > 100
+              ? "⚠️ Over-extraction detected"
+              : data.stage > 90
+              ? "⚡ Approaching critical levels"
+              : data.stage > 70
+              ? "📊 Monitor closely"
+              : "✅ Sustainable extraction"}
           </p>
         </div>
 
@@ -419,10 +482,20 @@ const GroundwaterMetricsCard: React.FC<GroundwaterMetricsCardProps> = ({ data })
             </p>
             <p className="text-slate-400 text-xs">
               {data.stage > 100
-                ? `${data.locationName} is extracting ${(data.stage - 100).toFixed(1)}% more than available. Category: ${formatCategoryName(data.category)}.`
+                ? `${data.locationName} is extracting ${(
+                    data.stage - 100
+                  ).toFixed(
+                    1
+                  )}% more than available. Category: ${formatCategoryName(
+                    data.category
+                  )}.`
                 : data.stage > 70
-                ? `Extraction at ${data.stage.toFixed(1)}% of available resources. Close monitoring recommended.`
-                : `Sustainable extraction at ${data.stage.toFixed(1)}% of available resources.`}
+                ? `Extraction at ${data.stage.toFixed(
+                    1
+                  )}% of available resources. Close monitoring recommended.`
+                : `Sustainable extraction at ${data.stage.toFixed(
+                    1
+                  )}% of available resources.`}
             </p>
           </div>
         </div>

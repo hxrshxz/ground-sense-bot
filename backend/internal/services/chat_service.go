@@ -877,12 +877,12 @@ func (s *ChatService) getFallbackSQL(message string) string {
 
 // formatNumberWithCommas formats a float64 with comma separators (Indian style: 9,30,116.00)
 func formatNumberWithCommas(n float64) string {
-	// Format with 2 decimal places first
-	// Format with up to 2 decimal places, but don't force .00 if integer
-	str := fmt.Sprintf("%.2f", n)
-	if strings.HasSuffix(str, ".00") {
-		str = strings.TrimSuffix(str, ".00")
-	}
+	// Format with default precision (6 decimals) or sufficient precision, then trim
+	str := fmt.Sprintf("%f", n)
+	
+	// Trim trailing zeros and decimal point if appropriate
+	str = strings.TrimRight(str, "0")
+	str = strings.TrimSuffix(str, ".")
 	
 	// Split integer and decimal parts
 	parts := strings.Split(str, ".")

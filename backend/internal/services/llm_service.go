@@ -186,6 +186,13 @@ SQL:`, DOMAIN_KNOWLEDGE, historyContext, schema, userMessage)
 	// Add to history
 	s.AddToHistory("user", userMessage)
 
+	// --- DEBUG: EXPOSE PROMPT FOR TESTING ---
+	fmt.Println("\n📝  GENERATING PROMPT FOR LLM:")
+	fmt.Println(strings.Repeat("-", 60))
+	fmt.Println(prompt)
+	fmt.Println(strings.Repeat("-", 60))
+	// ----------------------------------------
+	
 	sql, err := s.ollamaClient.Generate(ctx, prompt)
 	if err != nil {
 		return "", fmt.Errorf("SQL generation failed: %w", err)

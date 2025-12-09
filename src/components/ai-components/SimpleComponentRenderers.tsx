@@ -103,26 +103,33 @@ export const SimpleTableRenderer = ({
   rows: (string | number)[][];
   title?: string;
 }) => (
-  <div>
-    {title && <h3 className="text-xl font-semibold mb-2">{title}</h3>}
-    <Table>
-      <TableHeader>
-        <TableRow>
-          {headers.map((header, index) => (
-            <TableHead key={index}>{header}</TableHead>
-          ))}
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {rows.map((row, rowIndex) => (
-          <TableRow key={rowIndex}>
-            {row.map((cell, cellIndex) => (
-              <TableCell key={cellIndex}>{cell}</TableCell>
+  <div className="w-full">
+    {title && (
+      <h3 className="text-xl font-bold mb-4 text-slate-800">{title}</h3>
+    )}
+    <div className="rounded-lg border border-slate-200 overflow-hidden shadow-sm bg-white">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            {headers.map((header, index) => (
+              <TableHead key={index}>{header}</TableHead>
             ))}
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {rows.map((row, rowIndex) => (
+            <TableRow
+              key={rowIndex}
+              className={rowIndex % 2 === 0 ? "bg-white" : "bg-slate-50"}
+            >
+              {row.map((cell, cellIndex) => (
+                <TableCell key={cellIndex}>{cell}</TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   </div>
 );
 

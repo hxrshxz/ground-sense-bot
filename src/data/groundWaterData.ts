@@ -45,48 +45,7 @@ export interface DistrictData {
 export const groundwaterDB: {
   [key: string]: BlockData | StateData | DistrictData;
 } = {
-  // MODIFIED: delhi data with detailed object structure
-  delhi: {
-    type: "Block",
-    block: "Delhi",
-    district: "New Delhi",
-    state: "Delhi",
-    category: "Over-Exploited",
-    recharge: {
-      total: 120.5,
-      rainfall: 90.5,
-      canal: 30.0,
-    },
-    extraction: {
-      total: 155.8,
-      irrigation: 140.0,
-      domestic: 10.8,
-      industry: 5.0,
-    },
-    stage: "129%",
-    trend: [98, 107, 115, 122, 129],
-  },
-  // MODIFIED: chaksu data now has the detailed object structure
-  chaksu: {
-    type: "Block",
-    block: "Chaksu",
-    district: "Jaipur",
-    state: "Rajasthan",
-    category: "Critical",
-    recharge: {
-      total: 95.2,
-      rainfall: 75.2,
-      canal: 20.0,
-    },
-    extraction: {
-      total: 94.1,
-      irrigation: 85.0,
-      domestic: 7.1,
-      industry: 2.0,
-    },
-    stage: "99%",
-    trend: [82, 88, 91, 95, 99],
-  },
+  // District and State level data - blocks are fetched from database
   "madhya pradesh": {
     type: "State",
     recharge: { total: 3606611 },

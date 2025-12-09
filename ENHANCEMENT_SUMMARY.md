@@ -6,7 +6,7 @@ Added **4 new sophisticated query patterns** to the chatbot that follow the same
 
 - **Predefined chart types** (gradient-area, brush-bar, rose-pie, etc.)
 - **Dynamic data** from PostgreSQL based on user questions
-- **AI-generated SQL** using Gemini
+- **AI-generated SQL** using Ollama
 - **AI-selected visualizations** optimized for the data
 
 ---
@@ -98,7 +98,7 @@ Punjab Category Distribution:
          ▼
 ┌─────────────────┐
 │ Intent Detection│ ← AI analyzes keywords & context
-│   (Gemini AI)   │
+│   (Ollama AI)   │
 └────────┬────────┘
          │
          ▼
@@ -110,7 +110,7 @@ Punjab Category Distribution:
          ▼
 ┌─────────────────┐
 │ SQL Generation  │ ← AI creates query using EXAMPLE 17
-│   (Gemini AI)   │
+│   (Ollama AI)   │
 └────────┬────────┘
          │
          ▼
@@ -123,7 +123,7 @@ Punjab Category Distribution:
 ┌─────────────────┐
 │  Visualization  │ ← AI selects horizontal-bar
 │   Generation    │    for ranking data
-│   (Gemini AI)   │
+│   (Ollama AI)   │
 └────────┬────────┘
          │
          ▼
@@ -316,7 +316,7 @@ See `NEW_QUERY_PATTERNS.md` for 14 additional ready-to-implement patterns!
 
 2. **AI-Powered Flexibility**
 
-   - Gemini learns from SQL examples
+   - Ollama learns from SQL examples
    - Users can ask questions naturally
    - System adapts to variations in phrasing
 

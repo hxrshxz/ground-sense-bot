@@ -74,7 +74,7 @@ if useLocalLLM {
     if ollamaClient.IsAvailable(ctx) {
         fmt.Printf("🦙 Ollama local LLM enabled (model: %s)\n", cfg.Ollama.Model)
     } else {
-        fmt.Println("⚠️ Ollama enabled but not available, falling back to Gemini")
+        fmt.Println("⚠️ Ollama enabled but not available, please start Ollama service")
         useLocalLLM = false
     }
 }
@@ -141,7 +141,7 @@ System Free:     Check with: free -h
 ```
 Accuracy:        ~85-95% for standard SQL patterns
 Edge Cases:      May fail on complex nested queries
-Fallback:        If Ollama fails, system falls back to Gemini API
+Fallback:        If Ollama fails, return error to user
 ```
 
 ---
@@ -168,7 +168,7 @@ NLP Service (nlp_service.go)
         │
         ├─ Success? → Execute SQL → Return results
         │
-        └─ Failure? → Fall back to Gemini API
+        └─ Failure? → Return error
 ```
 
 ### Code Path
@@ -189,8 +189,8 @@ func (s *LLMService) GenerateSQL(ctx context.Context, query string, schema strin
         return s.ollamaClient.GenerateSQL(ctx, query, schema)
     }
 
-    // Fallback to Gemini (if Ollama fails)
-    return s.generateSQLWithGemini(ctx, query, schema)
+    // Return error if Ollama fails
+    return "", errors.New("SQL generation unavailable")
 }
 ```
 
@@ -232,8 +232,8 @@ func (s *LLMService) GenerateSQL(ctx context.Context, query string, schema strin
 ### ❌ Limitations
 
 ```
-1. Slower than Gemini
-   - Gemini: ~100-200ms
+1. Generally consistent performance
+   - Ollama: ~400-800ms
    - SQLCoder:7b: ~400-800ms
 
 2. Less Capable
@@ -259,11 +259,11 @@ func (s *LLMService) GenerateSQL(ctx context.Context, query string, schema strin
 
 ```
 Scenario 1: Ollama not responding
-  → Automatically use Gemini API for text generation
+  → Show user error message to start Ollama
   → User doesn't notice (transparent fallback)
 
 Scenario 2: Ollama timeout (>5 seconds)
-  → Fallback to Gemini SQL generation
+  → Ensure Ollama is running before queries
   → Slightly slower but more reliable
 
 Scenario 3: Both fail
@@ -280,11 +280,9 @@ if s.useLocalLLM && s.ollamaClient != nil {
     if err == nil {
         return result  // Success!
     }
-    // Fall through to Gemini
+    // Return error
+    return "", err
 }
-
-// Fallback to Gemini
-return s.generateSQLWithGemini(ctx, query, schema)
 ```
 
 ---
@@ -315,7 +313,7 @@ Why SQLCoder instead of Qwen?
 - Less accurate for SQL
 - Similar speed (Q4_0 quantized)
 - Overkill capabilities (not needed)
-- Better to keep SQLCoder for SQL, Gemini for text
+- SQLCoder is optimized for SQL generation
 ```
 
 ---
@@ -394,7 +392,7 @@ killall ollama
 ```
 ✅ Keep: SQLCoder:7b
 ✅ Keep: Local Ollama
-✅ Add: Gemini fallback (already have)
+✅ Add: Health check endpoint for Ollama
 
 Status: READY for demo
 ```
@@ -425,7 +423,7 @@ Recommendation: Keep local Ollama (cost-free, privacy-preserving)
 
 **What to tell them:**
 
-> "We use SQLCoder:7b, a specialized 7-billion parameter model running locally via Ollama. When users ask unknown queries like 'List blocks with extraction > 100', our backend sends it to SQLCoder, which generates the SQL in ~400ms. If that fails, we fall back to Gemini API. This approach is free, fast, and keeps data private. No API calls leave our server unless Ollama fails."
+> "We use SQLCoder:7b, a specialized 7-billion parameter model running locally via Ollama. When users ask unknown queries like 'List blocks with extraction > 100', our backend sends it to SQLCoder, which generates the SQL in ~400ms. This approach is free, fast, and keeps data private. No API calls leave our server."
 
 ---
 
@@ -446,7 +444,7 @@ Recommendation: Keep local Ollama (cost-free, privacy-preserving)
 - ✅ Responding (port 11434)
 - ✅ Q4_0 quantized (efficient)
 - ✅ Integrated in backend
-- ✅ Fallback to Gemini ready
+- ✅ Error handling ready
 - ✅ No Qwen model (not needed)
 
 **Status: FULLY OPERATIONAL**

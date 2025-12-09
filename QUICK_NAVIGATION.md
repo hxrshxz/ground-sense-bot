@@ -74,7 +74,7 @@
 
 - File: `backend/internal/services/nlp_service.go`
 - Function: `generateDynamicSQL()` at **line 725**
-- Uses: Ollama SQLCoder:7b (local) **first**, Gemini API (fallback)
+- Uses: Ollama SQLCoder:7b (local)
 - Returns: PostgreSQL query string
 
 ---
@@ -210,11 +210,11 @@
   if s.useLocalLLM && s.ollamaClient != nil {
       sql, err := s.ollamaClient.GenerateSQL(ctx, query, schema)
       if err == nil {
-          return sql, nil  // Success!
+          return sql, nil
       }
-      log.Printf("Ollama failed, falling back to Gemini")
+      log.Printf("Ollama SQL generation failed: %v", err)
   }
-  return s.generateSQLWithGemini(ctx, query, schema)  // Fallback
+  return "", errors.New("SQL generation unavailable")
   ```
 
 ---
@@ -412,7 +412,7 @@ A: Yes, using official INGRES GEC dataset 2024-2025 with 5,796 blocks
 A: Yes, Ollama SQLCoder generates custom SQL for any question
 
 **Q: What if Ollama is down?**
-A: Falls back to Gemini API automatically (see llm_service.go line 350)
+A: Uses Ollama locally (see llm_service.go line 350)
 
 **Q: How do you test?**
 A: Try these exact queries:
@@ -452,7 +452,7 @@ backend/
 │   ├── services/
 │   │   ├── chat_service.go (3210 lines) ⭐ MAIN LOGIC
 │   │   ├── nlp_service.go (1304 lines) ⭐ INTENT DETECTION
-│   │   └── llm_service.go (521 lines) ⭐ OLLAMA/GEMINI
+│   │   └── llm_service.go (521 lines) ⭐ OLLAMA SQL
 │   ├── models/
 │   │   └── chat.go ⭐ DATA STRUCTURES
 │   └── database/

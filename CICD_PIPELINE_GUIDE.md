@@ -74,7 +74,7 @@ Triggers on changes to:
          ▼
 ┌──────────────────┐
 │  Job 3: EMBED    │
-│  🧠 RAG/Gemini   │
+│  🧠 RAG/Ollama   │
 │                  │
 │  • Restore DB    │
 │  • Generate vec..│
@@ -173,12 +173,12 @@ Triggers on changes to:
 1. Download database backup
 2. Restore to PostgreSQL
 3. Run `ingest_rag_data.py`
-4. Generate embeddings using Gemini API
+4. Generate embeddings using Ollama API
 5. Store in `assessment_embeddings` table
 
 **Requirements:**
 
-- `GEMINI_API_KEY` secret must be set
+- `OLLAMA_API_KEY` secret must be set
 
 **Artifacts:**
 
@@ -206,7 +206,7 @@ Set these in GitHub repository settings → Secrets and variables → Actions:
 
 | Secret Name      | Description                          | Required       |
 | ---------------- | ------------------------------------ | -------------- |
-| `GEMINI_API_KEY` | Google Gemini API key for embeddings | Only for Job 3 |
+| `OLLAMA_API_KEY` | Google Ollama API key for embeddings | Only for Job 3 |
 
 ## 📊 Data Structure
 
@@ -331,11 +331,11 @@ Pipeline uses these environment variables:
 
 ### Pipeline Fails at Job 3 (Embeddings)
 
-**Symptoms:** Gemini API errors, missing secret
+**Symptoms:** Ollama API errors, missing secret
 
 **Solutions:**
 
-- Verify `GEMINI_API_KEY` secret is set
+- Verify `OLLAMA_API_KEY` secret is set
 - Check API quota/rate limits
 - Review embedding generation logs
 

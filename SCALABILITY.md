@@ -317,7 +317,6 @@ Limit: Rate limit per API key
 
 Scale With:
 - Multiple API keys (already in docker-compose!)
-- GEMINI_API_KEYS environment variable
 - Request queuing
 ```
 
@@ -405,7 +404,6 @@ Total (typical):          ~150-400ms
 2. Database connection pooling (built-in to Go)
 3. Context-based timeout (built-in)
 4. WebSocket support (persistent connections)
-5. Multi-key API support (GEMINI_API_KEYS)
 6. Environment-based config (12-factor app)
 7. Docker containerization (easy deployment)
 8. Terraform IaC (infrastructure as code)

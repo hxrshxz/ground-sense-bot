@@ -310,11 +310,11 @@ func (s *ChatService) handleDistrictQuery(ctx context.Context, districtName stri
 		OverExploitedBlocks: overExploitedCount,
 	}
 	
-	// Add follow-up suggestions
+	// Add follow-up suggestions using actual category
 	r.Suggestions = []string{
 		fmt.Sprintf("Show blocks in %s", district.DistrictName),
-		fmt.Sprintf("Critical blocks in %s", district.DistrictName),
-		fmt.Sprintf("Compare %s with Ludhiana and Patiala", district.DistrictName),
+		fmt.Sprintf("%s blocks in %s", formatCategory(category), district.DistrictName),
+		fmt.Sprintf("Compare %s with Amritsar", district.DistrictName),
 		fmt.Sprintf("%s state overview", stateName),
 	}
 	

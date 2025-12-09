@@ -26,7 +26,6 @@ This project is designed to work seamlessly with Vercel's serverless functions, 
    - The `vercel.json` configures the serverless function
 
 3. **Environment Variables**:
-   - Add your `VITE_GEMINI_API_KEY` in Vercel dashboard
    - Go to Project Settings > Environment Variables
 
 ### Key Files for Vercel:

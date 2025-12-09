@@ -180,25 +180,21 @@ func (s *NLPService) generateDynamicSQL(message string, intent Intent, entities 
 ║                    INDIA GROUNDWATER DATABASE - ACTUAL SCHEMA                ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║  Database: PostgreSQL | Schema: public | Data: INGRES Groundwater System     ║
-║  TOTAL BLOCKS: 5,796 | YEARS AVAILABLE: 2012-2025 (7 assessment periods)    ║
+║  TOTAL BLOCKS: 5,796 | YEARS AVAILABLE: 2012-2025 (7 assessment periods)     ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 
 ⚠️⚠️⚠️ CRITICAL DATA AVAILABILITY BY YEAR ⚠️⚠️⚠️
 ┌─────────────┬──────────────┬─────────┬──────────────────────────────────────┐
 │ Year        │ Block Count  │ States  │ Data Quality                         │
 ├─────────────┼──────────────┼─────────┼──────────────────────────────────────┤
-│ 2024-2025   │ 6,746 blocks │ 26      │ ✅ COMPLETE - Official data          │
 │ 2023-2024   │ 6,746 blocks │ 26      │ ✅ COMPLETE - Official data          │
-│ 2021-2022   │ 4,824 blocks │ 16      │ ✅ GOOD - Wide coverage              │
-│ 2019-2020   │ 2,811 blocks │ 13      │ ⚠️ MODERATE - Limited coverage       │
-│ 2016-2017   │ 2,738 blocks │ 12      │ ⚠️ MODERATE - Limited coverage       │
-│ 2012-2013   │   160 blocks │  1      │ ⚠️ MINIMAL - Only West Bengal        │
+│ 2024-2025   │ 6,746 blocks │ 26      │ ✅ COMPLETE - Official data          │
 └─────────────┴──────────────┴─────────┴──────────────────────────────────────┘
 
 📊 TREND ANALYSIS CAPABILITY:
-- Recent years (2021-2025): Best for trend analysis across most states
-- Earlier years (2012-2020): Limited to specific states only
-- For comprehensive trends: Use 2021-2025 period (4 years, 16+ states)
+- BOTH years available: 2023-2024 and 2024-2025 (2 years of complete data)
+- For single queries: Default to 2024-2025 (most recent)
+- For trend/comparison: Use both years (2023-2024 and 2024-2025)
 - For maximum data: Default to 2024-2025 unless user specifies otherwise
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -257,8 +253,10 @@ CREATE TABLE assessments_summary (
     created_at TIMESTAMP
 );
 
-⚠️⚠️⚠️ CRITICAL - ONLY ONE YEAR EXISTS: '2024-2025' ⚠️⚠️⚠️
-ALWAYS use: WHERE a.year = '2024-2025' or just omit year filter!
+⚠️⚠️⚠️ CRITICAL - ONLY 2 YEARS EXIST: '2023-2024' AND '2024-2025' ⚠️⚠️⚠️
+For single queries: WHERE a.year = '2024-2025' (most recent)
+For trend queries: WHERE a.year IN ('2023-2024', '2024-2025')
+For all data: Omit year filter to include both years
 
 ⚠️⚠️⚠️ ACTUAL CATEGORY VALUES (lowercase, underscore format) ⚠️⚠️⚠️
 ┌─────────────────┬──────────────────────────────────────────────────────────┐
@@ -384,7 +382,7 @@ WHERE LOWER(b.block_name) ILIKE '%jaisinagar%'
   AND a.year = '2024-2025'
 
 🎯 EXAMPLE 2: TREND - "Show me groundwater trend for Ludhiana"
--- Multi-year data available! This will show actual trends over time.
+-- 2 years available: 2023-2024 and 2024-2025
 SELECT 
     a.year,
     b.block_name,
@@ -396,6 +394,7 @@ SELECT
 FROM assessments_summary a
 JOIN blocks b ON a.block_uuid = b.block_uuid
 WHERE LOWER(b.block_name) ILIKE '%ludhiana%'
+  AND a.year IN ('2023-2024', '2024-2025')
 ORDER BY a.year ASC
 
 🎯 EXAMPLE 3: COMPARE - "Compare Ludhiana and Bathinda"
@@ -594,9 +593,8 @@ WHERE UPPER(s.state_name) = UPPER('rajasthan')
   AND a.year = '2024-2025'
 GROUP BY d.district_name
 ORDER BY avg_stage DESC
-
 🎯 EXAMPLE 16: STATE TREND - "Show groundwater trend for Punjab over years"
--- Multi-year data available! Punjab has data from 2021-2025.
+-- 2 years available: 2023-2024 and 2024-2025
 SELECT 
     a.year,
     s.state_name,
@@ -609,7 +607,9 @@ FROM assessments_summary a
 JOIN blocks b ON a.block_uuid = b.block_uuid
 JOIN states s ON b.state_uuid = s.state_uuid
 WHERE UPPER(s.state_name) = UPPER('punjab')
+  AND a.year IN ('2023-2024', '2024-2025')
 GROUP BY a.year, s.state_name
+ORDER BY a.year ASCstate_name
 ORDER BY a.year ASC
 
 🎯 EXAMPLE 17: TOP_RANKING - "Top 10 over-exploited blocks in India"
@@ -666,9 +666,7 @@ WHERE a.year = '2024-2025'
 AND a.total_extraction > a.total_recharge
 AND a.stage > 0
 ORDER BY (a.total_extraction - a.total_recharge) DESC
-LIMIT 20
-
-🎯 EXAMPLE 20: CHANGE_ANALYSIS - "How has Punjab changed over 4 years?"
+🎯 EXAMPLE 20: CHANGE_ANALYSIS - "How has Punjab changed from 2023 to 2024?"
 WITH yearly_data AS (
     SELECT 
         a.year,
@@ -680,6 +678,7 @@ WITH yearly_data AS (
     JOIN districts d ON b.district_uuid = d.district_uuid
     JOIN states s ON d.state_uuid = s.state_uuid
     WHERE UPPER(s.state_name) = 'PUNJAB'
+      AND a.year IN ('2023-2024', '2024-2025')
     GROUP BY a.year
 )
 SELECT 
@@ -688,6 +687,8 @@ SELECT
     avg_rainfall,
     total_blocks,
     (avg_stage - LAG(avg_stage) OVER (ORDER BY year)) as stage_change
+FROM yearly_data
+ORDER BY yeare - LAG(avg_stage) OVER (ORDER BY year)) as stage_change
 FROM yearly_data
 ORDER BY year
 
@@ -763,10 +764,10 @@ func (s *NLPService) analyzeQueryWithAI(message string) (*IntentAnalysis, error)
 	}
 
 	ctx := context.Background()
-	prompt := fmt.Sprintf(`You are an expert AI assistant for India's INGRES Groundwater Data System.
-
 DATABASE SCHEMA CONTEXT:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HIERARCHY: State → District → Block
+BLOCKS: 6,746 | DATA AVAILABILITY: 2 years (2023-2024, 2024-2025)
 HIERARCHY: State → District → Block
 BLOCKS IN 2024-2025: 5,796 | DATA AVAILABILITY: 7 years (2012-2025)
 
@@ -780,9 +781,8 @@ BLOCKS IN 2024-2025: 5,796 | DATA AVAILABILITY: 7 years (2012-2025)
    - block_name (VARCHAR): Mixed case (some UPPERCASE, some Title Case)
 
 4. ASSESSMENTS_SUMMARY TABLE (Main groundwater data):
-   - year (VARCHAR): 6 years available: '2012-2013', '2016-2017', '2019-2020', 
-                     '2021-2022', '2023-2024', '2024-2025'
-   - Block coverage varies by year (see table above)
+   - year (VARCHAR): ONLY 2 years available: '2023-2024', '2024-2025'
+   - Block coverage: 6,746 blocks for BOTH years
    - rainfall (FLOAT): Rainfall in mm (range: 0-3000)
    - total_recharge (FLOAT): Total groundwater recharge in MCM
    - total_extraction (FLOAT): Total groundwater extraction in MCM
@@ -790,10 +790,10 @@ BLOCKS IN 2024-2025: 5,796 | DATA AVAILABILITY: 7 years (2012-2025)
    - availability (FLOAT): Available groundwater in MCM
    
    DEFAULT YEAR LOGIC:
-   - Single block query: Use '2024-2025' (most complete)
-   - Trend query: Use 2021-2025 period (4 years, best coverage)
-   - Specific location: Check all available years for that location in MCM
-   
+   DEFAULT YEAR LOGIC:
+   - Single block query: Use '2024-2025' (most recent)
+   - Trend/comparison query: Use both years ('2023-2024', '2024-2025')
+   - Specific location: Check both available years for that location
 ⚠️⚠️⚠️ CRITICAL - ACTUAL CATEGORY VALUES IN DATABASE (USE EXACTLY AS SHOWN):
    - 'safe' (lowercase)
    - 'semi_critical' (lowercase, underscore NOT hyphen)
@@ -842,10 +842,11 @@ INTENT CLASSIFICATION RULES:
 
 4. TREND
    → When: User asks for HISTORICAL data, trends OVER TIME
-   → Keywords: "trend", "over time", "historical", "over years"
-   → NOTE: 7 years of data available! Best coverage: 2021-2025 (4 years)
+   → Keywords: "trend", "over time", "historical", "over years", "change"
+   → NOTE: 2 years of data available: 2023-2024 and 2024-2025
    → Examples:
       "Show me trend for Ludhiana" → TREND
+      "How has Punjab changed from 2023 to 2024?" → TREND
 
 5. COMPARE
    → When: User wants to COMPARE TWO OR MORE specific locations
@@ -971,11 +972,11 @@ LOCATIONS:
 ⚠️ CRITICAL: For COMPARE intent, SPLIT multiple locations into SEPARATE array elements:
   "rajasthan and andhra pradesh" → ["rajasthan", "andhra pradesh"]
   "compare ludhiana vs bathinda" → ["ludhiana", "bathinda"]
-  "punjab versus haryana" → ["punjab", "haryana"]
-  Split on: "and", "vs", "versus", ","
-
 YEAR:
 - Format: "YYYY-YYYY" (e.g., "2024-2025")
+- Available: ONLY 2023-2024 and 2024-2025 (2 years total)
+- Default for single query: "2024-2025" (most recent data)
+- Default for trend query: Use both years ('2023-2024', '2024-2025')
 - Available: 2012-2013, 2016-2017, 2019-2020, 2021-2022, 2023-2024, 2024-2025
 - Default for single query: "2024-2025" (most complete data)
 - Default for trend query: 2021-2025 period (best multi-year coverage)

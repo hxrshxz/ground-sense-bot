@@ -28,7 +28,7 @@ func (s *ChatService) handleYearlyComparison(ctx context.Context, e Entities, r 
 	}
 
 	// Get data for multiple years
-	years := []string{"2021-2022", "2022-2023", "2023-2024", "2024-2025"}
+	years := []string{"2021-2022", "2023-2024", "2024-2025"}
 	
 	sqlQuery := fmt.Sprintf(`
 		SELECT 

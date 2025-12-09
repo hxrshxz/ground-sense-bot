@@ -31,13 +31,17 @@ func RegisterRoutes(mux *http.ServeMux, cfg *config.Config, db *database.Service
 	ragService := services.NewRAGService(db, cfg, logger)
 	ragController := controllers.NewRAGController(ragService, logger)
 
+	// Initialize Redis Cache Service
+	cacheService := services.NewCacheService(cfg)
+	logger.Info("✅ Redis Cache Service initialized")
+
 	// Initialize Chatbot components
 	llmService, err := services.NewLLMService(cfg)
 	if err != nil {
 		logger.Warnf("Failed to initialize LLM Service: %v", err)
 	}
-	nlpService := services.NewNLPService(llmService)
-	chatService := services.NewChatService(nlpService, ingresService, ragService)
+	nlpService := services.NewNLPService(llmService, cacheService) // Pass cache to NLP
+	chatService := services.NewChatService(nlpService, ingresService, ragService, cacheService)
 	hub := chat.NewHub(chatService)
 	go hub.Run()
 

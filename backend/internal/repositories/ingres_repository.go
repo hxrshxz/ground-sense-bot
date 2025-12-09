@@ -462,10 +462,10 @@ func (r *IngresRepository) ValidateSQL(ctx context.Context, query string) error 
 		}
 	}
 	
-	// Must start with SELECT
+	// Must start with SELECT or WITH (CTEs are allowed)
 	trimmedQuery := strings.TrimSpace(upperQuery)
-	if !strings.HasPrefix(trimmedQuery, "SELECT") {
-		return fmt.Errorf("only SELECT queries are allowed")
+	if !strings.HasPrefix(trimmedQuery, "SELECT") && !strings.HasPrefix(trimmedQuery, "WITH") {
+		return fmt.Errorf("only SELECT and WITH (CTE) queries are allowed")
 	}
 	
 	// Level 2: EXPLAIN Validation (Accurate - catches typos like district_uid vs district_uuid)

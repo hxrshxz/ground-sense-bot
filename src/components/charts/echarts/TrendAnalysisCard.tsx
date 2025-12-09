@@ -81,9 +81,9 @@ const TrendAnalysisCard: React.FC<TrendAnalysisCardProps> = ({ data }) => {
         {
           text: `Recharge: ${point.recharge.toFixed(
             1
-          )} MCM  |  Extraction: ${point.extraction.toFixed(
+          )} ham  |  Extraction: ${point.extraction.toFixed(
             1
-          )} MCM  |  Stage: ${point.stage.toFixed(
+          )} ham  |  Stage: ${point.stage.toFixed(
             1
           )}%  |  Rainfall: ${point.rainfall.toFixed(0)}mm`,
           left: "center",

@@ -84,15 +84,17 @@ type ChatService struct {
 	nlp      *NLPService
 	ingres   *IngresService
 	rag      *RAGService // Added for RAG semantic search
+	cache    *CacheService // Redis cache for low-latency access
 	sessions map[string]*UserSession
 	mu       sync.Mutex
 }
 
-func NewChatService(nlp *NLPService, ingres *IngresService, rag *RAGService) *ChatService {
+func NewChatService(nlp *NLPService, ingres *IngresService, rag *RAGService, cache *CacheService) *ChatService {
 	return &ChatService{
 		nlp:      nlp,
 		ingres:   ingres,
 		rag:      rag,
+		cache:    cache,
 		sessions: make(map[string]*UserSession),
 	}
 }
@@ -145,6 +147,13 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 	fmt.Printf("📨 NEW USER MESSAGE | User: %s | Time: %s\n", username, time.Now().Format("15:04:05"))
 	fmt.Printf("💬 Query: \"%s\"\n", message)
 	fmt.Println(strings.Repeat("=", 80))
+	
+	// CHECK FOR GREETING/HELLO - Guide users toward 4 key attributes
+	if isGreeting(message) {
+		fmt.Println("├─ 👋 Detected greeting, returning welcome message")
+		return s.handleWelcome(ctx)
+	}
+
 
 	// Get or create session
 	s.mu.Lock()
@@ -305,12 +314,39 @@ func (s *ChatService) ProcessMessage(ctx context.Context, message string, userna
 		}
 	}
 	
-	// Detect LIST_BLOCKS intent
-	if (strings.Contains(msgLower, "blocks in") || 
+	// Detect MAP_CATEGORY intent FIRST (e.g., "Critical blocks in Punjab", "Safe blocks in Haryana")
+	// This takes priority over LIST_BLOCKS when a category keyword is present
+	hasCategoryKeyword := strings.Contains(msgLower, "critical") || 
+		strings.Contains(msgLower, "safe") ||
+		strings.Contains(msgLower, "over-exploited") || 
+		strings.Contains(msgLower, "over exploited") ||
+		strings.Contains(msgLower, "overexploited") ||
+		strings.Contains(msgLower, "semi-critical") ||
+		strings.Contains(msgLower, "semi critical")
+	
+	if hasCategoryKeyword && strings.Contains(msgLower, "blocks") && intent != IntentMapCategory {
+		fmt.Println("├─ 🔄 Keyword fallback: Detected MAP_CATEGORY intent (category + blocks)")
+		intent = IntentMapCategory
+		
+		// Extract location - remove category keywords first
+		locationQuery := msgLower
+		for _, cat := range []string{"critical", "safe", "over-exploited", "over exploited", "overexploited", "semi-critical", "semi critical"} {
+			locationQuery = strings.ReplaceAll(locationQuery, cat, "")
+		}
+		locationQuery = strings.ReplaceAll(locationQuery, "blocks in", "")
+		locationQuery = strings.ReplaceAll(locationQuery, "blocks of", "")
+		locationQuery = strings.ReplaceAll(locationQuery, "blocks", "")
+		locationQuery = strings.TrimSpace(locationQuery)
+		
+		if locationQuery != "" {
+			entities.Locations = []string{strings.ToUpper(locationQuery)}
+			fmt.Printf("├─ 🔄 Extracted location for category query: %s\n", locationQuery)
+		}
+	} else if (strings.Contains(msgLower, "blocks in") || 
 		strings.Contains(msgLower, "blocks of") ||
 		strings.Contains(msgLower, "list blocks") ||
 		strings.Contains(msgLower, "show blocks")) && 
-		intent != IntentListBlocks {
+		intent != IntentListBlocks && !hasCategoryKeyword {
 		fmt.Println("├─ 🔄 Keyword fallback: Detected LIST_BLOCKS intent")
 		intent = IntentListBlocks
 		
@@ -1159,9 +1195,9 @@ func (s *ChatService) buildNoDataFoundMessage(query string) string {
 	}
 	
 	sb.WriteString("**📊 Available Data Coverage:**\n")
-	sb.WriteString("- **Years:** 2012-2013, 2016-2017, 2019-2020, 2021-2022, 2022-2023, 2023-2024, 2024-2025\n")
-	sb.WriteString("- **Locations:** 38 States, 590+ Districts, 5950+ Blocks\n")
-	sb.WriteString("- **Total Assessments:** 24,682 groundwater assessments\n\n")
+	sb.WriteString("- **Years:** 2012-2013, 2016-2017, 2019-2020, 2021-2022, 2023-2024, 2024-2025\n")
+	sb.WriteString("- **Locations:** 38 States, 590+ Districts, 6750+ Blocks\n")
+	sb.WriteString("- **Total Assessments:** 21,063 groundwater assessments\n\n")
 	
 	sb.WriteString("**💡 Try asking:**\n")
 	sb.WriteString("- \"Show me groundwater data for [district name]\"\n")
@@ -1748,6 +1784,23 @@ func isValidYear(year string) bool {
 }
 
 func (s *ChatService) handleTrend(ctx context.Context, e Entities, r *models.ChatResponse) (*models.ChatResponse, error) {
+	// Try Redis cache first for trend data
+	if s.cache != nil && s.cache.IsEnabled() && len(e.Locations) > 0 {
+		locationKey := strings.Join(e.Locations, "_")
+		cachedData, err := s.cache.GetTrendData(ctx, locationKey, e.StartYear, e.EndYear)
+		if err == nil && cachedData != nil {
+			fmt.Printf("├─ ⚡ REDIS CACHE HIT: trend:%s:%s-%s\n", locationKey, e.StartYear, e.EndYear)
+			if cachedResp, ok := cachedData.(string); ok {
+				if err := json.Unmarshal([]byte(cachedResp), r); err == nil {
+					fmt.Printf("└─ ✅ Returning cached trend data (0ms DB query)\n\n")
+					return r, nil
+				}
+			}
+		} else {
+			fmt.Printf("├─ ⚠️  Cache miss for trend, fetching from database...\n")
+		}
+	}
+
 	blocks, err := s.ingres.GetBlocksByNames(ctx, e.Locations)
 	
 	var trends []models.AssessmentSummary
@@ -1777,8 +1830,16 @@ func (s *ChatService) handleTrend(ctx context.Context, e Entities, r *models.Cha
 					"*Analyzing recharge vs extraction patterns over time...*",
 					locationName, e.StartYear, e.EndYear, len(trends))
 				
-				// Build trend-card chart and return
-				return s.buildTrendCard(trends, locationName, locationType, e.StartYear, e.EndYear, r), nil
+				// Build trend-card chart
+				result := s.buildTrendCard(trends, locationName, locationType, e.StartYear, e.EndYear, r)
+				
+				// Cache the result
+				if s.cache != nil && s.cache.IsEnabled() {
+					respJSON, _ := json.Marshal(result)
+					s.cache.SetTrendData(ctx, locationName, e.StartYear, e.EndYear, string(respJSON))
+				}
+				
+				return result, nil
 			}
 			// Try State
 			state, err := s.ingres.GetStateByName(ctx, joinedName)
@@ -1796,8 +1857,16 @@ func (s *ChatService) handleTrend(ctx context.Context, e Entities, r *models.Cha
 					"*Analyzing statewide recharge vs extraction patterns...*",
 					locationName, e.StartYear, e.EndYear, len(trends))
 				
-				// Build trend-card chart and return
-				return s.buildTrendCard(trends, locationName, locationType, e.StartYear, e.EndYear, r), nil
+				// Build trend-card chart
+				result := s.buildTrendCard(trends, locationName, locationType, e.StartYear, e.EndYear, r)
+				
+				// Cache the result
+				if s.cache != nil && s.cache.IsEnabled() {
+					respJSON, _ := json.Marshal(result)
+					s.cache.SetTrendData(ctx, locationName, e.StartYear, e.EndYear, string(respJSON))
+				}
+				
+				return result, nil
 			}
 		}
 	}
@@ -1820,7 +1889,19 @@ func (s *ChatService) handleTrend(ctx context.Context, e Entities, r *models.Cha
 		"*Tracking recharge and extraction patterns over time...*",
 		locationName, e.StartYear, e.EndYear)
 	
-	return s.buildTrendCard(trends, locationName, locationType, e.StartYear, e.EndYear, r), nil
+	result := s.buildTrendCard(trends, locationName, locationType, e.StartYear, e.EndYear, r)
+	
+	// Cache the result for future requests
+	if s.cache != nil && s.cache.IsEnabled() && len(e.Locations) > 0 {
+		locationKey := strings.Join(e.Locations, "_")
+		respJSON, err := json.Marshal(result)
+		if err == nil {
+			s.cache.SetTrendData(ctx, locationKey, e.StartYear, e.EndYear, string(respJSON))
+			fmt.Printf("├─ ⚡ Cached trend data (TTL: 1 hour)\n")
+		}
+	}
+	
+	return result, nil
 }
 
 // buildTrendCard builds a trend-card visualization for trend analysis
@@ -2137,6 +2218,24 @@ func (s *ChatService) compareStates(ctx context.Context, states []*models.State,
 
 // compareDistricts compares multiple districts
 func (s *ChatService) compareDistricts(ctx context.Context, districts []*models.District, year string, r *models.ChatResponse) (*models.ChatResponse, error) {
+	// Try Redis cache first if enabled
+	if s.cache != nil && s.cache.IsEnabled() && len(districts) >= 2 {
+		cacheKey := fmt.Sprintf("comparison:districts:%s:%s:%s", districts[0].DistrictName, districts[1].DistrictName, year)
+		cachedData, err := s.cache.GetComparisonData(ctx, districts[0].DistrictName, districts[1].DistrictName, year)
+		if err == nil && cachedData != nil {
+			fmt.Printf("├─ ⚡ REDIS CACHE HIT: %s\n", cacheKey)
+			// Unmarshal cached response
+			if cachedResp, ok := cachedData.(string); ok {
+				if err := json.Unmarshal([]byte(cachedResp), r); err == nil {
+					fmt.Printf("└─ ✅ Returning cached comparison data (0ms DB query)\n\n")
+					return r, nil
+				}
+			}
+		} else {
+			fmt.Printf("├─ ⚠️  Cache miss, fetching from database...\n")
+		}
+	}
+
 	var names []string
 	var stages []float64
 	var recharges []float64
@@ -2228,6 +2327,16 @@ func (s *ChatService) compareDistricts(ctx context.Context, districts []*models.
 	}
 	
 	fmt.Printf("├─ ✅ Chart created with %d locations\n", len(comparisonPoints))
+	
+	// Cache the complete response for next time
+	if s.cache != nil && s.cache.IsEnabled() && len(districts) >= 2 {
+		respJSON, err := json.Marshal(r)
+		if err == nil {
+			s.cache.SetComparisonData(ctx, districts[0].DistrictName, districts[1].DistrictName, year, string(respJSON))
+			fmt.Printf("├─ ⚡ Cached response for future requests (TTL: 1 hour)\n")
+		}
+	}
+	
 	fmt.Printf("└─ 📤 Sending response to frontend...\n\n")
 
 	return r, nil
@@ -2529,7 +2638,7 @@ func (s *ChatService) handleMapCategory(ctx context.Context, e Entities, r *mode
 			e.Category = "critical"
 		} else if strings.Contains(queryLower, "semi-critical") || strings.Contains(queryLower, "semi critical") {
 			e.Category = "semi_critical"
-		} else if strings.Contains(queryLower, "over-exploited") || strings.Contains(queryLower, "over exploited") {
+		} else if strings.Contains(queryLower, "over-exploited") || strings.Contains(queryLower, "over exploited") || strings.Contains(queryLower, "overexploited") {
 			e.Category = "over_exploited"
 		} else if strings.Contains(queryLower, "safe") {
 			e.Category = "safe"
@@ -2540,85 +2649,243 @@ func (s *ChatService) handleMapCategory(ctx context.Context, e Entities, r *mode
 	
 	if e.Category == "" {
 		r.Text = "Which category? (Safe, Critical, Semi-Critical, Over-Exploited)"
+		r.Suggestions = []string{"Safe blocks", "Critical blocks", "Over-exploited blocks", "Semi-critical blocks"}
 		return r, nil
 	}
 
 	var blocks []models.Block
 	var err error
 	var locationName string
+	var locationType string = "india" // Default to all India
+	var stateUUID, districtUUID string
+	_ = districtUUID // Keep for future use
+	year := "2024-2025"
+	if e.Year != "" {
+		year = e.Year
+	}
 
-	// Check if location is specified
+	// Check if location is specified - with proper hierarchy: State > District > Block
 	if len(e.Locations) > 0 {
 		locationName = strings.Join(e.Locations, " ")
+		
+		// PRIORITY 1: Check if it's a STATE
+		state, stateErr := s.ingres.GetStateByName(ctx, locationName)
+		if stateErr == nil && state != nil {
+			locationType = "state"
+			stateUUID = state.StateUUID.String()
+			locationName = state.StateName
+			fmt.Printf("├─ 📍 Location identified as STATE: %s\n", state.StateName)
+		} else {
+			// PRIORITY 2: Check if it's a DISTRICT
+			district, distErr := s.ingres.GetDistrictByName(ctx, locationName)
+			if distErr == nil && district != nil {
+				locationType = "district"
+				districtUUID = district.DistrictUUID.String()
+				locationName = district.DistrictName
+				// Get parent state
+				parentState, _ := s.ingres.repo.GetStateByUUID(ctx, district.StateUUID)
+				if parentState != nil {
+					stateUUID = parentState.StateUUID.String()
+				}
+				fmt.Printf("├─ 📍 Location identified as DISTRICT: %s\n", district.DistrictName)
+			}
+		}
+		
 		blocks, err = s.ingres.repo.GetBlocksByCategoryAndLocation(ctx, e.Category, locationName)
 	} else {
 		blocks, err = s.ingres.GetBlocksByCategory(ctx, e.Category)
 	}
 
 	if err != nil {
+		fmt.Printf("├─ ❌ Error fetching blocks: %v\n", err)
 		return nil, err
 	}
 
+	categoryDisplay := formatCategory(e.Category)
+	categoryEmoji := getCategoryEmoji(e.Category)
+
 	if len(blocks) == 0 {
 		if locationName != "" {
-			r.Text = fmt.Sprintf("No %s blocks found in %s.", e.Category, locationName)
+			r.Text = fmt.Sprintf("No %s blocks found in %s for %s.", categoryDisplay, locationName, year)
+			r.Suggestions = []string{
+				fmt.Sprintf("All blocks in %s", locationName),
+				fmt.Sprintf("%s overview", locationName),
+				"Show all states",
+			}
 		} else {
-			r.Text = fmt.Sprintf("No %s blocks found.", e.Category)
+			r.Text = fmt.Sprintf("No %s blocks found for %s.", categoryDisplay, year)
+			r.Suggestions = []string{"Show all states", "Safe blocks", "Critical blocks"}
 		}
 		return r, nil
 	}
 
-	// Build response text with block names
+	// Cache the result for future queries
+	if s.cache != nil && s.cache.IsEnabled() {
+		locationKey := locationName
+		if locationKey == "" {
+			locationKey = "all"
+		}
+		s.cache.SetBlocksByCategory(ctx, locationKey, e.Category, year, blocks)
+		fmt.Printf("├─ ⚡ Cached %d blocks for future queries\n", len(blocks))
+	}
+
+	// Build comprehensive response
 	var blockNames []string
-	limit := 15
+	var stageData []float64
+	limit := 20
 	for i, b := range blocks {
 		if i >= limit {
 			break
 		}
 		blockNames = append(blockNames, b.BlockName)
+		stageData = append(stageData, 1) // Placeholder for visualization
 	}
 
-	if locationName != "" {
-		r.Text = fmt.Sprintf("🔍 **%s Blocks in %s (%d total)**\n\n%s",
-			strings.Title(strings.ToLower(e.Category)),
-			strings.ToUpper(locationName),
-			len(blocks),
-			strings.Join(blockNames, ", "))
+	// Build response text
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("%s **%s Blocks in %s** (%s)\n", categoryEmoji, categoryDisplay, strings.ToUpper(locationName), year))
+	sb.WriteString("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n")
+	sb.WriteString(fmt.Sprintf("📊 **Total Found:** %d blocks\n\n", len(blocks)))
+	
+	// List blocks in table format (first 15)
+	sb.WriteString("| # | Block Name | District |\n")
+	sb.WriteString("|---|------------|----------|\n")
+	
+	for i, b := range blocks {
+		if i >= 15 {
+			break
+		}
+		// Get district name
+		district, _ := s.ingres.repo.GetDistrictByUUID(ctx, b.DistrictUUID)
+		districtName := "Unknown"
+		if district != nil {
+			districtName = district.DistrictName
+		}
+		sb.WriteString(fmt.Sprintf("| %d | %s | %s |\n", i+1, b.BlockName, districtName))
+	}
+	
+	if len(blocks) > 15 {
+		sb.WriteString(fmt.Sprintf("\n... and **%d more** blocks\n", len(blocks)-15))
+	}
+
+	r.Text = sb.String()
+
+	// Create beautiful rose-pie chart showing blocks by district
+	districtCounts := make(map[string]float64)
+	for _, b := range blocks {
+		district, _ := s.ingres.repo.GetDistrictByUUID(ctx, b.DistrictUUID)
+		if district != nil {
+			districtCounts[district.DistrictName]++
+		}
+	}
+	
+	var pieData []models.PieDatum
+	for name, count := range districtCounts {
+		pieData = append(pieData, models.PieDatum{Name: name, Value: count})
+	}
+
+	// If we have district breakdown, use rose-pie, otherwise use brush-bar
+	if len(pieData) > 1 {
+		r.Chart = &models.ChartPayload{
+			Type:    "rose-pie",
+			Title:   fmt.Sprintf("%s %s Blocks - District Distribution", categoryEmoji, categoryDisplay),
+			PieData: pieData,
+		}
 	} else {
-		r.Text = fmt.Sprintf("🔍 **%s Blocks (%d total)**\n\n%s",
-			strings.Title(strings.ToLower(e.Category)),
-			len(blocks),
-			strings.Join(blockNames, ", "))
-	}
-
-	if len(blocks) > limit {
-		r.Text += fmt.Sprintf("\n\n... and %d more blocks", len(blocks)-limit)
-	}
-
-	// Add chart showing distribution
-	r.Chart = &models.ChartPayload{
-		Type:  "bar",
-		Title: fmt.Sprintf("%s Blocks - %s", strings.Title(strings.ToLower(e.Category)), locationName),
-		XAxis: blockNames,
-		Series: []models.ChartSeries{
-			{
-				Name: "Count",
-				Data: func() []float64 {
-					data := make([]float64, len(blockNames))
-					for i := range data {
-						data[i] = 1 // Just to show each block
-					}
-					return data
-				}(),
+		// Simple bar chart for single district or block list
+		r.Chart = &models.ChartPayload{
+			Type:  "brush-bar",
+			Title: fmt.Sprintf("%s %s Blocks in %s", categoryEmoji, categoryDisplay, locationName),
+			XAxis: map[string]interface{}{"data": blockNames},
+			Series: []models.ChartSeries{
+				{Name: "Blocks", Data: stageData, Type: "bar"},
 			},
-		},
+		}
 	}
+
+	// Context-aware suggestions based on location type and category
+	suggestions := []string{}
+	
+	switch locationType {
+	case "state":
+		suggestions = append(suggestions, fmt.Sprintf("Show all districts in %s", locationName))
+		suggestions = append(suggestions, fmt.Sprintf("%s overview", locationName))
+		// Suggest other categories
+		if e.Category != "safe" {
+			suggestions = append(suggestions, fmt.Sprintf("Safe blocks in %s", locationName))
+		}
+		if e.Category != "over_exploited" {
+			suggestions = append(suggestions, fmt.Sprintf("Over-exploited blocks in %s", locationName))
+		}
+	case "district":
+		suggestions = append(suggestions, fmt.Sprintf("All blocks in %s", locationName))
+		suggestions = append(suggestions, fmt.Sprintf("%s district overview", locationName))
+		// Suggest parent state
+		if stateUUID != "" {
+			parentState, _ := s.ingres.repo.GetStateByUUID(ctx, uuid.MustParse(stateUUID))
+			if parentState != nil {
+				suggestions = append(suggestions, fmt.Sprintf("%s state overview", parentState.StateName))
+			}
+		}
+	default:
+		suggestions = append(suggestions, "Show all states")
+		suggestions = append(suggestions, "Punjab groundwater status")
+		suggestions = append(suggestions, "Haryana groundwater status")
+	}
+	
+	r.Suggestions = suggestions
+	r.Data = blocks
 
 	return r, nil
 }
 
 func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *models.ChatResponse) (*models.ChatResponse, error) {
 	// List blocks based on criteria (e.g., rainfall < 500, stage > 90)
+	
+	// Try Redis cache first for category-based queries
+	if s.cache != nil && s.cache.IsEnabled() && e.Category != "" {
+		locationKey := strings.Join(e.Locations, "_")
+		if locationKey == "" {
+			locationKey = "all"
+		}
+		cacheKey := fmt.Sprintf("blocks:category:%s:%s:%s", locationKey, e.Category, e.Year)
+		cachedBlocks, err := s.cache.GetBlocksByCategory(ctx, locationKey, e.Category, e.Year)
+		if err == nil && cachedBlocks != nil {
+			fmt.Printf("├─ ⚡ REDIS CACHE HIT: %s (%d blocks)\n", cacheKey, len(cachedBlocks))
+			// Build response from cached blocks
+			var blockNames []string
+			limit := 15
+			for i, b := range cachedBlocks {
+				if i >= limit {
+					break
+				}
+				blockNames = append(blockNames, b.BlockName)
+			}
+			
+			locationName := strings.Join(e.Locations, " ")
+			if locationName != "" {
+				r.Text = fmt.Sprintf("🔍 **%s Blocks in %s (%d total)**\n\n%s",
+					strings.Title(strings.ToLower(e.Category)),
+					strings.ToUpper(locationName),
+					len(cachedBlocks),
+					strings.Join(blockNames, ", "))
+			} else {
+				r.Text = fmt.Sprintf("🔍 **%s Blocks (%d total)**\n\n%s",
+					strings.Title(strings.ToLower(e.Category)),
+					len(cachedBlocks),
+					strings.Join(blockNames, ", "))
+			}
+			
+			if len(cachedBlocks) > limit {
+				r.Text += fmt.Sprintf("\n\n... and %d more blocks", len(cachedBlocks)-limit)
+			}
+			
+			fmt.Printf("└─ ✅ Returning cached list (0ms DB query)\n\n")
+			return r, nil
+		} else {
+			fmt.Printf("├─ ⚠️  Cache miss for blocks list, querying database...\n")
+		}
+	}
 	
 	var blocks []models.Block
 	var summaries []models.AssessmentSummary
@@ -2680,6 +2947,16 @@ func (s *ChatService) handleListBlocks(ctx context.Context, e Entities, r *model
 			
 			if len(blocks) > limit {
 				r.Text += fmt.Sprintf("\n\n... and %d more blocks", len(blocks)-limit)
+			}
+			
+			// Cache the blocks for future requests
+			if s.cache != nil && s.cache.IsEnabled() {
+				locationKey := locationName
+				if locationKey == "" {
+					locationKey = "all"
+				}
+				s.cache.SetBlocksByCategory(ctx, locationKey, e.Category, e.Year, blocks)
+				fmt.Printf("├─ ⚡ Cached %d blocks (TTL: 1 hour)\n", len(blocks))
 			}
 			
 			// Add chart

@@ -1,11 +1,12 @@
 # 🧠 COMPLETE CODE FLOW EXPLANATION - Ground Sense Bot
+
 ## From User Query → Intent Detection → SQL Generation → Graph Rendering
 
 ---
 
 ## 📊 ARCHITECTURE OVERVIEW
 
-```
+````
 ┌──────────────────────────────────────────────────────────────────────────┐
 │                         USER TYPES QUERY                                 │
 │                 "Compare Amritsar and Ludhiana"                          │
@@ -382,7 +383,7 @@
 │  - 4 different colors for 4 metrics                                      │
 │  - Interactive tooltips on hover                                         │
 └──────────────────────────────────────────────────────────────────────────┘
-```
+````
 
 ---
 
@@ -395,42 +396,43 @@
 ```go
 func (s *NLPService) determineIntent(msg string) Intent {
     msg = strings.ToLower(msg)
-    
+
     // COMPARE intent detection
-    if strings.Contains(msg, "compare") || 
-       strings.Contains(msg, "versus") || 
+    if strings.Contains(msg, "compare") ||
+       strings.Contains(msg, "versus") ||
        strings.Contains(msg, "vs") ||
        strings.Contains(msg, "difference between") {
         return IntentCompare
     }
-    
+
     // TREND intent detection
-    if strings.Contains(msg, "trend") || 
-       strings.Contains(msg, "over time") || 
+    if strings.Contains(msg, "trend") ||
+       strings.Contains(msg, "over time") ||
        strings.Contains(msg, "historical") ||
        strings.Contains(msg, "change") {
         return IntentTrend
     }
-    
+
     // LIST_BLOCKS intent detection
-    if (strings.Contains(msg, "list") || 
-        strings.Contains(msg, "show")) && 
+    if (strings.Contains(msg, "list") ||
+        strings.Contains(msg, "show")) &&
        strings.Contains(msg, "block") {
         return IntentListBlocks
     }
-    
+
     // MAP intent detection
-    if strings.Contains(msg, "map") || 
+    if strings.Contains(msg, "map") ||
        strings.Contains(msg, "geographic") {
         return IntentMapCategory
     }
-    
+
     // Default
     return IntentUnknown
 }
 ```
 
 **How it works**:
+
 - Takes lowercase message
 - Checks for keyword patterns
 - Returns the matching intent
@@ -450,7 +452,7 @@ func (s *NLPService) extractEntities(msg string) Entities {
         Year: "2024-2025",  // Default
         Metrics: []string{},
     }
-    
+
     // Extract locations (states, districts, blocks)
     // Check against known location names in database
     for _, state := range knownStates {
@@ -458,13 +460,13 @@ func (s *NLPService) extractEntities(msg string) Entities {
             entities.Locations = append(entities.Locations, state)
         }
     }
-    
+
     // Extract year if mentioned
     yearRegex := regexp.MustCompile(`\d{4}-\d{4}`)
     if match := yearRegex.FindString(msg); match != "" {
         entities.Year = match
     }
-    
+
     // Extract numeric thresholds
     // e.g., "rainfall > 500" extracts threshold=500, operator=">"
     thresholdRegex := regexp.MustCompile(`([<>]=?)\s*(\d+)`)
@@ -472,12 +474,13 @@ func (s *NLPService) extractEntities(msg string) Entities {
         entities.Operator = match[1]
         entities.Threshold, _ = strconv.ParseFloat(match[2], 64)
     }
-    
+
     return entities
 }
 ```
 
 **What it extracts**:
+
 - **Locations**: State/district/block names
 - **Year**: "2024-2025", "2023-2024", etc.
 - **Metrics**: "rainfall", "stage", "recharge", etc.
@@ -498,36 +501,37 @@ func (s *NLPService) generateDynamicSQL(message string, intent Intent, entities 
     - districts (district_uuid, district_name, state_uuid)
     - blocks (block_uuid, block_name, district_uuid, state_uuid)
     - assessments_summary (
-        block_uuid, year, rainfall, total_recharge, 
+        block_uuid, year, rainfall, total_recharge,
         total_extraction, stage, category
       )
-    
+
     CATEGORY VALUES: 'safe', 'semi_critical', 'critical', 'over_exploited'
-    
+
     USER QUERY: "%s"
-    
+
     Generate PostgreSQL query to answer this.
     `
-    
+
     prompt := fmt.Sprintf(schema, message)
-    
+
     // Use LLMService to generate SQL
     // Routes to Ollama (SQLCoder:7b) first, falls back to Gemini
     sqlText, err := s.llm.GenerateSQL(message, prompt)
     if err != nil {
         return "", fmt.Errorf("AI SQL generation failed: %w", err)
     }
-    
+
     // Validate SQL contains SELECT
     if !strings.Contains(strings.ToUpper(sqlText), "SELECT") {
         return "", fmt.Errorf("invalid SQL generated")
     }
-    
+
     return sqlText, nil
 }
 ```
 
 **Ollama/Gemini Integration** (`llm_service.go`):
+
 ```go
 func (s *LLMService) GenerateSQL(query string, schema string) (string, error) {
     // Try local Ollama first (SQLCoder:7b)
@@ -539,13 +543,14 @@ func (s *LLMService) GenerateSQL(query string, schema string) (string, error) {
         // Log error and fall through to Gemini
         log.Printf("Ollama failed: %v, falling back to Gemini", err)
     }
-    
+
     // Fallback to Gemini API
     return s.generateSQLWithGemini(ctx, query, schema)
 }
 ```
 
 **Why this approach**:
+
 - **Ollama SQLCoder** = Free, local, fast (~400ms)
 - **Gemini** = Paid, remote, fast (~200ms) but costs money
 - Ollama tries first, Gemini is backup
@@ -581,6 +586,7 @@ if len(results) == 0 {
 ```
 
 **Database repository** (`database_service.go`):
+
 ```go
 func (r *Repository) RunRawQuery(ctx context.Context, query string) ([]map[string]interface{}, error) {
     rows, err := r.db.QueryContext(ctx, query)
@@ -588,10 +594,10 @@ func (r *Repository) RunRawQuery(ctx context.Context, query string) ([]map[strin
         return nil, err
     }
     defer rows.Close()
-    
+
     // Get column names
     columns, _ := rows.Columns()
-    
+
     // Build result array
     var results []map[string]interface{}
     for rows.Next() {
@@ -601,18 +607,18 @@ func (r *Repository) RunRawQuery(ctx context.Context, query string) ([]map[strin
         for i := range values {
             valuePtrs[i] = &values[i]
         }
-        
+
         rows.Scan(valuePtrs...)
-        
+
         // Build map for this row
         rowMap := make(map[string]interface{})
         for i, col := range columns {
             rowMap[col] = values[i]
         }
-        
+
         results = append(results, rowMap)
     }
-    
+
     return results, nil
 }
 ```
@@ -626,14 +632,14 @@ func (r *Repository) RunRawQuery(ctx context.Context, query string) ([]map[strin
 ```go
 func (s *ChatService) compareDistricts(locations []string, year string) (*models.ChatResponse, error) {
     // ... SQL query execution ...
-    
+
     // Build ComparisonData payload
     comparisonData := &models.ComparisonData{
         ComparisonType: "district",
         Year: year,
         Locations: []models.ComparisonDataPoint{},
     }
-    
+
     // Process each row from database
     for _, row := range results {
         dataPoint := models.ComparisonDataPoint{
@@ -647,7 +653,7 @@ func (s *ChatService) compareDistricts(locations []string, year string) (*models
         }
         comparisonData.Locations = append(comparisonData.Locations, dataPoint)
     }
-    
+
     // Create chart response
     response := &models.ChatResponse{
         Text: fmt.Sprintf("Comparing %d districts...", len(locations)),
@@ -657,12 +663,13 @@ func (s *ChatService) compareDistricts(locations []string, year string) (*models
             ComparisonData: comparisonData,
         },
     }
-    
+
     return response, nil
 }
 ```
 
 **Data structure** (`backend/internal/models/chat.go`):
+
 ```go
 type ComparisonData struct {
     ComparisonType string                   `json:"comparisonType"` // "district", "state", "block"
@@ -690,78 +697,78 @@ type ComparisonDataPoint struct {
 ```typescript
 const ComparisonChart: React.FC<Props> = ({ data }) => {
   const { comparisonType, year, locations } = data;
-  
+
   // Extract location names for Y-axis
-  const locationNames = locations.map(loc => loc.name);
-  
+  const locationNames = locations.map((loc) => loc.name);
+
   // Build series for each metric
   const series = [
     {
       name: "Rainfall (mm)",
       type: "bar",
-      data: locations.map(loc => loc.rainfall),
-      itemStyle: { color: "#007BFF" }
+      data: locations.map((loc) => loc.rainfall),
+      itemStyle: { color: "#007BFF" },
     },
     {
       name: "Safe Blocks",
       type: "bar",
-      data: locations.map(loc => loc.safeBlocks),
-      itemStyle: { color: "#FFA500" }
+      data: locations.map((loc) => loc.safeBlocks),
+      itemStyle: { color: "#FFA500" },
     },
     {
       name: "Critical Blocks",
       type: "bar",
-      data: locations.map(loc => loc.criticalBlocks),
-      itemStyle: { color: "#9ACD32" }
+      data: locations.map((loc) => loc.criticalBlocks),
+      itemStyle: { color: "#9ACD32" },
     },
     {
       name: "Recharge (÷100)",
       type: "bar",
-      data: locations.map(loc => loc.recharge),
-      itemStyle: { color: "#4F5868" }
-    }
+      data: locations.map((loc) => loc.recharge),
+      itemStyle: { color: "#4F5868" },
+    },
   ];
-  
+
   // ECharts configuration for HORIZONTAL bars
   const option = {
     title: {
       text: `${comparisonType} Comparison - ${year}`,
       left: "center",
-      textStyle: { fontSize: 18, fontWeight: "bold" }
+      textStyle: { fontSize: 18, fontWeight: "bold" },
     },
     tooltip: {
       trigger: "axis",
-      axisPointer: { type: "shadow" }
+      axisPointer: { type: "shadow" },
     },
     legend: {
       top: 50,
-      data: series.map(s => s.name)
+      data: series.map((s) => s.name),
     },
     grid: {
-      left: "15%",    // Space for location names
+      left: "15%", // Space for location names
       right: "10%",
       bottom: "10%",
-      containLabel: true
+      containLabel: true,
     },
     xAxis: {
-      type: "value",  // Numeric values (horizontal)
-      name: "Value"
+      type: "value", // Numeric values (horizontal)
+      name: "Value",
     },
     yAxis: {
-      type: "category",  // Categories (vertical)
-      data: locationNames,  // ["Amritsar", "Ludhiana"]
+      type: "category", // Categories (vertical)
+      data: locationNames, // ["Amritsar", "Ludhiana"]
       axisLabel: {
         fontSize: 14,
-        fontWeight: 600
-      }
+        fontWeight: 600,
+      },
     },
-    series: series
+    series: series,
   };
-  
+
   return (
     <div className="comparison-chart-wrapper">
-      <ReactECharts 
-        option={option} 
+      <ReactECharts
+        option={option}
         style={{ height: "500px", width: "100%" }}
         opts={{ renderer: "svg" }}
       />
@@ -771,6 +778,7 @@ const ComparisonChart: React.FC<Props> = ({ data }) => {
 ```
 
 **ECharts renders**:
+
 - Y-axis = Location names (vertical)
 - X-axis = Numeric values (horizontal bars extending right)
 - 4 series = 4 different colored bars per location
@@ -803,26 +811,31 @@ const ComparisonChart: React.FC<Props> = ({ data }) => {
 ## 🔥 KEY OPTIMIZATION STRATEGIES
 
 ### 1. **Local Intent Detection**
+
 - No API calls for intent classification
 - Pattern matching is instant (~1ms)
 - Saves API costs
 
 ### 2. **Specialized Handlers**
+
 - Pre-optimized SQL for common queries
 - No LLM needed for COMPARE, TREND, LIST
 - Consistent performance
 
 ### 3. **Dynamic SQL Fallback**
+
 - Only used for unknown queries
 - Ollama (local) tries first
 - Gemini (API) is backup
 
 ### 4. **Data Structure Optimization**
+
 - ComparisonData has clear schema
 - Frontend knows exactly what to expect
 - No ambiguity in rendering
 
 ### 5. **Frontend Chart Templating**
+
 - Chart types are hardcoded (comparison-card, trend-card, etc.)
 - Only data is dynamic
 - Consistent UI/UX
@@ -832,6 +845,7 @@ const ComparisonChart: React.FC<Props> = ({ data }) => {
 ## 📚 FILES TO STUDY
 
 **Backend (Go)**:
+
 1. `backend/internal/services/nlp_service.go` - Intent detection & entity extraction
 2. `backend/internal/services/chat_service.go` - Message processing & handlers
 3. `backend/internal/services/llm_service.go` - Ollama & Gemini integration
@@ -839,6 +853,7 @@ const ComparisonChart: React.FC<Props> = ({ data }) => {
 5. `backend/pkg/websocket/handler.go` - WebSocket communication
 
 **Frontend (React)**:
+
 1. `src/hooks/useChatWebSocket.ts` - WebSocket client
 2. `src/components/INGRESAssistant.tsx` - Chat UI
 3. `src/components/charts/echarts/ChartRenderer.tsx` - Chart routing

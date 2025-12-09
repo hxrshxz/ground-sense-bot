@@ -3,6 +3,7 @@
 ## WHAT'S RUNNING
 
 ### ✅ Ollama Process Status
+
 ```
 Process ID: 4430
 Status: ACTIVE & RUNNING
@@ -13,6 +14,7 @@ Connection: http://localhost:11434 (RESPONDING)
 ```
 
 ### 🤖 Model Currently Loaded
+
 ```
 Name:           sqlcoder:7b
 Full Name:      sqlcoder:7b
@@ -26,6 +28,7 @@ Last Used:      December 8, 2025 @ 14:35:33 IST
 ```
 
 ### 📋 Model Details
+
 ```
 Model Family:       Llama-based (Meta LLaMA 2 or similar)
 Architecture:       Transformer (same as ChatGPT)
@@ -39,7 +42,9 @@ Inference Speed:    ~1-5 tokens/second (on CPU)
 ## WHERE IT'S USED IN YOUR CODEBASE
 
 ### Backend Configuration
+
 **File**: `backend/internal/config/config.go` (lines 138-141)
+
 ```go
 Ollama: OllamaConfig{
     Enabled: getEnvAsBool("OLLAMA_ENABLED", false),
@@ -49,7 +54,9 @@ Ollama: OllamaConfig{
 ```
 
 ### Environment Variables
+
 **File**: `backend/.env`
+
 ```
 OLLAMA_ENABLED=true
 OLLAMA_URL=http://localhost:11434
@@ -57,7 +64,9 @@ OLLAMA_MODEL=sqlcoder:7b
 ```
 
 ### LLM Service Integration
+
 **File**: `backend/internal/services/llm_service.go` (lines 120-130)
+
 ```go
 if useLocalLLM {
     ollamaClient = NewOllamaClient(cfg.Ollama.BaseURL, cfg.Ollama.Model)
@@ -76,7 +85,9 @@ if useLocalLLM {
 ## WHAT SQLCoder:7B DOES
 
 ### Purpose
+
 SQLCoder is a specialized model trained on SQL code generation. Given:
+
 - Database schema
 - Natural language question
 - Sample data
@@ -84,6 +95,7 @@ SQLCoder is a specialized model trained on SQL code generation. Given:
 It generates accurate SQL queries.
 
 ### Example: How It Works
+
 ```
 User Query: "List all blocks with extraction > 100 in Punjab"
      ↓
@@ -92,10 +104,10 @@ Backend sends to Ollama:
   - Question: "List all blocks with extraction > 100 in Punjab"
      ↓
 SQLCoder:7b generates SQL:
-  SELECT b.block_name, a.stage 
+  SELECT b.block_name, a.stage
   FROM assessments_summary a
   JOIN blocks b ON a.block_uuid = b.block_uuid
-  WHERE a.stage > 100 
+  WHERE a.stage > 100
     AND b.state_uuid = (SELECT state_uuid FROM states WHERE state_name = 'Punjab')
      ↓
 Query executes on PostgreSQL
@@ -108,6 +120,7 @@ Results sent to frontend
 ## PERFORMANCE CHARACTERISTICS
 
 ### Speed (On Current Hardware)
+
 ```
 Cold Start:      ~2-3 seconds (loading model to memory)
 Per Request:     ~400-800ms (depends on query complexity)
@@ -116,6 +129,7 @@ Throughput:      ~1-2 requests/second (CPU limited)
 ```
 
 ### Memory Usage
+
 ```
 Model Size:      ~4.1 GB (on disk)
 In Memory:       ~2.5 GB (loaded state, Q4_0 quantized)
@@ -123,6 +137,7 @@ System Free:     Check with: free -h
 ```
 
 ### Quality
+
 ```
 Accuracy:        ~85-95% for standard SQL patterns
 Edge Cases:      May fail on complex nested queries
@@ -134,6 +149,7 @@ Fallback:        If Ollama fails, system falls back to Gemini API
 ## HOW IT INTEGRATES WITH YOUR SYSTEM
 
 ### Architecture Flow
+
 ```
 User Query (Frontend)
     ↓
@@ -156,20 +172,23 @@ NLP Service (nlp_service.go)
 ```
 
 ### Code Path
+
 **File**: `backend/internal/services/nlp_service.go` (line 725)
+
 ```go
 // Use LLMService.GenerateSQL which routes to local Ollama (SQLCoder)
 sqlQuery, err := s.llm.GenerateSQL(ctx, message, schema, entities)
 ```
 
 **File**: `backend/internal/services/llm_service.go`
+
 ```go
 func (s *LLMService) GenerateSQL(ctx context.Context, query string, schema string, entities Entities) (string, error) {
     // First try Ollama (local, fast, free)
     if s.useLocalLLM && s.ollamaClient != nil {
         return s.ollamaClient.GenerateSQL(ctx, query, schema)
     }
-    
+
     // Fallback to Gemini (if Ollama fails)
     return s.generateSQLWithGemini(ctx, query, schema)
 }
@@ -180,6 +199,7 @@ func (s *LLMService) GenerateSQL(ctx context.Context, query string, schema strin
 ## ADVANTAGES OF SQLCoder:7B
 
 ### ✅ Advantages
+
 ```
 1. LOCAL (No API calls)
    - No latency waiting for remote server
@@ -210,6 +230,7 @@ func (s *LLMService) GenerateSQL(ctx context.Context, query string, schema strin
 ```
 
 ### ❌ Limitations
+
 ```
 1. Slower than Gemini
    - Gemini: ~100-200ms
@@ -235,11 +256,12 @@ func (s *LLMService) GenerateSQL(ctx context.Context, query string, schema strin
 ## FALLBACK STRATEGY
 
 ### When Ollama Fails
+
 ```
 Scenario 1: Ollama not responding
   → Automatically use Gemini API for text generation
   → User doesn't notice (transparent fallback)
-  
+
 Scenario 2: Ollama timeout (>5 seconds)
   → Fallback to Gemini SQL generation
   → Slightly slower but more reliable
@@ -250,6 +272,7 @@ Scenario 3: Both fail
 ```
 
 **Code** (`llm_service.go`):
+
 ```go
 if s.useLocalLLM && s.ollamaClient != nil {
     // Try local SQLCoder
@@ -269,6 +292,7 @@ return s.generateSQLWithGemini(ctx, query, schema)
 ## WHAT ABOUT QWEN?
 
 ### Current Status: NOT USING QWEN
+
 ```
 Your system: Using SQLCoder:7b (for SQL)
 NOT using: Qwen, Qwen2, or any Qwen variant
@@ -280,6 +304,7 @@ Why SQLCoder instead of Qwen?
 ```
 
 ### Could You Use Qwen?
+
 ```
 ✅ Yes, you COULD:
 - Download: ollama pull qwen:7b
@@ -298,12 +323,14 @@ Why SQLCoder instead of Qwen?
 ## TESTING OLLAMA
 
 ### Check if it's responding
+
 ```bash
 curl http://localhost:11434/api/tags
 # Returns: list of available models
 ```
 
 ### Test SQL generation
+
 ```bash
 curl http://localhost:11434/api/generate \
   -d '{
@@ -314,6 +341,7 @@ curl http://localhost:11434/api/generate \
 ```
 
 ### Monitor Ollama
+
 ```bash
 # Check logs
 journalctl -u ollama -f
@@ -330,6 +358,7 @@ curl http://localhost:11434/api/tags | jq .
 ## DOCKER COMPOSE SETUP
 
 **File**: `backend/docker-compose.yml` (lines 23-38)
+
 ```yaml
 ollama:
   image: ollama/ollama:latest
@@ -344,6 +373,7 @@ ollama:
 ```
 
 ### Start/Stop
+
 ```bash
 # Start Ollama (if not running via docker-compose)
 ollama serve
@@ -360,6 +390,7 @@ killall ollama
 ## PRODUCTION RECOMMENDATIONS
 
 ### For SIH (Current)
+
 ```
 ✅ Keep: SQLCoder:7b
 ✅ Keep: Local Ollama
@@ -369,6 +400,7 @@ Status: READY for demo
 ```
 
 ### For Production (Post-SIH)
+
 ```
 Consider:
 1. Separate Ollama server (on GPU machine)

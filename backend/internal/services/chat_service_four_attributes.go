@@ -19,7 +19,7 @@ import (
 // 4. Categorization
 // ============================================================================
 
-// handleStateQuery - Returns 4 key attributes for a state with drill-down options
+// handleStateQuery - Returns 4 key attributes for a state with GroundwaterMetricsCard visualization
 func (s *ChatService) handleStateQuery(ctx context.Context, stateName string, year string) (*models.ChatResponse, error) {
 	r := &models.ChatResponse{Intent: "state_query"}
 	
@@ -29,31 +29,50 @@ func (s *ChatService) handleStateQuery(ctx context.Context, stateName string, ye
 	
 	// Get state
 	state, err := s.ingres.GetStateByName(ctx, stateName)
+	fmt.Printf("├─ 🔍 DEBUG handleStateQuery: stateName='%s', state=%v, err=%v\n", stateName, state, err)
 	if err != nil || state == nil {
 		r.Text = fmt.Sprintf("❌ State '%s' not found. Try: Punjab, Haryana, Rajasthan, etc.", stateName)
 		r.Suggestions = []string{"Punjab groundwater status", "Haryana groundwater", "Show all states"}
 		return r, nil
 	}
 	
-	// Get aggregated data for state
-	query := fmt.Sprintf(`
-		SELECT 
-			COALESCE(SUM(a.total_extractable), 0) as extractable,
-			COALESCE(SUM(a.total_extraction), 0) as extraction,
-			ROUND(AVG(CASE WHEN a.stage > 0 AND a.stage < 1000 THEN a.stage ELSE NULL END)::numeric, 1) as avg_stage,
-			COUNT(DISTINCT b.block_uuid) as block_count,
-			COUNT(DISTINCT d.district_uuid) as district_count,
-			(SELECT category FROM assessments_summary a2 
-			 JOIN blocks b2 ON a2.block_uuid = b2.block_uuid 
-			 WHERE b2.state_uuid = '%s' AND a2.year = '%s'
-			 GROUP BY category ORDER BY COUNT(*) DESC LIMIT 1) as dominant_category
-		FROM assessments_summary a
-		JOIN blocks b ON a.block_uuid = b.block_uuid
-		JOIN districts d ON b.district_uuid = d.district_uuid
-		WHERE b.state_uuid = '%s' AND a.year = '%s'
-	`, state.StateUUID, year, state.StateUUID, year)
+	fmt.Printf("├─ ✅ State found: UUID=%s, Name=%s\n", state.StateUUID, state.StateName)
 	
+	// COMPREHENSIVE query with category breakdown
+	query := fmt.Sprintf(`
+		WITH block_data AS (
+			SELECT 
+				a.total_extractable,
+				a.total_extraction,
+				a.stage,
+				a.category
+			FROM assessments_summary a
+			JOIN blocks b ON a.block_uuid = b.block_uuid
+			WHERE b.state_uuid = '%s' AND a.year = '%s'
+		),
+		category_counts AS (
+			SELECT 
+				COALESCE(LOWER(category), 'unknown') as cat,
+				COUNT(*) as cnt
+			FROM block_data
+			GROUP BY LOWER(category)
+		)
+		SELECT 
+			(SELECT COALESCE(SUM(total_extractable), 0) FROM block_data) as extractable,
+			(SELECT COALESCE(SUM(total_extraction), 0) FROM block_data) as extraction,
+			(SELECT ROUND(AVG(CASE WHEN stage > 0 AND stage < 1000 THEN stage ELSE NULL END)::numeric, 1) FROM block_data) as avg_stage,
+			(SELECT COUNT(*) FROM block_data) as block_count,
+			(SELECT COUNT(DISTINCT d.district_uuid) FROM districts d WHERE d.state_uuid = '%s') as district_count,
+			(SELECT cnt FROM category_counts WHERE cat = 'safe') as safe_count,
+			(SELECT cnt FROM category_counts WHERE cat = 'semi_critical' OR cat = 'semi-critical') as semi_critical_count,
+			(SELECT cnt FROM category_counts WHERE cat = 'critical') as critical_count,
+			(SELECT cnt FROM category_counts WHERE cat LIKE '%%over%%') as over_exploited_count,
+			(SELECT cat FROM category_counts ORDER BY cnt DESC LIMIT 1) as dominant_category
+	`, state.StateUUID, year, state.StateUUID)
+	
+	fmt.Printf("├─ 🗄️ Executing SQL query for state...\n")
 	results, err := s.ingres.repo.RunRawQuery(ctx, query)
+	fmt.Printf("├─ 🔍 DEBUG SQL results: len=%d, err=%v\n", len(results), err)
 	if err != nil || len(results) == 0 {
 		r.Text = fmt.Sprintf("❌ No data found for %s in %s", state.StateName, year)
 		return r, nil
@@ -65,64 +84,100 @@ func (s *ChatService) handleStateQuery(ctx context.Context, stateName string, ye
 	avgStage := getFloat(row, "avg_stage")
 	blockCount := int(getFloat(row, "block_count"))
 	districtCount := int(getFloat(row, "district_count"))
+	safeCount := int(getFloat(row, "safe_count"))
+	semiCriticalCount := int(getFloat(row, "semi_critical_count"))
+	criticalCount := int(getFloat(row, "critical_count"))
+	overExploitedCount := int(getFloat(row, "over_exploited_count"))
 	category := getString(row, "dominant_category")
 	
-	// Determine category description
 	categoryDisplay := formatCategory(category)
 	stageStatus := getStageStatus(avgStage)
 	
-	// Build focused response text
-	r.Text = fmt.Sprintf(`🏛️ **%s** (State Level) - %s
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+	// Calculate balance
+	balance := extractable - extraction
+	balanceStatus := "Surplus"
+	balanceEmoji := "✅"
+	if balance < 0 {
+		balanceStatus = "Deficit"
+		balanceEmoji = "⚠️"
+	}
+	
+	// Build comprehensive response
+	r.Text = fmt.Sprintf(`🏛️ **%s State** - Comprehensive Analysis (%s)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 📊 **THE 4 KEY GROUNDWATER ATTRIBUTES:**
 
-1️⃣ **Annual Extractable GW Resources:** %.2f MCM
-2️⃣ **Annual GW Extraction:** %.2f MCM
-3️⃣ **Stage of Extraction:** %.1f%% (%s)
-4️⃣ **Dominant Category:** %s
+┌─────────────────────────────────────────────┐
+│  1️⃣ Extractable GW Resources: **%.2f MCM** │
+│  2️⃣ Annual GW Extraction:    **%.2f MCM**  │
+│  3️⃣ Stage of Extraction:     **%.1f%%** (%s) │
+│  4️⃣ Dominant Category:       **%s**        │
+└─────────────────────────────────────────────┘
+
+💧 **Groundwater Balance:** %.2f MCM %s (%s)
 
 📍 **Coverage:** %d Districts | %d Blocks
 
-🔍 **Drill-down:** Type "Show districts in %s" to see district-wise breakdown`,
+📈 **Block Category Distribution:**
+   🟢 Safe: %d blocks
+   🟡 Semi-Critical: %d blocks
+   🟠 Critical: %d blocks
+   🔴 Over-Exploited: %d blocks`,
 		state.StateName, year,
 		extractable, extraction, avgStage, stageStatus, categoryDisplay,
-		districtCount, blockCount, state.StateName)
+		balance, balanceEmoji, balanceStatus,
+		districtCount, blockCount,
+		safeCount, semiCriticalCount, criticalCount, overExploitedCount)
 	
-	// Set data
-	r.Data = &models.FourAttributeData{
-		LocationName: state.StateName,
-		LocationType: "state",
-		Year:         year,
-		Extractable:  extractable,
-		Extraction:   extraction,
-		Stage:        avgStage,
-		Category:     category,
-		ChildCount:   districtCount,
-		ChildType:    "districts",
+	// Use metrics-card chart type with comprehensive data
+	r.Chart = &models.ChartPayload{
+		Type:  "metrics-card",
+		Title: fmt.Sprintf("%s State - Groundwater Dashboard", state.StateName),
+		MetricsData: &models.MetricsData{
+			LocationName:       state.StateName,
+			LocationType:       "state",
+			Year:               year,
+			TotalExtractable:   extractable,
+			TotalExtraction:    extraction,
+			Stage:              avgStage,
+			Category:           category,
+			TotalBlocks:        blockCount,
+			SafeBlocks:         safeCount,
+			SemiCriticalBlocks: semiCriticalCount,
+			CriticalBlocks:     criticalCount,
+			OverExploitedBlocks: overExploitedCount,
+		},
 	}
 	
-	// Add drill-down suggestions
+	// Context-aware suggestions
 	r.Suggestions = []string{
 		fmt.Sprintf("Show districts in %s", state.StateName),
 		fmt.Sprintf("Critical blocks in %s", state.StateName),
+		fmt.Sprintf("Over-exploited blocks in %s", state.StateName),
 		fmt.Sprintf("Compare %s with Haryana", state.StateName),
 	}
 	
-	// Add simple comparison chart
-	r.Chart = &models.ChartPayload{
-		Type:  "brush-bar",
-		Title: fmt.Sprintf("%s - Groundwater Balance", state.StateName),
-		XAxis: map[string]interface{}{"data": []string{"Extractable GW", "GW Extraction"}},
-		Series: []models.ChartSeries{
-			{Name: "MCM", Data: []float64{extractable, extraction}, Type: "bar"},
-		},
+	// Set structured data for API consumers
+	r.Data = &models.MetricsData{
+		LocationName:       state.StateName,
+		LocationType:       "state",
+		Year:               year,
+		TotalExtractable:   extractable,
+		TotalExtraction:    extraction,
+		Stage:              avgStage,
+		Category:           category,
+		TotalBlocks:        blockCount,
+		SafeBlocks:         safeCount,
+		SemiCriticalBlocks: semiCriticalCount,
+		CriticalBlocks:     criticalCount,
+		OverExploitedBlocks: overExploitedCount,
 	}
 	
 	return r, nil
 }
 
-// handleDistrictQuery - Returns 4 key attributes for a district
+// handleDistrictQuery - Returns COMPREHENSIVE 4 key attributes for a district with beautiful visualizations
 func (s *ChatService) handleDistrictQuery(ctx context.Context, districtName string, year string) (*models.ChatResponse, error) {
 	r := &models.ChatResponse{Intent: "district_query"}
 	
@@ -144,21 +199,37 @@ func (s *ChatService) handleDistrictQuery(ctx context.Context, districtName stri
 		stateName = state.StateName
 	}
 	
-	// Get aggregated data for district
+	// COMPREHENSIVE QUERY: Get all block data + category counts + aggregates
 	query := fmt.Sprintf(`
+		WITH block_data AS (
+			SELECT 
+				b.block_name,
+				a.total_extractable,
+				a.total_extraction,
+				a.stage,
+				a.category
+			FROM assessments_summary a
+			JOIN blocks b ON a.block_uuid = b.block_uuid
+			WHERE b.district_uuid = '%s' AND a.year = '%s'
+		),
+		category_counts AS (
+			SELECT 
+				COALESCE(LOWER(category), 'unknown') as cat,
+				COUNT(*) as cnt
+			FROM block_data
+			GROUP BY LOWER(category)
+		)
 		SELECT 
-			COALESCE(SUM(a.total_extractable), 0) as extractable,
-			COALESCE(SUM(a.total_extraction), 0) as extraction,
-			ROUND(AVG(CASE WHEN a.stage > 0 AND a.stage < 1000 THEN a.stage ELSE NULL END)::numeric, 1) as avg_stage,
-			COUNT(DISTINCT b.block_uuid) as block_count,
-			(SELECT category FROM assessments_summary a2 
-			 JOIN blocks b2 ON a2.block_uuid = b2.block_uuid 
-			 WHERE b2.district_uuid = '%s' AND a2.year = '%s'
-			 GROUP BY category ORDER BY COUNT(*) DESC LIMIT 1) as dominant_category
-		FROM assessments_summary a
-		JOIN blocks b ON a.block_uuid = b.block_uuid
-		WHERE b.district_uuid = '%s' AND a.year = '%s'
-	`, district.DistrictUUID, year, district.DistrictUUID, year)
+			(SELECT COALESCE(SUM(total_extractable), 0) FROM block_data) as extractable,
+			(SELECT COALESCE(SUM(total_extraction), 0) FROM block_data) as extraction,
+			(SELECT ROUND(AVG(CASE WHEN stage > 0 AND stage < 1000 THEN stage ELSE NULL END)::numeric, 1) FROM block_data) as avg_stage,
+			(SELECT COUNT(*) FROM block_data) as block_count,
+			(SELECT cnt FROM category_counts WHERE cat = 'safe') as safe_count,
+			(SELECT cnt FROM category_counts WHERE cat = 'semi_critical') as semi_critical_count,
+			(SELECT cnt FROM category_counts WHERE cat = 'critical') as critical_count,
+			(SELECT cnt FROM category_counts WHERE cat = 'over_exploited') as over_exploited_count,
+			(SELECT cat FROM category_counts ORDER BY cnt DESC LIMIT 1) as dominant_category
+	`, district.DistrictUUID, year)
 	
 	results, err := s.ingres.repo.RunRawQuery(ctx, query)
 	if err != nil || len(results) == 0 {
@@ -171,54 +242,114 @@ func (s *ChatService) handleDistrictQuery(ctx context.Context, districtName stri
 	extraction := getFloat(row, "extraction")
 	avgStage := getFloat(row, "avg_stage")
 	blockCount := int(getFloat(row, "block_count"))
+	safeCount := int(getFloat(row, "safe_count"))
+	semiCriticalCount := int(getFloat(row, "semi_critical_count"))
+	criticalCount := int(getFloat(row, "critical_count"))
+	overExploitedCount := int(getFloat(row, "over_exploited_count"))
 	category := getString(row, "dominant_category")
 	
 	categoryDisplay := formatCategory(category)
 	stageStatus := getStageStatus(avgStage)
 	
-	r.Text = fmt.Sprintf(`🏢 **%s District** (%s) - %s
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+	// Calculate balance
+	balance := extractable - extraction
+	balanceStatus := "Surplus"
+	balanceEmoji := "✅"
+	if balance < 0 {
+		balanceStatus = "Deficit"
+		balanceEmoji = "⚠️"
+	}
+	
+	// Build COMPREHENSIVE response text
+	r.Text = fmt.Sprintf(`🏢 **%s District** - Comprehensive Analysis (%s)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📍 **Location:** %s State
 
 📊 **THE 4 KEY GROUNDWATER ATTRIBUTES:**
 
-1️⃣ **Annual Extractable GW Resources:** %.2f MCM
-2️⃣ **Annual GW Extraction:** %.2f MCM
-3️⃣ **Stage of Extraction:** %.1f%% (%s)
-4️⃣ **Dominant Category:** %s
+┌─────────────────────────────────────────────┐
+│  1️⃣ Extractable GW Resources: **%.2f MCM** │
+│  2️⃣ Annual GW Extraction:    **%.2f MCM**  │
+│  3️⃣ Stage of Extraction:     **%.1f%%** (%s) │
+│  4️⃣ Dominant Category:       **%s**        │
+└─────────────────────────────────────────────┘
 
-📍 **Coverage:** %d Blocks
+💧 **Groundwater Balance:** %.2f MCM %s (%s)
 
-⬆️ **Parent:** %s State
-🔍 **Drill-down:** Type "Show blocks in %s" for block-level details`,
-		district.DistrictName, stateName, year,
+📈 **Block-wise Category Distribution (%d blocks):**
+   🟢 Safe: %d blocks
+   🟡 Semi-Critical: %d blocks
+   🟠 Critical: %d blocks
+   🔴 Over-Exploited: %d blocks
+
+🔍 **Explore More:**
+   • "Show blocks in %s" - See all blocks with their status
+   • "Critical blocks in %s" - Focus on critical areas
+   • "%s state overview" - Go up to state level`,
+		district.DistrictName, year,
+		stateName,
 		extractable, extraction, avgStage, stageStatus, categoryDisplay,
-		blockCount, stateName, district.DistrictName)
+		balance, balanceEmoji, balanceStatus,
+		blockCount, safeCount, semiCriticalCount, criticalCount, overExploitedCount,
+		district.DistrictName, district.DistrictName, stateName)
 	
-	r.Data = &models.FourAttributeData{
-		LocationName: district.DistrictName,
-		LocationType: "district",
-		Year:         year,
-		Extractable:  extractable,
-		Extraction:   extraction,
-		Stage:        avgStage,
-		Category:     category,
-		ParentName:   stateName,
-		ParentType:   "state",
-		ChildCount:   blockCount,
-		ChildType:    "blocks",
+	// Set structured data with metrics
+	r.Data = &models.MetricsData{
+		LocationName:        district.DistrictName,
+		LocationType:        "district",
+		Year:               year,
+		TotalExtractable:   extractable,
+		TotalExtraction:    extraction,
+		Stage:              avgStage,
+		Category:           category,
+		TotalBlocks:        blockCount,
+		SafeBlocks:         safeCount,
+		SemiCriticalBlocks: semiCriticalCount,
+		CriticalBlocks:     criticalCount,
+		OverExploitedBlocks: overExploitedCount,
 	}
 	
+	// Add follow-up suggestions
 	r.Suggestions = []string{
 		fmt.Sprintf("Show blocks in %s", district.DistrictName),
+		fmt.Sprintf("Critical blocks in %s", district.DistrictName),
+		fmt.Sprintf("Compare %s with other districts", district.DistrictName),
 		fmt.Sprintf("%s state overview", stateName),
 	}
 	
+	// Create BEAUTIFUL PIE CHART showing category distribution
+	pieData := []models.PieDatum{}
+	if safeCount > 0 {
+		pieData = append(pieData, models.PieDatum{Name: "🟢 Safe", Value: float64(safeCount)})
+	}
+	if semiCriticalCount > 0 {
+		pieData = append(pieData, models.PieDatum{Name: "🟡 Semi-Critical", Value: float64(semiCriticalCount)})
+	}
+	if criticalCount > 0 {
+		pieData = append(pieData, models.PieDatum{Name: "🟠 Critical", Value: float64(criticalCount)})
+	}
+	if overExploitedCount > 0 {
+		pieData = append(pieData, models.PieDatum{Name: "🔴 Over-Exploited", Value: float64(overExploitedCount)})
+	}
+	
 	r.Chart = &models.ChartPayload{
-		Type:  "brush-bar",
-		Title: fmt.Sprintf("%s District - Groundwater Balance", district.DistrictName),
-		XAxis: map[string]interface{}{"data": []string{"Extractable GW", "GW Extraction"}},
-		Series: []models.ChartSeries{
-			{Name: "MCM", Data: []float64{extractable, extraction}, Type: "bar"},
+		Type:    "rose-pie",
+		Title:   fmt.Sprintf("%s District - Block Category Distribution", district.DistrictName),
+		PieData: pieData,
+		MetricsData: &models.MetricsData{
+			LocationName:        district.DistrictName,
+			LocationType:        "district",
+			Year:               year,
+			TotalExtractable:   extractable,
+			TotalExtraction:    extraction,
+			Stage:              avgStage,
+			Category:           category,
+			TotalBlocks:        blockCount,
+			SafeBlocks:         safeCount,
+			SemiCriticalBlocks: semiCriticalCount,
+			CriticalBlocks:     criticalCount,
+			OverExploitedBlocks: overExploitedCount,
 		},
 	}
 	
@@ -684,3 +815,86 @@ func sortByStageDesc(items []models.HierarchyItem) {
 		return items[i].Stage > items[j].Stage
 	})
 }
+
+// handleWelcome - Returns welcome message with guidance on the 4 key attributes
+func (s *ChatService) handleWelcome(ctx context.Context) (*models.ChatResponse, error) {
+	r := &models.ChatResponse{Intent: "welcome"}
+	
+	r.Text = `👋 **Welcome to India Groundwater Information System!**
+
+I help you explore groundwater data focused on **The 4 Key Attributes:**
+
+📊 **1. Annual Extractable GW Resources** - How much water can be safely extracted
+📈 **2. Annual GW Extraction** - How much water is actually being extracted  
+📉 **3. Stage of Extraction** - Extraction as a % of available resources
+🏷️ **4. Categorization** - Safe / Semi-Critical / Critical / Over-Exploited
+
+🗺️ **Navigation Hierarchy:**
+**State** → **District** → **Block** (most granular)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**Try asking:**
+• "Punjab groundwater status" 
+• "Show districts in Punjab"
+• "Show blocks in Ludhiana"
+• "Compare Punjab and Haryana"
+
+💡 I'll guide you through the data at each level!`
+	
+	r.Suggestions = []string{
+		"Show all states",
+		"Punjab groundwater status",
+		"Haryana groundwater status",
+		"Critical blocks in India",
+	}
+	
+	return r, nil
+}
+
+// handleUnknownQuery - Guides users to ask about the 4 key attributes
+func (s *ChatService) handleUnknownQuery(ctx context.Context, originalQuery string) (*models.ChatResponse, error) {
+	r := &models.ChatResponse{Intent: "guidance"}
+	
+	r.Text = fmt.Sprintf(`🤔 I understand you asked about: "%s"
+
+Let me help you find the right information! I specialize in **The 4 Key Groundwater Attributes:**
+
+1️⃣ **Extractable GW Resources** (total available)
+2️⃣ **GW Extraction** (actual usage)
+3️⃣ **Stage of Extraction** (usage percentage)
+4️⃣ **Category** (safe/critical/over-exploited)
+
+📍 **Ask about any location at three levels:**
+• **State Level:** "Punjab groundwater status"
+• **District Level:** "Ludhiana district groundwater"
+• **Block Level:** "Sunam block details"
+
+⬇️ **Or try these suggestions:**`, originalQuery)
+	
+	r.Suggestions = []string{
+		"Show all states",
+		"Punjab groundwater status",
+		"Show districts in Haryana",
+		"Critical blocks in Punjab",
+	}
+	
+	return r, nil
+}
+
+// isGreeting checks if the message is a greeting
+func isGreeting(message string) bool {
+	greetings := []string{
+		"hello", "hi", "hey", "greetings", "good morning", 
+		"good afternoon", "good evening", "namaste", "welcome",
+		"start", "help", "assist", "what can you do",
+	}
+	msgLower := strings.ToLower(strings.TrimSpace(message))
+	for _, g := range greetings {
+		if strings.Contains(msgLower, g) {
+			return true
+		}
+	}
+	return len(msgLower) < 3 // Very short messages are likely greetings
+}
+

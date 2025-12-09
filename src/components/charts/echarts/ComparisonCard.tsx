@@ -430,7 +430,7 @@ const ComparisonCard: React.FC<ComparisonCardProps> = ({ data }) => {
                     {highestExtraction.locationName}
                   </span>{" "}
                   has the highest extraction rate at{" "}
-                  {highestExtraction.extraction.toFixed(1)} MCM.
+                  {highestExtraction.extraction.toFixed(1)} ham.
                 </p>
                 <p>
                   <span className="text-purple-400 font-semibold">

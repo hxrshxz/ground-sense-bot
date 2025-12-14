@@ -47,6 +47,7 @@ India's groundwater crisis affects 700+ million people, with over 1,000 blocks c
 ### Our Solution
 
 A production-ready AI chatbot that:
+
 - ✅ Understands natural language queries in English and Indian languages
 - ✅ Provides instant access to 27,000+ groundwater assessments
 - ✅ Generates interactive visualizations automatically
@@ -64,12 +65,14 @@ A production-ready AI chatbot that:
 ### Background
 
 The Assessment of Dynamic Ground Water Resources of India is conducted annually by CGWB and State/UT Ground Water Departments. The INGRES web application estimates:
+
 - Annual groundwater recharge
 - Extractable resources
 - Total extraction
 - Stage of groundwater extraction
 
 Each assessment unit (Block/Mandal/Taluk) is categorized as:
+
 - **Safe** (<70% extraction)
 - **Semi-Critical** (70-90%)
 - **Critical** (90-100%)
@@ -81,7 +84,7 @@ Each assessment unit (Block/Mandal/Taluk) is categorized as:
 ✅ Real-time access to current and historical assessments  
 ✅ Interactive scientific diagrams and visualizations  
 ✅ Multilingual support including Indian regional languages  
-✅ Seamless INGRES database integration  
+✅ Seamless INGRES database integration
 
 ---
 
@@ -166,18 +169,21 @@ Each assessment unit (Block/Mandal/Taluk) is categorized as:
 ### 🤖 Advanced AI Capabilities
 
 #### 1. Local LLM Integration (Qwen 2.5 Coder)
+
 - **Zero API Costs**: Runs on local Ollama server
 - **SQL Generation**: Natural language → SQL without hardcoded templates
 - **7B Parameters**: Optimized for code generation
 - **Offline Support**: No internet dependency for query generation
 
 #### 2. RAG (Retrieval-Augmented Generation)
+
 - **Hybrid Search**: Combines keyword (BM25) + semantic (cosine similarity)
 - **27K+ Embeddings**: Gemini text-embedding-004 (768D vectors)
 - **95%+ Accuracy**: Grounded responses from actual assessment data
 - **Reranking**: Gemini reranker for optimal result ordering
 
 #### 3. NLP Query Understanding
+
 - **17+ Query Patterns**: SUMMARY, TREND, COMPARE, TOP_RANKING, etc.
 - **Entity Extraction**: Automatic detection of states, districts, blocks, years
 - **Intent Classification**: Routes to appropriate service handlers
@@ -186,6 +192,7 @@ Each assessment unit (Block/Mandal/Taluk) is categorized as:
 ### 📊 Visualization System
 
 #### 16+ Chart Types
+
 - **Gradient Area Charts**: Extraction trends over time
 - **Stacked Bar Charts**: Multi-metric rankings
 - **Donut Charts**: Recharge composition breakdown
@@ -196,6 +203,7 @@ Each assessment unit (Block/Mandal/Taluk) is categorized as:
 - **Sparklines**: KPI indicators
 
 #### Dynamic Chart Generation
+
 - AI selects optimal chart type based on data structure
 - Automatic color coding (Red: Critical, Orange: High, Green: Safe)
 - Interactive tooltips with detailed breakdowns
@@ -229,6 +237,7 @@ Each assessment unit (Block/Mandal/Taluk) is categorized as:
 ## 🛠️ Technology Stack
 
 ### Frontend
+
 ```javascript
 {
   "framework": "React 18.3.1 + TypeScript",
@@ -243,6 +252,7 @@ Each assessment unit (Block/Mandal/Taluk) is categorized as:
 ```
 
 ### Backend
+
 ```go
 {
   "language": "Go 1.24",
@@ -255,6 +265,7 @@ Each assessment unit (Block/Mandal/Taluk) is categorized as:
 ```
 
 ### Database & AI
+
 ```yaml
 PostgreSQL: 16 + pgvector extension
 Redis: 7-alpine with AOF persistence
@@ -263,6 +274,7 @@ Gemini: text-embedding-004 (768D embeddings)
 ```
 
 ### DevOps
+
 ```yaml
 Containerization: Docker + Docker Compose
 Orchestration: docker-compose.yml
@@ -292,12 +304,14 @@ CI/CD: Vercel (frontend) + Self-hosted (backend)
 ### Installation
 
 #### 1. Clone Repository
+
 ```bash
 git clone https://github.com/hxrshxz/ground-sense-bot.git
 cd ground-sense-bot
 ```
 
 #### 2. Install Ollama & Model
+
 ```bash
 # Install Ollama (Linux/Mac)
 curl -fsSL https://ollama.com/install.sh | sh
@@ -310,12 +324,14 @@ ollama list | grep qwen
 ```
 
 #### 3. Start Backend (One Command!)
+
 ```bash
 cd backend
 ./start.sh
 ```
 
 This automatically:
+
 - ✅ Starts PostgreSQL with pgvector (port 5433)
 - ✅ Starts Redis with persistence
 - ✅ Builds and starts Go backend (port 8080)
@@ -323,6 +339,7 @@ This automatically:
 - ✅ Initializes RAG system
 
 #### 4. Start Frontend
+
 ```bash
 # In a new terminal
 cd ..
@@ -333,6 +350,7 @@ npm run dev
 Frontend runs on: `http://localhost:5173`
 
 #### 5. Verify Everything Works
+
 ```bash
 # Check backend health
 curl http://localhost:8080/api/v1/health
@@ -473,12 +491,12 @@ CREATE TABLE assessments_extraction_breakdown (...);
 
 ```sql
 -- Vector similarity search (IVFFlat for large datasets)
-CREATE INDEX idx_assessments_embedding 
+CREATE INDEX idx_assessments_embedding
 ON assessments_summary USING ivfflat (embedding vector_cosine_ops)
 WITH (lists = 100);
 
 -- Full-text keyword search
-CREATE INDEX idx_assessments_search_vector 
+CREATE INDEX idx_assessments_search_vector
 ON assessments_summary USING GIN(search_vector);
 
 -- Common query filters
@@ -495,6 +513,7 @@ CREATE INDEX idx_blocks_state ON blocks(state_uuid);
 ### REST API Endpoints
 
 #### Health Check
+
 ```http
 GET /api/v1/health
 
@@ -509,6 +528,7 @@ Response:
 ```
 
 #### RAG Hybrid Search
+
 ```http
 POST /api/v1/rag/search
 Content-Type: application/json
@@ -545,6 +565,7 @@ Response:
 ```
 
 #### Get Assessment Details
+
 ```http
 GET /api/v1/rag/assessment/{block_uuid}?year=2024-2025
 
@@ -565,15 +586,17 @@ Response:
 ### WebSocket Protocol
 
 #### Connection
+
 ```javascript
-const ws = new WebSocket('ws://localhost:8080/ws');
+const ws = new WebSocket("ws://localhost:8080/ws");
 
 ws.onopen = () => {
-  console.log('Connected to GroundSense Bot');
+  console.log("Connected to GroundSense Bot");
 };
 ```
 
 #### Message Format
+
 ```javascript
 // Client → Server
 {
@@ -608,6 +631,7 @@ ws.onopen = () => {
 ### Supported Query Types
 
 #### 1. SUMMARY - Single Location Status
+
 ```
 Query: "What is the status of Punjab?"
 Intent: SUMMARY
@@ -617,6 +641,7 @@ Visualization: Donut chart + KPI cards
 ```
 
 #### 2. TREND - Historical Analysis
+
 ```
 Query: "Show me trend for Punjab over time"
 Intent: TREND
@@ -626,6 +651,7 @@ Visualization: Gradient area chart with trend lines
 ```
 
 #### 3. COMPARE - Location Comparison
+
 ```
 Query: "Compare Punjab and Haryana"
 Intent: COMPARE
@@ -635,6 +661,7 @@ Visualization: Multi-series bar chart
 ```
 
 #### 4. TOP_RANKING - Best/Worst Lists
+
 ```
 Query: "Top 10 over-exploited blocks"
 Intent: TOP_RANKING
@@ -644,6 +671,7 @@ Visualization: Horizontal stacked bar chart
 ```
 
 #### 5. CATEGORY_FILTER - Status-Based Queries
+
 ```
 Query: "Show me critical blocks in Rajasthan"
 Intent: CATEGORY_FILTER
@@ -653,6 +681,7 @@ Visualization: Map + table view
 ```
 
 #### 6. METRIC_SPECIFIC - Focus on Single Metric
+
 ```
 Query: "Which districts have highest extraction?"
 Intent: METRIC_SPECIFIC
@@ -662,6 +691,7 @@ Visualization: Horizontal bar chart
 ```
 
 #### 7. RAINFALL_CORRELATION - Climate Impact
+
 ```
 Query: "How does rainfall affect recharge in Gujarat?"
 Intent: RAINFALL_CORRELATION
@@ -767,17 +797,17 @@ def ingest_assessment(assessment_data):
     Total Extraction: {total_extraction} MCM
     Net Availability: {availability} MCM
     """
-    
+
     # 2. Generate Gemini embedding (768D)
     embedding = gemini.embed(text, task_type="retrieval_document")
-    
+
     # 3. Store in PostgreSQL
     db.execute("""
-        INSERT INTO assessments_summary 
+        INSERT INTO assessments_summary
         (block_uuid, year, text_representation, embedding, ...)
         VALUES ($1, $2, $3, $4, ...)
     """, block_uuid, year, text, embedding)
-    
+
     # 4. Update search vector for keyword search
     db.execute("""
         UPDATE assessments_summary
@@ -806,9 +836,9 @@ func (s *RAGService) keywordSearch(query string) []SearchResult {
 func (s *RAGService) semanticSearch(query string) []SearchResult {
     // Generate query embedding
     queryEmbedding := gemini.Embed(query, "retrieval_query")
-    
+
     sql := `
-        SELECT a.*, 
+        SELECT a.*,
                1 - (embedding <=> $1::vector) as score
         FROM assessments_summary a
         ORDER BY embedding <=> $1::vector
@@ -825,7 +855,7 @@ func (s *RAGService) rerank(query string, docs []SearchResult) []SearchResult {
         Documents: extractTexts(docs),
         TopN:      10,
     }
-    
+
     rankings := gemini.Rerank(req)
     return reorderByRankings(docs, rankings)
 }
@@ -859,34 +889,34 @@ const chartConfig = llm.generateVisualization(queryResults, intent);
 
 ### Chart Types & Use Cases
 
-| Chart Type | Use Case | Example Query |
-|------------|----------|---------------|
-| **Gradient Area** | Time series trends | "Punjab extraction over time" |
-| **Stacked Bar** | Multi-metric rankings | "Top 10 over-exploited blocks" |
-| **Donut** | Category distribution | "Breakdown of block categories" |
-| **Radar** | Multi-dimensional analysis | "Risk factors for Punjab" |
-| **Heatmap** | Geospatial patterns | "Extraction intensity map" |
-| **Rose** | Sectoral breakdown | "Water usage by sector" |
-| **Sparkline** | Quick KPI indicators | "Stage trend mini-chart" |
-| **Timeline** | Historical comparison | "Compare 2021 vs 2024" |
+| Chart Type        | Use Case                   | Example Query                   |
+| ----------------- | -------------------------- | ------------------------------- |
+| **Gradient Area** | Time series trends         | "Punjab extraction over time"   |
+| **Stacked Bar**   | Multi-metric rankings      | "Top 10 over-exploited blocks"  |
+| **Donut**         | Category distribution      | "Breakdown of block categories" |
+| **Radar**         | Multi-dimensional analysis | "Risk factors for Punjab"       |
+| **Heatmap**       | Geospatial patterns        | "Extraction intensity map"      |
+| **Rose**          | Sectoral breakdown         | "Water usage by sector"         |
+| **Sparkline**     | Quick KPI indicators       | "Stage trend mini-chart"        |
+| **Timeline**      | Historical comparison      | "Compare 2021 vs 2024"          |
 
 ### Color Coding Standards
 
 ```typescript
 const CATEGORY_COLORS = {
-  over_exploited: '#ef4444',  // Red
-  critical: '#f97316',        // Orange
-  semi_critical: '#eab308',   // Yellow
-  safe: '#22c55e',            // Green
-  salinity: '#8b5cf6'         // Purple
+  over_exploited: "#ef4444", // Red
+  critical: "#f97316", // Orange
+  semi_critical: "#eab308", // Yellow
+  safe: "#22c55e", // Green
+  salinity: "#8b5cf6", // Purple
 };
 
 const METRIC_COLORS = {
-  extraction: '#dc2626',      // Red (concern)
-  recharge: '#10b981',        // Green (positive)
-  rainfall: '#3b82f6',        // Blue (neutral)
-  deficit: '#f59e0b',         // Orange (warning)
-  availability: '#06b6d4'     // Cyan (resource)
+  extraction: "#dc2626", // Red (concern)
+  recharge: "#10b981", // Green (positive)
+  rainfall: "#3b82f6", // Blue (neutral)
+  deficit: "#f59e0b", // Orange (warning)
+  availability: "#06b6d4", // Cyan (resource)
 };
 ```
 
@@ -910,6 +940,7 @@ npm run preview
 ### Environment Configuration
 
 #### Backend (.env)
+
 ```bash
 # Server
 SERVER_HOST=0.0.0.0
@@ -939,6 +970,7 @@ REDIS_CACHE_TTL=3600
 ```
 
 #### Frontend (.env)
+
 ```bash
 VITE_API_URL=http://localhost:8080
 VITE_WS_URL=ws://localhost:8080/ws
@@ -1026,12 +1058,14 @@ ground-sense-bot/
 ## 🧪 Testing
 
 ### Backend Tests
+
 ```bash
 cd backend
 go test ./... -v
 ```
 
 ### Test Queries
+
 ```bash
 # Run test query suite
 ./backend/test_queries.sh
@@ -1045,6 +1079,7 @@ go test ./... -v
 ```
 
 ### Load Testing
+
 ```bash
 # Using Apache Bench
 ab -n 1000 -c 10 http://localhost:8080/api/v1/health
@@ -1057,6 +1092,7 @@ ab -n 1000 -c 10 http://localhost:8080/api/v1/health
 ## 🔧 Development
 
 ### Local Development Setup
+
 ```bash
 # 1. Install dependencies
 cd backend && go mod download
@@ -1075,6 +1111,7 @@ docker logs -f ground-sense-redis
 ### Adding New Query Patterns
 
 1. Add pattern to NLP service:
+
 ```go
 // backend/internal/services/nlp_service.go
 const EXAMPLE_NEW_PATTERN = `
@@ -1086,6 +1123,7 @@ SQL: SELECT ...
 ```
 
 2. Add handler:
+
 ```go
 // backend/internal/services/conversational_handler.go
 func (ch *ConversationalHandler) handleNewIntent(ctx context.Context, ...) {
@@ -1094,6 +1132,7 @@ func (ch *ConversationalHandler) handleNewIntent(ctx context.Context, ...) {
 ```
 
 3. Update visualization logic:
+
 ```go
 // backend/internal/services/llm_service.go
 // Add new chart type mapping
@@ -1106,6 +1145,7 @@ func (ch *ConversationalHandler) handleNewIntent(ctx context.Context, ...) {
 ### Common Issues
 
 #### Backend won't start
+
 ```bash
 # Check Ollama is running
 ollama list
@@ -1118,6 +1158,7 @@ docker logs ground-sense-app
 ```
 
 #### Database connection errors
+
 ```bash
 # Verify PostgreSQL is running
 docker exec ground-sense-postgres pg_isready
@@ -1127,6 +1168,7 @@ psql -h localhost -p 5433 -U admin -d ground_sense_bot
 ```
 
 #### Frontend can't connect to WebSocket
+
 ```bash
 # Verify backend is running
 curl http://localhost:8080/api/v1/health
@@ -1136,6 +1178,7 @@ curl http://localhost:8080/api/v1/health
 ```
 
 #### Slow queries
+
 ```bash
 # Check Redis cache
 docker exec -it ground-sense-redis redis-cli
@@ -1153,6 +1196,7 @@ docker exec ground-sense-postgres psql -U admin -d ground_sense_bot -c "SELECT *
 We welcome contributions! Please follow these guidelines:
 
 ### Development Workflow
+
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
@@ -1160,12 +1204,14 @@ We welcome contributions! Please follow these guidelines:
 5. Open a Pull Request
 
 ### Code Standards
+
 - **Go**: Follow `golangci-lint` recommendations
 - **TypeScript**: Use ESLint + Prettier
 - **SQL**: Use parameterized queries, never string concatenation
 - **Comments**: Document complex logic and public functions
 
 ### Testing Requirements
+
 - Add unit tests for new services
 - Test query patterns with real data
 - Verify UI components render correctly
@@ -1185,6 +1231,7 @@ We welcome contributions! Please follow these guidelines:
 - **[Team Member 6]** - UI/UX Designer (Visualization & Design)
 
 ### Mentors
+
 - **[Mentor Name]** - Technical Mentor
 - **[Industry Expert]** - Domain Expert (Groundwater Management)
 
@@ -1239,18 +1286,21 @@ If you find this project helpful, please consider giving it a ⭐ on GitHub!
 ## 🚀 Future Enhancements
 
 ### Phase 1 (Q1 2026)
+
 - [ ] Multilingual support (Hindi, Tamil, Telugu, etc.)
 - [ ] Mobile app (React Native)
 - [ ] Advanced analytics dashboard
 - [ ] Report generation (PDF/Excel)
 
 ### Phase 2 (Q2 2026)
+
 - [ ] Predictive modeling (groundwater forecasting)
 - [ ] Integration with IoT sensors (real-time data)
 - [ ] Public API for third-party access
 - [ ] WhatsApp chatbot integration
 
 ### Phase 3 (Q3 2026)
+
 - [ ] Blockchain for data integrity
 - [ ] AI-powered policy recommendations
 - [ ] Satellite imagery integration
@@ -1262,7 +1312,7 @@ If you find this project helpful, please consider giving it a ⭐ on GitHub!
 
 **Built with ❤️ by Team Mercury**
 
-*Making India's groundwater data accessible to all*
+_Making India's groundwater data accessible to all_
 
 🏆 Smart India Hackathon 2025 Winner 🏆
 

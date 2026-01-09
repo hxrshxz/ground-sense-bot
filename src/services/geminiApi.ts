@@ -29,8 +29,10 @@ interface TaskConfig {
  * - Consistent error normalization
  */
 export class GeminiApiService {
-  private apiKey: string;
-  private apiVersion = "v1beta"; // keep v1beta for latest 1.5 models
+  private apiKeys: string[] = [];
+  private currentKeyIndex: number = 0;
+  private disabledKeys: Set<string> = new Set();
+  private apiVersion = "v1beta"; 
   
   /* 
    * VALIDATED: gemini-flash-latest is the ONLY working model for the current API key 
@@ -67,8 +69,38 @@ export class GeminiApiService {
     },
   };
 
-  constructor(apiKey: string) {
-    this.apiKey = apiKey;
+
+  constructor(apiKeys: string | string[]) {
+    this.apiKeys = Array.isArray(apiKeys) ? apiKeys.filter(Boolean) : [apiKeys].filter(Boolean);
+    if (this.apiKeys.length === 0) {
+      console.error("[GEMINI] No valid API keys provided");
+    }
+  }
+
+  private get apiKey(): string {
+    return this.apiKeys[this.currentKeyIndex] || "";
+  }
+
+  /**
+   * Switches to the next available API key if the current one is exhausted
+   */
+  private rotateKey(): boolean {
+    if (this.apiKeys.length <= 1) return false;
+    
+    const failedKey = this.apiKey;
+    this.disabledKeys.add(failedKey);
+    
+    // Find next non-disabled key
+    for (let i = 1; i < this.apiKeys.length; i++) {
+      const nextIndex = (this.currentKeyIndex + i) % this.apiKeys.length;
+      if (!this.disabledKeys.has(this.apiKeys[nextIndex])) {
+        this.currentKeyIndex = nextIndex;
+        console.warn(`[GEMINI] Switched to backup API key (Index: ${this.currentKeyIndex})`);
+        return true;
+      }
+    }
+    
+    return false;
   }
 
   private buildUrl(model: string) {
@@ -386,49 +418,66 @@ User Query: ${userPrompt}`;
     prompt: string,
     task: "general" | "analysis" | "explanation" | "visualization" = "general"
   ): Promise<GeminiResponse> {
-    if (!this.apiKey || this.apiKey.trim() === "")
+    if (!this.apiKey)
       throw new Error("Gemini API key is required");
 
-    // Clear tried models at the start of each turn (important with persistent service instance)
+    // Clear tried models at the start of each turn
     this.triedModels.clear();
 
     // Add user message to history
     this.addToHistory("user", prompt);
 
-    const modelsToTry = [this.primaryModel, ...this.fallbackModels].filter(
-      (m) => !this.triedModels.has(m)
-    );
-    let lastError: any;
-    for (const model of modelsToTry) {
-      try {
-        this.triedModels.add(model);
-        const data = await this.postGenerate(model, prompt, task);
-        const text =
-          data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-          "No response text returned.";
+    let retryWithNewKey = true;
+    while (retryWithNewKey) {
+      retryWithNewKey = false;
+      const modelsToTry = [this.primaryModel, ...this.fallbackModels].filter(
+        (m) => !this.triedModels.has(m)
+      );
+      
+      let lastError: any;
+      for (const model of modelsToTry) {
+        try {
+          this.triedModels.add(model);
+          const data = await this.postGenerate(model, prompt, task);
+          const text =
+            data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+            "No response text returned.";
 
-        // Add assistant response to history
-        this.addToHistory("assistant", text);
+          this.addToHistory("assistant", text);
+          return { text };
+        } catch (err: any) {
+          lastError = err;
+          
+          const isNotFound = this.isModelNotFound(err);
+          const isQuotaError = err.code === 429 || err.status === "RESOURCE_EXHAUSTED";
+          
+          if (isNotFound) {
+            console.warn(`[GEMINI] Model ${model} not found. Trying next fallback...`);
+            continue; 
+          }
 
-        return { text };
-      } catch (err: any) {
-        lastError = err;
-        
-        // Check if we should continue to the next model
-        const isNotFound = this.isModelNotFound(err);
-        const isQuotaError = err.code === 429 || err.status === "RESOURCE_EXHAUSTED";
-        
-        if (isNotFound || isQuotaError) {
-           console.warn(`[GEMINI] Model ${model} failed (${isNotFound ? "Not Found" : "Quota Exceeded"}). Trying next fallback...`);
-           continue; 
+          if (isQuotaError) {
+            console.warn(`[GEMINI] Model ${model} quota exceeded with current key.`);
+            if (this.rotateKey()) {
+              console.log("[GEMINI] Rotating API key and retrying turn...");
+              this.triedModels.clear(); // Restart model fallback with new key
+              retryWithNewKey = true;
+              break; // Break the model loop to restart with new key
+            }
+            continue; // No more keys, try next model with same key if possible
+          }
+
+          break; // Other fatal errors
         }
+      }
 
-        // For other errors (authorization, bad request, server error), stop immediately
-        break;
+      if (!retryWithNewKey) {
+        console.error("Gemini API final error:", lastError);
+        throw lastError;
       }
     }
-    console.error("Gemini API final error:", lastError);
-    throw lastError;
+    
+    throw new Error("Maximum retries with key rotation exceeded");
   }
 
   /** Analyze image with Gemini Vision capabilities using predefined groundwater analysis prompt */

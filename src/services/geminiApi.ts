@@ -136,73 +136,71 @@ RED FLAGS TO DETECT:
 - Stage > 150% (severe over-exploitation)
 `;
 
-  // Chart schema for visualization responses - compatible with ChartRenderer
-  private readonly CHART_SCHEMA = `
-CHART GENERATION INSTRUCTIONS:
-When the user asks for a graph, chart, visualization, comparison, or any data that would benefit from visual representation, 
-you MUST include a JSON code block with chart data in your response.
+  // Data extraction schema for visualization - client builds charts from structured data
+  private readonly DATA_EXTRACTION_SCHEMA = `
+DATA EXTRACTION FOR VISUALIZATION:
+When asked to compare locations, show trends, or visualize data, you MUST return structured data in a JSON code block.
 
-The JSON should be wrapped in \`\`\`json and \`\`\` tags and follow this exact structure:
+The JSON should be wrapped in \`\`\`json and \`\`\` tags.
 
+FOR COMPARISON QUERIES (e.g., "Compare Punjab and Haryana"):
 \`\`\`json
 {
-  "chart": {
-    "type": "bar",
-    "title": "Descriptive Chart Title",
-    "series": [
-      { "name": "Series Name", "data": [10, 20, 30, 40] }
-    ],
-    "xAxis": ["Label1", "Label2", "Label3", "Label4"]
-  }
+  "dataType": "comparison",
+  "locations": ["Punjab", "Haryana"],
+  "metrics": {
+    "extraction": [17096.20, 12500.50],
+    "recharge": [11621.68, 14200.30],
+    "stage": [147.1, 88.0]
+  },
+  "unit": "MCM"
 }
 \`\`\`
 
-CHART TYPE OPTIONS:
-- "bar": For comparing values across categories (e.g., extraction vs recharge by region)
-- "pie": For showing percentage distribution (e.g., sector usage breakdown)
-- "line": For trends over time (e.g., annual extraction trends)
-- "stacked-bar": For showing composition (e.g., recharge sources by component)
-- "rose-pie": For visually striking pie charts with varying radii
-
-FIELD REQUIREMENTS:
-- type: One of the chart types above (REQUIRED)
-- title: A descriptive title for the chart (REQUIRED)
-- series: Array of data series with "name" and "data" array (REQUIRED)
-- xAxis: Array of category labels matching data points (REQUIRED for bar/line)
-- pieData: Array of {name, value} objects (REQUIRED for pie charts instead of series)
-
-EXAMPLE FOR COMPARISON:
+FOR TREND QUERIES (e.g., "Show trend for Delhi"):
 \`\`\`json
 {
-  "chart": {
-    "type": "bar",
-    "title": "Groundwater Extraction vs Recharge Comparison",
-    "series": [
-      { "name": "Extraction (MCM)", "data": [1200, 950, 800] },
-      { "name": "Recharge (MCM)", "data": [900, 1100, 750] }
-    ],
-    "xAxis": ["Punjab", "Haryana", "Rajasthan"]
-  }
+  "dataType": "trend",
+  "location": "Delhi",
+  "years": ["2020-21", "2021-22", "2022-23", "2023-24", "2024-25"],
+  "values": {
+    "extraction": [150.2, 155.8, 158.2, 160.5, 162.1],
+    "recharge": [125.3, 120.5, 119.8, 118.2, 117.5]
+  },
+  "unit": "MCM"
 }
 \`\`\`
 
-EXAMPLE FOR PIE CHART:
+FOR SECTOR USAGE QUERIES (e.g., "Sector-wise usage in Gujarat"):
 \`\`\`json
 {
-  "chart": {
-    "type": "pie",
-    "title": "Sector-wise Water Usage",
-    "pieData": [
-      { "name": "Agriculture", "value": 89 },
-      { "name": "Domestic", "value": 7 },
-      { "name": "Industrial", "value": 4 }
-    ],
-    "series": []
-  }
+  "dataType": "sector",
+  "location": "Gujarat",
+  "sectors": [
+    { "name": "Agriculture", "percentage": 89.8 },
+    { "name": "Domestic", "percentage": 7.2 },
+    { "name": "Industrial", "percentage": 3.0 }
+  ]
 }
 \`\`\`
 
-Always include a text explanation BEFORE or AFTER the JSON block to provide context.
+FOR TOP RANKING QUERIES (e.g., "Top 5 over-exploited states"):
+\`\`\`json
+{
+  "dataType": "ranking",
+  "category": "Over-Exploited",
+  "items": [
+    { "name": "Punjab", "stage": 166.0 },
+    { "name": "Rajasthan", "stage": 140.0 },
+    { "name": "Haryana", "stage": 137.0 }
+  ]
+}
+\`\`\`
+
+IMPORTANT:
+1. Use REAL data from your knowledge about Indian groundwater (CGWB data)
+2. Include a brief text explanation BEFORE the JSON block
+3. Return ONLY the JSON for the data, the chart will be built automatically
 `;
 
   // Conversation history for context retention
@@ -283,7 +281,7 @@ User Query: ${userPrompt}`;
     } else if (task === "visualization") {
       return (
         basePrompt +
-        `\n\n${this.CHART_SCHEMA}\n\nIMPORTANT: You MUST include a JSON chart block in your response for this visualization request.`
+        `\n\n${this.DATA_EXTRACTION_SCHEMA}\n\nIMPORTANT: You MUST include a JSON data block in your response for this visualization request.`
       );
     }
 

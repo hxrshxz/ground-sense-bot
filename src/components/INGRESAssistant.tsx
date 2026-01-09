@@ -1443,11 +1443,11 @@ Your response should sound like it's coming from a knowledgeable human analyst e
       const taskType = needsChart ? "visualization" : "general";
       const response = await geminiService.generateResponse(contextualPrompt, taskType);
 
-      // Parse chart JSON from response if visualization intent
+      // Build chart from structured data if visualization intent
       if (needsChart) {
-        const chartData = parseChartFromResponse(response.text);
+        const chartData = buildChartFromData(response.text);
         if (chartData) {
-          console.log("[GEMINI] Chart data parsed:", chartData);
+          console.log("[GEMINI] Chart built from data:", chartData);
           return { text: response.text, chart: chartData };
         }
       }
@@ -1466,19 +1466,69 @@ Your response should sound like it's coming from a knowledgeable human analyst e
     }
   };
 
-  // Helper function to parse chart JSON from Gemini response
-  const parseChartFromResponse = (response: string) => {
+  // Build chart from structured data using predefined templates (matches backend approach)
+  const buildChartFromData = (response: string): any => {
     try {
-      // Match JSON code block
+      // Extract JSON from response
       const jsonMatch = response.match(/```json\s*([\s\S]*?)```/);
-      if (jsonMatch && jsonMatch[1]) {
-        const parsed = JSON.parse(jsonMatch[1].trim());
-        if (parsed.chart) {
-          return parsed.chart;
-        }
+      if (!jsonMatch || !jsonMatch[1]) return null;
+      
+      const data = JSON.parse(jsonMatch[1].trim());
+      if (!data.dataType) return null;
+      
+      console.log("[GEMINI] Building chart from data type:", data.dataType);
+
+      // COMPARISON: Bar chart comparing locations
+      if (data.dataType === "comparison" && data.locations && data.metrics) {
+        return {
+          type: "bar" as const,
+          title: `${data.locations.join(" vs ")} Groundwater Comparison`,
+          series: [
+            { name: `Extraction (${data.unit || "MCM"})`, data: data.metrics.extraction || [] },
+            { name: `Recharge (${data.unit || "MCM"})`, data: data.metrics.recharge || [] },
+          ],
+          xAxis: data.locations,
+        };
       }
+
+      // TREND: Line chart over years
+      if (data.dataType === "trend" && data.years && data.values) {
+        return {
+          type: "line" as const,
+          title: `${data.location} Groundwater Trend`,
+          series: [
+            { name: `Extraction (${data.unit || "MCM"})`, data: data.values.extraction || [] },
+            { name: `Recharge (${data.unit || "MCM"})`, data: data.values.recharge || [] },
+          ],
+          xAxis: data.years,
+        };
+      }
+
+      // SECTOR USAGE: Pie chart
+      if (data.dataType === "sector" && data.sectors) {
+        return {
+          type: "pie" as const,
+          title: `${data.location} Sector-wise Water Usage`,
+          pieData: data.sectors.map((s: any) => ({ name: s.name, value: s.percentage })),
+          series: [],
+        };
+      }
+
+      // RANKING: Bar chart for top N
+      if (data.dataType === "ranking" && data.items) {
+        return {
+          type: "bar" as const,
+          title: `Top ${data.category || ""} States/Blocks`,
+          series: [{ name: "Stage (%)", data: data.items.map((i: any) => i.stage) }],
+          xAxis: data.items.map((i: any) => i.name),
+        };
+      }
+
+      // Fallback: return parsed chart if it has chart property (old format)
+      if (data.chart) return data.chart;
+      
     } catch (err) {
-      console.warn("[GEMINI] Failed to parse chart JSON:", err);
+      console.warn("[GEMINI] Failed to build chart from data:", err);
     }
     return null;
   };

@@ -136,6 +136,75 @@ RED FLAGS TO DETECT:
 - Stage > 150% (severe over-exploitation)
 `;
 
+  // Chart schema for visualization responses - compatible with ChartRenderer
+  private readonly CHART_SCHEMA = `
+CHART GENERATION INSTRUCTIONS:
+When the user asks for a graph, chart, visualization, comparison, or any data that would benefit from visual representation, 
+you MUST include a JSON code block with chart data in your response.
+
+The JSON should be wrapped in \`\`\`json and \`\`\` tags and follow this exact structure:
+
+\`\`\`json
+{
+  "chart": {
+    "type": "bar",
+    "title": "Descriptive Chart Title",
+    "series": [
+      { "name": "Series Name", "data": [10, 20, 30, 40] }
+    ],
+    "xAxis": ["Label1", "Label2", "Label3", "Label4"]
+  }
+}
+\`\`\`
+
+CHART TYPE OPTIONS:
+- "bar": For comparing values across categories (e.g., extraction vs recharge by region)
+- "pie": For showing percentage distribution (e.g., sector usage breakdown)
+- "line": For trends over time (e.g., annual extraction trends)
+- "stacked-bar": For showing composition (e.g., recharge sources by component)
+- "rose-pie": For visually striking pie charts with varying radii
+
+FIELD REQUIREMENTS:
+- type: One of the chart types above (REQUIRED)
+- title: A descriptive title for the chart (REQUIRED)
+- series: Array of data series with "name" and "data" array (REQUIRED)
+- xAxis: Array of category labels matching data points (REQUIRED for bar/line)
+- pieData: Array of {name, value} objects (REQUIRED for pie charts instead of series)
+
+EXAMPLE FOR COMPARISON:
+\`\`\`json
+{
+  "chart": {
+    "type": "bar",
+    "title": "Groundwater Extraction vs Recharge Comparison",
+    "series": [
+      { "name": "Extraction (MCM)", "data": [1200, 950, 800] },
+      { "name": "Recharge (MCM)", "data": [900, 1100, 750] }
+    ],
+    "xAxis": ["Punjab", "Haryana", "Rajasthan"]
+  }
+}
+\`\`\`
+
+EXAMPLE FOR PIE CHART:
+\`\`\`json
+{
+  "chart": {
+    "type": "pie",
+    "title": "Sector-wise Water Usage",
+    "pieData": [
+      { "name": "Agriculture", "value": 89 },
+      { "name": "Domestic", "value": 7 },
+      { "name": "Industrial", "value": 4 }
+    ],
+    "series": []
+  }
+}
+\`\`\`
+
+Always include a text explanation BEFORE or AFTER the JSON block to provide context.
+`;
+
   // Conversation history for context retention
   private conversationHistory: Array<{ role: string; content: string }> = [];
   private readonly MAX_HISTORY_LENGTH = 5;
@@ -174,7 +243,7 @@ RED FLAGS TO DETECT:
 
   private buildSystemPrompt(
     userPrompt: string,
-    task: "general" | "analysis" | "explanation" = "general"
+    task: "general" | "analysis" | "explanation" | "visualization" = "general"
   ) {
     const historyContext = this.buildContextFromHistory();
 
@@ -210,6 +279,11 @@ User Query: ${userPrompt}`;
       return (
         basePrompt +
         `\n\nExplain in a clear, educational manner suitable for spoken delivery. Use simple language and natural speech patterns.`
+      );
+    } else if (task === "visualization") {
+      return (
+        basePrompt +
+        `\n\n${this.CHART_SCHEMA}\n\nIMPORTANT: You MUST include a JSON chart block in your response for this visualization request.`
       );
     }
 
@@ -312,7 +386,7 @@ User Query: ${userPrompt}`;
 
   async generateResponse(
     prompt: string,
-    task: "general" | "analysis" | "explanation" = "general"
+    task: "general" | "analysis" | "explanation" | "visualization" = "general"
   ): Promise<GeminiResponse> {
     if (!this.apiKey || this.apiKey.trim() === "")
       throw new Error("Gemini API key is required");

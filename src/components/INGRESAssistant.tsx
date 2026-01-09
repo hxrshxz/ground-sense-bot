@@ -1397,14 +1397,19 @@ export const INGRESAssistant = ({
         return null;
       }
       
-      // Step 1: LLM-powered intent classification (matches backend nlp_service.go approach)
+      // Step 1: Check for explicit graph/chart request keywords FIRST
+      const explicitGraphKeywords = /\b(graph|chart|visuali|plot|diagram|show.*chart|give.*graph|draw|display.*chart)\b/i;
+      const isExplicitGraphRequest = explicitGraphKeywords.test(query);
+      
+      // Step 2: LLM-powered intent classification (matches backend nlp_service.go approach)
       const intent = await geminiService.classifyIntent(query);
       console.log("[GEMINI] Intent classified:", intent);
       
-      // Step 2: Determine if visualization is needed based on intent type
+      // Step 3: Determine if visualization is needed
+      // Either explicit graph request OR visualization intent type
       const visualIntents = ["COMPARE", "TREND", "TOP_RANKING", "SECTOR_USAGE", "RISK_PROFILE"];
-      const needsChart = visualIntents.includes(intent);
-      console.log("[GEMINI] Needs chart:", needsChart, "for intent:", intent);
+      const needsChart = isExplicitGraphRequest || visualIntents.includes(intent);
+      console.log("[GEMINI] Needs chart:", needsChart, "| Explicit request:", isExplicitGraphRequest, "| Intent:", intent);
 
       // Prepare context-aware prompt with detailed response guidance
       let contextualPrompt = query;

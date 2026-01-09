@@ -521,4 +521,61 @@ User Query: ${userPrompt}`;
 
     return await resp.json();
   }
+
+  /**
+   * Classify user query intent using LLM for semantic understanding.
+   * Matches the backend's intent classification approach from nlp_service.go
+   * Returns one of: SUMMARY | TREND | COMPARE | TOP_RANKING | SECTOR_USAGE | RISK_PROFILE | QUESTION | GREETING
+   */
+  async classifyIntent(query: string): Promise<string> {
+    const classificationPrompt = `You are an intent classifier for a groundwater data assistant.
+Classify this query into EXACTLY ONE of these intents:
+
+INTENTS:
+- SUMMARY: General status or overview of a location (e.g., "What's the status of Punjab?")
+- TREND: Analysis over time, historical data (e.g., "Show trend for Delhi", "How has extraction changed?")
+- COMPARE: Comparison between 2+ locations (e.g., "Compare Punjab and Haryana", "Punjab vs Rajasthan")
+- TOP_RANKING: Top/bottom N, worst/best, rankings (e.g., "Top 10 over-exploited blocks", "Which states are worst?")
+- SECTOR_USAGE: Sector breakdown, usage by sector (e.g., "Sector-wise usage in Gujarat", "How much does agriculture use?")
+- RISK_PROFILE: Risk assessment, sustainability, vulnerability (e.g., "What's the risk in Delhi?", "Is Rajasthan sustainable?")
+- QUESTION: Definition or explanation (e.g., "What is stage of extraction?", "Define ham")
+- GREETING: Hello, hi, welcome messages
+
+Query: "${query}"
+
+Respond with ONLY the intent word (e.g., "COMPARE"). No explanation.`;
+
+    try {
+      const url = `https://generativelanguage.googleapis.com/${this.apiVersion}/models/${this.primaryModel}:generateContent`;
+      const response = await fetch(`${url}?key=${this.apiKey}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: classificationPrompt }] }],
+          generationConfig: { maxOutputTokens: 10 }, // Very short response
+        }),
+      });
+
+      if (!response.ok) {
+        console.warn("[GEMINI] Intent classification failed, defaulting to SUMMARY");
+        return "SUMMARY";
+      }
+
+      const data = await response.json();
+      const intent = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim().toUpperCase() || "SUMMARY";
+      
+      // Validate intent is one of our known types
+      const validIntents = ["SUMMARY", "TREND", "COMPARE", "TOP_RANKING", "SECTOR_USAGE", "RISK_PROFILE", "QUESTION", "GREETING"];
+      if (validIntents.includes(intent)) {
+        console.log(`[GEMINI] Intent classified: ${intent}`);
+        return intent;
+      }
+      
+      console.warn(`[GEMINI] Unknown intent "${intent}", defaulting to SUMMARY`);
+      return "SUMMARY";
+    } catch (err) {
+      console.error("[GEMINI] Intent classification error:", err);
+      return "SUMMARY";
+    }
+  }
 }

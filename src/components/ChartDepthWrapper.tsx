@@ -19,7 +19,7 @@ export const ChartDepthWrapper: React.FC<ChartDepthWrapperProps> = ({
           {children}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 

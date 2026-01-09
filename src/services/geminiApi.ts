@@ -391,6 +391,9 @@ User Query: ${userPrompt}`;
     if (!this.apiKey || this.apiKey.trim() === "")
       throw new Error("Gemini API key is required");
 
+    // Clear tried models at the start of each turn (important with persistent service instance)
+    this.triedModels.clear();
+
     // Add user message to history
     this.addToHistory("user", prompt);
 

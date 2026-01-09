@@ -1376,6 +1376,11 @@ export const INGRESAssistant = ({
       console.log("[GEMINI] Starting API request");
       setIsThinking(true);
 
+      // Detect if user wants visualization
+      const visualKeywords = /graph|chart|visuali|compare.*with|plot|show.*data|trend|diagram|versus|vs\b/i;
+      const wantsVisualization = visualKeywords.test(query);
+      console.log("[GEMINI] Visualization detected:", wantsVisualization);
+
       // Prepare context-aware prompt with detailed response guidance
       let contextualPrompt = query;
 
@@ -1387,7 +1392,7 @@ export const INGRESAssistant = ({
       }
 
       // Add instructions for more detailed responses when in co-pilot mode
-      if (isCoPilotMode) {
+      if (isCoPilotMode && !wantsVisualization) {
         contextualPrompt += `\n\n
 Please provide a comprehensive and detailed response suitable for natural human speech with the following characteristics:
 1. Use conversational language that flows naturally when spoken aloud
@@ -1409,9 +1414,19 @@ Please provide a comprehensive and detailed response suitable for natural human 
 Your response should sound like it's coming from a knowledgeable human analyst explaining the information in a clear, conversational manner.`;
       }
 
-      // Call Gemini APIPrompt =
+      // Call Gemini API with appropriate task type
       const geminiService = new GeminiApiService(apiKey);
-      const response = await geminiService.generateResponse(contextualPrompt);
+      const taskType = wantsVisualization ? "visualization" : "general";
+      const response = await geminiService.generateResponse(contextualPrompt, taskType);
+
+      // Parse chart JSON from response if visualization was requested
+      if (wantsVisualization) {
+        const chartData = parseChartFromResponse(response.text);
+        if (chartData) {
+          console.log("[GEMINI] Chart data parsed:", chartData);
+          return { text: response.text, chart: chartData };
+        }
+      }
 
       return response.text;
     } catch (error) {
@@ -1425,6 +1440,23 @@ Your response should sound like it's coming from a knowledgeable human analyst e
     } finally {
       setIsThinking(false);
     }
+  };
+
+  // Helper function to parse chart JSON from Gemini response
+  const parseChartFromResponse = (response: string) => {
+    try {
+      // Match JSON code block
+      const jsonMatch = response.match(/```json\s*([\s\S]*?)```/);
+      if (jsonMatch && jsonMatch[1]) {
+        const parsed = JSON.parse(jsonMatch[1].trim());
+        if (parsed.chart) {
+          return parsed.chart;
+        }
+      }
+    } catch (err) {
+      console.warn("[GEMINI] Failed to parse chart JSON:", err);
+    }
+    return null;
   };
 
   // Sync WebSocket messages to chat history
@@ -2109,16 +2141,26 @@ Your response should sound like it's coming from a knowledgeable human analyst e
         const response = await callGeminiAPI(text);
 
         if (response) {
-          const aiResponse = {
+          // Handle both string and {text, chart} response formats
+          const responseText = typeof response === 'string' ? response : response.text;
+          const chartData = typeof response === 'object' && response.chart ? response.chart : null;
+
+          // Remove the JSON block from display text if chart was parsed
+          const displayText = chartData 
+            ? responseText.replace(/```json[\s\S]*?```/g, '').trim()
+            : responseText;
+
+          const aiResponse: ChatMessage = {
             id: Date.now() + 1,
             type: "ai",
-            text: response,
+            text: displayText,
+            component: chartData ? <ChartRenderer chart={chartData} /> : undefined,
           };
 
           setChatHistory((prev) => [...prev, aiResponse]);
 
-          // Speak the response
-          speakText(response);
+          // Speak the response (text only)
+          speakText(displayText);
           setIsThinking(false);
           return;
         }
@@ -2147,13 +2189,21 @@ Your response should sound like it's coming from a knowledgeable human analyst e
         try {
           const geminiResponse = await callGeminiAPI(text);
           if (geminiResponse) {
-             const aiResponse = {
+            // Handle both string and {text, chart} response formats
+            const responseText = typeof geminiResponse === 'string' ? geminiResponse : geminiResponse.text;
+            const chartData = typeof geminiResponse === 'object' && geminiResponse.chart ? geminiResponse.chart : null;
+            const displayText = chartData 
+              ? responseText.replace(/```json[\s\S]*?```/g, '').trim()
+              : responseText;
+
+            const aiResponse: ChatMessage = {
               id: Date.now() + 1,
               type: "ai",
-              text: geminiResponse,
+              text: displayText,
+              component: chartData ? <ChartRenderer chart={chartData} /> : undefined,
             };
             setChatHistory((prev) => [...prev, aiResponse]);
-            speakText(geminiResponse);
+            speakText(displayText);
             setIsThinking(false);
             return;
           }

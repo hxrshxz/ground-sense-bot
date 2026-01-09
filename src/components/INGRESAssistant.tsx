@@ -1045,8 +1045,8 @@ export const INGRESAssistant = ({
     setIsThinking(true);
 
     try {
-      // If no API key, immediately fallback to predefined sample
-      if (!apiKey) {
+      // If no API keys available, immediately fallback to predefined sample
+      if (apiKeys.length === 0) {
         console.warn(
           "⚠️ No API key provided. Using offline fallback groundwater analysis sample."
         );
@@ -1216,18 +1216,21 @@ export const INGRESAssistant = ({
   const [showListeningIndicator, setShowListeningIndicator] = useState(false);
   const [isMapAnalysisOpen, setIsMapAnalysisOpen] = useState(false);
 
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
+  const apiKeys = [
+    import.meta.env.VITE_GEMINI_API_KEY || "",
+    import.meta.env.VITE_GEMINI_API_KEY_2 || "",
+  ].filter(Boolean);
   
   // Persistent GeminiApiService instance to retain conversation history across messages
   const geminiServiceRef = useRef<GeminiApiService | null>(null);
   
-  // Initialize GeminiApiService once when apiKey is available
+  // Initialize GeminiApiService once when apiKeys are available
   useEffect(() => {
-    if (apiKey && !geminiServiceRef.current) {
-      geminiServiceRef.current = new GeminiApiService(apiKey);
-      console.log("[GEMINI] Service initialized with history retention");
+    if (apiKeys.length > 0 && !geminiServiceRef.current) {
+      geminiServiceRef.current = new GeminiApiService(apiKeys);
+      console.log("[GEMINI] Service initialized with key rotation support");
     }
-  }, [apiKey]);
+  }, [apiKeys.length]);
   
   const {
     text: voiceText,
@@ -1373,12 +1376,12 @@ export const INGRESAssistant = ({
   // Function to call Gemini API with context awareness for Co-Pilot Mode
   const callGeminiAPI = async (query: string) => {
     console.log("[GEMINI] callGeminiAPI called with:", query);
-    console.log("[GEMINI] API Key present:", !!apiKey);
+    console.log("[GEMINI] API Keys present:", apiKeys.length > 0);
     
-    if (!apiKey) {
-      console.warn("[GEMINI] Missing API key");
+    if (apiKeys.length === 0) {
+      console.warn("[GEMINI] Missing API keys");
       setToast({
-        message: "API key is required to use Co-Pilot Mode",
+        message: "API keys are required to use Co-Pilot Mode",
         type: "error",
         visible: true,
       });
@@ -2259,7 +2262,7 @@ Your response should sound like it's coming from a knowledgeable human analyst e
       // If WebSocket is NOT connected, try Gemini API directly
       console.warn("[CHAT] WebSocket disconnected, attempting Gemini fallback");
       
-      if (apiKey) {
+      if (apiKeys.length > 0) {
         setToast({
           message: "Backend disconnected - using Gemini Cloud fallback",
           type: "info",

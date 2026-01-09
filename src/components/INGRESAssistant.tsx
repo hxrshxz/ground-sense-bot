@@ -66,6 +66,8 @@ import {
 import { MapAnalysisDialog } from "./MapAnalysisDialog";
 import { pickProfileByText } from "@/lib/stateDetection";
 import { STATE_PROFILE_MAP } from "@/data/stateGroundwaterData";
+import { AIInputWithLoading } from "@/components/ui/ai-input-with-loading";
+import WavyBackground from "@/components/ui/blue-meshy-background";
 const GroundwaterExtractionVisualization = React.lazy(
   () => import("./GroundwaterExtractionVisualization")
 );
@@ -976,7 +978,8 @@ export const INGRESAssistant = ({
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
 
   // WebSocket Integration
-  const { sendMessage, messages: wsMessages } = useChatWebSocket(
+  // WebSocket Integration
+  const { sendMessage, messages: wsMessages, isConnected: isWsConnected } = useChatWebSocket(
     "ws://localhost:8081/ws",
     "User"
   );
@@ -1356,7 +1359,11 @@ export const INGRESAssistant = ({
 
   // Function to call Gemini API with context awareness for Co-Pilot Mode
   const callGeminiAPI = async (query: string) => {
+    console.log("[GEMINI] callGeminiAPI called with:", query);
+    console.log("[GEMINI] API Key present:", !!apiKey);
+    
     if (!apiKey) {
+      console.warn("[GEMINI] Missing API key");
       setToast({
         message: "API key is required to use Co-Pilot Mode",
         type: "error",
@@ -1366,6 +1373,7 @@ export const INGRESAssistant = ({
     }
 
     try {
+      console.log("[GEMINI] Starting API request");
       setIsThinking(true);
 
       // Prepare context-aware prompt with detailed response guidance
@@ -1422,14 +1430,19 @@ Your response should sound like it's coming from a knowledgeable human analyst e
   // Sync WebSocket messages to chat history
   useEffect(() => {
     if (wsMessages.length > 0) {
+      console.log("[WS] Messages received. Count:", wsMessages.length);
       const lastMsg = wsMessages[wsMessages.length - 1];
+      console.log("[WS] Last message:", lastMsg);
+      
       // Only add bot messages or user messages that aren't already added locally
       // Actually, we add user messages locally in handleChatSubmit.
       // So we only care about BOT messages here.
       if (lastMsg.sender === "bot") {
-        console.log("Bot message received:", lastMsg);
-        console.log("Payload:", lastMsg.payload);
-        console.log("Chart:", lastMsg.payload?.chart);
+        console.log("[WS] Processing bot message:", lastMsg);
+        console.log("[WS] Payload details:", lastMsg.payload);
+        if (lastMsg.payload?.chart) {
+          console.log("[WS] Chart data found:", lastMsg.payload.chart);
+        }
 
         const newMsg: ChatMessage = {
           id: Number(lastMsg.id) || Date.now(),
@@ -1564,12 +1577,18 @@ Your response should sound like it's coming from a knowledgeable human analyst e
   };
 
   const handleChatSubmit = async (text: string) => {
-    if (!text.trim()) return;
+    console.log("[CHAT] handleChatSubmit called with:", text);
+    if (!text.trim()) {
+      console.log("[CHAT] Empty text, returning early");
+      return;
+    }
     const query = text.toLowerCase();
+    console.log("[CHAT] Setting view to chat, adding user message");
     setView("chat");
     setChatHistory((prev) => [...prev, { id: Date.now(), type: "user", text }]);
     setInputValue("");
     setIsThinking(true);
+    console.log("[CHAT] isThinking set to true");
 
     // Deep dive manual command: "deep dive <state>" or "state deep dive <state>"
     const deepDiveMatch = query.match(
@@ -2105,12 +2124,52 @@ Your response should sound like it's coming from a knowledgeable human analyst e
         }
       }
 
-      // --- 5. FALLBACK TO WEBSOCKET CHATBOT ---
-      // If no specific frontend trigger matched, send to the Go backend via WebSocket
-      sendMessage(text);
-
-      // The response will be handled by the useEffect hook listening to wsMessages
-      // Keep isThinking=true until response arrives
+      // --- 5. FALLBACK LOGIC ---
+      
+      // If WebSocket is connected, use it
+      if (isWsConnected) {
+        console.log("[CHAT] WebSocket is connected, sending message to backend");
+        sendMessage(text);
+        // The response will be handled by the useEffect hook
+        return;
+      }
+      
+      // If WebSocket is NOT connected, try Gemini API directly
+      console.warn("[CHAT] WebSocket disconnected, attempting Gemini fallback");
+      
+      if (apiKey) {
+        setToast({
+          message: "Backend disconnected - using Gemini Cloud fallback",
+          type: "info",
+          visible: true
+        });
+        
+        try {
+          const geminiResponse = await callGeminiAPI(text);
+          if (geminiResponse) {
+             const aiResponse = {
+              id: Date.now() + 1,
+              type: "ai",
+              text: geminiResponse,
+            };
+            setChatHistory((prev) => [...prev, aiResponse]);
+            speakText(geminiResponse);
+            setIsThinking(false);
+            return;
+          }
+        } catch (err) {
+          console.error("[CHAT] Gemini fallback failed:", err);
+        }
+      }
+      
+      // If everything fails
+      const offlineResponse = {
+        id: Date.now() + 1,
+        type: "ai",
+        text: "I'm currently offline (Backend disconnected). Please check your connection or provide a Gemini API Key for cloud fallback.",
+      };
+      setChatHistory((prev) => [...prev, offlineResponse]);
+      setIsThinking(false);
       return;
 
       /* Legacy Gemini Implementation Removed */
@@ -2195,34 +2254,41 @@ Your response should sound like it's coming from a knowledgeable human analyst e
   // Removed predefined prompts - now fully dynamic AI-powered
 
   const renderDashboard = () => (
-    <div
-      className={`container mx-auto px-4 pt-8 pb-24 ${
-        embedded ? "mt-0" : "mt-10"
-      }`}
-    >
-      {!embedded && (
-        <div className="absolute top-8 right-8">
-          {/* <NotificationBell /> */}
-        </div>
-      )}
+    <WavyBackground className="min-h-screen">
+      <div
+        className={`relative container mx-auto px-4 pt-8 pb-24 ${
+          embedded ? "mt-0" : "mt-10"
+        }`}
+      >
+        {!embedded && (
+          <div className="absolute top-8 right-8">
+            {/* <NotificationBell /> */}
+          </div>
+        )}
       <div className="relative text-center max-w-4xl mx-auto">
         <h1
-          className={`font-bold text-slate-800 ${
+          className={`font-bold text-white drop-shadow-lg ${
             embedded ? "text-3xl" : "text-5xl md:text-7xl"
           }`}
         >
           INGRES AI Assistant
         </h1>
-        <p className="text-xl text-slate-600 max-w-2xl mt-4 mx-auto">
+        <p className="text-xl text-white/80 max-w-2xl mt-4 mx-auto">
           Your intelligent command center for India's groundwater data.
         </p>
       </div>
       <div className="mt-12">
-        <INGRESCommandBar
-          {...commonCommandBarProps}
-          onFileSelect={handleFakeMapAnalysis}
-          isMapAnalysisOpen={isMapAnalysisOpen}
-          setIsMapAnalysisOpen={setIsMapAnalysisOpen}
+        <AIInputWithLoading
+          placeholder="Ask about groundwater data, compare regions, or analyze trends..."
+          onSubmit={async (value) => {
+            await handleChatSubmit(value);
+          }}
+          loadingDuration={2000}
+          className="max-w-3xl mx-auto"
+          showMic={true}
+          showLanguageToggle={true}
+          currentLanguage={language}
+          onLanguageChange={(lang) => setLanguage(lang)}
         />
       </div>
       {/* <motion.div
@@ -2243,16 +2309,18 @@ Your response should sound like it's coming from a knowledgeable human analyst e
           </motion.div>
         ))}
       </motion.div> */}
-    </div>
+      </div>
+    </WavyBackground>
   );
 
   // --- Located inside the INGRESAssistant component ---
   const renderChatView = () => (
-    <div
-      className={`flex items-center justify-center min-h-screen p-4 ${
-        embedded ? "p-2" : "md:p-6"
-      }`}
-    >
+    <WavyBackground className="min-h-screen">
+      <div
+        className={`flex items-center justify-center min-h-screen p-4 ${
+          embedded ? "p-2" : "md:p-6"
+        }`}
+      >
       {" "}
       {/* CHANGED: Added more padding on larger screens */}
       {/* CHANGED: Increased max-width and adjusted height for a bigger chat window */}
@@ -2435,29 +2503,30 @@ Your response should sound like it's coming from a knowledgeable human analyst e
               : "border-slate-200/80"
           } pt-4`}
         >
-          <INGRESCommandBar
-            {...commonCommandBarProps}
-            onFileSelect={handleFakeMapAnalysis}
-            isMapAnalysisOpen={isMapAnalysisOpen}
-            setIsMapAnalysisOpen={setIsMapAnalysisOpen}
+          <AIInputWithLoading
+            placeholder="Ask about groundwater data, compare regions, or analyze trends..."
+            onSubmit={async (value) => {
+              await handleChatSubmit(value);
+            }}
+            loadingDuration={2000}
+            className="max-w-full"
+            showMic={true}
+            showLanguageToggle={true}
+            currentLanguage={language}
+            onLanguageChange={(lang) => setLanguage(lang)}
           />
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </WavyBackground>
   );
 
   return (
     <div
       className={`min-h-screen text-slate-900 font-sans isolate ${
-        embedded ? "bg-slate-900" : "bg-slate-100"
+        embedded ? "bg-slate-900" : "bg-white"
       }`}
     >
-      {!embedded && (
-        <div className="absolute inset-0 -z-10 h-full w-full overflow-hidden">
-          <div className="absolute -top-1/4 left-0 h-[800px] w-[800px] bg-purple-200/30 rounded-full blur-3xl filter animate-blob"></div>
-          <div className="absolute -top-1/3 right-0 h-[800px] w-[800px] bg-sky-200/30 rounded-full filter animate-blob animation-delay-2000"></div>
-        </div>
-      )}
       <AnimatePresence>
         {toast.visible && (
           <Toast

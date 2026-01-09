@@ -1081,7 +1081,8 @@ export const INGRESAssistant = ({
 
       // Try the live Gemini analysis first
       try {
-        const geminiService = new GeminiApiService(apiKey);
+        const geminiService = geminiServiceRef.current;
+        if (!geminiService) throw new Error("Gemini service not initialized");
         const response = await geminiService.analyzeImage(imageData, true);
 
         // If response doesn't look like JSON, wrap into a JSON shell to allow renderer heuristics
@@ -1216,6 +1217,18 @@ export const INGRESAssistant = ({
   const [isMapAnalysisOpen, setIsMapAnalysisOpen] = useState(false);
 
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
+  
+  // Persistent GeminiApiService instance to retain conversation history across messages
+  const geminiServiceRef = useRef<GeminiApiService | null>(null);
+  
+  // Initialize GeminiApiService once when apiKey is available
+  useEffect(() => {
+    if (apiKey && !geminiServiceRef.current) {
+      geminiServiceRef.current = new GeminiApiService(apiKey);
+      console.log("[GEMINI] Service initialized with history retention");
+    }
+  }, [apiKey]);
+  
   const {
     text: voiceText,
     startListening,
@@ -1376,7 +1389,13 @@ export const INGRESAssistant = ({
       console.log("[GEMINI] Starting API request");
       setIsThinking(true);
 
-      const geminiService = new GeminiApiService(apiKey);
+      // Use persistent GeminiApiService instance for conversation history retention
+      const geminiService = geminiServiceRef.current;
+      if (!geminiService) {
+        console.error("[GEMINI] Service not initialized");
+        setToast({ message: "AI service not ready. Please try again.", type: "error", visible: true });
+        return null;
+      }
       
       // Step 1: LLM-powered intent classification (matches backend nlp_service.go approach)
       const intent = await geminiService.classifyIntent(query);
@@ -1694,10 +1713,11 @@ Your response should sound like it's coming from a knowledgeable human analyst e
         await new Promise((r) => setTimeout(r, 800));
 
         // Use Gemini API with the predefined MAP_ANALYSIS_PROMPT
-        const geminiService = new GeminiApiService(apiKey);
+        const geminiService = geminiServiceRef.current;
         let response;
 
         try {
+          if (!geminiService) throw new Error("Gemini service not initialized");
           // Apply the comprehensive MAP_ANALYSIS_PROMPT directly
           const result = await geminiService.generateResponse(
             MAP_ANALYSIS_PROMPT +

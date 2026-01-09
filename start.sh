@@ -25,7 +25,7 @@ if [ ! -f .env ]; then
 fi
 
 # Check if GEMINI_API_KEY is set
-if ! grep -q "GEMINI_API_KEY=AIza" .env 2>/dev/null; then
+if ! grep -q "^GEMINI_API_KEY=.\+" .env 2>/dev/null || grep -q "^GEMINI_API_KEY=your" .env 2>/dev/null; then
     echo -e "${YELLOW}⚠️  GEMINI_API_KEY not set in backend/.env${NC}"
     echo ""
     echo "Please add your Gemini API key to backend/.env:"

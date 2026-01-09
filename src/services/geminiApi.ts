@@ -73,12 +73,7 @@ export class GeminiApiService {
   async listModels(): Promise<string[]> {
     if (!this.apiKey) throw new Error("Gemini API key is required");
     const resp = await fetch(
-      `https://generativelanguage.googleapis.com/${this.apiVersion}/models`,
-      {
-        headers: {
-          "x-goog-api-key": this.apiKey,
-        },
-      }
+      `https://generativelanguage.googleapis.com/${this.apiVersion}/models?key=${this.apiKey}`
     );
     if (!resp.ok) return [];
     const data = await resp.json().catch(() => ({}));
@@ -227,12 +222,9 @@ User Query: ${userPrompt}`;
   ) {
     const config = this.taskConfigs[task] || this.taskConfigs.general;
 
-    const response = await fetch(this.buildUrl(model), {
+    const response = await fetch(`${this.buildUrl(model)}?key=${this.apiKey}`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": this.apiKey,
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [
           {
@@ -414,12 +406,9 @@ User Query: ${userPrompt}`;
       ],
     };
 
-    const resp = await fetch(url, {
+    const resp = await fetch(`${url}?key=${this.apiKey}`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": this.apiKey,
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
 

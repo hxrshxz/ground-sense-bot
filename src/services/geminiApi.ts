@@ -31,14 +31,20 @@ interface TaskConfig {
 export class GeminiApiService {
   private apiKey: string;
   private apiVersion = "v1beta"; // keep v1beta for latest 1.5 models
+  
+  /* 
+   * VALIDATED: gemini-flash-latest is the ONLY working model for the current API key 
+   */
   private primaryModel =
-    (import.meta.env.VITE_GEMINI_MODEL as string) || "gemini-2.5-flash";
+    (import.meta.env.VITE_GEMINI_MODEL as string) || "gemini-flash-latest";
+    
   // Fallback order (will try sequentially on model-not-found)
   private fallbackModels = [
+    "gemini-flash-latest",     // EXACT user requested model
     "gemini-1.5-flash",
-    "gemini-2.5-pro-latest",
-    "gemini-2.5-pro",
-    "gemini-pro",
+    "gemini-2.0-flash-exp",
+    "gemini-1.5-pro",
+    "gemini-pro",              // Legacy 1.0 pro
   ];
   private triedModels = new Set<string>();
 
@@ -221,6 +227,9 @@ User Query: ${userPrompt}`;
       | "sql" = "general"
   ) {
     const config = this.taskConfigs[task] || this.taskConfigs.general;
+    
+    // Standard logging
+    console.log(`[GEMINI] Generating using model: ${model}`);
 
     const response = await fetch(`${this.buildUrl(model)}?key=${this.apiKey}`, {
       method: "POST",
@@ -266,12 +275,24 @@ User Query: ${userPrompt}`;
     });
 
     if (!response.ok) {
-      const errorData = (await response.json().catch(() => ({}))) as {
-        error?: GeminiApiError;
-      };
-      const message = errorData?.error?.message || "Unknown error";
+      const errorText = await response.text();
+      let errorData: any = {};
+      try {
+        errorData = JSON.parse(errorText);
+      } catch (e) {
+        // failed to parse
+      }
+
+      const message = errorData?.error?.message || errorText || "Unknown error";
       const code = errorData?.error?.code || response.status;
       const status = errorData?.error?.status;
+      
+      if (code === 429 || status === "RESOURCE_EXHAUSTED") {
+        console.warn(`⚠️ Gemini Quota Exceeded for ${model}.`);
+      } else {
+        console.warn(`⚠️ Gemini API Error (${model}): ${message}`);
+      }
+
       throw Object.assign(
         new Error(
           `Gemini API error (${model}): ${code} ${status || ""} - ${message}`
@@ -315,13 +336,20 @@ User Query: ${userPrompt}`;
         this.addToHistory("assistant", text);
 
         return { text };
-      } catch (err) {
+      } catch (err: any) {
         lastError = err;
-        if (!this.isModelNotFound(err)) {
-          // Non model-not-found errors => stop early
-          break;
+        
+        // Check if we should continue to the next model
+        const isNotFound = this.isModelNotFound(err);
+        const isQuotaError = err.code === 429 || err.status === "RESOURCE_EXHAUSTED";
+        
+        if (isNotFound || isQuotaError) {
+           console.warn(`[GEMINI] Model ${model} failed (${isNotFound ? "Not Found" : "Quota Exceeded"}). Trying next fallback...`);
+           continue; 
         }
-        // else continue to next fallback
+
+        // For other errors (authorization, bad request, server error), stop immediately
+        break;
       }
     }
     console.error("Gemini API final error:", lastError);

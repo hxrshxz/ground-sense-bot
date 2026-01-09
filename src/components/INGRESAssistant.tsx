@@ -1376,10 +1376,16 @@ export const INGRESAssistant = ({
       console.log("[GEMINI] Starting API request");
       setIsThinking(true);
 
-      // Detect if user wants visualization
-      const visualKeywords = /graph|chart|visuali|compare.*with|plot|show.*data|trend|diagram|versus|vs\b/i;
-      const wantsVisualization = visualKeywords.test(query);
-      console.log("[GEMINI] Visualization detected:", wantsVisualization);
+      const geminiService = new GeminiApiService(apiKey);
+      
+      // Step 1: LLM-powered intent classification (matches backend nlp_service.go approach)
+      const intent = await geminiService.classifyIntent(query);
+      console.log("[GEMINI] Intent classified:", intent);
+      
+      // Step 2: Determine if visualization is needed based on intent type
+      const visualIntents = ["COMPARE", "TREND", "TOP_RANKING", "SECTOR_USAGE", "RISK_PROFILE"];
+      const needsChart = visualIntents.includes(intent);
+      console.log("[GEMINI] Needs chart:", needsChart, "for intent:", intent);
 
       // Prepare context-aware prompt with detailed response guidance
       let contextualPrompt = query;
@@ -1391,8 +1397,8 @@ export const INGRESAssistant = ({
         )}`;
       }
 
-      // Add instructions for more detailed responses when in co-pilot mode
-      if (isCoPilotMode && !wantsVisualization) {
+      // Add instructions for more detailed responses when in co-pilot mode (not for charts)
+      if (isCoPilotMode && !needsChart) {
         contextualPrompt += `\n\n
 Please provide a comprehensive and detailed response suitable for natural human speech with the following characteristics:
 1. Use conversational language that flows naturally when spoken aloud
@@ -1414,13 +1420,12 @@ Please provide a comprehensive and detailed response suitable for natural human 
 Your response should sound like it's coming from a knowledgeable human analyst explaining the information in a clear, conversational manner.`;
       }
 
-      // Call Gemini API with appropriate task type
-      const geminiService = new GeminiApiService(apiKey);
-      const taskType = wantsVisualization ? "visualization" : "general";
+      // Step 3: Call Gemini API with appropriate task type
+      const taskType = needsChart ? "visualization" : "general";
       const response = await geminiService.generateResponse(contextualPrompt, taskType);
 
-      // Parse chart JSON from response if visualization was requested
-      if (wantsVisualization) {
+      // Parse chart JSON from response if visualization intent
+      if (needsChart) {
         const chartData = parseChartFromResponse(response.text);
         if (chartData) {
           console.log("[GEMINI] Chart data parsed:", chartData);

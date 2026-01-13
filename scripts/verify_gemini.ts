@@ -26,10 +26,10 @@ async function verifyGemini() {
       const text = await resp.text();
       console.error(`   ${text}`);
     } else {
-      const data = await resp.json();
+      const data = await resp.json() as { models?: Array<{ name: string; supportedGenerationMethods?: string[] }> };
       const models = data.models || [];
       console.log(`✅ Found ${models.length} models:`);
-      models.forEach((m: any) => {
+      models.forEach((m) => {
         if (m.supportedGenerationMethods?.includes('generateContent')) {
           console.log(`   - ${m.name.replace('models/', '')}`);
         }

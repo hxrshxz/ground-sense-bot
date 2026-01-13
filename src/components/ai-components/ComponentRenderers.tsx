@@ -62,7 +62,90 @@ const generateColors = (count: number, alpha = 1) => {
   return Array.from({ length: count }, (_, i) => colors[i % colors.length]);
 };
 
-export const KeyStatsRenderer: React.FC<any> = ({ data }) => {
+// Interfaces for component props
+interface KeyStatsProps {
+  data: Record<string, string | number>;
+}
+
+interface MetricBadge {
+  label: string;
+  value: string | number;
+  variant?: "alert" | "success" | "warning" | "default";
+  change?: string;
+}
+
+interface KeyMetricsProps {
+  data: MetricBadge[];
+}
+
+interface ChartItem {
+  name: string;
+  value: number;
+}
+
+interface PieChartProps {
+  title: string;
+  data: ChartItem[];
+}
+
+interface ChartDataProps {
+  title: string;
+  labels: string[];
+  data: Record<string, number[]>;
+  yAxisLabel?: string;
+}
+
+interface TableProps {
+  headers: string[];
+  rows: (string | number)[][];
+}
+
+interface DualAxisSeries {
+  type: "line" | "bar";
+  name: string;
+  data: number[];
+  yAxis?: "left" | "right";
+}
+
+interface DualAxisProps {
+  title: string;
+  labels: string[];
+  series: DualAxisSeries[];
+}
+
+interface CropItem {
+  name: string;
+  waterRequirement: string;
+  benefit: string;
+}
+
+interface CropListProps {
+  title: string;
+  data: CropItem[];
+}
+
+interface HotspotItem {
+  district: string;
+  stage: string | number;
+}
+
+interface HotspotListProps {
+  title: string;
+  data: HotspotItem[];
+}
+
+interface AlertData {
+  status: string;
+  message: string;
+  details: string;
+  action: string;
+}
+
+interface AlertCardProps {
+  data: AlertData;
+}
+
+export const KeyStatsRenderer: React.FC<KeyStatsProps> = ({ data }) => {
   return (
     <Card className="w-full mb-4">
       <CardHeader className="pb-2">
@@ -82,7 +165,7 @@ export const KeyStatsRenderer: React.FC<any> = ({ data }) => {
   );
 };
 
-export const KeyMetricsBadgesRenderer: React.FC<any> = ({
+export const KeyMetricsBadgesRenderer: React.FC<KeyMetricsProps> = ({
   data,
 }) => {
   const getVariantClasses = (variant?: string) => {
@@ -123,7 +206,7 @@ export const KeyMetricsBadgesRenderer: React.FC<any> = ({
   );
 };
 
-export const PieChartRenderer: React.FC<any> = ({
+export const PieChartRenderer: React.FC<PieChartProps> = ({
   title,
   data,
 }) => {
@@ -164,7 +247,7 @@ export const PieChartRenderer: React.FC<any> = ({
   );
 };
 
-export const LineChartRenderer: React.FC<any> = ({
+export const LineChartRenderer: React.FC<ChartDataProps> = ({
   title,
   labels,
   data,
@@ -217,7 +300,7 @@ export const LineChartRenderer: React.FC<any> = ({
   );
 };
 
-export const BarChartRenderer: React.FC<any> = ({
+export const BarChartRenderer: React.FC<ChartDataProps> = ({
   title,
   labels,
   data,
@@ -266,7 +349,7 @@ export const BarChartRenderer: React.FC<any> = ({
   );
 };
 
-export const TableRenderer: React.FC<any> = ({ headers, rows }) => {
+export const TableRenderer: React.FC<TableProps> = ({ headers, rows }) => {
   return (
     <Card className="w-full mb-4">
       <CardContent className="pt-4">
@@ -295,7 +378,7 @@ export const TableRenderer: React.FC<any> = ({ headers, rows }) => {
   );
 };
 
-export const DualLineChartRenderer: React.FC<any> = ({
+export const DualLineChartRenderer: React.FC<ChartDataProps> = ({
   title,
   labels,
   data,
@@ -355,7 +438,7 @@ export const DualLineChartRenderer: React.FC<any> = ({
   );
 };
 
-export const PredictionCardRenderer: React.FC<any> = ({
+export const PredictionCardRenderer: React.FC<KeyStatsProps> = ({
   data,
 }) => {
   return (
@@ -385,7 +468,7 @@ export const PredictionCardRenderer: React.FC<any> = ({
   );
 };
 
-export const DualAxisChartRenderer: React.FC<any> = ({
+export const DualAxisChartRenderer: React.FC<DualAxisProps> = ({
   title,
   labels,
   series,
@@ -463,7 +546,7 @@ export const DualAxisChartRenderer: React.FC<any> = ({
   );
 };
 
-export const InsightCardRenderer: React.FC<any> = ({
+export const InsightCardRenderer: React.FC<KeyStatsProps> = ({
   data,
 }) => {
   return (
@@ -488,7 +571,7 @@ export const InsightCardRenderer: React.FC<any> = ({
   );
 };
 
-export const CropListRenderer: React.FC<any> = ({
+export const CropListRenderer: React.FC<CropListProps> = ({
   title,
   data,
 }) => {
@@ -525,7 +608,7 @@ export const CropListRenderer: React.FC<any> = ({
   );
 };
 
-export const HotspotListRenderer: React.FC<any> = ({
+export const HotspotListRenderer: React.FC<HotspotListProps> = ({
   title,
   data,
 }) => {
@@ -551,7 +634,7 @@ export const HotspotListRenderer: React.FC<any> = ({
   );
 };
 
-export const AlertCardRenderer: React.FC<any> = ({ data }) => {
+export const AlertCardRenderer: React.FC<AlertCardProps> = ({ data }) => {
   return (
     <Card className="w-full mb-4 border-l-4 border-l-red-500">
       <CardHeader className="pb-2">

@@ -2450,7 +2450,7 @@ Your response should sound like it's coming from a knowledgeable human analyst e
             href="https://ingres.iith.ac.in/gecdataonline/gis/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-white/70 hover:text-white flex items-center gap-1.5 transition-colors bg-white/10 px-3 py-1.5 rounded-full backdrop-blur-sm border border-white/20"
+            className="text-xs text-white hover:text-white/80 flex items-center gap-1.5 transition-colors bg-white/20 px-3 py-1.5 rounded-full backdrop-blur-lg border border-white/40"
           >
             <Database className="w-3 h-3" />
             Powered by INGRES Portal • Groundwater Data for India

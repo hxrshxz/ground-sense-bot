@@ -1,8 +1,9 @@
-import { defineConfig } from "vite";
+import { defineConfig, ViteDevServer } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import fs from "fs";
+import type { IncomingMessage, ServerResponse } from "http";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -21,17 +22,19 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     {
       name: "configure-response-headers",
-      configureServer: (server: any) => {
-        server.middlewares.use((req: any, res: any, next: any) => {
-          // Basic response headers
-          res.setHeader("Access-Control-Allow-Origin", "*");
-          res.setHeader(
-            "Access-Control-Allow-Methods",
-            "GET,HEAD,PUT,PATCH,POST,DELETE"
-          );
-          res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-          next();
-        });
+      configureServer: (server: ViteDevServer) => {
+        server.middlewares.use(
+          (req: IncomingMessage, res: ServerResponse, next: () => void) => {
+            // Basic response headers
+            res.setHeader("Access-Control-Allow-Origin", "*");
+            res.setHeader(
+              "Access-Control-Allow-Methods",
+              "GET,HEAD,PUT,PATCH,POST,DELETE"
+            );
+            res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+            next();
+          }
+        );
       },
     },
   ].filter(Boolean),

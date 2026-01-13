@@ -3,8 +3,9 @@ import { useEffect, useRef, useState, useCallback } from "react";
 export interface ChatResponse {
   text: string;
   intent: string;
+  suggestions?: string[];
   chart?: {
-    type: string;
+    type: any; // Using any to avoid rigid enum conflicts with dynamic backend types
     title: string;
     series: {
       name: string;

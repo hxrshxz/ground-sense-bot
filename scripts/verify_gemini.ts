@@ -41,9 +41,8 @@ async function verifyGemini() {
 
   const modelsToTry = ["gemini-2.0-flash-exp", "gemini-1.5-flash"];
   
-  console.log('\n🔄 Retrying generation with specific models...');
+  console.log('\n🔄 Testing specific models...');
   for (const modelName of modelsToTry) {
-     // ... (keep existing generation test logic) -> actually I need to rewrite the loop part as I replaced the whole block
      console.log(`\nTesting model: ${modelName}...`);
     try {
       const genAI = new GoogleGenerativeAI(apiKey);
@@ -53,9 +52,8 @@ async function verifyGemini() {
       const response = await result.response;
       const text = response.text();
       
-      console.log(`✅ Success! Response from ${modelName}:`);
-      console.log(`   "${text.trim()}"`);
-      return; 
+      console.log(`✅ Success! ${modelName} is WORKING.`);
+      console.log(`   Response: "${text.trim()}"`);
     } catch (error: any) {
       console.error(`❌ Failed with ${modelName}:`);
       console.error(`   Error: ${error.message}`);

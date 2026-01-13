@@ -44,8 +44,11 @@ export class GroundwaterDataService {
       const name = block.name.toLowerCase();
       const district = block.district?.toLowerCase();
       
-      const nameRegex = new RegExp(`\\b${name}\\b`, 'i');
-      const distRegex = district ? new RegExp(`\\b${district}\\b`, 'i') : null;
+      // Escape special characters for regex
+      const escapeRegExp = (string: string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      
+      const nameRegex = new RegExp(`\\b${escapeRegExp(name)}\\b`, 'i');
+      const distRegex = district ? new RegExp(`\\b${escapeRegExp(district)}\\b`, 'i') : null;
       
       const isWordMatch = name.length > 3 && nameRegex.test(normalizedQuery);
       const isDistMatch = district && district.length > 3 && distRegex!.test(normalizedQuery);

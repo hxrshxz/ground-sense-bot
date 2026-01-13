@@ -32,23 +32,28 @@ export class GeminiApiService {
   private apiKeys: string[] = [];
   private currentKeyIndex: number = 0;
   private disabledKeys: Set<string> = new Set();
-  private apiVersion = "v1beta"; 
   
   /* 
-   * VALIDATED: gemini-flash-latest is the ONLY working model for the current API key 
+  /* 
+   * VALIDATED: gemini-2.0-flash-exp is the correct model name (returns 429 Quota Exceeded, not 404)
+   * This confirms the model exists and is accessible with the current key.
    */
   private primaryModel =
-    (import.meta.env.VITE_GEMINI_MODEL as string) || "gemini-flash-latest";
+    (import.meta.env.VITE_GEMINI_MODEL as string) || "gemini-2.0-flash-exp";
     
-  // Fallback order (will try sequentially on model-not-found)
+  // Fallback order (will try sequentially on model-not-found or quota exceeded)
   private fallbackModels = [
-    "gemini-flash-latest",     // EXACT user requested model
-    "gemini-1.5-flash",
-    "gemini-2.0-flash-exp",
-    "gemini-1.5-pro",
-    "gemini-pro",              // Legacy 1.0 pro
+    "gemini-2.5-flash",       // New high-performance model
+    "gemini-2.5-flash-lite",  // Efficient lite version
+    "gemini-3-flash",         // Next-gen flash model
+    "gemini-2.0-flash-exp",   // Existing experimental model
+    "gemini-1.5-flash",       // Stable fallback
+    "gemini-1.5-pro",         // Legacy fallback
   ];
   private triedModels = new Set<string>();
+
+  // Use v1beta for widest model support
+  private apiVersion = "v1beta";
 
   // Task-specific configurations for optimal responses
   private taskConfigs: Record<string, TaskConfig> = {
@@ -120,52 +125,37 @@ export class GeminiApiService {
       .filter(Boolean);
   }
 
-  // Domain knowledge for groundwater analysis
+  // Domain knowledge for groundwater analysis - THE SOURCE of TRUTH for RULES
   private readonly DOMAIN_KNOWLEDGE = `
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-DOMAIN KNOWLEDGE FOR GROUNDWATER ANALYSIS
+CGWB OFFICIAL DATA PROTOCOLS - MANDATORY COMPLIANCE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-CRITICAL THRESHOLDS:
-- Stage of Extraction > 100%: Over-Exploited (RED ALERT)
+⚠️ DATA LOCK:
+1. If data is provided in the query under "VERIFIED GROUND TRUTH DATA", you MUST use those exact numbers.
+2. NEVER hallucinate or invent numbers if they are not provided.
+3. TARGETED LOCATIONS: If the user explicitly asks for groundwater data for a specific location and no data is provided, state: "The specific data for [Location Name] is not available in my current dataset. Please check the INGRES portal."
+4. GENERAL/OTHER QUERIES: If the user asks general questions (e.g., "Who is Virat Kohli", "Write a code") unrelated to groundwater:
+   - You MAY answer them helpfully.
+   - You MUST briefly mention: "I am primarily a Groundwater Analysis Assistant, but..."
+
+⚠️ MATHEMATICAL CONVERSION RULES (NON-NEGOTIABLE):
+1. Unit conversion: BCM = ham ÷ 100,000
+   - Example trace: "2,000,000 ham ÷ 100,000 = 20.00 BCM"
+2. Stage of Extraction Formula: (Extraction in ham / Extractable Resources in ham) × 100
+   - Example trace: "(1,500,000 ham / 1,000,000 ham) × 100 = 150%"
+3. ALWAYS show the raw ham value, the formula, and the final result.
+
+CLASSIFICATION THRESHOLDS (CGWB Official):
+- Stage > 100%: Over-Exploited (RED ALERT)
 - Stage 90-100%: Critical (HIGH RISK)  
 - Stage 70-90%: Semi-Critical (MODERATE RISK)
 - Stage < 70%: Safe (LOW RISK)
 
-INDIA GROUNDWATER STATISTICS (2024-2025):
-- Total Assessment Units: 6,746 blocks
-- Over-Exploited: ~17% of blocks
-- Critical: ~5% of blocks
-- Semi-Critical: ~10% of blocks
-- Safe: ~65% of blocks
-- Total Recharge: ~430 BCM/year
-- Total Extraction: ~250 BCM/year
-- Net Availability: ~398 BCM/year
-
-STATE-LEVEL INSIGHTS:
-- Punjab: Highest extraction, 79% over-exploited blocks, 650mm avg rainfall
-- Rajasthan: Water-scarce, 450mm rainfall, high salinity issues
-- Haryana: High agricultural demand, 60% critical+over-exploited
-- Delhi: Urban stress, limited recharge, 90%+ over-exploited
-- Tamil Nadu: Coastal salinity, monsoon dependent
-- Gujarat: Mixed status, western areas critical
-
-TYPICAL EXTRACTION BREAKDOWN:
-- Agriculture: 85-92% (dominant in rural areas)
-- Domestic: 5-10%
-- Industrial: 2-5%
-
-RECHARGE SOURCES IMPORTANCE:
-1. Rainfall Recharge: 60-70% of total
-2. Canal Recharge: 15-25%
-3. Irrigation Return Flow: 10-15%
-4. Water Conservation: 5-10%
-
-RED FLAGS TO DETECT:
-- Extraction > Recharge by 30%+ (unsustainable)
-- Rainfall < 400mm with high extraction
-- Rapid decline > 0.5m/year
-- Stage > 150% (severe over-exploitation)
+FORBIDDEN:
+- "approximately", "around", "about", "roughly"
+- Estimates not based on the provided ham values
+- Omitting the BCM unit or the ham -> BCM calculation trace
 `;
 
   // Data extraction schema for visualization - client builds charts from structured data

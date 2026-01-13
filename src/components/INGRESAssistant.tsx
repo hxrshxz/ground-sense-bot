@@ -59,6 +59,9 @@ import AIResponseRendererV2 from "./ai-components/AIResponseRendererV2";
 const StateDeepDiveCard = React.lazy(() => import("./cards/StateDeepDiveCard"));
 import { PUNJAB_PROFILE } from "@/data/stateGroundwaterData";
 import { GeminiApiService } from "../services/geminiApi";
+import { useChatWebSocket } from "@/hooks/useChatWebSocket";
+import { GroundwaterDataService } from "../services/groundwaterDataService";
+import ChartRenderer from "./charts/echarts/ChartRenderer";
 import {
   MAP_ANALYSIS_PROMPT,
   SAMPLE_MAP_ANALYSIS_RESPONSE,
@@ -966,8 +969,6 @@ const HydrogeologicalAnalysisChart = () => {
   );
 };
 // --- Main INGRES Assistant Component ---
-import { useChatWebSocket } from "@/hooks/useChatWebSocket";
-import ChartRenderer from "./charts/echarts/ChartRenderer";
 
 export const INGRESAssistant = ({
   embedded = false,
@@ -1198,7 +1199,7 @@ export const INGRESAssistant = ({
   const [isThinking, setIsThinking] = useState(false);
   const [currentComparison, setCurrentComparison] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState("");
-  const [activeYear, setActiveYear] = useState("Latest (2025)");
+  const [activeYear, setActiveYear] = useState("2023-2024");
   const [language, setLanguage] = useState("en-US");
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [toast, setToast] = useState({
@@ -1219,6 +1220,7 @@ export const INGRESAssistant = ({
   const apiKeys = [
     import.meta.env.VITE_GEMINI_API_KEY || "",
     import.meta.env.VITE_GEMINI_API_KEY_2 || "",
+    import.meta.env.VITE_GEMINI_API_KEY_3 || "",
   ].filter(Boolean);
   
   // Persistent GeminiApiService instance to retain conversation history across messages
@@ -1563,9 +1565,9 @@ Your response should sound like it's coming from a knowledgeable human analyst e
           type: "ai",
           text: lastMsg.content,
           component: lastMsg.payload?.chart ? (
-            <ChartRenderer chart={lastMsg.payload.chart} />
+            <ChartRenderer chart={lastMsg.payload.chart as any} />
           ) : undefined,
-          suggestions: lastMsg.payload?.suggestions || [],
+          suggestions: (lastMsg.payload as any)?.suggestions || [],
         };
         setChatHistory((prev) => {
           // Avoid duplicates if possible (simple check by ID or content)
@@ -2249,12 +2251,26 @@ Your response should sound like it's coming from a knowledgeable human analyst e
         }
       }
 
-      // --- 5. FALLBACK LOGIC ---
+      // --- 5. DATA-AUGMENTED FALLBACK LOGIC ---
       
+      // Attempt to find ground truth data in our local blocks dataset
+      // Attempt to find ground truth data (Analytics OR Search)
+      let groundTruthContext = GroundwaterDataService.getAnalyticsContext(text, activeYear);
+      if (!groundTruthContext) {
+         groundTruthContext = GroundwaterDataService.getContextForPrompt(text, activeYear);
+      }
+
+      let augmentedQuery = text;
+      if (groundTruthContext) {
+        console.log("[CHAT] Found ground truth data, augmenting query");
+        augmentedQuery += "\n\nUSE THIS VERIFIED DATA TO ANSWER:";
+        augmentedQuery += groundTruthContext;
+      }
+
       // If WebSocket is connected, use it
       if (isWsConnected) {
         console.log("[CHAT] WebSocket is connected, sending message to backend");
-        sendMessage(text);
+        sendMessage(augmentedQuery);
         // The response will be handled by the useEffect hook
         return;
       }
@@ -2264,13 +2280,13 @@ Your response should sound like it's coming from a knowledgeable human analyst e
       
       if (apiKeys.length > 0) {
         setToast({
-          message: "Backend disconnected - using Gemini Cloud fallback",
+          message: groundTruthContext ? "Data found! Using Gemini for analysis." : "Backend disconnected - using Gemini Cloud fallback",
           type: "info",
           visible: true
         });
         
         try {
-          const geminiResponse = await callGeminiAPI(text);
+          const geminiResponse = await callGeminiAPI(augmentedQuery);
           if (geminiResponse) {
             // Handle both string and {text, chart} response formats
             const responseText = typeof geminiResponse === 'string' ? geminiResponse : geminiResponse.text;
@@ -2422,7 +2438,24 @@ Your response should sound like it's coming from a knowledgeable human analyst e
           showLanguageToggle={true}
           currentLanguage={language}
           onLanguageChange={(lang) => setLanguage(lang)}
+          voiceText={voiceText}
+          isListening={isListening}
+          onStartListening={startListening}
+          onStopListening={stopListening}
+          hasRecognitionSupport={hasRecognitionSupport}
         />
+        {/* Subtle INGRES Portal info */}
+        <div className="flex items-center justify-center gap-2 mt-4 opacity-80">
+          <a 
+            href="https://ingres.iith.ac.in/gecdataonline/gis/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-white/70 hover:text-white flex items-center gap-1.5 transition-colors bg-white/10 px-3 py-1.5 rounded-full backdrop-blur-sm border border-white/20"
+          >
+            <Database className="w-3 h-3" />
+            Powered by INGRES Portal • Groundwater Data for India
+          </a>
+        </div>
       </div>
       {/* <motion.div
         initial="hidden"
@@ -2647,6 +2680,11 @@ Your response should sound like it's coming from a knowledgeable human analyst e
             showLanguageToggle={true}
             currentLanguage={language}
             onLanguageChange={(lang) => setLanguage(lang)}
+            voiceText={voiceText}
+            isListening={isListening}
+            onStartListening={startListening}
+            onStopListening={stopListening}
+            hasRecognitionSupport={hasRecognitionSupport}
           />
         </CardContent>
       </Card>

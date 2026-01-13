@@ -13,7 +13,7 @@ export const TextGenerateEffect = ({
   onAnimationComplete?: () => void; // This is the new callback prop
 }) => {
   const [scope, animate] = useAnimate();
-  let wordsArray = words.split(" ");
+  const wordsArray = words.split(" ");
   
   useEffect(() => {
     const animateText = async () => {

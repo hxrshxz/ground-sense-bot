@@ -204,7 +204,7 @@ export function AIInputWithLoading({
       <div className="relative max-w-2xl w-full mx-auto">
         {/* Main Input Container - Light/Transparent Theme */}
         <div className={cn(
-          "relative rounded-2xl border bg-white/80 backdrop-blur-sm border-slate-200/60 p-3 shadow-lg transition-all duration-300",
+          "relative rounded-2xl border bg-white/50 backdrop-blur-lg border-white/30 p-3 shadow-xl transition-all duration-300",
           isRecording && "border-red-400/70 bg-red-50/50"
         )}>
           
@@ -248,7 +248,7 @@ export function AIInputWithLoading({
               placeholder={placeholder}
               className={cn(
                 "w-full bg-transparent border-none rounded-xl px-4 py-3",
-                "placeholder:text-slate-400",
+                "placeholder:text-slate-600",
                 "text-slate-800 resize-none text-base leading-[1.4]",
                 "focus-visible:outline-none focus-visible:ring-0",
                 `min-h-[${minHeight}px]`

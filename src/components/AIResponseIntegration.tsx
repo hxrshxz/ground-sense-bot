@@ -24,6 +24,7 @@ const AIResponseIntegration: React.FC<AIResponseIntegrationProps> = ({
         // Ensure displayType matches the v2 type
         displayType: rawResponse.displayType as DisplayType,
         // Map components from v1 to v2 if necessary
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         components: rawResponse.components.map((component: any) => {
           // Example mapping logic, adjust as needed for your types
           if (
@@ -42,17 +43,20 @@ const AIResponseIntegration: React.FC<AIResponseIntegrationProps> = ({
       }
     : null;
 
+  // React Hook must be called unconditionally
+  React.useEffect(() => {
+    if (!response) {
+      onFallback();
+    }
+  }, [response, onFallback]);
+
   // If we have a structured response, render it with our enhanced renderer
   if (response) {
     return <AIResponseRenderer response={response} />;
   }
 
-  // Otherwise, call the fallback handler (which should use Gemini or other processing)
-  React.useEffect(() => {
-    onFallback();
-  }, [onFallback]);
-
-  return null; // Nothing to render as we're calling the fallback
+  // Otherwise, render nothing while fallback is triggered
+  return null;
 };
 
 export default AIResponseIntegration;

@@ -35,6 +35,19 @@ interface ComparisonCardProps {
   data: ComparisonData;
 }
 
+interface EChartsParam {
+  componentType: "series";
+  seriesType: string;
+  seriesName: string;
+  name: string;
+  dataIndex: number;
+  data: number;
+  value: number;
+  color: string;
+  axisValue: string;
+  marker: string;
+}
+
 const ComparisonCard: React.FC<ComparisonCardProps> = ({ data }) => {
   // Build ECharts grouped bar chart option
   const chartOption: echarts.EChartsOption = useMemo(() => {
@@ -91,10 +104,11 @@ const ComparisonCard: React.FC<ComparisonCardProps> = ({ data }) => {
         textStyle: {
           color: "#fff",
         },
-        formatter: (params: any) => {
-          const location = params[0].axisValue;
+        formatter: (params: unknown) => {
+          const p = params as EChartsParam[];
+          const location = p[0].axisValue;
           let result = `<div style="font-weight: bold; margin-bottom: 8px;">${location}</div>`;
-          params.forEach((param: any) => {
+          p.forEach((param) => {
             const value = param.value;
             const unit =
               param.seriesName === "Rainfall"
@@ -167,16 +181,16 @@ const ComparisonCard: React.FC<ComparisonCardProps> = ({ data }) => {
       series: [
         {
           name: "Recharge",
-          type: "bar",
+          type: "bar" as const,
           data: data.locations.map((loc) => loc.recharge),
           itemStyle: {
             color: "#3b82f6",
           },
           label: {
             show: true,
-            position: "top",
+            position: "top" as const,
             color: "#fff",
-            formatter: (params: any) => params.value.toFixed(1),
+            formatter: (params: unknown) => (params as EChartsParam).value.toFixed(1),
           },
           emphasis: {
             focus: "series",
@@ -188,16 +202,16 @@ const ComparisonCard: React.FC<ComparisonCardProps> = ({ data }) => {
         },
         {
           name: "Extraction",
-          type: "bar",
+          type: "bar" as const,
           data: data.locations.map((loc) => loc.extraction),
           itemStyle: {
             color: "#f59e0b",
           },
           label: {
             show: true,
-            position: "top",
+            position: "top" as const,
             color: "#fff",
-            formatter: (params: any) => params.value.toFixed(1),
+            formatter: (params: unknown) => (params as EChartsParam).value.toFixed(1),
           },
           emphasis: {
             focus: "series",
@@ -209,16 +223,16 @@ const ComparisonCard: React.FC<ComparisonCardProps> = ({ data }) => {
         },
         {
           name: "Stage",
-          type: "bar",
+          type: "bar" as const,
           data: data.locations.map((loc) => loc.stage),
           itemStyle: {
             color: "#8b5cf6",
           },
           label: {
             show: true,
-            position: "top",
+            position: "top" as const,
             color: "#fff",
-            formatter: (params: any) => params.value.toFixed(1) + "%",
+            formatter: (params: unknown) => (params as EChartsParam).value.toFixed(1) + "%",
           },
           emphasis: {
             focus: "series",
@@ -230,16 +244,16 @@ const ComparisonCard: React.FC<ComparisonCardProps> = ({ data }) => {
         },
         {
           name: "Rainfall",
-          type: "bar",
+          type: "bar" as const,
           data: data.locations.map((loc) => loc.rainfall),
           itemStyle: {
             color: "#22c55e",
           },
           label: {
             show: true,
-            position: "top",
+            position: "top" as const,
             color: "#fff",
-            formatter: (params: any) => params.value.toFixed(0) + "mm",
+            formatter: (params: unknown) => (params as EChartsParam).value.toFixed(0) + "mm",
           },
           emphasis: {
             focus: "series",

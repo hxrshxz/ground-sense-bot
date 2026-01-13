@@ -21,6 +21,12 @@ interface AIInputWithLoadingProps {
   showLanguageToggle?: boolean;
   onLanguageChange?: (language: string) => void;
   currentLanguage?: string;
+  // Voice recognition props
+  voiceText?: string;
+  isListening?: boolean;
+  onStartListening?: () => void;
+  onStopListening?: () => void;
+  hasRecognitionSupport?: boolean;
 }
 
 const LANGUAGES = [
@@ -47,7 +53,13 @@ export function AIInputWithLoading({
   showMic = true,
   showLanguageToggle = true,
   onLanguageChange,
-  currentLanguage = "en-US"
+  currentLanguage = "en-US",
+  // Voice recognition props
+  voiceText = "",
+  isListening: externalIsListening,
+  onStartListening,
+  onStopListening,
+  hasRecognitionSupport = true
 }: AIInputWithLoadingProps) {
   const [inputValue, setInputValue] = useState("");
   const [submitted, setSubmitted] = useState(autoAnimate);
@@ -136,11 +148,37 @@ export function AIInputWithLoading({
     }, loadingDuration);
   };
 
+  // Use external voice recognition if provided, otherwise fall back to internal state
+  const isVoiceRecording = externalIsListening !== undefined ? externalIsListening : isRecording;
+
+  // Effect to update input value when voice text changes
+  useEffect(() => {
+    if (voiceText && voiceText.trim()) {
+      setInputValue(voiceText);
+      adjustHeight();
+    }
+  }, [voiceText, adjustHeight]);
+
+  // Sync internal recording state with external listening state
+  useEffect(() => {
+    if (externalIsListening !== undefined) {
+      setIsRecording(externalIsListening);
+    }
+  }, [externalIsListening]);
+
   const handleMicClick = () => {
-    console.log("[AIInput] Mic clicked, isRecording:", isRecording);
-    if (isRecording) {
+    console.log("[AIInput] Mic clicked, isRecording:", isVoiceRecording);
+    if (isVoiceRecording) {
+      // Stop listening
+      if (onStopListening) {
+        onStopListening();
+      }
       setIsRecording(false);
     } else {
+      // Start listening
+      if (onStartListening) {
+        onStartListening();
+      }
       setIsRecording(true);
     }
   };
@@ -291,35 +329,35 @@ export function AIInputWithLoading({
             {/* Right Side - Submit/Mic Button */}
             <button
               onClick={() => {
-                if (isRecording) {
-                  setIsRecording(false);
+                if (isVoiceRecording) {
+                  handleMicClick();
                 } else if (hasContent) {
                   handleSubmit();
-                } else if (showMic) {
-                  setIsRecording(true);
+                } else if (showMic && hasRecognitionSupport) {
+                  handleMicClick();
                 }
               }}
               className={cn(
                 "h-9 w-9 rounded-full transition-all duration-200 flex items-center justify-center",
-                isRecording
+                isVoiceRecording
                   ? "bg-red-100 hover:bg-red-200 text-red-500"
                   : hasContent
                   ? "bg-blue-600 hover:bg-blue-700 text-white"
                   : "bg-slate-100 hover:bg-slate-200 text-slate-600"
               )}
               type="button"
-              disabled={submitted && !isRecording}
+              disabled={submitted && !isVoiceRecording}
             >
-              {submitted && !isRecording ? (
+              {submitted && !isVoiceRecording ? (
                 <div
                   className="w-4 h-4 bg-blue-600 rounded-sm animate-spin"
                   style={{ animationDuration: "3s" }}
                 />
-              ) : isRecording ? (
+              ) : isVoiceRecording ? (
                 <StopCircle className="w-5 h-5" />
               ) : hasContent ? (
                 <CornerRightUp className="w-4 h-4" />
-              ) : showMic ? (
+              ) : showMic && hasRecognitionSupport ? (
                 <Mic className="w-5 h-5" />
               ) : (
                 <CornerRightUp className={cn("w-4 h-4 opacity-30")} />
@@ -329,7 +367,7 @@ export function AIInputWithLoading({
         </div>
 
         {/* Status Text - Only show during recording */}
-        {isRecording && (
+        {isVoiceRecording && (
           <p className="text-center mt-2 h-4 text-xs text-slate-500">
             Listening... Click stop to finish.
           </p>

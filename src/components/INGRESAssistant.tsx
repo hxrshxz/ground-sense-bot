@@ -2324,21 +2324,28 @@ Your response should sound like it's coming from a knowledgeable human analyst e
       /* Legacy Gemini Implementation Removed */
     } catch (error) {
       console.error("Error processing request:", error);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const errMsg = (error as any)?.message || String(error);
       const errorResponse = {
         id: Date.now() + 1,
         type: "ai",
         component: (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-left">
             <div className="flex items-center gap-2 mb-2">
               <AlertCircle className="w-5 h-5 text-red-500" />
               <h3 className="font-semibold text-red-700">
                 Sorry, I encountered an error
               </h3>
             </div>
-            <p className="text-red-600">
-              I was unable to process your request. Please try again later or
-              rephrase your question.
+            <p className="text-red-600 mb-2">
+              I was unable to process your request. Please try again later.
             </p>
+            <details className="text-xs text-red-500 mt-2 p-2 bg-white rounded border border-red-100">
+              <summary className="cursor-pointer font-medium mb-1">Debug Details</summary>
+              <pre className="whitespace-pre-wrap overflow-auto max-h-32">
+                {errMsg}
+              </pre>
+            </details>
           </div>
         ),
       };

@@ -35,19 +35,17 @@ export class GeminiApiService {
   
   /* 
   /* 
-   * VALIDATED: gemini-2.0-flash-exp is the correct model name (returns 429 Quota Exceeded, not 404)
-   * This confirms the model exists and is accessible with the current key.
+   * VALIDATED: gemini-1.5-flash is the most stable and quota-friendly model for free tier users.
+   * gemini-2.0-flash-exp causes frequent 429s or 404s if access is limited.
    */
   private primaryModel =
-    (import.meta.env.VITE_GEMINI_MODEL as string) || "gemini-2.0-flash-exp";
+    (import.meta.env.VITE_GEMINI_MODEL as string) || "gemini-1.5-flash";
     
   // Fallback order (verified available models)
   private fallbackModels = [
-    "gemini-2.0-flash",       // Stable 2.0 Flash
-    "gemini-2.0-flash-lite",  // 2.0 Flash Lite
-    "gemini-flash-latest",    // Latest Flash (1.5)
-    "gemini-pro-latest",      // Latest Pro (1.5)
-    "gemini-2.5-flash",       // New 2.5 Flash (if available)
+    "gemini-1.5-pro",       // High quality fallback
+    "gemini-2.0-flash-exp", // Experimental (fast but risky)
+    "gemini-pro",           // Legacy Pro
   ];
   private triedModels = new Set<string>();
 

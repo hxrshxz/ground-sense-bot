@@ -31,6 +31,18 @@ interface ComparisonChartProps {
   data: ComparisonData;
 }
 
+interface EChartsTooltipParam {
+  componentType: "series";
+  seriesType: string;
+  seriesName: string;
+  name: string;
+  dataIndex: number;
+  data: number;
+  value: number;
+  color: string;
+  marker: string;
+}
+
 const ComparisonChart: React.FC<ComparisonChartProps> = ({ data }) => {
   const option: echarts.EChartsOption = {
     backgroundColor: "transparent",
@@ -51,16 +63,17 @@ const ComparisonChart: React.FC<ComparisonChartProps> = ({ data }) => {
       backgroundColor: "rgba(255, 255, 255, 0.95)",
       borderColor: "#E5E5E5",
       textStyle: { color: "#333333" },
-      formatter: (params: any) => {
+      formatter: (params: unknown) => {
         if (!Array.isArray(params)) return "";
-        const location = params[0].name;
+        const tooltipParams = params as EChartsTooltipParam[];
+        const location = tooltipParams[0].name;
         const locData = data.locations.find((l) => l.name === location);
         const colors = locData
           ? getCategoryColors(locData.category)
           : CATEGORY_COLORS.unknown;
 
         let result = `<div style="font-weight: 600; margin-bottom: 6px; color: #333333;">${location}</div>`;
-        params.forEach((param: any) => {
+        tooltipParams.forEach((param) => {
           const unit = param.seriesName.includes("Stage") ? "%" : " ham";
           result += `<div style="margin: 3px 0; font-size: 12px;">
             <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${
@@ -129,8 +142,9 @@ const ComparisonChart: React.FC<ComparisonChartProps> = ({ data }) => {
           color: "#333333",
           fontSize: 10,
           fontWeight: 500,
-          formatter: (params: any) => {
-            const val = data.locations[params.dataIndex]?.extractable || 0;
+          formatter: (params: unknown) => {
+            const p = params as EChartsTooltipParam;
+            const val = data.locations[p.dataIndex]?.extractable || 0;
             return val > 1000 ? `${(val / 1000).toFixed(1)}K` : String(val);
           },
         },
@@ -150,8 +164,9 @@ const ComparisonChart: React.FC<ComparisonChartProps> = ({ data }) => {
           color: "#333333",
           fontSize: 10,
           fontWeight: 500,
-          formatter: (params: any) => {
-            const val = data.locations[params.dataIndex]?.extraction || 0;
+          formatter: (params: unknown) => {
+             const p = params as EChartsTooltipParam;
+            const val = data.locations[p.dataIndex]?.extraction || 0;
             return val > 1000 ? `${(val / 1000).toFixed(1)}K` : String(val);
           },
         },
@@ -162,8 +177,8 @@ const ComparisonChart: React.FC<ComparisonChartProps> = ({ data }) => {
         type: "bar",
         data: data.locations.map((loc) => loc.stage || 0),
         itemStyle: {
-          color: (params: any) =>
-            getCategoryColorsFromStage(params.value).primary,
+          color: (params: unknown) =>
+            getCategoryColorsFromStage((params as EChartsTooltipParam).value).primary,
           borderRadius: [0, 2, 2, 0],
         },
         label: {
@@ -172,7 +187,7 @@ const ComparisonChart: React.FC<ComparisonChartProps> = ({ data }) => {
           color: "#333333",
           fontSize: 10,
           fontWeight: 500,
-          formatter: (params: any) => `${params.value?.toFixed(1) || 0}%`,
+          formatter: (params: unknown) => `${(params as EChartsTooltipParam).value?.toFixed(1) || 0}%`,
         },
         barMaxWidth: 20,
       },

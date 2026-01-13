@@ -34,6 +34,14 @@ interface TrendAnalysisCardProps {
   data: TrendData;
 }
 
+interface EChartsParam {
+  value: number;
+  name: string;
+  dataIndex: number;
+  seriesName: string;
+  color: string;
+}
+
 const TrendAnalysisCard: React.FC<TrendAnalysisCardProps> = ({ data }) => {
   // Build ECharts timeline option matching the example structure
   const timelineOption: echarts.EChartsOption = useMemo(() => {
@@ -75,7 +83,7 @@ const TrendAnalysisCard: React.FC<TrendAnalysisCardProps> = ({ data }) => {
           textStyle: {
             color: "#fff",
             fontSize: 20,
-            fontWeight: "bold",
+            fontWeight: 700,
           },
         },
         {
@@ -91,7 +99,7 @@ const TrendAnalysisCard: React.FC<TrendAnalysisCardProps> = ({ data }) => {
           textStyle: {
             color: "#94a3b8",
             fontSize: 13,
-            fontWeight: "normal",
+            fontWeight: 400,
           },
         },
       ],
@@ -99,61 +107,61 @@ const TrendAnalysisCard: React.FC<TrendAnalysisCardProps> = ({ data }) => {
         // Bar series for Recharge
         {
           name: "Recharge",
-          type: "bar",
+          type: "bar" as const,
           data: [point.recharge],
           itemStyle: {
             color: "#3b82f6",
           },
-          label: {
+            label: {
             show: true,
-            position: "top",
+            position: "top" as const,
             color: "#fff",
-            formatter: (params: any) => params.value.toFixed(1),
+            formatter: (params: unknown) => (params as EChartsParam).value.toFixed(1),
           },
         },
         // Bar series for Extraction
         {
           name: "Extraction",
-          type: "bar",
+          type: "bar" as const,
           data: [point.extraction],
           itemStyle: {
             color: "#f59e0b",
           },
-          label: {
+            label: {
             show: true,
-            position: "top",
+            position: "top" as const,
             color: "#fff",
-            formatter: (params: any) => params.value.toFixed(1),
+            formatter: (params: unknown) => (params as EChartsParam).value.toFixed(1),
           },
         },
         // Bar series for Stage
         {
           name: "Stage",
-          type: "bar",
+          type: "bar" as const,
           data: [point.stage],
           itemStyle: {
             color: "#8b5cf6",
           },
           label: {
             show: true,
-            position: "top",
+            position: "top" as const,
             color: "#fff",
-            formatter: (params: any) => params.value.toFixed(1) + "%",
+            formatter: (params: unknown) => (params as EChartsParam).value.toFixed(1) + "%",
           },
         },
         // Bar series for Rainfall
         {
           name: "Rainfall",
-          type: "bar",
+          type: "bar" as const,
           data: [point.rainfall],
           itemStyle: {
             color: "#22c55e",
           },
           label: {
             show: true,
-            position: "top",
+            position: "top" as const,
             color: "#fff",
-            formatter: (params: any) => params.value.toFixed(0) + "mm",
+            formatter: (params: unknown) => (params as EChartsParam).value.toFixed(0) + "mm",
           },
         },
         // Pie chart for category status
@@ -184,7 +192,7 @@ const TrendAnalysisCard: React.FC<TrendAnalysisCardProps> = ({ data }) => {
           label: {
             color: "#94a3b8",
             fontSize: 13,
-            fontWeight: "normal",
+            fontWeight: 400,
           },
           lineStyle: {
             color: "#475569",
@@ -272,59 +280,59 @@ const TrendAnalysisCard: React.FC<TrendAnalysisCardProps> = ({ data }) => {
         series: [
           {
             name: "Recharge",
-            type: "bar",
+            type: "bar" as const,
             itemStyle: {
               color: "#3b82f6",
             },
             label: {
               show: true,
-              position: "top",
+              position: "top" as const,
               color: "#fff",
-              formatter: (params: any) => params.value.toFixed(1),
+              formatter: (params: unknown) => (params as EChartsParam).value.toFixed(1),
             },
           },
           {
             name: "Extraction",
-            type: "bar",
+            type: "bar" as const,
             itemStyle: {
               color: "#f59e0b",
             },
             label: {
               show: true,
-              position: "top",
+              position: "top" as const,
               color: "#fff",
-              formatter: (params: any) => params.value.toFixed(1),
+              formatter: (params: unknown) => (params as EChartsParam).value.toFixed(1),
             },
           },
           {
             name: "Stage",
-            type: "bar",
+            type: "bar" as const,
             itemStyle: {
               color: "#8b5cf6",
             },
             label: {
               show: true,
-              position: "top",
+              position: "top" as const,
               color: "#fff",
-              formatter: (params: any) => params.value.toFixed(1) + "%",
+              formatter: (params: unknown) => (params as EChartsParam).value.toFixed(1) + "%",
             },
           },
           {
             name: "Rainfall",
-            type: "bar",
+            type: "bar" as const,
             itemStyle: {
               color: "#22c55e",
             },
             label: {
               show: true,
-              position: "top",
+              position: "top" as const,
               color: "#fff",
-              formatter: (params: any) => params.value.toFixed(0) + "mm",
+              formatter: (params: unknown) => (params as EChartsParam).value.toFixed(0) + "mm",
             },
           },
           {
             name: "Category Status",
-            type: "pie",
+            type: "pie" as const,
             center: ["80%", "30%"],
             radius: ["15%", "25%"],
             z: 100,
@@ -334,7 +342,7 @@ const TrendAnalysisCard: React.FC<TrendAnalysisCardProps> = ({ data }) => {
               formatter: "{b}\n{d}%",
             },
             itemStyle: {
-              color: (params: any) => {
+              color: (params: unknown) => {
                 const categoryColors: Record<string, string> = {
                   safe: "#10b981",
                   semicritical: "#3b82f6",
@@ -342,7 +350,8 @@ const TrendAnalysisCard: React.FC<TrendAnalysisCardProps> = ({ data }) => {
                   overcritical: "#ef4444",
                   saline: "#8b5cf6",
                 };
-                const cat = params.name.toLowerCase().replace(/[_\s-]/g, "");
+                const p = params as EChartsParam;
+                const cat = p.name.toLowerCase().replace(/[_\s-]/g, "");
                 return categoryColors[cat] || "#6b7280";
               },
             },

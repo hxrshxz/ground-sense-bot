@@ -104,10 +104,17 @@ const normalizeXAxis = (
 };
 
 // Helper to convert series data to pie data
+interface PieChartItem {
+  name: string;
+  value: number;
+  blockUuid?: string;
+  districtUuid?: string;
+}
+
 const convertSeriesToPieData = (
   series: SeriesData[],
   xAxis: { data: string[] }
-) => {
+): PieChartItem[] => {
   if (!series || !series[0]?.data || !xAxis.data) return [];
   return xAxis.data.map((name, idx) => ({
     name,
@@ -169,33 +176,9 @@ const ChartRenderer: React.FC<ChartRendererProps> = ({
   );
 
   // Handle metrics-card type separately (it's a React component, not ECharts)
-  if (chart.type === "metrics-card" && chart.metricsData) {
-    return <GroundwaterMetricsCard data={chart.metricsData} />;
-  }
-
-  // Handle trend-card type separately (it's a React component, not ECharts)
-  if (chart.type === "trend-card" && chart.trendData) {
-    return <TrendAnalysisCard data={chart.trendData} />;
-  }
-
-  // Handle comparison-card type separately (new comparison chart)
-  if (chart.type === "comparison-card" && chart.comparisonData) {
-    // Check if it's the new ComparisonChart format (has comparisonType field)
-    if (
-      "comparisonType" in chart.comparisonData &&
-      chart.comparisonData.locations.length > 0
-    ) {
-      // Check if locations have 'name' field (new format) vs 'locationName' (old format)
-      const firstLoc = chart.comparisonData.locations[0];
-      if ("name" in firstLoc) {
-        return (
-          <ComparisonChart data={chart.comparisonData as ComparisonChartData} />
-        );
-      }
-    }
-    // Otherwise use the old ComparisonCard
-    return <ComparisonCard data={chart.comparisonData} />;
-  }
+  const isMetricsCard = chart.type === "metrics-card" && chart.metricsData;
+  const isTrendCard = chart.type === "trend-card" && chart.trendData;
+  const isComparisonCard = chart.type === "comparison-card" && chart.comparisonData;
 
   const getOption = useCallback(() => {
     // We intentionally ignore `chart.echarts_option` to keep visuals hardcoded
@@ -239,7 +222,13 @@ const ChartRenderer: React.FC<ChartRendererProps> = ({
       case "pie":
         return createRosePieChart(
           title,
-          chart.pieData || convertSeriesToPieData(series, xAxis)
+          (chart.pieData || convertSeriesToPieData(series, xAxis)).map(
+            (item) => ({
+              ...item,
+              blockUuid: (item as PieChartItem).blockUuid,
+              districtUuid: (item as PieChartItem).districtUuid,
+            })
+          )
         );
 
       case "timeline-bar":
@@ -264,6 +253,34 @@ const ChartRenderer: React.FC<ChartRendererProps> = ({
         return createGradientAreaChart(title, series, xAxis);
     }
   }, [chart]);
+
+  if (isMetricsCard && chart.metricsData) {
+    return <GroundwaterMetricsCard data={chart.metricsData} />;
+  }
+
+  if (isTrendCard && chart.trendData) {
+    return <TrendAnalysisCard data={chart.trendData} />;
+  }
+
+  if (isComparisonCard && chart.comparisonData) {
+    // Check if it's the new ComparisonChart format (has comparisonType field)
+    if (
+      "comparisonType" in chart.comparisonData &&
+      chart.comparisonData.locations.length > 0
+    ) {
+      // Check if locations have 'name' field (new format) vs 'locationName' (old format)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const firstLoc = chart.comparisonData.locations[0] as any;
+      if ("name" in firstLoc) {
+        return (
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          <ComparisonChart data={chart.comparisonData as any} />
+        );
+      }
+    }
+    // Otherwise use the old ComparisonCard
+    return <ComparisonCard data={chart.comparisonData} />;
+  }
 
   return (
     <div

@@ -609,7 +609,6 @@ JOIN states s ON b.state_uuid = s.state_uuid
 WHERE UPPER(s.state_name) = UPPER('punjab')
   AND a.year IN ('2023-2024', '2024-2025')
 GROUP BY a.year, s.state_name
-ORDER BY a.year ASCstate_name
 ORDER BY a.year ASC
 
 🎯 EXAMPLE 17: TOP_RANKING - "Top 10 over-exploited blocks in India"
@@ -688,8 +687,6 @@ SELECT
     total_blocks,
     (avg_stage - LAG(avg_stage) OVER (ORDER BY year)) as stage_change
 FROM yearly_data
-ORDER BY yeare - LAG(avg_stage) OVER (ORDER BY year)) as stage_change
-FROM yearly_data
 ORDER BY year
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -764,7 +761,7 @@ func (s *NLPService) analyzeQueryWithAI(message string) (*IntentAnalysis, error)
 	}
 
 	ctx := context.Background()
-DATABASE SCHEMA CONTEXT:
+	prompt := fmt.Sprintf(`DATABASE SCHEMA CONTEXT:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 HIERARCHY: State → District → Block
 BLOCKS: 6,746 | DATA AVAILABILITY: 2 years (2023-2024, 2024-2025)
@@ -789,7 +786,6 @@ BLOCKS IN 2024-2025: 5,796 | DATA AVAILABILITY: 7 years (2012-2025)
    - stage (FLOAT): Stage percentage (can be negative -100000 for salinity)
    - availability (FLOAT): Available groundwater in MCM
    
-   DEFAULT YEAR LOGIC:
    DEFAULT YEAR LOGIC:
    - Single block query: Use '2024-2025' (most recent)
    - Trend/comparison query: Use both years ('2023-2024', '2024-2025')

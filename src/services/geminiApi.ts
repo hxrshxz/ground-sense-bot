@@ -369,7 +369,7 @@ User Query: ${userPrompt}`;
 
     if (!response.ok) {
       const errorText = await response.text();
-      let errorData: Record<string, any> = {};
+      let errorData: { error?: { message?: string; code?: number; status?: string } } = {};
       try {
         errorData = JSON.parse(errorText);
       } catch (e) {
@@ -418,13 +418,14 @@ User Query: ${userPrompt}`;
     this.addToHistory("user", prompt);
 
     let retryWithNewKey = true;
+    let lastError: Error | unknown;
+
     while (retryWithNewKey) {
       retryWithNewKey = false;
       const modelsToTry = [this.primaryModel, ...this.fallbackModels].filter(
         (m) => !this.triedModels.has(m)
       );
       
-      let lastError: any;
       for (const model of modelsToTry) {
         try {
           this.triedModels.add(model);
@@ -479,7 +480,7 @@ User Query: ${userPrompt}`;
     if (!this.apiKey) throw new Error("Gemini API key is required");
 
     const modelsToTry = [this.primaryModel, ...this.fallbackModels];
-    let lastError: any;
+    let lastError: Error | unknown;
 
     // Use the comprehensive map analysis prompt or a simple fallback
     const analysisPrompt = useMapAnalysisPrompt

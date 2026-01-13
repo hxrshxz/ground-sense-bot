@@ -188,6 +188,14 @@ Each assessment unit (Block/Mandal/Taluk) is categorized as:
 - **Entity Extraction**: Automatic detection of states, districts, blocks, years
 - **Intent Classification**: Routes to appropriate service handlers
 - **Multilingual Support**: English + Indian languages (future)
+- **Phonetic Matching**: Handles misspellings (e.g., "Ferozepur" → "Firozpur")
+- **Context Handling**: Differentiates between groundwater and general queries ("Who is Virat Kohli?")
+
+#### 4. Enterprise-Grade Reliability
+
+- **Multi-Key Rotation**: Automatically switches API keys to bypass rate limits (429 errors).
+- **Client-Side Analytics**: Performs local ranking/sorting for "Top 5" queries when backend is unavailable.
+- **Robust Fallback**: Seamlessly switches between Backend and Direct-API modes.
 
 ### 📊 Visualization System
 
@@ -243,6 +251,8 @@ Each assessment unit (Block/Mandal/Taluk) is categorized as:
   "framework": "React 18.3.1 + TypeScript",
   "build": "Vite 5.4",
   "ui": "shadcn/ui + TailwindCSS + Framer Motion",
+  "ai": "Google Generative AI SDK (Multi-Key Support)",
+  "voice": "Web Speech API (Speech-to-Text)",
   "charts": "ECharts + Recharts + Chart.js",
   "maps": "MapLibre GL JS",
   "state": "React Query (TanStack)",
@@ -700,6 +710,18 @@ Response: Correlation analysis
 Visualization: Scatter plot with regression line
 ```
 
+#### 8. PHONETIC & ANALYTIC QUERIES (New) [Client-Side]
+
+```
+Query: "Ferozepur groundwater status" (User misspelling)
+Logic: Skeleton Match (frzpr == frzpr) -> Finds "Firozpur"
+Response: Correct data for Firozpur
+
+Query: "Top 5 blocks in Punjab"
+Logic: Client-side Sort & Filter
+Response: Instant ranking without backend SQL
+```
+
 ### NLP Processing Pipeline
 
 ```go
@@ -974,7 +996,10 @@ REDIS_CACHE_TTL=3600
 ```bash
 VITE_API_URL=http://localhost:8080
 VITE_WS_URL=ws://localhost:8080/ws
-VITE_GEMINI_API_KEY=your_gemini_api_key_here
+# Multi-Key Rotation (Recommended: Use keys from different Google Projects)
+VITE_GEMINI_API_KEY=key_from_project_A
+VITE_GEMINI_API_KEY_2=key_from_project_B
+VITE_GEMINI_API_KEY_3=key_from_project_C
 ```
 
 ### Production Checklist

@@ -41,14 +41,13 @@ export class GeminiApiService {
   private primaryModel =
     (import.meta.env.VITE_GEMINI_MODEL as string) || "gemini-2.0-flash-exp";
     
-  // Fallback order (will try sequentially on model-not-found or quota exceeded)
+  // Fallback order (verified available models)
   private fallbackModels = [
-    "gemini-2.5-flash",       // New high-performance model
-    "gemini-2.5-flash-lite",  // Efficient lite version
-    "gemini-3-flash",         // Next-gen flash model
-    "gemini-2.0-flash-exp",   // Existing experimental model
-    "gemini-1.5-flash",       // Stable fallback
-    "gemini-1.5-pro",         // Legacy fallback
+    "gemini-2.0-flash",       // Stable 2.0 Flash
+    "gemini-2.0-flash-lite",  // 2.0 Flash Lite
+    "gemini-flash-latest",    // Latest Flash (1.5)
+    "gemini-pro-latest",      // Latest Pro (1.5)
+    "gemini-2.5-flash",       // New 2.5 Flash (if available)
   ];
   private triedModels = new Set<string>();
 
@@ -121,7 +120,7 @@ export class GeminiApiService {
     if (!resp.ok) return [];
     const data = await resp.json().catch(() => ({}));
     return (data.models || [])
-      .map((m: any) => m.name?.replace("models/", ""))
+      .map((m: { name?: string }) => m.name?.replace("models/", ""))
       .filter(Boolean);
   }
 
@@ -370,7 +369,7 @@ User Query: ${userPrompt}`;
 
     if (!response.ok) {
       const errorText = await response.text();
-      let errorData: any = {};
+      let errorData: Record<string, any> = {};
       try {
         errorData = JSON.parse(errorText);
       } catch (e) {
@@ -398,9 +397,10 @@ User Query: ${userPrompt}`;
     return response.json();
   }
 
-  private isModelNotFound(err: any) {
+  private isModelNotFound(err: unknown) {
     if (!err) return false;
-    const msg = String(err.message || "");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const msg = String((err as any).message || "");
     return /NOT_FOUND|not found|404/i.test(msg);
   }
 
@@ -435,11 +435,12 @@ User Query: ${userPrompt}`;
 
           this.addToHistory("assistant", text);
           return { text };
-        } catch (err: any) {
+        } catch (err: unknown) {
           lastError = err;
           
           const isNotFound = this.isModelNotFound(err);
-          const isQuotaError = err.code === 429 || err.status === "RESOURCE_EXHAUSTED";
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const isQuotaError = (err as any).code === 429 || (err as any).status === "RESOURCE_EXHAUSTED";
           
           if (isNotFound) {
             console.warn(`[GEMINI] Model ${model} not found. Trying next fallback...`);

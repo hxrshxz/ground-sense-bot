@@ -5,7 +5,7 @@ export interface ChatResponse {
   intent: string;
   suggestions?: string[];
   chart?: {
-    type: any; // Using any to avoid rigid enum conflicts with dynamic backend types
+    type: string;
     title: string;
     series: {
       name: string;
@@ -14,10 +14,12 @@ export interface ChatResponse {
     }[];
     xAxis?: string[] | { data: string[] };
     pieData?: { name: string; value: number }[];
-    echarts_option?: any;
+    echarts_option?: Record<string, unknown>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    comparisonData?: any;
   };
-  map?: any;
-  data?: any;
+  map?: unknown;
+  data?: unknown;
 }
 
 export interface Message {
@@ -47,7 +49,7 @@ export const useChatWebSocket = (url: string, username: string) => {
       setIsConnected(true);
     };
 
-    socket.onmessage = (event) => {
+    socket.onmessage = (event: MessageEvent) => {
       try {
         const data = JSON.parse(event.data);
         console.log("\n" + "=".repeat(80));
@@ -70,8 +72,9 @@ export const useChatWebSocket = (url: string, username: string) => {
             }
           }
           if (data.payload.map) {
+             const mapData = data.payload.map as { features?: unknown[] };
             console.log(
-              `├─ Map Features: ${data.payload.map.features?.length || 0}`
+              `├─ Map Features: ${mapData.features?.length || 0}`
             );
           }
         }

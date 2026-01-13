@@ -104,7 +104,7 @@ export class GroundwaterDataService {
       const uniqueStates = Array.from(new Set(yearData.map(b => b.state).filter(Boolean))) as string[];
       const targetState = uniqueStates.find(s => normalizedQuery.includes(s.toLowerCase()));
 
-      let filtered = targetState 
+      const filtered = targetState 
          ? yearData.filter(b => b.state?.toLowerCase() === targetState.toLowerCase())
          : yearData; // If no state mentioned, search all India (careful with size)
 

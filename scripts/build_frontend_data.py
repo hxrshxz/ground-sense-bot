@@ -3,58 +3,59 @@ import os
 import json
 import glob
 
-def extract_block_data(file_path):
+def extract_blocks_from_file(file_path):
     try:
         with open(file_path, 'r') as f:
             data = json.load(f)
-            if not data or not isinstance(data, list) or len(data) == 0:
-                return None
+            if not data or not isinstance(data, list):
+                return []
             
-            block = data[0]
-            if not block or not isinstance(block, dict):
-                return None
-            
-            # Extract key metrics
-            # Note: The JSON structure is complex, we need to find the specific fields the user cares about
-            
-            # Total Extractable Resource
-            extractable = block.get('totalGWAvailability', {}).get('total', 0)
-            
-            # Extraction - need to sum agriculture, domestic, industry
-            extraction_agg = 0
-            comp_summary = block.get('computationSummary', {}) or {}
-            annual_data = comp_summary.get('annual', {}) or {}
-            draft = annual_data.get('draft', {}) or {}
-            
-            # Simple sum of draft totals if they exist
-            for sector in ['agriculture', 'domestic', 'industry']:
-                sector_dec = (draft.get(sector, {}) or {}).get('decision', {}) or {}
-                sector_data = sector_dec.get('non_command', {}) or {}
-                extraction_agg += float(sector_data.get('u_dr', 0) or 0)
-            
-            # Category
-            category = block.get('category', {}).get('total', 'unknown')
-            
-            # Rainfall
-            rainfall = block.get('rainfall', {}).get('total', 0)
-            
-            # Stage
-            stage = 0
-            if extractable > 0:
-                stage = (extraction_agg / extractable) * 100
+            blocks = []
+            for block in data:
+                if not isinstance(block, dict): continue
+                
+                # Extract key metrics
+                # Safety wrapper: (block.get(KEY) or {}).get(SUBKEY)
+                
+                # Total Extractable Resource
+                extractable = (block.get('totalGWAvailability') or {}).get('total', 0)
+                
+                # Extraction
+                extraction_agg = 0
+                comp_summary = block.get('computationSummary') or {}
+                annual_data = comp_summary.get('annual') or {}
+                draft = annual_data.get('draft') or {}
+                
+                for sector in ['agriculture', 'domestic', 'industry']:
+                    sector_dec = (draft.get(sector) or {}).get('decision') or {}
+                    sector_data = sector_dec.get('non_command') or {}
+                    extraction_agg += float(sector_data.get('u_dr') or 0)
+                
+                # Category
+                category = (block.get('category') or {}).get('total', 'unknown')
+                
+                # Rainfall
+                rainfall = (block.get('rainfall') or {}).get('total', 0)
+                
+                # Stage
+                stage = 0
+                if extractable > 0:
+                    stage = (extraction_agg / extractable) * 100
 
-            return {
-                "name": block.get('locationName', 'Unknown'),
-                "uuid": block.get('locationUUID', ''),
-                "extractable_ham": extractable,
-                "extraction_ham": extraction_agg,
-                "stage": stage,
-                "category": category,
-                "rainfall": rainfall
-            }
+                blocks.append({
+                    "name": block.get('locationName', 'Unknown'),
+                    "uuid": block.get('locationUUID', ''),
+                    "extractable_ham": extractable,
+                    "extraction_ham": extraction_agg,
+                    "stage": stage,
+                    "category": category,
+                    "rainfall": rainfall
+                })
+            return blocks
+            
     except Exception as e:
         print(f"Error processing {file_path}: {e}")
-        return None
+        return []
 
 def build_master_dataset():
     data_root = "Data/data"
@@ -77,19 +78,40 @@ def build_master_dataset():
         for file_path in files:
             # Skip summary files
             filename = os.path.basename(file_path).lower()
-            if filename in ["total.json", "summary.json"] or filename == os.path.basename(os.path.dirname(file_path)).lower() + ".json":
+            if filename in ["total.json", "summary.json"]:
                 continue
                 
-            block_data = extract_block_data(file_path)
-            if block_data:
-                # Add location context from path
+            file_blocks = extract_blocks_from_file(file_path)
+            
+            if file_blocks:
                 path_parts = file_path.split(os.sep)
-                # Data/data/YEAR/STATE/DISTRICT/BLOCK.json
-                if len(path_parts) >= 5:
-                    block_data["state"] = path_parts[3]
-                    block_data["district"] = path_parts[4]
+                # Structure 1: Data/data/YEAR/STATE/DISTRICT/BLOCK.json (len >= 6 usually, or 5 if running from root)
+                # path_parts: ['Data', 'data', '2024-2025', 'STATE', 'DISTRICT', 'BLOCK.json'] -> len 6
                 
-                master_data[year].append(block_data)
+                state_name = "Unknown"
+                district_name = "Unknown"
+
+                # Logic to infer state/district from path
+                if len(path_parts) >= 6:
+                    state_name = path_parts[3]
+                    district_name = path_parts[4]
+                elif len(path_parts) == 4: 
+                    # Data/data/YEAR/STATE.json (e.g. DELHI.json)
+                    state_name = os.path.splitext(path_parts[3])[0] # DELHI
+                    district_name = state_name # Use state as district for UTs/Cities if single file
+                
+                for b in file_blocks:
+                    b["state"] = state_name
+                    
+                    # If district is not set or unknown, use inferred district
+                    current_district = b.get("district", "Unknown")
+                    if current_district == "Unknown":
+                         b["district"] = district_name
+                    else:
+                         if district_name != "Unknown":
+                             b["district"] = district_name
+                             
+                    master_data[year].append(b)
         
         print(f"  Extracted {len(master_data[year])} blocks for {year}")
 
